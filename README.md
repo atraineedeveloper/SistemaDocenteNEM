@@ -3,6 +3,10 @@
 Aplicación local de escritorio para apoyar la operación cotidiana
 de un docente de educación primaria.
 
+## Estado actual
+
+Solo está implementada la fundación técnica de la solución. Las funciones docentes descritas como objetivo siguen pendientes de diseño e implementación.
+
 ## Objetivo inicial
 
 Ofrecer una experiencia sencilla para:
