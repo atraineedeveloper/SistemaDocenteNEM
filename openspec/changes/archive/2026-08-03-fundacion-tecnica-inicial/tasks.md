@@ -24,7 +24,7 @@
 
 - [x] 4.1 Añadir comprobaciones fundacionales mínimas que demuestren que Core.Tests y Data.Tests se descubren y ejecutan sin WPF, sin implementar comportamiento docente
 - [x] 4.2 Ejecutar `dotnet restore`, `dotnet build`, `dotnet test` y `dotnet format --verify-no-changes` sobre la solución en Fedora y registrar el resultado
-- [ ] 4.3 Ejecutar `dotnet restore`, `dotnet build`, `dotnet test` y `dotnet format --verify-no-changes` sobre la solución en Windows y registrar el resultado; esta tarea debe permanecer pendiente mientras solo se disponga de Fedora
-- [ ] 4.4 Ejecutar App.Wpf y completar su validación visual básica exclusivamente en Windows; esta tarea debe permanecer pendiente y no puede completarse desde Fedora
+- [x] 4.3 Ejecutar `dotnet restore`, `dotnet build`, `dotnet test` y `dotnet format --verify-no-changes` sobre la solución en Windows y registrar el resultado; esta tarea debe permanecer pendiente mientras solo se disponga de Fedora
+- [x] 4.4 Ejecutar App.Wpf y completar su validación visual básica exclusivamente en Windows; esta tarea debe permanecer pendiente y no puede completarse desde Fedora
 - [x] 4.5 Confirmar que no se eligieron proveedor/estrategia SQLite, Entity Framework, Dapper, acceso directo, toolkit/implementación MVVM ni analizadores externos adicionales
 - [x] 4.6 Revisar que la implementación no incluya entidades, esquema/migraciones SQLite, reportes funcionales ni funciones docentes
