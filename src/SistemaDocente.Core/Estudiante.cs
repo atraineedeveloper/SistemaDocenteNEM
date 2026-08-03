@@ -3,11 +3,20 @@ namespace SistemaDocente.Core;
 public sealed class Estudiante
 {
     internal Estudiante(string nombreVisible, int numeroLista)
+        : this(EstudianteId.Crear(), nombreVisible, numeroLista, true)
     {
-        Id = EstudianteId.Crear();
+    }
+
+    internal Estudiante(
+        EstudianteId id,
+        string nombreVisible,
+        int numeroLista,
+        bool estaActivo)
+    {
+        Id = id;
         NombreVisible = nombreVisible;
         NumeroLista = numeroLista;
-        EstaActivo = true;
+        EstaActivo = estaActivo;
     }
 
     public EstudianteId Id { get; }
