@@ -1,5 +1,6 @@
 using Microsoft.Data.Sqlite;
 
+using SistemaDocente.Application;
 using SistemaDocente.Core;
 
 namespace SistemaDocente.Data.Tests;
@@ -118,7 +119,9 @@ public sealed class PersistenciaGrupoSqliteTests : IDisposable
             "Primero B",
             [new(estudiante.Id, estudiante.NombreVisible, 1, true)]);
 
-        Assert.Throws<DataIntegrityException>(() => _base.Persistencia.Guardar(otroGrupo));
+        var error = Assert.Throws<ErrorPersistenciaAplicacionException>(
+            () => _base.Persistencia.Guardar(otroGrupo));
+        Assert.IsType<DataIntegrityException>(error.InnerException);
 
         Assert.Null(_base.Persistencia.Cargar(otroGrupoId));
         var cargadoOriginal = _base.Persistencia.Cargar(original.Id)!;
@@ -139,7 +142,9 @@ public sealed class PersistenciaGrupoSqliteTests : IDisposable
             comando.ExecuteNonQuery();
         }
 
-        Assert.Throws<DataIntegrityException>(() => _base.Persistencia.Cargar(grupo.Id));
+        var error = Assert.Throws<ErrorPersistenciaAplicacionException>(
+            () => _base.Persistencia.Cargar(grupo.Id));
+        Assert.IsType<DataIntegrityException>(error.InnerException);
     }
 
     [Fact]
@@ -167,7 +172,9 @@ public sealed class PersistenciaGrupoSqliteTests : IDisposable
         grupo.RenombrarEstudiante(primero.Id, "Actualizada");
         grupo.RenombrarEstudiante(segundo.Id, "Falla");
 
-        Assert.Throws<DataIntegrityException>(() => _base.Persistencia.Guardar(grupo));
+        var error = Assert.Throws<ErrorPersistenciaAplicacionException>(
+            () => _base.Persistencia.Guardar(grupo));
+        Assert.IsType<DataIntegrityException>(error.InnerException);
 
         SqliteConnection.ClearAllPools();
         var cargado = new PersistenciaGrupoSqlite(_base.Ruta).Cargar(grupo.Id)!;
