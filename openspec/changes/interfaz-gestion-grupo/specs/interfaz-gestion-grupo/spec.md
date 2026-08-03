@@ -91,6 +91,14 @@ La interfaz SHALL permitir cambiar el nombre del grupo, agregar estudiante, reno
 - **WHEN** una edición termina exitosamente
 - **THEN** la lista refleja exclusivamente el resultado confirmado y conserva el orden recibido
 
+#### Scenario: Editar nombre y número como una sola acción
+- **WHEN** el docente confirma nombre y número para un estudiante existente
+- **THEN** Presentation invoca una sola operación atómica de Application y cierra el panel únicamente después del éxito
+
+#### Scenario: Conflicto durante edición combinada
+- **WHEN** el nombre es válido pero el número entra en conflicto
+- **THEN** el snapshot visual no cambia, las entradas permanecen disponibles, el panel sigue abierto y no se persiste parcialmente el nombre
+
 ### Requirement: Desactivación y reactivación
 La interfaz SHALL pedir confirmación antes de desactivar. Cancelar MUST NOT invocar Application. La reactivación SHALL ejecutarse desde el estudiante inactivo seleccionado.
 

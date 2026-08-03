@@ -14,6 +14,7 @@ El sistema ya dispone de dominio, persistencia y casos de uso, pero App.Wpf sól
 - Incorporar navegación completa por teclado, estado ocupado, bloqueo de comandos duplicados y restauración en `finally` sin `async`, `Task.Run` ni `CancellationToken`.
 - Mostrar validaciones y conflictos junto a la edición conservando entradas; ocultar SQL, rutas, excepciones internas y trazas en errores técnicos.
 - Actualizar encabezado y lista exclusivamente desde resultados confirmados por Application.
+- Usar una única operación `EditarEstudiante` para persistir nombre y número atómicamente, sin encadenar dos guardados.
 
 ## Capabilities
 

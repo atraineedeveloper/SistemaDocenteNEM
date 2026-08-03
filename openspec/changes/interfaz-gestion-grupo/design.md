@@ -66,6 +66,8 @@ Validation y conflictos se mostrarán junto al panel editable y conservarán la 
 
 El ViewModel conservará el último snapshot confirmado. Encabezado y lista se reemplazarán sólo después de éxito, usando resultados confirmados o una consulta posterior a Application. Ante fallo de persistencia se conservará la pantalla anterior.
 
+La auditoría detectó que encadenar `RenombrarEstudiante` y `CambiarNumeroLista` producía dos guardados y permitía persistencia parcial si el segundo fallaba. La edición integrada usará exclusivamente `EditarEstudiante`, que coordina nombre y número en Application con un único guardado atómico. El panel sólo se cerrará y la lista se refrescará tras el resultado exitoso; cualquier error conservará snapshot, entradas y panel.
+
 ### Pruebas sin WPF
 
 Presentation.Tests construirá ViewModels con dobles manuales de la fachada/servicios abstractos y sin cargar Data, SQLite o ventanas. Cubrirá arranque, app-state, comandos, entradas conservadas, cancelaciones, estado ocupado, orden, ausencia de IDs visibles y consistencia tras fallos.

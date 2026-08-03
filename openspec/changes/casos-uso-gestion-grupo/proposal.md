@@ -6,6 +6,7 @@ Core y Data ya resuelven las reglas del agregado y su persistencia, pero todaví
 
 - Crear los proyectos `SistemaDocente.Application` y `SistemaDocente.Application.Tests`.
 - Incorporar una fachada de casos de uso para crear, cargar, comprobar existencia y administrar un grupo y sus estudiantes.
+- Incorporar `EditarEstudiante` para coordinar nombre y número como una sola acción atómica con un único guardado.
 - Definir en Application el puerto específico `IAlmacenamientoGrupos`, que Data implementará mediante el adaptador SQLite existente.
 - Hacer que cada comando sobre un grupo existente cargue una instancia fresca, invoque una operación pública de Core y guarde exactamente una vez después del éxito, incluso si Core acepta la operación como idempotente.
 - Exponer exclusivamente snapshots inmutables `GrupoDetalle` y `EstudianteDetalle`; nunca agregados, entidades ni colecciones internas.

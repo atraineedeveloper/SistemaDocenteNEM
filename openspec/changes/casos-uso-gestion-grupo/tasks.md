@@ -71,3 +71,10 @@
 - [x] 8.3 Confirmar que Data sólo se prevé desde la futura raíz de composición de App.Wpf y que ventanas, controles y ViewModels dependerán de Application
 - [x] 8.4 Confirmar que App.Wpf no referencia `Microsoft.Data.Sqlite`
 - [x] 8.5 Confirmar que no se añadieron WPF funcional, ViewModels, navegación, contenedor DI, API asíncrona, `CancellationToken`, caché, concurrencia, asistencia, actividades, evaluación, reportes funcionales ni importación
+
+## 9. Corregir edición atómica de estudiante
+
+- [x] 9.1 Implementar `EditarEstudiante` con una carga, dos mutaciones de Core en memoria, un guardado y proyección posterior
+- [x] 9.2 Probar éxito con identidades estables, una carga y un guardado
+- [x] 9.3 Probar nombre inválido y número inválido o conflictivo con cero guardados y estado persistido intacto
+- [x] 9.4 Probar fallo de guardado, carga posterior del estado anterior y grupo inexistente
