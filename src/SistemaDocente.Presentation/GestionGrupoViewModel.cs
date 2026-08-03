@@ -62,6 +62,8 @@ public sealed class GestionGrupoViewModel : ViewModelBase
     public RelayCommand ReactivarEstudianteCommand { get; }
     public RelayCommand OlvidarReferenciaCommand { get; }
 
+    public GrupoId? GrupoIdActual => _grupoConfirmado?.GrupoId;
+
     public bool EstaOcupado
     {
         get => _estaOcupado;
@@ -352,6 +354,7 @@ public sealed class GestionGrupoViewModel : ViewModelBase
     private void AplicarGrupoConfirmado(GrupoDetalle grupo)
     {
         _grupoConfirmado = grupo;
+        OnPropertyChanged(nameof(GrupoIdActual));
         NombreGrupo = grupo.NombreVisible;
         Estudiantes = grupo.Estudiantes.Select(Proyectar).ToArray();
         EstudianteSeleccionado = null;
@@ -365,6 +368,7 @@ public sealed class GestionGrupoViewModel : ViewModelBase
     private void MostrarBienvenidaSegura()
     {
         _grupoConfirmado = null;
+        OnPropertyChanged(nameof(GrupoIdActual));
         NombreGrupo = string.Empty;
         Estudiantes = Array.Empty<EstudianteVisual>();
         EstudianteSeleccionado = null;

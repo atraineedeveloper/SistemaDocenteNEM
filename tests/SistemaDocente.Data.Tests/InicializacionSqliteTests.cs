@@ -9,7 +9,7 @@ public sealed class InicializacionSqliteTests : IDisposable
     private readonly BaseSqliteTemporal _base = new();
 
     [Fact]
-    public void InicializarCreaDirectorioBaseYVersionUno()
+    public void InicializarCreaDirectorioBaseYVersionDos()
     {
         Assert.False(File.Exists(_base.Ruta));
 
@@ -17,9 +17,9 @@ public sealed class InicializacionSqliteTests : IDisposable
 
         Assert.True(File.Exists(_base.Ruta));
         using var conexion = _base.AbrirConexion();
-        Assert.Equal(1L, EscalarLong(conexion, "PRAGMA user_version;"));
+        Assert.Equal(2L, EscalarLong(conexion, "PRAGMA user_version;"));
         Assert.Equal(
-            4L,
+            9L,
             EscalarLong(
                 conexion,
                 """
@@ -28,12 +28,17 @@ public sealed class InicializacionSqliteTests : IDisposable
                     'grupos',
                     'estudiantes',
                     'ix_estudiantes_grupo_id',
-                    'ux_estudiantes_grupo_numero_activo');
+                    'ux_estudiantes_grupo_numero_activo',
+                    'ux_estudiantes_id_grupo_id',
+                    'asistencias_diarias',
+                    'registros_asistencia',
+                    'ix_asistencias_diarias_grupo_fecha',
+                    'ix_registros_asistencia_estudiante_id');
                 """));
     }
 
     [Fact]
-    public void InicializarVersionUnoCompatibleEsIdempotente()
+    public void InicializarVersionDosCompatibleEsIdempotente()
     {
         _base.Persistencia.Inicializar();
         var grupo = Grupo.Crear("Primero A");
@@ -47,12 +52,12 @@ public sealed class InicializacionSqliteTests : IDisposable
     [Fact]
     public void InicializarRechazaVersionPosteriorSinModificarla()
     {
-        CrearBaseCruda("PRAGMA user_version = 2;");
+        CrearBaseCruda("PRAGMA user_version = 3;");
 
         Assert.Throws<SchemaIncompatibleException>(() => _base.Persistencia.Inicializar());
 
         using var conexion = _base.AbrirConexion();
-        Assert.Equal(2L, EscalarLong(conexion, "PRAGMA user_version;"));
+        Assert.Equal(3L, EscalarLong(conexion, "PRAGMA user_version;"));
     }
 
     [Fact]
@@ -89,6 +94,27 @@ public sealed class InicializacionSqliteTests : IDisposable
             EscalarLong(
                 conexion,
                 "SELECT COUNT(*) FROM pragma_table_info('grupos');"));
+    }
+
+    [Fact]
+    public void InicializarRechazaVersionDosConEstructuraIncompatible()
+    {
+        _base.Persistencia.Inicializar();
+        using (var conexion = _base.AbrirConexion())
+        using (var comando = conexion.CreateCommand())
+        {
+            comando.CommandText = """
+                DROP INDEX ix_registros_asistencia_estudiante_id;
+                CREATE INDEX ix_registros_asistencia_estudiante_id
+                    ON registros_asistencia(grupo_id);
+                """;
+            comando.ExecuteNonQuery();
+        }
+
+        Assert.Throws<SchemaIncompatibleException>(() => _base.Persistencia.Inicializar());
+
+        using var comprobacion = _base.AbrirConexion();
+        Assert.Equal(2L, EscalarLong(comprobacion, "PRAGMA user_version;"));
     }
 
     [Fact]
