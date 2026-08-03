@@ -1,78 +1,44 @@
 ## Purpose
 
-Define el registro diario de asistencia de un grupo y protege su fecha, sus estados y la conservación íntegra de sus registros históricos.
+Define el registro diario de asistencia de un grupo y mantiene al día como única unidad de dominio, incluso cuando la interfaz consulta y edita un mes completo.
 
 ## ADDED Requirements
 
 ### Requirement: Asistencia diaria identificada por grupo y fecha
-Core SHALL representar cada asistencia diaria mediante un `GrupoId` existente y una `DateOnly`; la pareja grupo-fecha SHALL identificar de forma única el día sin introducir una identidad adicional.
+Core SHALL representar cada asistencia mediante `GrupoId` y `DateOnly`; la pareja grupo-fecha SHALL identificar de forma única el agregado sin introducir `AsistenciaId`.
 
-#### Scenario: Crear asistencia para una fecha
-- **WHEN** se crea una asistencia para un grupo y una fecha
-- **THEN** conserva exactamente el grupo y la fecha recibidos
+#### Scenario: Días distintos
+- **WHEN** un grupo registra dos fechas diferentes
+- **THEN** existen dos agregados diarios independientes
 
-#### Scenario: Dos fechas del mismo grupo
-- **WHEN** se crean asistencias para dos fechas distintas del mismo grupo
-- **THEN** se consideran días de asistencia distintos
+### Requirement: Estados cerrados y exclusivos
+Cada registro SHALL tener exactamente uno de los valores mutuamente excluyentes `Presente`, `Falta`, `Retardo` o `Justificada`. `Justificada` SHALL significar ausencia justificada sin motivo, documento ni evidencia.
 
-### Requirement: Estados de asistencia cerrados
-Core SHALL definir `EstadoAsistencia` con exactamente los valores mutuamente excluyentes `Presente`, `Falta`, `Retardo` y `Justificada`. `Justificada` SHALL significar ausencia justificada y no SHALL contener motivo, documento, evidencia ni efecto adicional en este cambio. Cada estudiante del padrón del día SHALL tener exactamente un estado.
+#### Scenario: Estado inválido
+- **WHEN** se crea, modifica o rehidrata un registro con un valor fuera del conjunto
+- **THEN** Core rechaza la operación sin cambios parciales
 
-#### Scenario: Estados admitidos
-- **WHEN** se registra cualquiera de los cuatro estados definidos
-- **THEN** el registro conserva ese estado exactamente
+### Requirement: Padrón diario único
+Una `AsistenciaDiaria` SHALL contener como máximo un registro por `EstudianteId`, conservar sólo identidad y estado, exponer una vista de solo lectura y rechazar identidades duplicadas o ausentes al modificar.
 
-#### Scenario: Falta justificada exclusiva
-- **WHEN** un estudiante tiene estado `Justificada`
-- **THEN** se considera ausente con justificación y no tiene simultáneamente Presente, Falta ni Retardo
+#### Scenario: Cambiar un estado
+- **WHEN** se cambia el estado de un estudiante perteneciente al padrón
+- **THEN** sólo cambia ese registro y se conservan grupo, fecha e identidades
 
-#### Scenario: Estado fuera del conjunto
-- **WHEN** se intenta crear o rehidratar un registro con un valor fuera del conjunto cerrado
-- **THEN** Core rechaza el snapshot completo con una excepción de validación de dominio
+#### Scenario: Estudiante ausente
+- **WHEN** se intenta modificar un estudiante que no pertenece al padrón
+- **THEN** Core rechaza la operación y conserva todos los registros
 
-### Requirement: Un registro por estudiante
-Una `AsistenciaDiaria` SHALL contener como máximo un `RegistroAsistencia` por `EstudianteId`, y cada registro SHALL conservar exactamente la identidad del estudiante y su estado.
+### Requirement: Rehidratación neutral
+Core SHALL rehidratar públicamente un día completo conservando grupo, fecha, identidades y estados, validando todo antes de devolverlo y sin depender de Data o SQLite.
 
-#### Scenario: Registro único
-- **WHEN** se agrega un estado para un estudiante que aún no está registrado en el día
-- **THEN** la asistencia contiene un único registro para esa identidad
-
-#### Scenario: Identidad repetida
-- **WHEN** la creación o rehidratación contiene dos registros para el mismo estudiante
-- **THEN** Core rechaza la operación de forma atómica
-
-### Requirement: Datos conservados por el agregado
-La asistencia SHALL conservar únicamente grupo, fecha, identidad del estudiante y estado. No SHALL duplicar nombre visible, número de lista ni situación activa; esos datos SHALL obtenerse de la matrícula actual cuando se proyecte el día.
-
-#### Scenario: Cambio posterior de matrícula
-- **WHEN** cambia el nombre, número o situación activa de un estudiante después de guardar un día
-- **THEN** el registro histórico conserva identidad y estado sin contener una copia anterior del nombre o número
-
-### Requirement: Edición atómica en memoria
-La asistencia SHALL permitir cambiar el estado de un estudiante ya incluido sin cambiar grupo, fecha ni identidad. Una operación inválida SHALL dejar el agregado sin cambios parciales.
-
-#### Scenario: Cambiar estado
-- **WHEN** se cambia el estado de un registro existente a otro estado admitido
-- **THEN** sólo cambia el estado de ese estudiante
-
-#### Scenario: Estudiante ausente del día
-- **WHEN** se intenta cambiar el estado de una identidad que no forma parte de la asistencia
-- **THEN** Core rechaza la operación y conserva todos los registros anteriores
-
-### Requirement: Rehidratación neutral y completa
-Core SHALL ofrecer una vía pública neutral para rehidratar una asistencia con su grupo, fecha y registros existentes, sin depender de Data ni SQLite. SHALL validar el snapshot completo antes de devolver el agregado y no SHALL generar identidades ni estados sustitutos.
-
-#### Scenario: Rehidratar datos válidos
-- **WHEN** se rehidrata un snapshot válido
-- **THEN** se conservan exactamente el grupo, la fecha, las identidades y los estados
-
-#### Scenario: Rehidratar datos contradictorios
-- **WHEN** cualquier parte del snapshot incumple una invariante
+#### Scenario: Snapshot contradictorio
+- **WHEN** cualquier dato rehidratado incumple una invariante
 - **THEN** no se devuelve un agregado parcial
 
-### Requirement: Vistas de solo lectura
-Core SHALL exponer los registros mediante una vista de solo lectura que no permita modificar la colección interna.
+### Requirement: El mes no es un agregado
+Core SHALL permanecer ajeno a la proyección mensual. Un mes no SHALL tener identidad, mutaciones ni atomicidad de dominio y no SHALL sustituir a `AsistenciaDiaria`.
 
-#### Scenario: Consultar registros
-- **WHEN** un consumidor obtiene los registros de una asistencia
-- **THEN** no puede agregar, quitar ni reemplazar elementos en la colección del agregado
+#### Scenario: Consultar un mes
+- **WHEN** Application reúne varios días para una vista mensual
+- **THEN** cada día conserva su agregado e invariantes independientes y Core no crea un agregado mensual

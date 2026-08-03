@@ -1,116 +1,138 @@
 ## Purpose
 
-Permite que un docente capture y corrija asistencia desde WPF con interacción segura, eficiente y coherente con el último estado confirmado por persistencia.
+Permite capturar y revisar asistencia mediante una grilla mensual rápida, accesible y segura, conservando temporalmente la vista diaria existente.
 
 ## ADDED Requirements
 
-### Requirement: Navegación mínima entre módulos
-La ventana principal SHALL ofrecer navegación directa entre gestión del grupo y asistencia sin introducir un framework de navegación. La lógica visual SHALL depender de Application; sólo la raíz de composición SHALL crear implementaciones de Data.
+### Requirement: Selector mensual completo
+La interfaz SHALL mostrar Mes anterior, selector de los doce meses en español, selector de año válido, Mes siguiente e Ir al mes actual. La selección SHALL cargar todos los días reales del mes y no SHALL usar un `DatePicker` estrecho como selector principal.
 
-#### Scenario: Abrir asistencia
-- **WHEN** el docente activa la opción Asistencia
-- **THEN** la ventana muestra el módulo de asistencia del grupo actual sin exponer identidades ni detalles de SQLite
+#### Scenario: Navegar entre diciembre y enero
+- **WHEN** se avanza desde diciembre o retrocede desde enero
+- **THEN** mes y año cambian correctamente
 
-#### Scenario: Volver a gestión
-- **WHEN** no hay cambios pendientes y se activa la opción Grupo
-- **THEN** se muestra de nuevo la gestión del grupo en la misma ventana
+#### Scenario: Volver al mes actual
+- **WHEN** se activa Ir al mes actual
+- **THEN** se seleccionan el mes y año proporcionados por el reloj local
 
-### Requirement: Selección de fecha
-El módulo SHALL iniciar con la fecha local actual, permitir seleccionar otra fecha válida mediante un control de fecha y preparar el día seleccionado sin persistirlo por el solo hecho de abrirlo.
+### Requirement: Grilla mensual principal
+La vista predeterminada SHALL mostrar estudiantes en filas; Número y Nombre como columnas iniciales; una columna por fecha lectiva real de lunes a viernes; y Presentes, Faltas, Retardos, Faltas justificadas y Porcentaje al final. SHALL soportar 40 estudiantes, el máximo de fechas lectivas del mes, redimensionamiento, virtualización y desplazamiento horizontal.
 
-#### Scenario: Primera apertura
-- **WHEN** se abre el módulo
-- **THEN** se selecciona hoy según la hora local y se muestran los estudiantes del día sin ejecutar un guardado
+#### Scenario: Agosto con 40 estudiantes
+- **WHEN** se abre agosto con 40 filas visibles
+- **THEN** existen únicamente las columnas de lunes a viernes, las filas conservan altura legible y la ventana sigue siendo utilizable
 
-#### Scenario: Fecha no seleccionada
-- **WHEN** el control no contiene una fecha válida
-- **THEN** no se prepara ni guarda asistencia y se muestra un mensaje claro
+#### Scenario: Encabezado diario
+- **WHEN** se muestra una fecha
+- **THEN** su encabezado contiene número y abreviatura `L/M/M/J/V`
 
-### Requirement: Captura tabular eficiente
-La interfaz SHALL mostrar una fila editable por integrante del padrón devuelto por Application, conservando ese orden, con número de lista, nombre y los cuatro estados disponibles. SHALL presentar `Justificada` con el texto «Falta justificada». No SHALL mostrar identidades ni abrir una ventana por estudiante y SHALL ser utilizable con teclado para grupos de 30 a 40 filas.
+### Requirement: Encabezados y columnas persistentes
+Los encabezados SHALL permanecer visibles durante el desplazamiento vertical. Número y Nombre SHALL permanecer congelados durante el desplazamiento horizontal mediante la capacidad estable de WPF. Los resúmenes SHALL permanecer al final del contenido desplazable.
 
-#### Scenario: Cambiar estado con teclado
-- **WHEN** el docente recorre y modifica filas mediante teclado
-- **THEN** puede completar la captura sin cambiar de ventana
+#### Scenario: Desplazamiento hacia fin de mes
+- **WHEN** el usuario desplaza horizontalmente hasta el último día
+- **THEN** Número y Nombre continúan visibles y los resúmenes pueden alcanzarse al final
 
-#### Scenario: Estudiantes inactivos
-- **WHEN** un día persistido contiene a un estudiante actualmente inactivo
-- **THEN** aparece editable con el texto «Inactivo actualmente» sin depender sólo del color
+### Requirement: Fines de semana ausentes y separación semanal
+Sábados y domingos no SHALL mostrarse como columnas. Un viernes SHALL mostrar un borde derecho neutro y más grueso sólo cuando exista otra fecha lectiva posterior. La separación SHALL depender del `DayOfWeek` real y no del número ordinal de columna, y no SHALL parecer una columna de datos.
 
-#### Scenario: Día nuevo excluye inactivos
-- **WHEN** se prepara un día todavía no guardado
-- **THEN** aparecen únicamente los estudiantes actualmente activos
+#### Scenario: Navegar entre semanas
+- **WHEN** la celda activa está en viernes y se navega a la fecha siguiente
+- **THEN** la selección pasa directamente al lunes sin atravesar columnas de fin de semana
 
-#### Scenario: Grupo de tamaño habitual
-- **WHEN** el padrón visible contiene entre 30 y 40 filas
-- **THEN** todas pueden recorrerse y editarse en la misma tabla mediante teclado
+#### Scenario: Último viernes del mes
+- **WHEN** un viernes es la última fecha lectiva representada
+- **THEN** no muestra separación semanal a su derecha
 
-### Requirement: Indicador guardado y cambios pendientes
-El ViewModel SHALL mantener el último snapshot confirmado y una copia editable, compararlos y exponer de forma clara si el día nunca se ha guardado, está guardado sin cambios o tiene cambios pendientes. Un día nuevo SHALL tener `EsPersistido = false` y se considerará pendiente aunque todas sus filas estén en Presente. Guardar SHALL estar deshabilitado únicamente para un día persistido sin diferencias.
+### Requirement: Edición compacta y accesible
+Cada celda editable SHALL mostrar `P`, `F`, `R` o `J` con texto accesible y estilo contrastado, sin un `ComboBox` permanente. Clic simple SHALL seleccionar; doble clic o `Enter` SHALL abrir un selector compacto; `Escape` SHALL cancelar esa edición y restaurar el valor inicial.
 
-#### Scenario: Día nuevo sin edición
-- **WHEN** se prepara una fecha ausente con estados `Presente`
-- **THEN** se indica que aún no está guardada y Guardar está habilitado para confirmar por primera vez
+#### Scenario: Selector compacto
+- **WHEN** se hace doble clic en una celda laborable
+- **THEN** aparecen los cuatro estados y elegir uno actualiza sólo esa celda
 
-#### Scenario: Día guardado sin cambios
-- **WHEN** el estado editable coincide con el último snapshot persistido
-- **THEN** se indica guardado y Guardar está deshabilitado
+### Requirement: Navegación por teclado
+Flechas SHALL mover la celda activa; `P/F/R/J` SHALL asignar el estado y avanzar a la siguiente fila visible del mismo día; `Home/End` SHALL mover al primer/último día editable de la fila cuando sea posible; `Ctrl+S` SHALL guardar el día activo; `PageUp/PageDown` SHALL solicitar el mes anterior/siguiente fuera de edición.
 
-#### Scenario: Revertir edición local
-- **WHEN** el docente modifica un estado y luego lo devuelve al valor confirmado
-- **THEN** el día deja de aparecer como modificado
+#### Scenario: Pase vertical con letras
+- **WHEN** se presiona `F` en una celda editable que no está en la última fila
+- **THEN** se asigna Falta y la selección avanza a la fila siguiente de la misma fecha
 
-### Requirement: Guardado visualmente atómico
-Una acción Guardar, incluido `Ctrl+S`, SHALL enviar una sola operación completa a Application, deshabilitar acciones incompatibles mientras se ejecuta y actualizar el snapshot confirmado sólo después del éxito.
+#### Scenario: Última fila
+- **WHEN** se asigna un estado mediante letra en la última fila visible
+- **THEN** el estado cambia y la selección permanece en esa celda
 
-#### Scenario: Guardado exitoso
-- **WHEN** Application confirma el guardado
-- **THEN** la lista, conteos e indicador se actualizan con el snapshot devuelto
+### Requirement: Estado editable por fecha
+El ViewModel SHALL conservar snapshot confirmado, copia editable y un conjunto explícito de fechas modificadas. Abrir el mes no SHALL marcar fechas ni persistir borradores. Una fecha SHALL salir del conjunto si vuelve completamente a su snapshot.
 
-#### Scenario: Fallo de persistencia
-- **WHEN** Application informa un error al guardar
-- **THEN** se muestra un mensaje técnico seguro, se conservan la entrada editable y el último snapshot confirmado, y no se presenta el cambio como guardado
+#### Scenario: Editar dos días
+- **WHEN** se cambian celdas de dos columnas
+- **THEN** el conjunto contiene exactamente esas dos fechas
 
-### Requirement: Confirmación de cambios pendientes
-Al cambiar de fecha, navegar específicamente a Grupo o cerrar con cambios pendientes —incluido un borrador nunca guardado— la interfaz SHALL reutilizar el mismo flujo `Guardar`, `Descartar` o `Cancelar`. Guardar SHALL continuar únicamente si persiste con éxito; Descartar SHALL abandonar la copia editable sin guardar y continuar; Cancelar SHALL mantener íntegramente la fecha, módulo, ventana y edición actuales.
+### Requirement: Guardado del día y del mes
+Guardar día SHALL ser la acción principal y persistir sólo la columna activa. SHALL estar habilitada para una fecha lectiva visible no persistida o para una fecha persistida modificada, y deshabilitada para una fecha persistida sin cambios. Tras cada éxito SHALL reemplazar inmediatamente el snapshot mensual confirmado de esa fecha, marcar su columna como persistida y retirar la fecha del conjunto modificado sin recargar todo el mes ni perder borradores de otras fechas. Guardar cambios del mes SHALL ser secundaria, procesar fechas modificadas en orden y actualizar el snapshot tras cada éxito. Ante fallo SHALL conservar edición de la fecha fallida y posteriores e informar éxitos previos; no SHALL afirmar atomicidad mensual.
 
-#### Scenario: Guardar antes de cambiar fecha
-- **WHEN** se elige Guardar y el guardado termina correctamente
-- **THEN** se carga la fecha solicitada
+#### Scenario: Día nuevo o modificado
+- **WHEN** la columna activa es lectiva y no persistida, o está persistida pero tiene cambios locales
+- **THEN** Guardar día está habilitado
 
-#### Scenario: Fallo al guardar antes de salir
-- **WHEN** se elige Guardar y la persistencia falla
-- **THEN** no se cambia de fecha, no se navega y no se cierra la ventana
+#### Scenario: Día persistido sin cambios
+- **WHEN** la columna activa ya está persistida y coincide con su snapshot confirmado
+- **THEN** Guardar día está deshabilitado
 
-#### Scenario: Descartar cambios
-- **WHEN** se elige Descartar
-- **THEN** no se guarda, se abandona la edición local y continúa la acción solicitada
+#### Scenario: Confirmación inmediata del día
+- **WHEN** Guardar día termina correctamente
+- **THEN** la columna queda persistida y sin cambios pendientes inmediatamente, conservando los borradores de otras fechas sin recargar el mes
 
-#### Scenario: Cancelar salida
-- **WHEN** se elige Cancelar
-- **THEN** se conserva íntegramente la edición actual
+#### Scenario: Fallo en segundo día
+- **WHEN** el primer día se confirma y falla el segundo
+- **THEN** el primero aparece guardado, el segundo continúa modificado y ningún día posterior aparece confirmado
 
-### Requirement: Acciones masivas y conteos
-La interfaz SHALL permitir marcar todas las filas históricas visibles como `Presente` y SHALL mostrar total y conteos de `Presente`, `Falta`, `Retardo` y «Falta justificada», actualizados inmediatamente con el estado visual. Los conteos SHALL incluir todas las filas visibles, aunque algún estudiante esté actualmente inactivo.
+### Requirement: Acciones de columna
+La interfaz SHALL mostrar la fecha activa completa en español y ofrecer Marcar todo el día como Presente, Guardar día y Descartar cambios del día. Estas acciones SHALL afectar únicamente la fecha seleccionada.
 
-#### Scenario: Marcar todos presentes
-- **WHEN** el docente activa Marcar todos presentes
-- **THEN** todas las filas editables cambian a `Presente`, los conteos se recalculan y se actualiza la condición de cambios pendientes
+#### Scenario: Marcar columna
+- **WHEN** se activa Marcar todo presente para un martes
+- **THEN** cambian únicamente las celdas editables de ese martes
 
-#### Scenario: Cambiar una fila
-- **WHEN** una fila pasa de Presente a Falta
-- **THEN** disminuye Presente, aumenta Falta y el total permanece igual
+### Requirement: Confirmación al cambiar contexto
+Cambiar mes/año, navegar a Grupo o cerrar con fechas modificadas SHALL reutilizar Guardar/Descartar/Cancelar. Guardar continuará sólo si todos los días pendientes tienen éxito; Descartar abandonará la edición sin guardar; Cancelar conservará mes, selección y edición.
 
-### Requirement: Tratamiento seguro de errores
-El ViewModel SHALL distinguir validación de dominio, conflicto y error de persistencia, SHALL mostrar mensajes claros en español mediante un servicio de diálogo y SHALL impedir que esas excepciones cierren la aplicación. El code-behind SHALL limitarse a conducta visual y cierre de ventana.
+#### Scenario: Fallo al guardar antes de cambiar mes
+- **WHEN** se elige Guardar y una fecha falla
+- **THEN** el mes no cambia y se conserva la edición no confirmada
 
-#### Scenario: Error de dominio
-- **WHEN** Application rechaza una operación por validación o conflicto
-- **THEN** la ventana permanece abierta, conserva la edición y muestra una explicación adecuada
+### Requirement: Resúmenes y borradores distinguibles
+Cada fila SHALL mostrar conteos y porcentaje según la fórmula aprobada. Las tarjetas superiores SHALL mostrar alumnos visibles, días guardados y conteos generales. Cuando cualquier conteo visual incluya cambios locales SHALL indicarlo explícitamente y no presentarlo como confirmado.
 
-### Requirement: Presentación comprobable sin WPF real
-Las decisiones del ViewModel SHALL poder probarse con dobles manuales de casos de uso, diálogo y reloj, sin abrir ventanas ni cargar Data, Microsoft.Data.Sqlite o controles WPF reales.
+#### Scenario: Porcentaje sin denominador
+- **WHEN** un estudiante no tiene días contabilizados
+- **THEN** la grilla muestra `—` en vez de `0 %`
 
-#### Scenario: Ejecutar pruebas de ViewModel
-- **WHEN** se prueban selección, edición, guardado, confirmaciones y errores
-- **THEN** las pruebas se ejecutan sin crear una ventana ni una base SQLite
+### Requirement: Búsqueda y filtros
+La interfaz SHALL permitir búsqueda parcial por nombre y filtros Todos, Con incidencias, Sólo activos y Activos e inactivos históricos. Incidencia SHALL significar al menos una Falta, Retardo o Falta justificada visible. Filtrar no SHALL modificar datos ni el orden contractual.
+
+#### Scenario: Filtrar incidencias
+- **WHEN** se activa Con incidencias
+- **THEN** sólo permanecen filas con al menos un estado F, R o J en el mes visual
+
+### Requirement: Barra inferior fija
+La barra inferior SHALL permanecer visible con estado de guardado, ayuda «P/F/R/J cambia el estado · Ctrl+S guarda», Descartar cambios, Guardar día y Guardar cambios del mes. Cada botón SHALL habilitarse según el día activo y las fechas modificadas.
+
+#### Scenario: Sin día activo
+- **WHEN** no hay una columna lectiva seleccionada
+- **THEN** Guardar día y Marcar todo presente están deshabilitados
+
+### Requirement: Vista diaria conservada temporalmente
+La vista mensual SHALL ser predeterminada y la vista diaria existente SHALL permanecer disponible como modo alternativo dentro de la misma ventana hasta superar las pruebas manuales mensuales, sin duplicar reglas ni persistencia.
+
+#### Scenario: Cambiar a vista diaria
+- **WHEN** se activa el modo diario sin cambios pendientes
+- **THEN** se muestra la captura diaria existente usando los mismos casos de uso
+
+### Requirement: Errores seguros
+Dominio, conflicto y persistencia SHALL producir mensajes corregibles en español sin SQL, rutas, causas internas ni trazas. Un error SHALL conservar la celda editada, no cerrar la aplicación y no marcar como guardado el día fallido.
+
+#### Scenario: Error técnico al guardar día
+- **WHEN** la persistencia falla
+- **THEN** la celda conserva su edición local y el día permanece sin confirmar

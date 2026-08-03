@@ -1,97 +1,100 @@
 ## Purpose
 
-Coordina la preparación, consulta y persistencia completa de una asistencia diaria sin exponer agregados, infraestructura ni estado mutable entre llamadas.
+Coordina consultas y guardados diarios y mensuales de asistencia mediante snapshots inmutables, sin retener agregados ni exponer infraestructura.
 
 ## ADDED Requirements
 
-### Requirement: Puerto específico de asistencia
-Application SHALL definir un contrato específico que permita cargar una asistencia por grupo y fecha, comprobar su existencia y guardar una asistencia completa. El contrato SHALL usar únicamente tipos de Core y no SHALL exponer SQLite, SQL ni tipos visuales.
+### Requirement: Consulta mensual coordinada
+Application SHALL aceptar `GrupoId`, año y mes válidos, calcular el intervalo real completo, cargar una matrícula fresca y las asistencias mediante una operación coordinada, y devolver una proyección inmutable con columnas únicamente para fechas lectivas de lunes a viernes. No SHALL realizarse la carga mensual mediante llamadas descoordinadas desde Presentation.
 
-#### Scenario: Ausencia real
-- **WHEN** el puerto consulta una pareja grupo-fecha que no está almacenada
-- **THEN** la carga devuelve ausencia y la comprobación de existencia devuelve `false`
+#### Scenario: Meses de distinta longitud
+- **WHEN** se consultan meses de 28, 29, 30 y 31 días, incluidos febreros bisiesto y no bisiesto
+- **THEN** el snapshot contiene exactamente sus fechas de lunes a viernes en orden ascendente, sin sábados, domingos ni columnas vacías
 
-#### Scenario: Error técnico al comprobar existencia
-- **WHEN** la infraestructura falla durante la comprobación
-- **THEN** el error se conserva como fallo identificable y no se convierte en `false`
+#### Scenario: Año o mes inválido
+- **WHEN** año está fuera del rango de `DateOnly` o mes fuera de 1–12
+- **THEN** Application rechaza la consulta sin invocar persistencia
 
-### Requirement: Snapshots inmutables de asistencia
-Application SHALL devolver records inmutables para el detalle del día y de cada estudiante. El detalle SHALL incluir grupo, fecha, `EsPersistido` y una lista de filas; cada fila SHALL incluir `EstudianteId`, nombre visible y número de lista obtenidos de la matrícula actual, estado de asistencia e indicador de actividad actual. Las listas SHALL materializarse como arreglos nuevos y no SHALL exponer `Grupo`, `Estudiante`, `AsistenciaDiaria`, `RegistroAsistencia` ni colecciones internas.
+#### Scenario: Error técnico en el intervalo
+- **WHEN** la persistencia falla al cargar cualquier parte del intervalo
+- **THEN** no se devuelve un snapshot mensual parcial y se conserva el error identificable
 
-#### Scenario: Obtener detalle
-- **WHEN** se obtiene un snapshot de asistencia
-- **THEN** modificar una colección externa no altera el estado de dominio ni snapshots posteriores
+### Requirement: Calendario lectivo mínimo
+Application SHALL usar una abstracción de calendario que para este cambio marque lunes a viernes como laborables y sábado y domingo como no laborables.
 
-### Requirement: Preparar un día no guardado
-El caso de uso de preparación SHALL cargar una instancia fresca del grupo y consultar la asistencia de la fecha. Si no existe, SHALL crear en memoria una fila `Presente` por cada estudiante actualmente activo, en el orden proporcionado por Application, marcar el resultado como no guardado y no invocar `Guardar`.
+#### Scenario: Semana completa
+- **WHEN** se proyectan siete fechas consecutivas de lunes a domingo
+- **THEN** las primeras cinco son laborables y sábado y domingo no lo son
 
-#### Scenario: Primera apertura de una fecha
-- **WHEN** el grupo existe y la fecha no tiene asistencia
-- **THEN** se devuelven sólo sus estudiantes activos con estado `Presente`, indicador no guardado y cero guardados
+### Requirement: Snapshot mensual inmutable
+Application SHALL materializar arreglos nuevos para `AsistenciaMesDetalle`, sus fechas lectivas, estudiantes y estados por fecha. Cada columna SHALL incluir fecha, número, abreviatura española, persistencia y si requiere separación visual semanal. Esta señal SHALL ser verdadera sólo para un viernes que tenga otra fecha lectiva posterior en el mes. Cada estudiante SHALL incluir identidad interna, nombre y número actuales, actividad actual, celdas, conteos confirmados y porcentaje confirmado. No SHALL exponer agregados ni colecciones internas.
 
-#### Scenario: Grupo inexistente
-- **WHEN** se prepara una fecha para un grupo ausente
-- **THEN** se lanza `GrupoNoEncontradoException` y no se guarda asistencia
+#### Scenario: Dos consultas consecutivas
+- **WHEN** se consulta dos veces el mismo mes
+- **THEN** se obtienen arreglos distintos y modificar una colección externa no afecta consultas posteriores
 
-### Requirement: Cargar un día guardado
-Al preparar una fecha ya guardada, Application SHALL cargar el agregado histórico completo y devolver todos sus estados confirmados. SHALL obtener nombre, número de lista y situación activa desde la matrícula actual, sin pretender reconstruir una fotografía histórica de esos datos. Cada fila SHALL indicar si el estudiante está actualmente activo.
+### Requirement: Unión de matrícula e históricos
+Las filas mensuales SHALL ser la unión de estudiantes activos actuales y estudiantes presentes en cualquier padrón histórico guardado del mes. SHALL ordenarse por número actual, nombre visible y `EstudianteId`.
 
-#### Scenario: Estudiante desactivado después del guardado
-- **WHEN** se abre un día guardado que contiene a un estudiante ahora inactivo
-- **THEN** su registro histórico aparece, indica que está actualmente inactivo y continúa siendo editable
+#### Scenario: Inactivo con historial
+- **WHEN** un estudiante ahora inactivo aparece en un día guardado del mes
+- **THEN** permanece visible con su estado histórico y situación inactiva
 
-#### Scenario: Estudiante agregado después del guardado
-- **WHEN** se abre un día guardado anterior a la incorporación de un estudiante actualmente activo
-- **THEN** el estudiante nuevo no se agrega automáticamente al día histórico
+#### Scenario: Estudiante incorporado después
+- **WHEN** un estudiante activo actual no pertenece al padrón de un día ya guardado
+- **THEN** su celda para ese día es no aplicable y no se incorpora retroactivamente
 
-#### Scenario: Estudiante reactivado
-- **WHEN** se abre un día guardado que contiene a un estudiante posteriormente desactivado y reactivado
-- **THEN** se muestra el mismo registro histórico con su identidad y estado conservados
+#### Scenario: Día nuevo laborable
+- **WHEN** un día laborable no está guardado
+- **THEN** los estudiantes actualmente activos reciben borrador `Presente`, los inactivos históricos reciben no aplicable y no se guarda nada
 
-### Requirement: Guardado completo y único
-El comando de guardado SHALL recibir grupo, fecha y entradas con identidad y estado, cargar estado fresco, validar el conjunto completo mediante Core y llamar a `Guardar` exactamente una vez sólo después del éxito de todas las operaciones. SHALL rechazar identidades faltantes, duplicadas o ajenas, devolver el snapshot confirmado únicamente después del guardado y no SHALL conservar agregados entre llamadas.
+### Requirement: Sólo columnas lectivas
+Sábados y domingos no SHALL producir columnas ni celdas. La lista SHALL comenzar y terminar en las fechas lectivas reales aunque el mes empiece o termine en fin de semana o a mitad de semana.
 
-#### Scenario: Guardar día nuevo
-- **WHEN** la fecha no está guardada y existe exactamente una entrada válida por cada estudiante actualmente activo
-- **THEN** se crea el agregado con ese padrón, se guarda exactamente una vez y se devuelve como persistido
+#### Scenario: Mes comienza en fin de semana
+- **WHEN** el día 1 del mes es sábado o domingo
+- **THEN** la primera columna corresponde al lunes siguiente
 
-#### Scenario: Actualizar día existente
-- **WHEN** existe exactamente una entrada válida por cada fila del padrón histórico mostrado
-- **THEN** se actualizan todos los estados sobre la misma instancia, se conservan grupo, fecha e identidades y se realiza un único guardado final sin eliminar registros
+#### Scenario: Mes termina en fin de semana
+- **WHEN** los últimos días del mes son sábado y domingo
+- **THEN** la última columna corresponde al viernes anterior y no existen columnas posteriores
 
-#### Scenario: Conjunto incompleto o ajeno
-- **WHEN** la entrada omite una identidad esperada, la duplica o contiene una identidad ajena
-- **THEN** la operación falla antes de guardar y no produce cambios parciales
+#### Scenario: Separación semanal
+- **WHEN** una columna corresponde a viernes y existe otra fecha lectiva posterior
+- **THEN** el snapshot la marca como cierre semanal; el último viernes no se marca si no existe otra columna
 
-#### Scenario: Error de dominio durante la actualización
-- **WHEN** cualquiera de los estados o mutaciones del agregado es rechazado por Core
-- **THEN** se realizan cero guardados y permanece confirmado el estado persistido anterior
+### Requirement: Resumen mensual confirmado
+Por estudiante, Application SHALL contar estados exclusivamente en días laborables persistidos cuyo padrón histórico contenga al estudiante. El porcentaje SHALL ser `(Presentes + Retardos) / días contabilizados × 100`; Falta y Justificada no cuentan como presencia. Si el denominador es cero SHALL devolverse ausencia de porcentaje, no cero.
 
-#### Scenario: Fallo al guardar
-- **WHEN** la persistencia falla durante el único guardado
-- **THEN** no se devuelve éxito y una llamada posterior vuelve a cargar el último estado persistido
+#### Scenario: Porcentaje con retardo
+- **WHEN** un estudiante tiene un Presente, un Retardo, una Falta y una Justificada en cuatro días contabilizados
+- **THEN** su porcentaje confirmado es 50 % y cada estado se cuenta por separado
 
-### Requirement: Consultar existencia sin efectos laterales
-Application SHALL permitir comprobar si existe una asistencia para grupo y fecha sin crearla, guardarla ni mantenerla en memoria.
+#### Scenario: Denominador cero
+- **WHEN** el estudiante no pertenece a ningún día laborable guardado
+- **THEN** el porcentaje confirmado está ausente
 
-#### Scenario: Consultar fecha ausente
-- **WHEN** se consulta una fecha sin asistencia
-- **THEN** se devuelve `false` y no se invoca ningún guardado
+### Requirement: Guardar día seleccionado
+Application SHALL guardar la entrada completa de una fecha laborable mediante el caso diario existente, exactamente una vez, y devolver el día confirmado sólo después del éxito.
 
-### Requirement: Orden determinista
-Las filas SHALL ordenarse primero por número de lista, después por nombre visible y finalmente por `EstudianteId` como desempate determinista.
+#### Scenario: Día nuevo seleccionado
+- **WHEN** se guarda explícitamente una columna laborable no persistida
+- **THEN** se valida su padrón actual y se confirma una sola `AsistenciaDiaria`
 
-#### Scenario: Número y nombre coincidentes
-- **WHEN** dos filas tienen el mismo número y nombre visible
-- **THEN** su orden se resuelve de forma estable mediante `EstudianteId`
+### Requirement: Guardado mensual secuencial
+Application SHALL guardar las fechas solicitadas en orden ascendente mediante transacciones diarias independientes. Después de cada éxito SHALL registrar esa fecha como confirmada. Si una fecha falla SHALL detenerse, informar las fechas confirmadas y la fecha fallida, y no intentar fechas posteriores.
 
-### Requirement: Frontera única de errores
-El adaptador de Data SHALL traducir sus errores técnicos a `ErrorPersistenciaAplicacionException`, conservando la causa como `InnerException`. Los casos de uso no SHALL volver a envolver esa excepción ni las excepciones de dominio.
+#### Scenario: Todos los días tienen éxito
+- **WHEN** se guardan varias fechas válidas
+- **THEN** cada fecha se guarda una vez en orden y el resultado informa todas como confirmadas
 
-#### Scenario: Error de infraestructura
-- **WHEN** Data no puede cargar o guardar una asistencia
-- **THEN** Application entrega un error de persistencia identificable con la causa técnica original
+#### Scenario: Fallo intermedio
+- **WHEN** el segundo de tres días falla
+- **THEN** el primero permanece confirmado, el segundo y tercero no se presentan como guardados y el tercero no se intenta
 
-#### Scenario: Error de dominio
-- **WHEN** Core rechaza un estado o snapshot
-- **THEN** la excepción de dominio se conserva y no se invoca el guardado
+### Requirement: Frontera de errores compuesta
+Data SHALL continuar traduciendo errores técnicos una sola vez. Para un guardado mensual interrumpido, Application SHALL añadir únicamente contexto de progreso mediante una excepción que conserve el error ya traducido como `InnerException`, las fechas confirmadas y la fecha fallida; no SHALL exponer SQL, rutas ni trazas.
+
+#### Scenario: Persistencia falla en guardado mensual
+- **WHEN** Data entrega un error de persistencia durante una fecha
+- **THEN** el consumidor puede identificar la fecha fallida y los éxitos previos sin perder la causa traducida

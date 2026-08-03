@@ -17,14 +17,29 @@ public partial class App : System.Windows.Application
             var rutas = RutasAplicacion.DesdeLocalApplicationData(
                 Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData));
             var persistencia = new PersistenciaGrupoSqlite(rutas.BaseSqlite);
+            var persistenciaAsistencia = new PersistenciaAsistenciaSqlite(rutas.BaseSqlite);
             var gestion = new GestionGrupoPresentacion(new GestionGrupoCasosUso(persistencia));
+            var gestionAsistencia = new GestionAsistenciaPresentacion(
+                new GestionAsistenciaCasosUso(persistencia, persistenciaAsistencia));
             var estado = new AlmacenamientoEstadoJson(rutas.EstadoAplicacion);
-            var viewModel = new GestionGrupoViewModel(
-                gestion, estado, new ServicioMensajesWpf(), new ServicioConfirmacionWpf());
+            var mensajes = new ServicioMensajesWpf();
+            var viewModelGrupo = new GestionGrupoViewModel(
+                gestion, estado, mensajes, new ServicioConfirmacionWpf());
+            var viewModelAsistencia = new GestionAsistenciaViewModel(
+                gestionAsistencia,
+                new RelojLocalSistema(),
+                new DialogoCambiosPendientesWpf(),
+                mensajes);
+            var viewModelMensual = new GestionAsistenciaMensualViewModel(
+                gestionAsistencia,
+                new RelojLocalSistema(),
+                new DialogoCambiosPendientesWpf(),
+                mensajes);
+            var viewModel = new MainWindowViewModel(viewModelGrupo, viewModelAsistencia, viewModelMensual);
             var ventana = new MainWindow(viewModel);
             MainWindow = ventana;
             ventana.Show();
-            viewModel.Inicializar();
+            viewModelGrupo.Inicializar();
         }
         catch (Exception exception) when (
             exception is IOException or UnauthorizedAccessException or ErrorPersistenciaAplicacionException)
