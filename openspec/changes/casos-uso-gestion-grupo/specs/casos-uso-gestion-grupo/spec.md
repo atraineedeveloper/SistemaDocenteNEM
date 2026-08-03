@@ -16,7 +16,7 @@ Application SHALL depender únicamente de Core y SHALL definir `IAlmacenamientoG
 - **THEN** los mismos casos de uso coordinan Core con SQLite sin conocer el proveedor concreto
 
 ### Requirement: Resultados públicos exactos
-Application SHALL exponer los siguientes resultados: `CrearGrupo`, `CargarGrupo` y `CambiarNombreGrupo` devuelven `GrupoDetalle`; `AgregarEstudiante`, `RenombrarEstudiante`, `CambiarNumeroLista`, `DesactivarEstudiante` y `ReactivarEstudiante` devuelven `EstudianteDetalle`; `Existe` devuelve `bool`; y las consultas de estudiantes devuelven `IReadOnlyList<EstudianteDetalle>`.
+Application SHALL exponer los siguientes resultados: `CrearGrupo`, `CargarGrupo` y `CambiarNombreGrupo` devuelven `GrupoDetalle`; `AgregarEstudiante`, `RenombrarEstudiante`, `CambiarNumeroLista`, `EditarEstudiante`, `DesactivarEstudiante` y `ReactivarEstudiante` devuelven `EstudianteDetalle`; `Existe` devuelve `bool`; y las consultas de estudiantes devuelven `IReadOnlyList<EstudianteDetalle>`.
 
 #### Scenario: Obtener el resultado declarado por cada operación
 - **WHEN** una operación termina correctamente
@@ -122,6 +122,31 @@ Application SHALL permitir renombrar, cambiar número de lista, desactivar y rea
 #### Scenario: Rechazar una modificación
 - **WHEN** Core rechaza un nombre, número, identidad o conflicto
 - **THEN** Application conserva la excepción de dominio y no invoca `Guardar`
+
+### Requirement: Editar nombre y número de estudiante atómicamente
+`EditarEstudiante` SHALL recibir `GrupoId`, `EstudianteId`, nombre visible y número de lista; cargar el grupo una sola vez; aplicar en memoria el renombrado y el cambio de número mediante Core; e invocar `Guardar` exactamente una vez después de que ambas mutaciones terminen correctamente. SHALL devolver `EstudianteDetalle` únicamente después del guardado y SHALL conservar `GrupoId` y `EstudianteId`. Application MUST NOT duplicar validaciones de Core.
+
+Esta operación SHALL ser una excepción justificada a la regla general de una operación pública de Core por comando: un comando MAY coordinar varias mutaciones de Core cuando representan una sola acción atómica del usuario y existe un único guardado final.
+
+#### Scenario: Editar nombre y número válidos
+- **WHEN** Core acepta el nombre y el número nuevos
+- **THEN** Application carga una vez, guarda una vez y devuelve el estudiante con ambos cambios e identidad estable
+
+#### Scenario: Rechazar nombre inválido
+- **WHEN** Core rechaza el nombre antes de cambiar el número
+- **THEN** Application conserva la excepción de dominio y no invoca `Guardar`
+
+#### Scenario: Rechazar número después de nombre válido
+- **WHEN** Core acepta el nombre en memoria pero rechaza el número por validación o conflicto
+- **THEN** Application conserva la excepción de dominio, no invoca `Guardar` y el estado persistido anterior permanece intacto
+
+#### Scenario: Fallar en el guardado único
+- **WHEN** ambas mutaciones terminan correctamente pero `Guardar` falla
+- **THEN** Application no devuelve éxito y un comando posterior carga el estado persistido anterior
+
+#### Scenario: Editar en grupo inexistente
+- **WHEN** la carga única devuelve ausencia
+- **THEN** Application lanza `GrupoNoEncontradoException` y no invoca `Guardar`
 
 ### Requirement: Consultar estudiantes
 `ObtenerEstudiantesActivos` y `ObtenerTodosLosEstudiantes` SHALL cargar una instancia fresca, devolver una matriz nueva como `IReadOnlyList<EstudianteDetalle>` en el orden determinista definido y no guardar.

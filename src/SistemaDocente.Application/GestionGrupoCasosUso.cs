@@ -64,6 +64,19 @@ public sealed class GestionGrupoCasosUso
         return Proyectar(ObtenerEstudiante(grupo, estudianteId));
     }
 
+    public EstudianteDetalle EditarEstudiante(
+        GrupoId grupoId,
+        EstudianteId estudianteId,
+        string nombreVisible,
+        int numeroLista)
+    {
+        var grupo = CargarRequerido(grupoId);
+        grupo.RenombrarEstudiante(estudianteId, nombreVisible);
+        grupo.CambiarNumeroLista(estudianteId, numeroLista);
+        _almacenamiento.Guardar(grupo);
+        return Proyectar(ObtenerEstudiante(grupo, estudianteId));
+    }
+
     public EstudianteDetalle DesactivarEstudiante(
         GrupoId grupoId,
         EstudianteId estudianteId)

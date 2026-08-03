@@ -62,6 +62,8 @@ Cada comando sobre un grupo existente seguirá esta secuencia:
 4. Invocar `Guardar` exactamente una vez si Core termina correctamente, incluso en una operación idempotente aceptada.
 5. Crear y devolver el snapshot únicamente después del guardado exitoso.
 
+La regla de una sola operación pública de Core admite una excepción justificada: un comando de aplicación puede coordinar varias mutaciones de Core cuando juntas representan una única acción atómica del usuario. `EditarEstudiante` renombra y cambia el número sobre la misma instancia cargada y realiza un único guardado final. Si cualquiera de las mutaciones falla, no se guarda; si el guardado falla, no se devuelve éxito.
+
 `CrearGrupo` construirá mediante `Grupo.Crear`, guardará exactamente una vez y sólo entonces devolverá el resultado. Las consultas cargarán y proyectarán sin guardar. Un error de dominio ocurre antes de `Guardar`; un fallo de persistencia impide devolver un resultado exitoso.
 
 ### Resultados y snapshots
@@ -70,6 +72,7 @@ Los resultados públicos serán exactos:
 
 - `CrearGrupo`, `CargarGrupo` y `CambiarNombreGrupo` devuelven `GrupoDetalle`.
 - `AgregarEstudiante`, `RenombrarEstudiante`, `CambiarNumeroLista`, `DesactivarEstudiante` y `ReactivarEstudiante` devuelven `EstudianteDetalle`.
+- `EditarEstudiante` recibe grupo, estudiante, nombre y número, y devuelve `EstudianteDetalle` sólo después del guardado único.
 - `Existe` devuelve `bool`.
 - `ObtenerEstudiantesActivos` y `ObtenerTodosLosEstudiantes` devuelven `IReadOnlyList<EstudianteDetalle>`.
 
