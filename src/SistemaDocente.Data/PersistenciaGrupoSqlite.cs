@@ -1,10 +1,11 @@
 using Microsoft.Data.Sqlite;
 
+using SistemaDocente.Application;
 using SistemaDocente.Core;
 
 namespace SistemaDocente.Data;
 
-public sealed class PersistenciaGrupoSqlite
+public sealed class PersistenciaGrupoSqlite : IAlmacenamientoGrupos
 {
     private readonly string _cadenaConexion;
 
@@ -46,6 +47,20 @@ public sealed class PersistenciaGrupoSqlite
     public void Guardar(Grupo grupo)
     {
         ArgumentNullException.ThrowIfNull(grupo);
+
+        try
+        {
+            GuardarInterno(grupo);
+        }
+        catch (DataAccessException exception)
+        {
+            throw Traducir(exception);
+        }
+    }
+
+    private void GuardarInterno(Grupo grupo)
+    {
+        ArgumentNullException.ThrowIfNull(grupo);
         Inicializar();
 
         try
@@ -82,6 +97,50 @@ public sealed class PersistenciaGrupoSqlite
     }
 
     public Grupo? Cargar(GrupoId grupoId)
+    {
+        if (grupoId == default)
+        {
+            throw new ArgumentException("La identidad del grupo no puede estar vacía.", nameof(grupoId));
+        }
+
+        try
+        {
+            return CargarInterno(grupoId);
+        }
+        catch (DataAccessException exception)
+        {
+            throw Traducir(exception);
+        }
+    }
+
+    public bool Existe(GrupoId grupoId)
+    {
+        if (grupoId == default)
+        {
+            throw new ArgumentException("La identidad del grupo no puede estar vacía.", nameof(grupoId));
+        }
+
+        try
+        {
+            Inicializar();
+            using var conexion = AbrirConexion();
+            using var comando = conexion.CreateCommand();
+            comando.CommandText = "SELECT EXISTS(SELECT 1 FROM grupos WHERE id = $id);";
+            comando.Parameters.AddWithValue("$id", Formatear(grupoId.Valor));
+            return comando.ExecuteScalar() is long resultado && resultado == 1;
+        }
+        catch (DataAccessException exception)
+        {
+            throw Traducir(exception);
+        }
+        catch (SqliteException exception)
+        {
+            throw Traducir(
+                new DataAccessException("No fue posible comprobar la existencia del grupo.", exception));
+        }
+    }
+
+    private Grupo? CargarInterno(GrupoId grupoId)
     {
         if (grupoId == default)
         {
@@ -134,6 +193,9 @@ public sealed class PersistenciaGrupoSqlite
 
     private static bool EsErrorDeInfraestructura(Exception exception) =>
         exception is IOException or UnauthorizedAccessException or SqliteException;
+
+    private static ErrorPersistenciaAplicacionException Traducir(DataAccessException exception) =>
+        new("Ocurrió un error al acceder a la persistencia de grupos.", exception);
 
     private void CrearDirectorioContenedor()
     {

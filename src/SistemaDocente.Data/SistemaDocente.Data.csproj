@@ -10,6 +10,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\SistemaDocente.Application\SistemaDocente.Application.csproj" />
     <ProjectReference Include="..\SistemaDocente.Core\SistemaDocente.Core.csproj" />
   </ItemGroup>
 
