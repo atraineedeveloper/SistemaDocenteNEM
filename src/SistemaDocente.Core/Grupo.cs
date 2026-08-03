@@ -6,13 +6,19 @@ public sealed class Grupo
 {
     private const int LongitudMaximaNombre = 100;
     private const int LongitudMaximaNombreEstudiante = 150;
-    private readonly List<Estudiante> _estudiantes = [];
+    private readonly List<Estudiante> _estudiantes;
     private readonly ReadOnlyCollection<Estudiante> _vistaEstudiantes;
 
     private Grupo(string nombreVisible)
+        : this(GrupoId.Crear(), nombreVisible, [])
     {
-        Id = GrupoId.Crear();
+    }
+
+    private Grupo(GrupoId id, string nombreVisible, List<Estudiante> estudiantes)
+    {
+        Id = id;
         NombreVisible = nombreVisible;
+        _estudiantes = estudiantes;
         _vistaEstudiantes = _estudiantes.AsReadOnly();
     }
 
@@ -37,6 +43,54 @@ public sealed class Grupo
             "El nombre del grupo");
 
         return new Grupo(nombreNormalizado);
+    }
+
+    public static Grupo Rehidratar(
+        GrupoId id,
+        string nombreVisible,
+        IReadOnlyCollection<DatosEstudianteRehidratado> estudiantes)
+    {
+        if (id == default)
+        {
+            throw new DomainValidationException("La identidad del grupo no puede estar vacía.");
+        }
+
+        ArgumentNullException.ThrowIfNull(estudiantes);
+
+        var nombreValidado = ValidarNombreNormalizado(
+            nombreVisible,
+            LongitudMaximaNombre,
+            "El nombre del grupo");
+        var snapshot = estudiantes.ToArray();
+        var identidades = new HashSet<EstudianteId>();
+        var numerosActivos = new HashSet<int>();
+        var estudiantesValidados = new List<Estudiante>(snapshot.Length);
+
+        foreach (var datos in snapshot)
+        {
+            if (datos.Id == default || !identidades.Add(datos.Id))
+            {
+                throw new DomainValidationException(
+                    "Las identidades de estudiantes deben ser válidas y únicas.");
+            }
+
+            var nombreEstudiante = ValidarNombreNormalizado(
+                datos.NombreVisible,
+                LongitudMaximaNombreEstudiante,
+                "El nombre del estudiante");
+            ValidarNumeroLista(datos.NumeroLista);
+
+            if (datos.EstaActivo && !numerosActivos.Add(datos.NumeroLista))
+            {
+                throw new DomainConflictException(
+                    $"El número de lista {datos.NumeroLista} está repetido entre estudiantes activos.");
+            }
+
+            estudiantesValidados.Add(
+                new Estudiante(datos.Id, nombreEstudiante, datos.NumeroLista, datos.EstaActivo));
+        }
+
+        return new Grupo(id, nombreValidado, estudiantesValidados);
     }
 
     public void Renombrar(string nombreVisible)
@@ -112,6 +166,24 @@ public sealed class Grupo
             nombreVisible,
             LongitudMaximaNombreEstudiante,
             "El nombre del estudiante");
+
+    private static string ValidarNombreNormalizado(
+        string nombreVisible,
+        int longitudMaxima,
+        string campo)
+    {
+        var normalizado = NormalizadorNombreVisible.NormalizarYValidar(
+            nombreVisible,
+            longitudMaxima,
+            campo);
+
+        if (!string.Equals(nombreVisible, normalizado, StringComparison.Ordinal))
+        {
+            throw new DomainValidationException($"{campo} debe estar normalizado.");
+        }
+
+        return normalizado;
+    }
 
     private static void ValidarNumeroLista(int numeroLista)
     {
