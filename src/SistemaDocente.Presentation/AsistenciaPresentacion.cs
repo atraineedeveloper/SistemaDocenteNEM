@@ -62,4 +62,7 @@ public enum DecisionCambiosPendientes
 public interface IDialogoCambiosPendientes
 {
     DecisionCambiosPendientes ConfirmarCambiosPendientes();
+
+    DecisionCambiosPendientes ConfirmarCambiosPendientes(string contexto) =>
+        ConfirmarCambiosPendientes();
 }

@@ -1,4 +1,5 @@
 using System.IO;
+using System.Diagnostics;
 using System.Windows;
 
 using SistemaDocente.Application;
@@ -18,9 +19,13 @@ public partial class App : System.Windows.Application
                 Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData));
             var persistencia = new PersistenciaGrupoSqlite(rutas.BaseSqlite);
             var persistenciaAsistencia = new PersistenciaAsistenciaSqlite(rutas.BaseSqlite);
+            var persistenciaProyectos = new PersistenciaProyectosSqlite(rutas.BaseSqlite);
             var gestion = new GestionGrupoPresentacion(new GestionGrupoCasosUso(persistencia));
             var gestionAsistencia = new GestionAsistenciaPresentacion(
                 new GestionAsistenciaCasosUso(persistencia, persistenciaAsistencia));
+            var gestionProyectos = new GestionProyectosPresentacion(
+                new GestionProyectosActividadesCasosUso(
+                    persistencia, persistenciaProyectos, persistenciaProyectos));
             var estado = new AlmacenamientoEstadoJson(rutas.EstadoAplicacion);
             var mensajes = new ServicioMensajesWpf();
             var viewModelGrupo = new GestionGrupoViewModel(
@@ -35,7 +40,13 @@ public partial class App : System.Windows.Application
                 new RelojLocalSistema(),
                 new DialogoCambiosPendientesWpf(),
                 mensajes);
-            var viewModel = new MainWindowViewModel(viewModelGrupo, viewModelAsistencia, viewModelMensual);
+            var viewModelProyectos = new GestionProyectosViewModel(
+                gestionProyectos,
+                new DialogoCambiosPendientesWpf(),
+                new ConfirmacionProyectosWpf(),
+                mensajes);
+            var viewModel = new MainWindowViewModel(
+                viewModelGrupo, viewModelAsistencia, viewModelMensual, viewModelProyectos);
             var ventana = new MainWindow(viewModel);
             MainWindow = ventana;
             ventana.Show();
@@ -44,6 +55,7 @@ public partial class App : System.Windows.Application
         catch (Exception exception) when (
             exception is IOException or UnauthorizedAccessException or ErrorPersistenciaAplicacionException)
         {
+            Debug.WriteLine($"Fallo de inicio de almacenamiento: {exception}");
             MessageBox.Show(
                 "No fue posible iniciar el almacenamiento local. Cierra la aplicación e intenta nuevamente.",
                 "Sistema Docente Local", MessageBoxButton.OK, MessageBoxImage.Error);

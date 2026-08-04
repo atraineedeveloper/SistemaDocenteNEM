@@ -19,6 +19,7 @@
                 <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" HorizontalAlignment="Right">
                     <Button Content="Grupo" Command="{Binding IrAGrupoCommand}"/>
                     <Button Content="Asistencia" Command="{Binding IrAAsistenciaCommand}"/>
+                    <Button Content="Proyectos" Command="{Binding IrAProyectosCommand}"/>
                 </StackPanel>
             </DockPanel>
         </Border>
@@ -128,6 +129,71 @@
                     <Button Content="Guardar cambios (Ctrl+S)" Command="{Binding GuardarMesCommand}"/>
                 </StackPanel>
             </DockPanel>
+        </Grid>
+
+        <Grid Grid.Row="1" Margin="18" DataContext="{Binding Proyectos}"
+              Visibility="{Binding DataContext.MostrarProyectos, RelativeSource={RelativeSource AncestorType=Window}, Converter={StaticResource BoolToVisibility}}">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="240" MinWidth="190"/>
+                <ColumnDefinition Width="8"/>
+                <ColumnDefinition Width="310" MinWidth="250"/>
+                <ColumnDefinition Width="8"/>
+                <ColumnDefinition Width="*" MinWidth="360"/>
+            </Grid.ColumnDefinitions>
+            <Border Grid.Column="0" Background="White" Padding="12" CornerRadius="7">
+                <Grid><Grid.RowDefinitions><RowDefinition Height="Auto"/><RowDefinition Height="Auto"/><RowDefinition Height="*"/><RowDefinition Height="Auto"/></Grid.RowDefinitions>
+                    <TextBlock Text="Proyectos" FontSize="24" FontWeight="SemiBold"/>
+                    <ComboBox Grid.Row="1" Margin="0,10" ItemsSource="{Binding FiltrosProyecto}" SelectedItem="{Binding FiltroProyecto}"/>
+                    <ListBox Grid.Row="2" ItemsSource="{Binding ProyectosVisibles}" SelectedItem="{Binding ProyectoSeleccionado}">
+                        <ListBox.ItemTemplate><DataTemplate><StackPanel Margin="4"><TextBlock Text="{Binding Nombre}" FontWeight="SemiBold" TextWrapping="Wrap"/><TextBlock Text="{Binding Estado}" Foreground="#52606D"/></StackPanel></DataTemplate></ListBox.ItemTemplate>
+                    </ListBox>
+                    <Button Grid.Row="3" Content="Nuevo proyecto" Command="{Binding NuevoProyectoCommand}"/>
+                </Grid>
+            </Border>
+            <GridSplitter Grid.Column="1" Width="8" HorizontalAlignment="Stretch"/>
+            <Border Grid.Column="2" Background="White" Padding="12" CornerRadius="7">
+                <ScrollViewer VerticalScrollBarVisibility="Auto"><StackPanel>
+                    <TextBlock Text="Proyecto didáctico" FontSize="21" FontWeight="SemiBold"/>
+                    <TextBlock Text="Nombre"/><TextBox Text="{Binding NombreProyecto, UpdateSourceTrigger=PropertyChanged}"/>
+                    <TextBlock Text="Descripción"/><TextBox Text="{Binding DescripcionProyecto, UpdateSourceTrigger=PropertyChanged}" AcceptsReturn="True" Height="58"/>
+                    <Grid><Grid.ColumnDefinitions><ColumnDefinition/><ColumnDefinition Width="8"/><ColumnDefinition/></Grid.ColumnDefinitions>
+                        <StackPanel><TextBlock Text="Inicio"/><TextBox Text="{Binding FechaInicio}"/></StackPanel>
+                        <StackPanel Grid.Column="2"><TextBlock Text="Término"/><TextBox Text="{Binding FechaTermino}"/></StackPanel>
+                    </Grid>
+                    <TextBlock Foreground="#9A6700" Text="Duración fuera de 14–31 días; puedes guardar." Visibility="{Binding DuracionAtipica, Converter={StaticResource BoolToVisibility}}"/>
+                    <TextBlock Text="Observaciones"/><TextBox Text="{Binding ObservacionesProyecto, UpdateSourceTrigger=PropertyChanged}" AcceptsReturn="True" Height="58"/>
+                    <WrapPanel><Button Content="Guardar proyecto" Command="{Binding GuardarProyectoCommand}"/><Button Content="Iniciar" Command="{Binding IniciarProyectoCommand}"/><Button Content="Finalizar" Command="{Binding FinalizarProyectoCommand}"/><Button Content="Reabrir" Command="{Binding ReabrirProyectoCommand}"/><Button Content="Eliminar" Command="{Binding EliminarProyectoCommand}"/></WrapPanel>
+                    <Separator Margin="0,10"/>
+                    <DockPanel><TextBlock DockPanel.Dock="Left" Text="Actividades" FontSize="19" FontWeight="SemiBold"/><Button DockPanel.Dock="Right" Content="Nueva actividad" Command="{Binding NuevaActividadCommand}"/></DockPanel>
+                    <TextBox Text="{Binding BusquedaActividad, UpdateSourceTrigger=PropertyChanged}" ToolTip="Buscar actividad"/>
+                    <ListBox Height="220" ItemsSource="{Binding Actividades}" SelectedItem="{Binding ActividadSeleccionada}">
+                        <ListBox.ItemTemplate><DataTemplate><StackPanel Margin="3"><TextBlock Text="{Binding Titulo}" FontWeight="SemiBold"/><TextBlock Text="{Binding FechaRealizacion}"/><TextBlock Text="{Binding Estado}"/></StackPanel></DataTemplate></ListBox.ItemTemplate>
+                    </ListBox>
+                </StackPanel></ScrollViewer>
+            </Border>
+            <GridSplitter Grid.Column="3" Width="8" HorizontalAlignment="Stretch"/>
+            <Border Grid.Column="4" Background="White" Padding="12" CornerRadius="7">
+                <Grid><Grid.RowDefinitions><RowDefinition Height="Auto"/><RowDefinition Height="Auto"/><RowDefinition Height="Auto"/><RowDefinition Height="*"/><RowDefinition Height="Auto"/></Grid.RowDefinitions>
+                    <DockPanel><TextBlock Text="Actividad y entregas" FontSize="21" FontWeight="SemiBold"/><TextBlock DockPanel.Dock="Right" Text="{Binding ActividadSeleccionada.Estado}"/></DockPanel>
+                    <Grid Grid.Row="1"><Grid.ColumnDefinitions><ColumnDefinition Width="2*"/><ColumnDefinition Width="8"/><ColumnDefinition/></Grid.ColumnDefinitions>
+                        <StackPanel><TextBlock Text="Título"/><TextBox Text="{Binding TituloActividad, UpdateSourceTrigger=PropertyChanged}"/></StackPanel>
+                        <StackPanel Grid.Column="2"><TextBlock Text="Fecha"/><TextBox Text="{Binding FechaActividad}"/></StackPanel>
+                    </Grid>
+                    <DockPanel Grid.Row="2" Margin="0,4,0,8"><ComboBox DockPanel.Dock="Left" Width="180" ItemsSource="{Binding FiltrosEntrega}" SelectedItem="{Binding FiltroEntrega}"/><TextBlock DockPanel.Dock="Right" VerticalAlignment="Center"><Run Text="Total "/><Run Text="{Binding Total, Mode=OneWay}"/><Run Text=" · Pendientes "/><Run Text="{Binding Pendientes, Mode=OneWay}"/><Run Text=" · Entregadas "/><Run Text="{Binding Entregadas, Mode=OneWay}"/><Run Text=" · No entregadas "/><Run Text="{Binding NoEntregadas, Mode=OneWay}"/></TextBlock></DockPanel>
+                    <DataGrid x:Name="GrillaEntregas" Grid.Row="3" ItemsSource="{Binding EntregasVisibles}" AutoGenerateColumns="False" CanUserAddRows="False" RowHeaderWidth="0" EnableRowVirtualization="True" PreviewKeyDown="OnGrillaEntregasPreviewKeyDown">
+                        <DataGrid.Columns>
+                            <DataGridCheckBoxColumn Header="Sel." Binding="{Binding Seleccionada}" Width="45"/>
+                            <DataGridTextColumn Header="Núm." Binding="{Binding NumeroLista}" IsReadOnly="True" Width="55"/>
+                            <DataGridTextColumn Header="Nombre" Binding="{Binding Nombre}" IsReadOnly="True" Width="*"/>
+                            <DataGridTextColumn Header="Situación" Binding="{Binding SituacionActual}" IsReadOnly="True" Width="130"/>
+                            <DataGridTextColumn Header="Estado E/N/P" Binding="{Binding Estado}" IsReadOnly="True" Width="105"/>
+                            <DataGridTextColumn Header="Observación" Binding="{Binding Observacion, UpdateSourceTrigger=PropertyChanged}" Width="180"/>
+                        </DataGrid.Columns>
+                    </DataGrid>
+                    <DockPanel Grid.Row="4" Margin="0,8,0,0"><WrapPanel DockPanel.Dock="Left"><Button Content="E Entregada" Command="{Binding MarcarEntregadaCommand}"/><Button Content="N No entregada" Command="{Binding MarcarNoEntregadaCommand}"/><Button Content="P Pendiente" Command="{Binding MarcarPendienteCommand}"/><Button Content="Todos entregada" Command="{Binding MarcarTodosEntregadaCommand}"/></WrapPanel><WrapPanel DockPanel.Dock="Right"><Button Content="Anular" Command="{Binding AnularActividadCommand}"/><Button Content="Eliminar" Command="{Binding EliminarActividadCommand}"/><Button Content="Descartar" Command="{Binding DescartarActividadCommand}"/><Button Content="Guardar (Ctrl+S)" Command="{Binding GuardarActividadCommand}"/></WrapPanel></DockPanel>
+                </Grid>
+            </Border>
+            <Grid.InputBindings><KeyBinding Modifiers="Control" Key="S" Command="{Binding GuardarActividadCommand}"/></Grid.InputBindings>
         </Grid>
     </Grid>
 </Window>

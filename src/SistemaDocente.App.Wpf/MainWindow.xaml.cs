@@ -207,6 +207,30 @@ public partial class MainWindow : Window
         }
     }
 
+    private void OnGrillaEntregasPreviewKeyDown(object sender, KeyEventArgs e)
+    {
+        if (e.Key is not (Key.E or Key.N or Key.P)
+            || Keyboard.Modifiers != ModifierKeys.None
+            || Keyboard.FocusedElement is TextBoxBase
+            || Keyboard.FocusedElement is not DependencyObject foco
+            || !GrillaEntregas.IsAncestorOf(foco))
+        {
+            return;
+        }
+
+        var command = e.Key switch
+        {
+            Key.E => ViewModel.Proyectos?.MarcarEntregadaCommand,
+            Key.N => ViewModel.Proyectos?.MarcarNoEntregadaCommand,
+            _ => ViewModel.Proyectos?.MarcarPendienteCommand,
+        };
+        if (command?.CanExecute(null) == true)
+        {
+            command.Execute(null);
+            e.Handled = true;
+        }
+    }
+
     private void MostrarSelectorCompacto()
     {
         if (ObtenerCeldaActual() is null) return;

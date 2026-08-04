@@ -19,8 +19,11 @@ public sealed class ServicioConfirmacionWpf : IServicioConfirmacion
 
 public sealed class DialogoCambiosPendientesWpf : IDialogoCambiosPendientes
 {
-    public DecisionCambiosPendientes ConfirmarCambiosPendientes() => MessageBox.Show(
-        "Hay cambios pendientes. ¿Deseas guardarlos antes de continuar?\n\nSí: Guardar  ·  No: Descartar  ·  Cancelar: Permanecer aquí",
+    public DecisionCambiosPendientes ConfirmarCambiosPendientes() =>
+        ConfirmarCambiosPendientes("cambios");
+
+    public DecisionCambiosPendientes ConfirmarCambiosPendientes(string contexto) => MessageBox.Show(
+        $"Hay cambios pendientes en {contexto}. ¿Deseas guardarlos antes de continuar?\n\nSí: Guardar  ·  No: Descartar  ·  Cancelar: Permanecer aquí",
         "Cambios sin guardar",
         MessageBoxButton.YesNoCancel,
         MessageBoxImage.Question) switch
@@ -34,4 +37,11 @@ public sealed class DialogoCambiosPendientesWpf : IDialogoCambiosPendientes
 public sealed class RelojLocalSistema : IRelojLocal
 {
     public DateOnly Hoy => DateOnly.FromDateTime(DateTime.Now);
+}
+
+public sealed class ConfirmacionProyectosWpf : IConfirmacionProyectos
+{
+    public bool Confirmar(string mensaje) => MessageBox.Show(
+        mensaje, "Sistema Docente Local", MessageBoxButton.YesNo,
+        MessageBoxImage.Question) == MessageBoxResult.Yes;
 }
