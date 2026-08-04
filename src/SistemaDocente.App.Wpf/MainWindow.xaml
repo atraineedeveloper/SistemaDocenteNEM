@@ -131,69 +131,452 @@
             </DockPanel>
         </Grid>
 
-        <Grid Grid.Row="1" Margin="18" DataContext="{Binding Proyectos}"
+        <!-- ========================================== -->
+        <!-- VISTA DE PROYECTOS (Rediseñada) -->
+        <!-- ========================================== -->
+        <Grid Grid.Row="1" DataContext="{Binding Proyectos}"
               Visibility="{Binding DataContext.MostrarProyectos, RelativeSource={RelativeSource AncestorType=Window}, Converter={StaticResource BoolToVisibility}}">
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="240" MinWidth="190"/>
-                <ColumnDefinition Width="8"/>
-                <ColumnDefinition Width="310" MinWidth="250"/>
-                <ColumnDefinition Width="8"/>
-                <ColumnDefinition Width="*" MinWidth="360"/>
-            </Grid.ColumnDefinitions>
-            <Border Grid.Column="0" Background="White" Padding="12" CornerRadius="7">
-                <Grid><Grid.RowDefinitions><RowDefinition Height="Auto"/><RowDefinition Height="Auto"/><RowDefinition Height="*"/><RowDefinition Height="Auto"/></Grid.RowDefinitions>
-                    <TextBlock Text="Proyectos" FontSize="24" FontWeight="SemiBold"/>
-                    <ComboBox Grid.Row="1" Margin="0,10" ItemsSource="{Binding FiltrosProyecto}" SelectedItem="{Binding FiltroProyecto}"/>
-                    <ListBox Grid.Row="2" ItemsSource="{Binding ProyectosVisibles}" SelectedItem="{Binding ProyectoSeleccionado}">
-                        <ListBox.ItemTemplate><DataTemplate><StackPanel Margin="4"><TextBlock Text="{Binding Nombre}" FontWeight="SemiBold" TextWrapping="Wrap"/><TextBlock Text="{Binding Estado}" Foreground="#52606D"/></StackPanel></DataTemplate></ListBox.ItemTemplate>
-                    </ListBox>
-                    <Button Grid.Row="3" Content="Nuevo proyecto" Command="{Binding NuevoProyectoCommand}"/>
-                </Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>
+            
+            <!-- Barra de herramientas superior -->
+            <Border Grid.Row="0" Background="White" Padding="20,16" CornerRadius="10,10,0,0" Margin="20,20,20,0">
+                <DockPanel>
+                    <StackPanel DockPanel.Dock="Left">
+                        <TextBlock Text="Proyectos Didácticos" Style="{StaticResource PageTitleStyle}"/>
+                        <TextBlock Text="Gestiona tus proyectos y actividades de aprendizaje" 
+                                   Foreground="{StaticResource TextSecondaryBrush}" FontSize="14"/>
+                    </StackPanel>
+                    <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" HorizontalAlignment="Right">
+                        <TextBox Width="280" Style="{StaticResource ModernTextBoxStyle}" Margin="0,0,12,0"
+                                 Text="{Binding BusquedaActividad, UpdateSourceTrigger=PropertyChanged}"
+                                 ToolTip="Buscar actividad por nombre">
+                            <TextBox.InputBindings>
+                                <KeyBinding Key="F3" Command="{Binding DataContext.IrAProyectosCommand, RelativeSource={RelativeSource AncestorType=Window}}"/>
+                            </TextBox.InputBindings>
+                        </TextBox>
+                        <ComboBox Width="180" Style="{StaticResource ModernComboBoxStyle}" Margin="0,0,12,0"
+                                  ItemsSource="{Binding FiltrosProyecto}" SelectedItem="{Binding FiltroProyecto}"
+                                  ToolTip="Filtrar proyectos por estado"/>
+                        <Button Content="Nuevo Proyecto" Style="{StaticResource PrimaryButtonStyle}" 
+                                Command="{Binding NuevoProyectoCommand}" ToolTip="Crear un nuevo proyecto didáctico"/>
+                    </StackPanel>
+                </DockPanel>
             </Border>
-            <GridSplitter Grid.Column="1" Width="8" HorizontalAlignment="Stretch"/>
-            <Border Grid.Column="2" Background="White" Padding="12" CornerRadius="7">
-                <ScrollViewer VerticalScrollBarVisibility="Auto"><StackPanel>
-                    <TextBlock Text="Proyecto didáctico" FontSize="21" FontWeight="SemiBold"/>
-                    <TextBlock Text="Nombre"/><TextBox Text="{Binding NombreProyecto, UpdateSourceTrigger=PropertyChanged}"/>
-                    <TextBlock Text="Descripción"/><TextBox Text="{Binding DescripcionProyecto, UpdateSourceTrigger=PropertyChanged}" AcceptsReturn="True" Height="58"/>
-                    <Grid><Grid.ColumnDefinitions><ColumnDefinition/><ColumnDefinition Width="8"/><ColumnDefinition/></Grid.ColumnDefinitions>
-                        <StackPanel><TextBlock Text="Inicio"/><TextBox Text="{Binding FechaInicio}"/></StackPanel>
-                        <StackPanel Grid.Column="2"><TextBlock Text="Término"/><TextBox Text="{Binding FechaTermino}"/></StackPanel>
+            
+            <!-- Área principal con 3 columnas -->
+            <Grid Grid.Row="1" Margin="20,0,20,20">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="280" MinWidth="240" MaxWidth="350"/>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="320" MinWidth="280" MaxWidth="400"/>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*" MinWidth="400"/>
+                </Grid.ColumnDefinitions>
+                
+                <!-- COLUMNA 1: Lista de Proyectos -->
+                <Border Grid.Column="0" Style="{StaticResource CardStyle}" Margin="0,0,0,0">
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="*"/>
+                        </Grid.RowDefinitions>
+                        
+                        <TextBlock Grid.Row="0" Text="Mis Proyectos" Style="{StaticResource SectionTitleStyle}"/>
+                        
+                        <!-- Contador de proyectos -->
+                        <Border Grid.Row="1" Background="#F8FAFC" Padding="12,8" CornerRadius="6" Margin="0,0,0,12">
+                            <TextBlock Text="{Binding ProyectosVisibles.Count, StringFormat={}{0} proyectos}" 
+                                       FontWeight="SemiBold" Foreground="{StaticResource TextSecondaryBrush}"
+                                       HorizontalAlignment="Center"/>
+                        </Border>
+                        
+                        <!-- Lista de proyectos -->
+                        <ListBox Grid.Row="2" Style="{StaticResource ModernListBoxStyle}"
+                                 ItemsSource="{Binding ProyectosVisibles}" 
+                                 SelectedItem="{Binding ProyectoSeleccionado}"
+                                 ScrollViewer.VerticalScrollBarVisibility="Auto">
+                            <ListBox.ItemTemplate>
+                                <DataTemplate>
+                                    <Border Padding="12,10" Margin="-12,-10">
+                                        <StackPanel>
+                                            <TextBlock Text="{Binding Nombre}" FontWeight="SemiBold" 
+                                                       TextWrapping="Wrap" FontSize="14" 
+                                                       Foreground="{StaticResource TextPrimaryBrush}"/>
+                                            <StackPanel Orientation="Horizontal" Margin="0,6,0,0">
+                                                <!-- Badge de estado con color -->
+                                                <Border CornerRadius="4" Padding="6,3" Margin="0,0,8,0">
+                                                    <Border.Style>
+                                                        <Style TargetType="Border">
+                                                            <Style.Triggers>
+                                                                <DataTrigger Binding="{Binding Estado}" Value="Borrador">
+                                                                    <Setter Property="Background" Value="#ECEFF2"/>
+                                                                </DataTrigger>
+                                                                <DataTrigger Binding="{Binding Estado}" Value="EnCurso">
+                                                                    <Setter Property="Background" Value="#E8F5E9"/>
+                                                                </DataTrigger>
+                                                                <DataTrigger Binding="{Binding Estado}" Value="Finalizado">
+                                                                    <Setter Property="Background" Value="#E3F2FD"/>
+                                                                </DataTrigger>
+                                                            </Style.Triggers>
+                                                        </Style>
+                                                    </Border.Style>
+                                                    <Border.Style>
+                                                        <Style TargetType="Border">
+                                                            <Style.Triggers>
+                                                                <DataTrigger Binding="{Binding Estado}" Value="Borrador">
+                                                                    <Setter Property="Background" Value="#ECEFF2"/>
+                                                                </DataTrigger>
+                                                                <DataTrigger Binding="{Binding Estado}" Value="EnCurso">
+                                                                    <Setter Property="Background" Value="#E8F5E9"/>
+                                                                </DataTrigger>
+                                                                <DataTrigger Binding="{Binding Estado}" Value="Finalizado">
+                                                                    <Setter Property="Background" Value="#E3F2FD"/>
+                                                                </DataTrigger>
+                                                            </Style.Triggers>
+                                                        </Style>
+                                                    </Border.Style>
+                                                    <TextBlock FontSize="11" FontWeight="SemiBold">
+                                                        <TextBlock.Style>
+                                                            <Style TargetType="TextBlock">
+                                                                <Style.Triggers>
+                                                                    <DataTrigger Binding="{Binding Estado}" Value="Borrador">
+                                                                        <Setter Property="Foreground" Value="#5D6670"/>
+                                                                    </DataTrigger>
+                                                                    <DataTrigger Binding="{Binding Estado}" Value="EnCurso">
+                                                                        <Setter Property="Foreground" Value="#2E7D32"/>
+                                                                    </DataTrigger>
+                                                                    <DataTrigger Binding="{Binding Estado}" Value="Finalizado">
+                                                                        <Setter Property="Foreground" Value="#1565C0"/>
+                                                                    </DataTrigger>
+                                                                </Style.Triggers>
+                                                            </Style>
+                                                        </TextBlock.Style>
+                                                        <TextBlock.Text>
+                                                            <MultiBinding StringFormat="{}{0}">
+                                                                <Binding Path="Estado"/>
+                                                            </MultiBinding>
+                                                        </TextBlock.Text>
+                                                    </TextBlock>
+                                                </Border>
+                                                <TextBlock Text="{Binding FechaInicio, StringFormat={}{0:dd/MM}}" 
+                                                           Foreground="{StaticResource TextSecondaryBrush}" FontSize="12"/>
+                                            </StackPanel>
+                                        </StackPanel>
+                                    </Border>
+                                </DataTemplate>
+                            </ListBox.ItemTemplate>
+                        </ListBox>
                     </Grid>
-                    <TextBlock Foreground="#9A6700" Text="Duración fuera de 14–31 días; puedes guardar." Visibility="{Binding DuracionAtipica, Converter={StaticResource BoolToVisibility}}"/>
-                    <TextBlock Text="Observaciones"/><TextBox Text="{Binding ObservacionesProyecto, UpdateSourceTrigger=PropertyChanged}" AcceptsReturn="True" Height="58"/>
-                    <WrapPanel><Button Content="Guardar proyecto" Command="{Binding GuardarProyectoCommand}"/><Button Content="Iniciar" Command="{Binding IniciarProyectoCommand}"/><Button Content="Finalizar" Command="{Binding FinalizarProyectoCommand}"/><Button Content="Reabrir" Command="{Binding ReabrirProyectoCommand}"/><Button Content="Eliminar" Command="{Binding EliminarProyectoCommand}"/></WrapPanel>
-                    <Separator Margin="0,10"/>
-                    <DockPanel><TextBlock DockPanel.Dock="Left" Text="Actividades" FontSize="19" FontWeight="SemiBold"/><Button DockPanel.Dock="Right" Content="Nueva actividad" Command="{Binding NuevaActividadCommand}"/></DockPanel>
-                    <TextBox Text="{Binding BusquedaActividad, UpdateSourceTrigger=PropertyChanged}" ToolTip="Buscar actividad"/>
-                    <ListBox Height="220" ItemsSource="{Binding Actividades}" SelectedItem="{Binding ActividadSeleccionada}">
-                        <ListBox.ItemTemplate><DataTemplate><StackPanel Margin="3"><TextBlock Text="{Binding Titulo}" FontWeight="SemiBold"/><TextBlock Text="{Binding FechaRealizacion}"/><TextBlock Text="{Binding Estado}"/></StackPanel></DataTemplate></ListBox.ItemTemplate>
-                    </ListBox>
-                </StackPanel></ScrollViewer>
-            </Border>
-            <GridSplitter Grid.Column="3" Width="8" HorizontalAlignment="Stretch"/>
-            <Border Grid.Column="4" Background="White" Padding="12" CornerRadius="7">
-                <Grid><Grid.RowDefinitions><RowDefinition Height="Auto"/><RowDefinition Height="Auto"/><RowDefinition Height="Auto"/><RowDefinition Height="*"/><RowDefinition Height="Auto"/></Grid.RowDefinitions>
-                    <DockPanel><TextBlock Text="Actividad y entregas" FontSize="21" FontWeight="SemiBold"/><TextBlock DockPanel.Dock="Right" Text="{Binding ActividadSeleccionada.Estado}"/></DockPanel>
-                    <Grid Grid.Row="1"><Grid.ColumnDefinitions><ColumnDefinition Width="2*"/><ColumnDefinition Width="8"/><ColumnDefinition/></Grid.ColumnDefinitions>
-                        <StackPanel><TextBlock Text="Título"/><TextBox Text="{Binding TituloActividad, UpdateSourceTrigger=PropertyChanged}"/></StackPanel>
-                        <StackPanel Grid.Column="2"><TextBlock Text="Fecha"/><TextBox Text="{Binding FechaActividad}"/></StackPanel>
+                </Border>
+                
+                <!-- GridSplitter -->
+                <GridSplitter Grid.Column="1" Width="8" HorizontalAlignment="Stretch" 
+                              Background="Transparent" BorderBrush="{StaticResource BorderLightBrush}"
+                              BorderThickness="1,0,0,0"/>
+                
+                <!-- COLUMNA 2: Detalles del Proyecto -->
+                <Border Grid.Column="2" Style="{StaticResource CardStyle}" Margin="12,0">
+                    <ScrollViewer VerticalScrollBarVisibility="Auto" Padding="4">
+                        <StackPanel>
+                            <TextBlock Text="Detalles del Proyecto" Style="{StaticResource SectionTitleStyle}"/>
+                            
+                            <!-- Estado del proyecto -->
+                            <Border x:Name="EstadoProyectoBadge" Padding="12,8" CornerRadius="6" Margin="0,0,0,16">
+                                <Border.Style>
+                                    <Style TargetType="Border">
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding ProyectoSeleccionado.Estado}" Value="Borrador">
+                                                <Setter Property="Background" Value="#ECEFF2"/>
+                                            </DataTrigger>
+                                            <DataTrigger Binding="{Binding ProyectoSeleccionado.Estado}" Value="EnCurso">
+                                                <Setter Property="Background" Value="#E8F5E9"/>
+                                            </DataTrigger>
+                                            <DataTrigger Binding="{Binding ProyectoSeleccionado.Estado}" Value="Finalizado">
+                                                <Setter Property="Background" Value="#E3F2FD"/>
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </Border.Style>
+                                <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                                    <TextBlock FontWeight="SemiBold">
+                                        <TextBlock.Style>
+                                            <Style TargetType="TextBlock">
+                                                <Style.Triggers>
+                                                    <DataTrigger Binding="{Binding ProyectoSeleccionado.Estado}" Value="Borrador">
+                                                        <Setter Property="Foreground" Value="#5D6670"/>
+                                                    </DataTrigger>
+                                                    <DataTrigger Binding="{Binding ProyectoSeleccionado.Estado}" Value="EnCurso">
+                                                        <Setter Property="Foreground" Value="#2E7D32"/>
+                                                    </DataTrigger>
+                                                    <DataTrigger Binding="{Binding ProyectoSeleccionado.Estado}" Value="Finalizado">
+                                                        <Setter Property="Foreground" Value="#1565C0"/>
+                                                    </DataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </TextBlock.Style>
+                                        <Run Text="Estado: "/>
+                                        <Run Text="{Binding ProyectoSeleccionado.Estado}"/>
+                                    </TextBlock>
+                                </StackPanel>
+                            </Border>
+                            
+                            <!-- Campos del formulario -->
+                            <TextBlock Text="Nombre del proyecto" Style="{StaticResource LabelStyle}"/>
+                            <TextBox Style="{StaticResource ModernTextBoxStyle}" 
+                                     Text="{Binding NombreProyecto, UpdateSourceTrigger=PropertyChanged}"/>
+                            
+                            <TextBlock Text="Descripción" Style="{StaticResource LabelStyle}"/>
+                            <TextBox Style="{StaticResource ModernTextBoxStyle}" 
+                                     Text="{Binding DescripcionProyecto, UpdateSourceTrigger=PropertyChanged}" 
+                                     AcceptsReturn="True" TextWrapping="Wrap" Height="80"/>
+                            
+                            <!-- Fechas con DatePicker -->
+                            <Grid Margin="0,4,0,0">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition/>
+                                    <ColumnDefinition Width="16"/>
+                                    <ColumnDefinition/>
+                                </Grid.ColumnDefinitions>
+                                <StackPanel>
+                                    <TextBlock Text="Fecha de inicio" Style="{StaticResource LabelStyle}"/>
+                                    <DatePicker Style="{StaticResource ModernDatePickerStyle}" 
+                                                SelectedDate="{Binding FechaInicio, Mode=TwoWay}"/>
+                                </StackPanel>
+                                <StackPanel Grid.Column="2">
+                                    <TextBlock Text="Fecha de término" Style="{StaticResource LabelStyle}"/>
+                                    <DatePicker Style="{StaticResource ModernDatePickerStyle}" 
+                                                SelectedDate="{Binding FechaTermino, Mode=TwoWay}"/>
+                                </StackPanel>
+                            </Grid>
+                            
+                            <!-- Advertencia de duración -->
+                            <Border Background="#FFF8E1" Padding="12,10" CornerRadius="6" Margin="0,4,0,12"
+                                    Visibility="{Binding DuracionAtipica, Converter={StaticResource BoolToVisibility}}">
+                                <StackPanel Orientation="Horizontal">
+                                    <TextBlock Text="⚠️" FontSize="16" Margin="0,0,8,0"/>
+                                    <TextBlock Text="Duración fuera de 14–31 días. Puedes guardar." 
+                                               Foreground="#F57C00" FontSize="13" TextWrapping="Wrap"/>
+                                </StackPanel>
+                            </Border>
+                            
+                            <TextBlock Text="Observaciones" Style="{StaticResource LabelStyle}"/>
+                            <TextBox Style="{StaticResource ModernTextBoxStyle}" 
+                                     Text="{Binding ObservacionesProyecto, UpdateSourceTrigger=PropertyChanged}" 
+                                     AcceptsReturn="True" TextWrapping="Wrap" Height="70"/>
+                            
+                            <!-- Botones de acción del proyecto -->
+                            <Separator Margin="0,16"/>
+                            <TextBlock Text="Acciones" Style="{StaticResource SectionTitleStyle}" FontSize="16"/>
+                            
+                            <WrapPanel Margin="0,8,0,0">
+                                <Button Content="Guardar" Style="{StaticResource PrimaryButtonStyle}" 
+                                        Command="{Binding GuardarProyectoCommand}" 
+                                        ToolTip="Guardar cambios del proyecto"/>
+                                <Button Content="Iniciar" Style="{StaticResource SecondaryButtonStyle}" 
+                                        Command="{Binding IniciarProyectoCommand}"
+                                        ToolTip="Iniciar proyecto (cambia a En Curso)"/>
+                                <Button Content="Finalizar" Style="{StaticResource SecondaryButtonStyle}" 
+                                        Command="{Binding FinalizarProyectoCommand}"
+                                        ToolTip="Finalizar proyecto"/>
+                                <Button Content="Reabrir" Style="{StaticResource SecondaryButtonStyle}" 
+                                        Command="{Binding ReabrirProyectoCommand}"
+                                        ToolTip="Reabrir proyecto finalizado"/>
+                                <Button Content="Eliminar" Style="{StaticResource DangerButtonStyle}" 
+                                        Command="{Binding EliminarProyectoCommand}"
+                                        ToolTip="Eliminar proyecto borrador"/>
+                            </WrapPanel>
+                            
+                            <!-- Sección de Actividades -->
+                            <Separator Margin="0,20"/>
+                            <DockPanel Margin="0,8,0,12">
+                                <TextBlock DockPanel.Dock="Left" Text="Actividades" Style="{StaticResource SectionTitleStyle}"/>
+                                <Button DockPanel.Dock="Right" Content="+ Nueva" Style="{StaticResource IconButtonStyle}" 
+                                        Command="{Binding NuevaActividadCommand}" FontSize="13" Padding="10,6"
+                                        ToolTip="Crear nueva actividad"/>
+                            </DockPanel>
+                            
+                            <!-- Lista de actividades -->
+                            <ListBox Height="200" Style="{StaticResource ModernListBoxStyle}"
+                                     ItemsSource="{Binding Actividades}" 
+                                     SelectedItem="{Binding ActividadSeleccionada}"
+                                     ScrollViewer.VerticalScrollBarVisibility="Auto">
+                                <ListBox.ItemTemplate>
+                                    <DataTemplate>
+                                        <Border Padding="10,8" Margin="-10,-8">
+                                            <StackPanel>
+                                                <TextBlock Text="{Binding Titulo}" FontWeight="SemiBold" 
+                                                           TextWrapping="Wrap" FontSize="13"/>
+                                                <StackPanel Orientation="Horizontal" Margin="0,4,0,0">
+                                                    <TextBlock Text="{Binding FechaRealizacion, StringFormat={}{0:dd/MM/yyyy}}" 
+                                                               Foreground="{StaticResource TextSecondaryBrush}" FontSize="11"/>
+                                                    <TextBlock Text=" • " Foreground="{StaticResource TextSecondaryBrush}" FontSize="11" Margin="4,0"/>
+                                                    <TextBlock FontSize="11">
+                                                        <TextBlock.Style>
+                                                            <Style TargetType="TextBlock">
+                                                                <Style.Triggers>
+                                                                    <DataTrigger Binding="{Binding Estado}" Value="Activa">
+                                                                        <Setter Property="Foreground" Value="#2E7D32"/>
+                                                                    </DataTrigger>
+                                                                    <DataTrigger Binding="{Binding Estado}" Value="Anulada">
+                                                                        <Setter Property="Foreground" Value="#D32F2F"/>
+                                                                    </DataTrigger>
+                                                                </Style.Triggers>
+                                                            </Style>
+                                                        </TextBlock.Style>
+                                                        <Run Text="{Binding Estado}"/>
+                                                    </TextBlock>
+                                                </StackPanel>
+                                            </StackPanel>
+                                        </Border>
+                                    </DataTemplate>
+                                </ListBox.ItemTemplate>
+                            </ListBox>
+                        </StackPanel>
+                    </ScrollViewer>
+                </Border>
+                
+                <!-- GridSplitter -->
+                <GridSplitter Grid.Column="3" Width="8" HorizontalAlignment="Stretch" 
+                              Background="Transparent" BorderBrush="{StaticResource BorderLightBrush}"
+                              BorderThickness="1,0,0,0"/>
+                
+                <!-- COLUMNA 3: Entregas de Actividades -->
+                <Border Grid.Column="4" Style="{StaticResource CardStyle}" Margin="12,0,0,0">
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="*"/>
+                            <RowDefinition Height="Auto"/>
+                        </Grid.RowDefinitions>
+                        
+                        <!-- Encabezado -->
+                        <DockPanel Grid.Row="0">
+                            <TextBlock Text="Entregas de Actividad" Style="{StaticResource SectionTitleStyle}"/>
+                            <TextBlock DockPanel.Dock="Right" FontSize="13" VerticalAlignment="Center"
+                                       Foreground="{StaticResource TextSecondaryBrush}">
+                                <TextBlock.Style>
+                                    <Style TargetType="TextBlock">
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding ActividadSeleccionada.Estado}" Value="Activa">
+                                                <Setter Property="Foreground" Value="#2E7D32"/>
+                                            </DataTrigger>
+                                            <DataTrigger Binding="{Binding ActividadSeleccionada.Estado}" Value="Anulada">
+                                                <Setter Property="Foreground" Value="#D32F2F"/>
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </TextBlock.Style>
+                                <Run Text="{Binding ActividadSeleccionada.Estado}"/>
+                            </TextBlock>
+                        </DockPanel>
+                        
+                        <!-- Campos de actividad -->
+                        <Grid Grid.Row="1" Margin="0,12,0,0">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="2*"/>
+                                <ColumnDefinition Width="16"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <StackPanel>
+                                <TextBlock Text="Título de actividad" Style="{StaticResource LabelStyle}"/>
+                                <TextBox Style="{StaticResource ModernTextBoxStyle}" 
+                                         Text="{Binding TituloActividad, UpdateSourceTrigger=PropertyChanged}"/>
+                            </StackPanel>
+                            <StackPanel Grid.Column="2">
+                                <TextBlock Text="Fecha" Style="{StaticResource LabelStyle}"/>
+                                <DatePicker Style="{StaticResource ModernDatePickerStyle}" 
+                                            SelectedDate="{Binding FechaActividad, Mode=TwoWay}"/>
+                            </StackPanel>
+                        </Grid>
+                        
+                        <!-- Filtros y estadísticas -->
+                        <DockPanel Grid.Row="2" Margin="0,8,0,12">
+                            <ComboBox DockPanel.Dock="Left" Width="160" Style="{StaticResource ModernComboBoxStyle}" Margin="0,0,12,0"
+                                      ItemsSource="{Binding FiltrosEntrega}" SelectedItem="{Binding FiltroEntrega}"
+                                      ToolTip="Filtrar entregas por estado"/>
+                            <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" HorizontalAlignment="Right">
+                                <Border Background="#E8F5E9" Padding="10,6" CornerRadius="4" Margin="0,0,6,0">
+                                    <TextBlock FontSize="12" FontWeight="SemiBold" Foreground="#2E7D32">
+                                        <Run Text="✓ "/><Run Text="{Binding Entregadas, Mode=OneWay}"/>
+                                    </TextBlock>
+                                </Border>
+                                <Border Background="#FFF8E1" Padding="10,6" CornerRadius="4" Margin="0,0,6,0">
+                                    <TextBlock FontSize="12" FontWeight="SemiBold" Foreground="#F57C00">
+                                        <Run Text="⏳ "/><Run Text="{Binding Pendientes, Mode=OneWay}"/>
+                                    </TextBlock>
+                                </Border>
+                                <Border Background="#FFEBEE" Padding="10,6" CornerRadius="4">
+                                    <TextBlock FontSize="12" FontWeight="SemiBold" Foreground="#D32F2F">
+                                        <Run Text="✗ "/><Run Text="{Binding NoEntregadas, Mode=OneWay}"/>
+                                    </TextBlock>
+                                </Border>
+                            </StackPanel>
+                        </DockPanel>
+                        
+                        <!-- DataGrid de entregas -->
+                        <DataGrid x:Name="GrillaEntregas" Grid.Row="3" Style="{StaticResource ModernDataGridStyle}"
+                                  ItemsSource="{Binding EntregasVisibles}" 
+                                  ScrollViewer.CanContentScroll="True"
+                                  EnableRowVirtualization="True"
+                                  PreviewKeyDown="OnGrillaEntregasPreviewKeyDown">
+                            <DataGrid.Columns>
+                                <DataGridCheckBoxColumn Header="" Binding="{Binding Seleccionada}" Width="40"/>
+                                <DataGridTextColumn Header="Núm." Binding="{Binding NumeroLista}" Width="55"/>
+                                <DataGridTextColumn Header="Estudiante" Binding="{Binding Nombre}" Width="*"/>
+                                <DataGridTextColumn Header="Estado" Binding="{Binding Estado}" Width="110"/>
+                                <DataGridTextColumn Header="Observación" Binding="{Binding Observacion, UpdateSourceTrigger=PropertyChanged}" Width="180"/>
+                            </DataGrid.Columns>
+                        </DataGrid>
+                        
+                        <!-- Botones de acción de entregas -->
+                        <DockPanel Grid.Row="4" Margin="0,16,0,0">
+                            <StackPanel DockPanel.Dock="Left" Orientation="Horizontal">
+                                <Button Content="Marcar Entregada" Style="{StaticResource PrimaryButtonStyle}" 
+                                        Command="{Binding MarcarEntregadaCommand}" FontSize="13" Padding="12,8"
+                                        ToolTip="Marcar seleccionadas como entregadas (E)"/>
+                                <Button Content="No Entregada" Style="{StaticResource SecondaryButtonStyle}" 
+                                        Command="{Binding MarcarNoEntregadaCommand}" FontSize="13" Padding="12,8"
+                                        ToolTip="Marcar seleccionadas como no entregadas (N)"/>
+                                <Button Content="Pendiente" Style="{StaticResource SecondaryButtonStyle}" 
+                                        Command="{Binding MarcarPendienteCommand}" FontSize="13" Padding="12,8"
+                                        ToolTip="Marcar seleccionadas como pendientes (P)"/>
+                            </StackPanel>
+                            <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" HorizontalAlignment="Right">
+                                <Button Content="Guardar" Style="{StaticResource PrimaryButtonStyle}" 
+                                        Command="{Binding GuardarActividadCommand}" FontSize="13" Padding="12,8"
+                                        ToolTip="Guardar actividad y entregas (Ctrl+S)"/>
+                                <Button Content="Anular" Style="{StaticResource SecondaryButtonStyle}" 
+                                        Command="{Binding AnularActividadCommand}" FontSize="13" Padding="12,8"
+                                        ToolTip="Anular actividad"/>
+                                <Button Content="Eliminar" Style="{StaticResource DangerButtonStyle}" 
+                                        Command="{Binding EliminarActividadCommand}" FontSize="13" Padding="12,8"
+                                        ToolTip="Eliminar actividad"/>
+                            </StackPanel>
+                        </DockPanel>
                     </Grid>
-                    <DockPanel Grid.Row="2" Margin="0,4,0,8"><ComboBox DockPanel.Dock="Left" Width="180" ItemsSource="{Binding FiltrosEntrega}" SelectedItem="{Binding FiltroEntrega}"/><TextBlock DockPanel.Dock="Right" VerticalAlignment="Center"><Run Text="Total "/><Run Text="{Binding Total, Mode=OneWay}"/><Run Text=" · Pendientes "/><Run Text="{Binding Pendientes, Mode=OneWay}"/><Run Text=" · Entregadas "/><Run Text="{Binding Entregadas, Mode=OneWay}"/><Run Text=" · No entregadas "/><Run Text="{Binding NoEntregadas, Mode=OneWay}"/></TextBlock></DockPanel>
-                    <DataGrid x:Name="GrillaEntregas" Grid.Row="3" ItemsSource="{Binding EntregasVisibles}" AutoGenerateColumns="False" CanUserAddRows="False" RowHeaderWidth="0" EnableRowVirtualization="True" PreviewKeyDown="OnGrillaEntregasPreviewKeyDown">
-                        <DataGrid.Columns>
-                            <DataGridCheckBoxColumn Header="Sel." Binding="{Binding Seleccionada}" Width="45"/>
-                            <DataGridTextColumn Header="Núm." Binding="{Binding NumeroLista}" IsReadOnly="True" Width="55"/>
-                            <DataGridTextColumn Header="Nombre" Binding="{Binding Nombre}" IsReadOnly="True" Width="*"/>
-                            <DataGridTextColumn Header="Situación" Binding="{Binding SituacionActual}" IsReadOnly="True" Width="130"/>
-                            <DataGridTextColumn Header="Estado E/N/P" Binding="{Binding Estado}" IsReadOnly="True" Width="105"/>
-                            <DataGridTextColumn Header="Observación" Binding="{Binding Observacion, UpdateSourceTrigger=PropertyChanged}" Width="180"/>
-                        </DataGrid.Columns>
-                    </DataGrid>
-                    <DockPanel Grid.Row="4" Margin="0,8,0,0"><WrapPanel DockPanel.Dock="Left"><Button Content="E Entregada" Command="{Binding MarcarEntregadaCommand}"/><Button Content="N No entregada" Command="{Binding MarcarNoEntregadaCommand}"/><Button Content="P Pendiente" Command="{Binding MarcarPendienteCommand}"/><Button Content="Todos entregada" Command="{Binding MarcarTodosEntregadaCommand}"/></WrapPanel><WrapPanel DockPanel.Dock="Right"><Button Content="Anular" Command="{Binding AnularActividadCommand}"/><Button Content="Eliminar" Command="{Binding EliminarActividadCommand}"/><Button Content="Descartar" Command="{Binding DescartarActividadCommand}"/><Button Content="Guardar (Ctrl+S)" Command="{Binding GuardarActividadCommand}"/></WrapPanel></DockPanel>
-                </Grid>
-            </Border>
-            <Grid.InputBindings><KeyBinding Modifiers="Control" Key="S" Command="{Binding GuardarActividadCommand}"/></Grid.InputBindings>
+                </Border>
+            </Grid>
+            
+            <!-- Overlay de carga -->
+            <Grid Grid.RowSpan="2" Panel.ZIndex="100" Visibility="{Binding EstaOcupado, Converter={StaticResource BoolToVisibility}}">
+                <Rectangle Fill="#80FFFFFF"/>
+                <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
+                    <ProgressBar IsIndeterminate="True" Width="200" Height="6" Margin="0,0,0,12"/>
+                    <TextBlock Text="Procesando..." FontSize="16" FontWeight="SemiBold" 
+                               Foreground="{StaticResource PrimaryBrush}" HorizontalAlignment="Center"/>
+                </StackPanel>
+            </Grid>
+            
+            <!-- Atajo de teclado -->
+            <Grid.InputBindings>
+                <KeyBinding Modifiers="Control" Key="S" Command="{Binding GuardarActividadCommand}"/>
+            </Grid.InputBindings>
         </Grid>
     </Grid>
 </Window>

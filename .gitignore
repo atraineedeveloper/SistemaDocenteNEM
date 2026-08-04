@@ -1,4 +1,43 @@
-# Documentation files are source content - no need to ignore
-# The added .md files in docs/ are source documentation
-# No build artifacts, dependencies, or temp files detected in changes
-# Current .gitignore is empty and no new ignores needed
+```
+# Build artifacts
+bin/
+obj/
+*.exe
+*.dll
+*.pdb
+*.userprefs
+
+# Dependencies
+packages/
+
+# Logs
+*.log
+
+# Environment
+.env
+.env.local
+*.env.*
+
+# Editors
+.vs/
+.vscode/
+.idea/
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+
+# OS generated files
+.DS_Store
+Thumbs.db
+ehthumbs.db
+Icon?
+desktop.ini
+
+# Testing
+TestResults/
+
+# NuGet
+*.nupkg
+.nuget/
+```
