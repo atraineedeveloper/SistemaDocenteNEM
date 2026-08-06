@@ -141,11 +141,11 @@
         <Style x:Key="NavTabButton" TargetType="Button">
             <Setter Property="FontFamily" Value="{StaticResource AppFontFamily}"/>
             <Setter Property="Padding" Value="16,8"/>
-            <Setter Property="Margin" Value="2,0"/>
-            <Setter Property="MinWidth" Value="85"/>
+            <Setter Property="Margin" Value="4,0"/>
+            <Setter Property="MinWidth" Value="90"/>
             <Setter Property="Cursor" Value="Hand"/>
             <Setter Property="Background" Value="Transparent"/>
-            <Setter Property="Foreground" Value="#D0D5DD"/>
+            <Setter Property="Foreground" Value="#FFFFFF"/>
             <Setter Property="BorderThickness" Value="0"/>
             <Setter Property="FontWeight" Value="SemiBold"/>
             <Setter Property="FontSize" Value="14"/>
@@ -156,11 +156,11 @@
                                 Background="{TemplateBinding Background}"
                                 CornerRadius="6"
                                 Padding="{TemplateBinding Padding}">
-                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" RecognizesAccessKey="True"/>
                         </Border>
                         <ControlTemplate.Triggers>
                             <Trigger Property="IsMouseOver" Value="True">
-                                <Setter TargetName="border" Property="Background" Value="#1D4ED8"/>
+                                <Setter TargetName="border" Property="Background" Value="#255177"/>
                                 <Setter Property="Foreground" Value="#FFFFFF"/>
                             </Trigger>
                             <Trigger Property="IsPressed" Value="True">
@@ -176,13 +176,13 @@
         <!-- ESTILO BOTÓN CABECERA HEADER -->
         <Style x:Key="HeaderButton" TargetType="Button">
             <Setter Property="FontFamily" Value="{StaticResource AppFontFamily}"/>
-            <Setter Property="Padding" Value="10,5"/>
+            <Setter Property="Padding" Value="12,6"/>
             <Setter Property="Margin" Value="4,0"/>
             <Setter Property="Cursor" Value="Hand"/>
-            <Setter Property="Background" Value="#1E40AF"/>
+            <Setter Property="Background" Value="#2563EB"/>
             <Setter Property="Foreground" Value="#FFFFFF"/>
             <Setter Property="BorderThickness" Value="0"/>
-            <Setter Property="FontWeight" Value="Medium"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
             <Setter Property="FontSize" Value="13"/>
             <Setter Property="Template">
                 <Setter.Value>
@@ -191,11 +191,11 @@
                                 Background="{TemplateBinding Background}"
                                 CornerRadius="6"
                                 Padding="{TemplateBinding Padding}">
-                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" RecognizesAccessKey="True"/>
                         </Border>
                         <ControlTemplate.Triggers>
                             <Trigger Property="IsMouseOver" Value="True">
-                                <Setter TargetName="border" Property="Background" Value="#2563EB"/>
+                                <Setter TargetName="border" Property="Background" Value="#3B82F6"/>
                             </Trigger>
                             <Trigger Property="IsPressed" Value="True">
                                 <Setter TargetName="border" Property="Background" Value="#1D4ED8"/>
