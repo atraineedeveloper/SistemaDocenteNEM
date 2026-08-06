@@ -17,114 +17,126 @@
                 <TextBlock DockPanel.Dock="Left" VerticalAlignment="Center" Foreground="White"
                            FontSize="18" FontWeight="SemiBold" Text="Sistema Docente Local"/>
                 <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" HorizontalAlignment="Right">
-                    <Button Content="Grupo" Command="{Binding IrAGrupoCommand}"/>
-                    <Button Content="Asistencia" Command="{Binding IrAAsistenciaCommand}"/>
-                    <Button Content="Proyectos" Command="{Binding IrAProyectosCommand}"/>
-                    <Button Content="Evaluación" Command="{Binding IrAEvaluacionCommand}"/>
+                    <Button Content="_Grupo" Command="{Binding IrAGrupoCommand}" TabIndex="1"/>
+                    <Button Content="_Asistencia" Command="{Binding IrAAsistenciaCommand}" TabIndex="2"/>
+                    <Button Content="_Proyectos" Command="{Binding IrAProyectosCommand}" TabIndex="3"/>
+                    <Button Content="_Evaluación" Command="{Binding IrAEvaluacionCommand}" TabIndex="4"/>
                 </StackPanel>
             </DockPanel>
         </Border>
 
         <Grid Grid.Row="1" DataContext="{Binding Grupo}"
               Visibility="{Binding DataContext.MostrarGrupo, RelativeSource={RelativeSource AncestorType=Window}, Converter={StaticResource BoolToVisibility}}">
-            <Grid Margin="28" Visibility="{Binding MostrarBienvenida, Converter={StaticResource BoolToVisibility}}">
-                <Grid.RowDefinitions><RowDefinition Height="*"/><RowDefinition Height="Auto"/><RowDefinition Height="*"/></Grid.RowDefinitions>
-                <Border Grid.Row="1" MaxWidth="620" Padding="36" Background="White" CornerRadius="10">
-                    <StackPanel>
-                        <TextBlock Text="Bienvenido a Sistema Docente Local" FontSize="28" FontWeight="SemiBold"/>
-                        <TextBlock Margin="0,10,0,22" TextWrapping="Wrap" Text="Comienza escribiendo el nombre del grupo que administras."/>
-                        <TextBlock Text="Nombre del grupo" FontWeight="SemiBold"/>
-                        <TextBox x:Name="NombreGrupoInicial" TabIndex="0" Text="{Binding NombreNuevoGrupo, UpdateSourceTrigger=PropertyChanged}">
-                            <TextBox.InputBindings><KeyBinding Key="Enter" Command="{Binding CrearGrupoCommand}"/></TextBox.InputBindings>
-                        </TextBox>
-                        <TextBlock Foreground="#B42318" TextWrapping="Wrap" Text="{Binding MensajeEdicion}"/>
-                        <WrapPanel><Button TabIndex="1" Content="Crear grupo" IsDefault="True" Command="{Binding CrearGrupoCommand}"/><Button TabIndex="2" Content="Olvidar referencia" Command="{Binding OlvidarReferenciaCommand}"/></WrapPanel>
-                    </StackPanel>
-                </Border>
-            </Grid>
-            <Grid Margin="28" Visibility="{Binding MostrarGestion, Converter={StaticResource BoolToVisibility}}">
-                <Grid.RowDefinitions><RowDefinition Height="Auto"/><RowDefinition Height="*"/><RowDefinition Height="Auto"/><RowDefinition Height="Auto"/></Grid.RowDefinitions>
-                <DockPanel Margin="0,0,0,18">
-                    <StackPanel DockPanel.Dock="Left"><TextBlock Text="Grupo" Foreground="#52606D"/><TextBlock Text="{Binding NombreGrupo}" FontSize="27" FontWeight="SemiBold"/></StackPanel>
-                    <Button DockPanel.Dock="Right" HorizontalAlignment="Right" TabIndex="10" Content="Cambiar nombre" Command="{Binding AbrirCambioNombreCommand}"/>
-                </DockPanel>
-                <DataGrid Grid.Row="1" ItemsSource="{Binding Estudiantes}" SelectedItem="{Binding EstudianteSeleccionado}" AutoGenerateColumns="False" IsReadOnly="True" CanUserSortColumns="False" SelectionMode="Single" SelectionUnit="FullRow" TabIndex="20" HeadersVisibility="Column" GridLinesVisibility="Horizontal" RowHeaderWidth="0" FontSize="15">
-                    <DataGrid.RowStyle><Style TargetType="DataGridRow"><Style.Triggers><DataTrigger Binding="{Binding EstaActivo}" Value="False"><Setter Property="Foreground" Value="#5D6670"/><Setter Property="Background" Value="#ECEFF2"/><Setter Property="FontStyle" Value="Italic"/></DataTrigger></Style.Triggers></Style></DataGrid.RowStyle>
-                    <DataGrid.Columns>
-                        <DataGridTextColumn Header="Núm." Binding="{Binding NumeroLista}" Width="65"/>
-                        <DataGridTextColumn Header="Nombre del Estudiante" Binding="{Binding Nombre}" Width="*"/>
-                        <DataGridTextColumn Header="Género" Binding="{Binding GeneroTexto}" Width="120"/>
-                        <DataGridTextColumn Header="Edad" Binding="{Binding Edad}" Width="70"/>
-                        <DataGridTextColumn Header="Estado" Binding="{Binding Estado}" Width="100"/>
-                    </DataGrid.Columns>
-                </DataGrid>
-                <WrapPanel Grid.Row="2" Margin="0,14,0,6">
-                    <Button Content="Ver Expediente" Click="OnVerExpedienteEstudianteClic"/>
-                    <Button Content="Agregar estudiante" Command="{Binding AbrirAgregarEstudianteCommand}"/>
-                    <Button Content="Editar estudiante" Command="{Binding AbrirEditarEstudianteCommand}"/>
-                    <Button Content="Desactivar" Command="{Binding DesactivarEstudianteCommand}"/>
-                    <Button Content="Reactivar" Command="{Binding ReactivarEstudianteCommand}"/>
-                </WrapPanel>
-                <Border Grid.Row="3" Padding="18" Background="White" CornerRadius="8" Visibility="{Binding MostrarEditorGrupo, Converter={StaticResource BoolToVisibility}}">
-                    <StackPanel><TextBlock Text="Cambiar nombre del grupo" FontSize="19" FontWeight="SemiBold"/><TextBlock Margin="0,10,0,0" Text="Nuevo nombre"/><TextBox x:Name="NombreGrupoEdicion" Text="{Binding NombreEdicionGrupo, UpdateSourceTrigger=PropertyChanged}"><TextBox.InputBindings><KeyBinding Key="Enter" Command="{Binding GuardarNombreGrupoCommand}"/></TextBox.InputBindings></TextBox><TextBlock Foreground="#B42318" Text="{Binding MensajeEdicion}"/><WrapPanel><Button Content="Guardar nombre" Command="{Binding GuardarNombreGrupoCommand}"/><Button Content="Cancelar" Command="{Binding CancelarEdicionCommand}"/></WrapPanel></StackPanel>
-                </Border>
-                <Border Grid.Row="3" Padding="18" Background="White" CornerRadius="8" Visibility="{Binding MostrarEditorEstudiante, Converter={StaticResource BoolToVisibility}}">
-                    <StackPanel>
-                        <TextBlock Text="{Binding TituloEditorEstudiante}" FontSize="19" FontWeight="SemiBold"/>
-                        <Grid Margin="0,10,0,0">
-                            <Grid.RowDefinitions>
-                                <RowDefinition Height="Auto"/>
-                                <RowDefinition Height="Auto"/>
-                                <RowDefinition Height="Auto"/>
-                            </Grid.RowDefinitions>
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="*"/>
-                                <ColumnDefinition Width="12"/>
-                                <ColumnDefinition Width="*"/>
-                                <ColumnDefinition Width="12"/>
-                                <ColumnDefinition Width="*"/>
-                            </Grid.ColumnDefinitions>
-                            <StackPanel Grid.Row="0" Grid.Column="0">
-                                <TextBlock Text="Primer apellido"/>
-                                <TextBox x:Name="PrimerApellidoEdicion" Text="{Binding PrimerApellidoEdicion, UpdateSourceTrigger=PropertyChanged}"/>
+            <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+                <Grid Margin="28">
+                    <Grid Visibility="{Binding MostrarBienvenida, Converter={StaticResource BoolToVisibility}}">
+                        <Grid.RowDefinitions><RowDefinition Height="*"/><RowDefinition Height="Auto"/><RowDefinition Height="*"/></Grid.RowDefinitions>
+                        <Border Grid.Row="1" MaxWidth="620" Padding="36" Background="White" CornerRadius="10">
+                            <StackPanel>
+                                <TextBlock Text="Bienvenido a Sistema Docente Local" FontSize="28" Foreground="#101828" FontWeight="SemiBold"/>
+                                <TextBlock Margin="0,10,0,22" Foreground="#344054" TextWrapping="Wrap" Text="Comienza escribiendo el nombre del grupo que administras."/>
+                                <TextBlock Text="Nombre del grupo" Foreground="#101828" FontWeight="SemiBold"/>
+                                <TextBox x:Name="NombreGrupoInicial" TabIndex="10" Text="{Binding NombreNuevoGrupo, UpdateSourceTrigger=PropertyChanged}">
+                                    <TextBox.InputBindings><KeyBinding Key="Enter" Command="{Binding CrearGrupoCommand}"/></TextBox.InputBindings>
+                                </TextBox>
+                                <TextBlock Foreground="#B42318" TextWrapping="Wrap" Text="{Binding MensajeEdicion}"/>
+                                <WrapPanel><Button TabIndex="11" Content="_Crear grupo" IsDefault="True" Command="{Binding CrearGrupoCommand}"/><Button TabIndex="12" Content="_Olvidar referencia" Command="{Binding OlvidarReferenciaCommand}"/></WrapPanel>
                             </StackPanel>
-                            <StackPanel Grid.Row="0" Grid.Column="2">
-                                <TextBlock Text="Segundo apellido"/>
-                                <TextBox Text="{Binding SegundoApellidoEdicion, UpdateSourceTrigger=PropertyChanged}"/>
-                            </StackPanel>
-                            <StackPanel Grid.Row="0" Grid.Column="4">
-                                <TextBlock Text="Nombres"/>
-                                <TextBox Text="{Binding NombresEdicion, UpdateSourceTrigger=PropertyChanged}"/>
-                            </StackPanel>
-                            <StackPanel Grid.Row="1" Grid.Column="0" Margin="0,8,0,0">
-                                <TextBlock Text="Número de lista"/>
-                                <TextBox Text="{Binding NumeroListaEdicion, UpdateSourceTrigger=PropertyChanged}"/>
-                            </StackPanel>
-                            <StackPanel Grid.Row="1" Grid.Column="2" Margin="0,8,0,0">
-                                <TextBlock Text="Género"/>
-                                <ComboBox SelectedIndex="{Binding GeneroIndexEdicion, Mode=TwoWay}">
-                                    <ComboBoxItem Content="No especificado"/>
-                                    <ComboBoxItem Content="Hombre"/>
-                                    <ComboBoxItem Content="Mujer"/>
-                                </ComboBox>
-                            </StackPanel>
-                            <StackPanel Grid.Row="1" Grid.Column="4" Margin="0,8,0,0">
-                                <TextBlock Text="Fecha de nacimiento"/>
-                                <DatePicker SelectedDate="{Binding FechaNacimientoEdicion, Mode=TwoWay}"/>
-                            </StackPanel>
-                            <StackPanel Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="5" Margin="0,8,0,0">
-                                <TextBlock Text="Observaciones particulares (cualitativo/pedagógico)"/>
-                                <TextBox Text="{Binding ObservacionesEdicion, UpdateSourceTrigger=PropertyChanged}" Height="55" TextWrapping="Wrap" AcceptsReturn="True"/>
-                            </StackPanel>
-                        </Grid>
-                        <TextBlock Foreground="#B42318" Text="{Binding MensajeEdicion}" Margin="0,4,0,4"/>
-                        <WrapPanel>
-                            <Button Content="Guardar estudiante" Command="{Binding GuardarEstudianteCommand}"/>
-                            <Button Content="Cancelar" Command="{Binding CancelarEdicionCommand}"/>
+                        </Border>
+                    </Grid>
+                    <Grid Visibility="{Binding MostrarGestion, Converter={StaticResource BoolToVisibility}}">
+                        <Grid.RowDefinitions><RowDefinition Height="Auto"/><RowDefinition Height="*"/><RowDefinition Height="Auto"/><RowDefinition Height="Auto"/></Grid.RowDefinitions>
+                        <DockPanel Margin="0,0,0,18">
+                            <StackPanel DockPanel.Dock="Left"><TextBlock Text="Grupo" Foreground="#475467"/><TextBlock Text="{Binding NombreGrupo}" Foreground="#101828" FontSize="27" FontWeight="SemiBold"/></StackPanel>
+                            <Button DockPanel.Dock="Right" HorizontalAlignment="Right" TabIndex="20" Content="_Cambiar nombre" Command="{Binding AbrirCambioNombreCommand}"/>
+                        </DockPanel>
+                        <DataGrid Grid.Row="1" ItemsSource="{Binding Estudiantes}" SelectedItem="{Binding EstudianteSeleccionado}" AutoGenerateColumns="False" IsReadOnly="True" CanUserSortColumns="False" SelectionMode="Single" SelectionUnit="FullRow" TabIndex="30" HeadersVisibility="Column" GridLinesVisibility="Horizontal" RowHeaderWidth="0" FontSize="15" MinHeight="220" VirtualizingStackPanel.IsVirtualizing="True">
+                            <DataGrid.RowStyle><Style TargetType="DataGridRow"><Style.Triggers><DataTrigger Binding="{Binding EstaActivo}" Value="False"><Setter Property="Foreground" Value="#475467"/><Setter Property="Background" Value="#F2F4F7"/><Setter Property="FontStyle" Value="Italic"/></DataTrigger></Style.Triggers></Style></DataGrid.RowStyle>
+                            <DataGrid.Columns>
+                                <DataGridTextColumn Header="Núm." Binding="{Binding NumeroLista}" Width="65"/>
+                                <DataGridTextColumn Header="Nombre del Estudiante" Binding="{Binding Nombre}" Width="*"/>
+                                <DataGridTextColumn Header="Género" Binding="{Binding GeneroTexto}" Width="120"/>
+                                <DataGridTextColumn Header="Edad" Binding="{Binding Edad}" Width="70"/>
+                                <DataGridTextColumn Header="Estado" Binding="{Binding Estado}" Width="110"/>
+                            </DataGrid.Columns>
+                        </DataGrid>
+                        <WrapPanel Grid.Row="2" Margin="0,14,0,6">
+                            <Button TabIndex="40" Content="_Ver Expediente" Click="OnVerExpedienteEstudianteClic"/>
+                            <Button TabIndex="41" Content="_Agregar estudiante" Command="{Binding AbrirAgregarEstudianteCommand}"/>
+                            <Button TabIndex="42" Content="_Editar estudiante" Command="{Binding AbrirEditarEstudianteCommand}"/>
+                            <Button TabIndex="43" Content="_Desactivar" Command="{Binding DesactivarEstudianteCommand}"/>
+                            <Button TabIndex="44" Content="_Reactivar" Command="{Binding ReactivarEstudianteCommand}"/>
                         </WrapPanel>
-                    </StackPanel>
-                </Border>
-            </Grid>
+                        <Border Grid.Row="3" Padding="18" Background="White" CornerRadius="8" Visibility="{Binding MostrarEditorGrupo, Converter={StaticResource BoolToVisibility}}">
+                            <StackPanel><TextBlock Text="Cambiar nombre del grupo" Foreground="#101828" FontSize="19" FontWeight="SemiBold"/><TextBlock Margin="0,10,0,0" Foreground="#344054" Text="Nuevo nombre"/><TextBox x:Name="NombreGrupoEdicion" TabIndex="50" Text="{Binding NombreEdicionGrupo, UpdateSourceTrigger=PropertyChanged}"><TextBox.InputBindings><KeyBinding Key="Enter" Command="{Binding GuardarNombreGrupoCommand}"/><KeyBinding Key="Escape" Command="{Binding CancelarEdicionCommand}"/></TextBox.InputBindings></TextBox><TextBlock Foreground="#B42318" Text="{Binding MensajeEdicion}"/><WrapPanel><Button TabIndex="51" Content="_Guardar nombre" Command="{Binding GuardarNombreGrupoCommand}"/><Button TabIndex="52" Content="_Cancelar" Command="{Binding CancelarEdicionCommand}"/></WrapPanel></StackPanel>
+                        </Border>
+                        <Border Grid.Row="3" Padding="18" Background="White" CornerRadius="8" Visibility="{Binding MostrarEditorEstudiante, Converter={StaticResource BoolToVisibility}}">
+                            <StackPanel>
+                                <TextBlock Text="{Binding TituloEditorEstudiante}" Foreground="#101828" FontSize="19" FontWeight="SemiBold"/>
+                                <Grid Margin="0,10,0,0">
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="Auto"/>
+                                    </Grid.RowDefinitions>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="12"/>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="12"/>
+                                        <ColumnDefinition Width="*"/>
+                                    </Grid.ColumnDefinitions>
+                                    <StackPanel Grid.Row="0" Grid.Column="0">
+                                        <TextBlock Text="Primer apellido" Foreground="#344054"/>
+                                        <TextBox x:Name="PrimerApellidoEdicion" TabIndex="60" Text="{Binding PrimerApellidoEdicion, UpdateSourceTrigger=PropertyChanged}">
+                                            <TextBox.InputBindings><KeyBinding Key="Enter" Command="{Binding GuardarEstudianteCommand}"/><KeyBinding Key="Escape" Command="{Binding CancelarEdicionCommand}"/></TextBox.InputBindings>
+                                        </TextBox>
+                                    </StackPanel>
+                                    <StackPanel Grid.Row="0" Grid.Column="2">
+                                        <TextBlock Text="Segundo apellido" Foreground="#344054"/>
+                                        <TextBox TabIndex="61" Text="{Binding SegundoApellidoEdicion, UpdateSourceTrigger=PropertyChanged}">
+                                            <TextBox.InputBindings><KeyBinding Key="Enter" Command="{Binding GuardarEstudianteCommand}"/><KeyBinding Key="Escape" Command="{Binding CancelarEdicionCommand}"/></TextBox.InputBindings>
+                                        </TextBox>
+                                    </StackPanel>
+                                    <StackPanel Grid.Row="0" Grid.Column="4">
+                                        <TextBlock Text="Nombres" Foreground="#344054"/>
+                                        <TextBox TabIndex="62" Text="{Binding NombresEdicion, UpdateSourceTrigger=PropertyChanged}">
+                                            <TextBox.InputBindings><KeyBinding Key="Enter" Command="{Binding GuardarEstudianteCommand}"/><KeyBinding Key="Escape" Command="{Binding CancelarEdicionCommand}"/></TextBox.InputBindings>
+                                        </TextBox>
+                                    </StackPanel>
+                                    <StackPanel Grid.Row="1" Grid.Column="0" Margin="0,8,0,0">
+                                        <TextBlock Text="Número de lista" Foreground="#344054"/>
+                                        <TextBox TabIndex="63" Text="{Binding NumeroListaEdicion, UpdateSourceTrigger=PropertyChanged}">
+                                            <TextBox.InputBindings><KeyBinding Key="Enter" Command="{Binding GuardarEstudianteCommand}"/><KeyBinding Key="Escape" Command="{Binding CancelarEdicionCommand}"/></TextBox.InputBindings>
+                                        </TextBox>
+                                    </StackPanel>
+                                    <StackPanel Grid.Row="1" Grid.Column="2" Margin="0,8,0,0">
+                                        <TextBlock Text="Género" Foreground="#344054"/>
+                                        <ComboBox TabIndex="64" SelectedIndex="{Binding GeneroIndexEdicion, Mode=TwoWay}">
+                                            <ComboBoxItem Content="No especificado"/>
+                                            <ComboBoxItem Content="Hombre"/>
+                                            <ComboBoxItem Content="Mujer"/>
+                                        </ComboBox>
+                                    </StackPanel>
+                                    <StackPanel Grid.Row="1" Grid.Column="4" Margin="0,8,0,0">
+                                        <TextBlock Text="Fecha de nacimiento" Foreground="#344054"/>
+                                        <DatePicker TabIndex="65" SelectedDate="{Binding FechaNacimientoEdicion, Mode=TwoWay}"/>
+                                    </StackPanel>
+                                    <StackPanel Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="5" Margin="0,8,0,0">
+                                        <TextBlock Text="Observaciones particulares (cualitativo/pedagógico)" Foreground="#344054"/>
+                                        <TextBox TabIndex="66" Text="{Binding ObservacionesEdicion, UpdateSourceTrigger=PropertyChanged}" Height="55" TextWrapping="Wrap" AcceptsReturn="True"/>
+                                    </StackPanel>
+                                </Grid>
+                                <TextBlock Foreground="#B42318" Text="{Binding MensajeEdicion}" Margin="0,4,0,4"/>
+                                <WrapPanel>
+                                    <Button TabIndex="67" Content="_Guardar estudiante" Command="{Binding GuardarEstudianteCommand}"/>
+                                    <Button TabIndex="68" Content="_Cancelar" Command="{Binding CancelarEdicionCommand}"/>
+                                </WrapPanel>
+                            </StackPanel>
+                        </Border>
+                    </Grid>
+                </Grid>
+            </ScrollViewer>
             <Border VerticalAlignment="Top" HorizontalAlignment="Right" Margin="18" Padding="12,7" Background="#1F4B6E" CornerRadius="5" Visibility="{Binding EstaOcupado, Converter={StaticResource BoolToVisibility}}"><TextBlock Foreground="White" Text="Procesando…"/></Border>
         </Grid>
 
@@ -134,13 +146,13 @@
             <Grid.Style><Style TargetType="Grid"><Setter Property="IsEnabled" Value="True"/><Style.Triggers><DataTrigger Binding="{Binding EstaOcupado}" Value="True"><Setter Property="IsEnabled" Value="False"/></DataTrigger></Style.Triggers></Style></Grid.Style>
             <Grid.RowDefinitions><RowDefinition Height="Auto"/><RowDefinition Height="Auto"/><RowDefinition Height="*"/><RowDefinition Height="Auto"/></Grid.RowDefinitions>
             <DockPanel Margin="0,0,0,12">
-                <StackPanel DockPanel.Dock="Left"><TextBlock Text="Asistencia" Foreground="#52606D"/><TextBlock Text="Registro diario" FontSize="27" FontWeight="SemiBold"/></StackPanel>
-                <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" HorizontalAlignment="Right"><Button Content="Vista mensual" Command="{Binding DataContext.MostrarVistaMensualCommand, RelativeSource={RelativeSource AncestorType=Window}}"/><StackPanel><TextBlock Text="Fecha" FontWeight="SemiBold"/><DatePicker Width="170" SelectedDate="{Binding FechaSeleccionada, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/></StackPanel></StackPanel>
+                <StackPanel DockPanel.Dock="Left"><TextBlock Text="Asistencia" Foreground="#475467"/><TextBlock Text="Registro diario" Foreground="#101828" FontSize="27" FontWeight="SemiBold"/></StackPanel>
+                <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" HorizontalAlignment="Right"><Button TabIndex="100" Content="_Vista mensual" Command="{Binding DataContext.MostrarVistaMensualCommand, RelativeSource={RelativeSource AncestorType=Window}}"/><StackPanel><TextBlock Text="Fecha" Foreground="#101828" FontWeight="SemiBold"/><DatePicker TabIndex="101" Width="170" SelectedDate="{Binding FechaSeleccionada, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/></StackPanel></StackPanel>
             </DockPanel>
             <Border Grid.Row="1" Margin="0,0,0,12" Padding="14" Background="White" CornerRadius="7">
-                <DockPanel><TextBlock DockPanel.Dock="Left" FontWeight="SemiBold" Text="{Binding EstadoGuardado}"/><StackPanel DockPanel.Dock="Right" Orientation="Horizontal"><TextBlock Margin="12,0" Text="{Binding Total, StringFormat=Total: {0}}"/><TextBlock Margin="12,0" Text="{Binding Presentes, StringFormat=Presentes: {0}}"/><TextBlock Margin="12,0" Text="{Binding Faltas, StringFormat=Faltas: {0}}"/><TextBlock Margin="12,0" Text="{Binding Retardos, StringFormat=Retardos: {0}}"/><TextBlock Margin="12,0" Text="{Binding Justificadas, StringFormat=Falta justificada: {0}}"/></StackPanel></DockPanel>
+                <DockPanel><TextBlock DockPanel.Dock="Left" Foreground="#101828" FontWeight="SemiBold" Text="{Binding EstadoGuardado}"/><StackPanel DockPanel.Dock="Right" Orientation="Horizontal"><TextBlock Margin="12,0" Foreground="#101828" Text="{Binding Total, StringFormat=Total: {0}}"/><TextBlock Margin="12,0" Foreground="#027A48" Text="{Binding Presentes, StringFormat=Presentes: {0}}"/><TextBlock Margin="12,0" Foreground="#B42318" Text="{Binding Faltas, StringFormat=Faltas: {0}}"/><TextBlock Margin="12,0" Foreground="#B54708" Text="{Binding Retardos, StringFormat=Retardos: {0}}"/><TextBlock Margin="12,0" Foreground="#175CD3" Text="{Binding Justificadas, StringFormat=Falta justificada: {0}}"/></StackPanel></DockPanel>
             </Border>
-            <DataGrid Grid.Row="2" ItemsSource="{Binding Estudiantes}" AutoGenerateColumns="False" CanUserAddRows="False" CanUserDeleteRows="False" CanUserSortColumns="False" RowHeaderWidth="0" GridLinesVisibility="Horizontal" FontSize="15" EnableRowVirtualization="True">
+            <DataGrid Grid.Row="2" ItemsSource="{Binding Estudiantes}" AutoGenerateColumns="False" CanUserAddRows="False" CanUserDeleteRows="False" CanUserSortColumns="False" RowHeaderWidth="0" GridLinesVisibility="Horizontal" FontSize="15" EnableRowVirtualization="True" TabIndex="102">
                 <DataGrid.Columns>
                     <DataGridTextColumn Header="Núm." Binding="{Binding NumeroLista}" Width="75" IsReadOnly="True"/>
                     <DataGridTextColumn Header="Nombre" Binding="{Binding Nombre}" Width="*" IsReadOnly="True"/>
@@ -148,7 +160,7 @@
                     <DataGridTextColumn Header="Situación actual" Binding="{Binding SituacionActual}" Width="180" IsReadOnly="True"/>
                 </DataGrid.Columns>
             </DataGrid>
-            <DockPanel Grid.Row="3" Margin="0,12,0,0"><Button DockPanel.Dock="Left" Content="Marcar todos presentes" Command="{Binding MarcarTodosPresentesCommand}"/><Button DockPanel.Dock="Right" Content="Guardar (Ctrl+S)" Command="{Binding GuardarCommand}"/></DockPanel>
+            <DockPanel Grid.Row="3" Margin="0,12,0,0"><Button TabIndex="103" DockPanel.Dock="Left" Content="Marcar _todos presentes" Command="{Binding MarcarTodosPresentesCommand}"/><Button TabIndex="104" DockPanel.Dock="Right" Content="_Guardar (Ctrl+S)" Command="{Binding GuardarCommand}"/></DockPanel>
         </Grid>
 
         <Grid Grid.Row="1" Margin="20" DataContext="{Binding AsistenciaMensual}"
@@ -156,43 +168,43 @@
             <Grid.Style><Style TargetType="Grid"><Setter Property="IsEnabled" Value="True"/><Style.Triggers><DataTrigger Binding="{Binding EstaOcupado}" Value="True"><Setter Property="IsEnabled" Value="False"/></DataTrigger></Style.Triggers></Style></Grid.Style>
             <Grid.RowDefinitions><RowDefinition Height="Auto"/><RowDefinition Height="Auto"/><RowDefinition Height="Auto"/><RowDefinition Height="*"/><RowDefinition Height="Auto"/></Grid.RowDefinitions>
             <DockPanel Margin="0,0,0,10">
-                <StackPanel DockPanel.Dock="Left"><TextBlock Text="Asistencia" Foreground="#52606D"/><TextBlock Text="Vista mensual" FontSize="27" FontWeight="SemiBold"/></StackPanel>
+                <StackPanel DockPanel.Dock="Left"><TextBlock Text="Asistencia" Foreground="#475467"/><TextBlock Text="Vista mensual" Foreground="#101828" FontSize="27" FontWeight="SemiBold"/></StackPanel>
                 <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" VerticalAlignment="Center">
-                    <Button Content="Vista diaria" Command="{Binding DataContext.MostrarVistaDiariaCommand, RelativeSource={RelativeSource AncestorType=Window}}"/>
-                    <Button Content="&lt;" Command="{Binding MesAnteriorCommand}" MinWidth="42"/>
-                    <ComboBox Width="135" Margin="4" ItemsSource="{Binding Meses}" DisplayMemberPath="Nombre" SelectedValuePath="Numero" SelectedValue="{Binding MesSeleccionado}"/>
-                    <TextBox Width="78" Margin="4" Text="{Binding AnioSeleccionado, UpdateSourceTrigger=LostFocus}"/>
-                    <Button Content="&gt;" Command="{Binding MesSiguienteCommand}" MinWidth="42"/>
-                    <Button Content="Mes actual" Command="{Binding IrMesActualCommand}"/>
+                    <Button TabIndex="200" Content="_Vista diaria" Command="{Binding DataContext.MostrarVistaDiariaCommand, RelativeSource={RelativeSource AncestorType=Window}}"/>
+                    <Button TabIndex="201" Content="&lt;" Command="{Binding MesAnteriorCommand}" MinWidth="42"/>
+                    <ComboBox TabIndex="202" Width="135" Margin="4" ItemsSource="{Binding Meses}" DisplayMemberPath="Nombre" SelectedValuePath="Numero" SelectedValue="{Binding MesSeleccionado}"/>
+                    <TextBox TabIndex="203" Width="78" Margin="4" Text="{Binding AnioSeleccionado, UpdateSourceTrigger=LostFocus}"/>
+                    <Button TabIndex="204" Content="&gt;" Command="{Binding MesSiguienteCommand}" MinWidth="42"/>
+                    <Button TabIndex="205" Content="_Mes actual" Command="{Binding IrMesActualCommand}"/>
                 </StackPanel>
             </DockPanel>
             <WrapPanel Grid.Row="1" Margin="0,0,0,10">
-                <Border Background="White" Padding="12,8" Margin="0,0,8,0"><TextBlock Text="{Binding EstadoMes}" FontWeight="SemiBold"/></Border>
-                <Border Background="White" Padding="12,8" Margin="0,0,8,0"><TextBlock Text="{Binding AlumnosVisibles, StringFormat=Alumnos: {0}}"/></Border>
-                <Border Background="White" Padding="12,8" Margin="0,0,8,0"><TextBlock Text="{Binding DiasGuardados, StringFormat=Días guardados: {0}}"/></Border>
-                <Border Background="#FFF4CE" Padding="12,8"><TextBlock Text="Los conteos incluyen borradores" Visibility="{Binding IncluyeBorradores, Converter={StaticResource BoolToVisibility}}"/></Border>
+                <Border Background="White" Padding="12,8" Margin="0,0,8,0"><TextBlock Foreground="#101828" Text="{Binding EstadoMes}" FontWeight="SemiBold"/></Border>
+                <Border Background="White" Padding="12,8" Margin="0,0,8,0"><TextBlock Foreground="#101828" Text="{Binding AlumnosVisibles, StringFormat=Alumnos: {0}}"/></Border>
+                <Border Background="White" Padding="12,8" Margin="0,0,8,0"><TextBlock Foreground="#101828" Text="{Binding DiasGuardados, StringFormat=Días guardados: {0}}"/></Border>
+                <Border Background="#FFF4CE" Padding="12,8"><TextBlock Foreground="#B54708" Text="Los conteos incluyen borradores" Visibility="{Binding IncluyeBorradores, Converter={StaticResource BoolToVisibility}}"/></Border>
             </WrapPanel>
             <DockPanel Grid.Row="2" Margin="0,0,0,10">
-                <TextBox DockPanel.Dock="Left" Width="260" Margin="0" Text="{Binding Busqueda, UpdateSourceTrigger=PropertyChanged}" ToolTip="Buscar estudiante"/>
-                <ComboBox DockPanel.Dock="Left" Width="220" Margin="8,0" ItemsSource="{Binding Filtros}" SelectedItem="{Binding Filtro}"/>
-                <TextBlock DockPanel.Dock="Right" VerticalAlignment="Center" Text="{Binding FechaSeleccionadaTexto}" FontWeight="SemiBold"/>
+                <TextBox TabIndex="210" DockPanel.Dock="Left" Width="260" Margin="0" Text="{Binding Busqueda, UpdateSourceTrigger=PropertyChanged}" ToolTip="Buscar estudiante"/>
+                <ComboBox TabIndex="211" DockPanel.Dock="Left" Width="220" Margin="8,0" ItemsSource="{Binding Filtros}" SelectedItem="{Binding Filtro}"/>
+                <TextBlock DockPanel.Dock="Right" VerticalAlignment="Center" Foreground="#101828" Text="{Binding FechaSeleccionadaTexto}" FontWeight="SemiBold"/>
             </DockPanel>
             <DataGrid x:Name="GrillaMensual" Grid.Row="3" ItemsSource="{Binding FilasVisibles}" AutoGenerateColumns="False"
                       CanUserAddRows="False" CanUserDeleteRows="False" CanUserSortColumns="False" IsReadOnly="True"
                       FrozenColumnCount="2" HeadersVisibility="Column" RowHeaderWidth="0" GridLinesVisibility="All"
                       EnableRowVirtualization="True" EnableColumnVirtualization="True" RowHeight="30"
                       SelectionUnit="Cell" SelectionMode="Single" CurrentCellChanged="OnCeldaMensualSeleccionada"
-                      MouseDoubleClick="OnCeldaMensualDobleClic" PreviewKeyDown="OnGrillaMensualPreviewKeyDown"/>
+                      MouseDoubleClick="OnCeldaMensualDobleClic" PreviewKeyDown="OnGrillaMensualPreviewKeyDown" TabIndex="212"/>
             <DockPanel Grid.Row="4" Margin="0,10,0,0">
                 <StackPanel DockPanel.Dock="Left" Orientation="Horizontal">
-                    <Button Content="Marcar día presente" Command="{Binding MarcarDiaPresenteCommand}"/>
-                    <Button Content="Descartar día" Command="{Binding DescartarDiaCommand}"/>
-                    <Button Content="Descartar mes" Command="{Binding DescartarMesCommand}"/>
+                    <Button TabIndex="220" Content="_Marcar día presente" Command="{Binding MarcarDiaPresenteCommand}"/>
+                    <Button TabIndex="221" Content="_Descartar día" Command="{Binding DescartarDiaCommand}"/>
+                    <Button TabIndex="222" Content="D_escartar mes" Command="{Binding DescartarMesCommand}"/>
                 </StackPanel>
                 <StackPanel DockPanel.Dock="Right" Orientation="Horizontal">
-                    <TextBlock VerticalAlignment="Center" Margin="8" Text="P Presente · F Falta · R Retardo · J Justificada"/>
-                    <Button Content="Guardar día" Command="{Binding GuardarDiaCommand}"/>
-                    <Button Content="Guardar cambios (Ctrl+S)" Command="{Binding GuardarMesCommand}"/>
+                    <TextBlock VerticalAlignment="Center" Foreground="#344054" Margin="8" Text="P Presente · F Falta · R Retardo · J Justificada"/>
+                    <Button TabIndex="223" Content="_Guardar día" Command="{Binding GuardarDiaCommand}"/>
+                    <Button TabIndex="224" Content="G_uardar cambios (Ctrl+S)" Command="{Binding GuardarMesCommand}"/>
                 </StackPanel>
             </DockPanel>
         </Grid>
