@@ -572,7 +572,7 @@ internal static class EsquemaSqlite
         }
     }
 
-    private static bool ExisteColumna(SqliteConnection conexion, SqliteTransaction transaccion, string tabla, string columna)
+    private static bool ExisteColumna(SqliteConnection conexion, SqliteTransaction? transaccion, string tabla, string columna)
     {
         using var cmd = conexion.CreateCommand();
         cmd.Transaction = transaccion;
@@ -600,7 +600,20 @@ internal static class EsquemaSqlite
 
     private static void ValidarVersionSeis(SqliteConnection conexion)
     {
-        ValidarObjetos(conexion, ObjetosVersionSeis);
+        string[] columnasV6 = ["id", "grupo_id", "nombre", "numero_lista", "activo", "primer_apellido", "segundo_apellido", "nombres", "fecha_nacimiento", "genero", "fecha_ingreso", "observaciones"];
+        foreach (var col in columnasV6)
+        {
+            if (!ExisteColumna(conexion, null, "estudiantes", col))
+            {
+                throw new SchemaIncompatibleException($"La tabla 'estudiantes' no contiene la columna requerida '{col}'.");
+            }
+        }
+
+        var objetosSinEstudiantes = ObjetosVersionSeis
+            .Where(kvp => !string.Equals(kvp.Key, "estudiantes", StringComparison.OrdinalIgnoreCase))
+            .ToDictionary(kvp => kvp.Key, kvp => kvp.Value);
+
+        ValidarObjetos(conexion, objetosSinEstudiantes);
     }
 
     private static void CrearObjetos(
