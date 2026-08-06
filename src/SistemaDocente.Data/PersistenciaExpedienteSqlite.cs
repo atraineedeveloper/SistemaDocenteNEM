@@ -16,6 +16,7 @@ public sealed class PersistenciaExpedienteSqlite : IAlmacenamientoExpedientes
         {
             DataSource = baseSqlite,
             Mode = SqliteOpenMode.ReadWriteCreate,
+            DefaultTimeout = 15,
         }.ConnectionString;
     }
 
@@ -27,7 +28,7 @@ public sealed class PersistenciaExpedienteSqlite : IAlmacenamientoExpedientes
             conexion.Open();
             using (var cmd = conexion.CreateCommand())
             {
-                cmd.CommandText = "PRAGMA foreign_keys = ON;";
+                cmd.CommandText = "PRAGMA foreign_keys = ON; PRAGMA busy_timeout = 5000;";
                 cmd.ExecuteNonQuery();
             }
             EsquemaSqlite.Inicializar(conexion);

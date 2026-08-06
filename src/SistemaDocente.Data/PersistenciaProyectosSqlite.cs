@@ -16,7 +16,7 @@ public sealed class PersistenciaProyectosSqlite : IAlmacenamientoProyectos, IAlm
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(rutaArchivo);
         _ruta = Path.GetFullPath(rutaArchivo);
-        _cadena = new SqliteConnectionStringBuilder { DataSource = _ruta, Mode = SqliteOpenMode.ReadWriteCreate, Pooling = false }.ToString();
+        _cadena = new SqliteConnectionStringBuilder { DataSource = _ruta, Mode = SqliteOpenMode.ReadWriteCreate, DefaultTimeout = 15, Pooling = false }.ToString();
     }
 
     public ProyectoDidactico? Cargar(ProyectoId proyectoId) => Ejecutar(() =>
@@ -136,7 +136,7 @@ public sealed class PersistenciaProyectosSqlite : IAlmacenamientoProyectos, IAlm
     private SqliteConnection Abrir()
     {
         new PersistenciaGrupoSqlite(_ruta).Inicializar(); var conexion = new SqliteConnection(_cadena); conexion.Open();
-        using var comando = conexion.CreateCommand(); comando.CommandText = "PRAGMA foreign_keys = ON;"; comando.ExecuteNonQuery(); return conexion;
+        using var comando = conexion.CreateCommand(); comando.CommandText = "PRAGMA foreign_keys = ON; PRAGMA busy_timeout = 5000;"; comando.ExecuteNonQuery(); return conexion;
     }
 
     private static ProyectoDidactico LeerProyecto(SqliteDataReader l) => ProyectoDidactico.Rehidratar(

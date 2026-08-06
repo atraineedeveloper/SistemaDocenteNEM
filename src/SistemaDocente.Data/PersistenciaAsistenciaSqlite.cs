@@ -22,6 +22,7 @@ public sealed class PersistenciaAsistenciaSqlite : IAlmacenamientoAsistencias
         {
             DataSource = RutaArchivo,
             Mode = SqliteOpenMode.ReadWriteCreate,
+            DefaultTimeout = 15,
             Pooling = false,
         }.ToString();
     }
@@ -207,7 +208,7 @@ public sealed class PersistenciaAsistenciaSqlite : IAlmacenamientoAsistencias
         {
             conexion.Open();
             using var comando = conexion.CreateCommand();
-            comando.CommandText = "PRAGMA foreign_keys = ON;";
+            comando.CommandText = "PRAGMA foreign_keys = ON; PRAGMA busy_timeout = 5000;";
             comando.ExecuteNonQuery();
             return conexion;
         }
