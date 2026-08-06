@@ -41,10 +41,10 @@
 
 ## 5. Tematización e internacionalización
 
-- [ ] 5.1 Crear `Themes/Light.xaml`, `Themes/Dark.xaml` y `Themes/HighContrast.xaml`.
-- [ ] 5.2 Implementar mecanismo de cambio de tema en caliente sin reinicio.
-- [ ] 5.3 Extraer cadenas de texto visibles a archivos `.resx` en `SistemaDocente.App.Wpf`.
-- [ ] 5.4 Declarar `xml:lang="es-MX"` en ventanas principales y diálogos.
+- [x] 5.1 Crear `Themes/Light.xaml`, `Themes/Dark.xaml` y `Themes/HighContrast.xaml`.
+- [x] 5.2 Implementar mecanismo de cambio de tema en caliente sin reinicio (`ThemeService`).
+- [x] 5.3 Extraer cadenas de texto visibles a archivos `.resx` en `SistemaDocente.App.Wpf`.
+- [x] 5.4 Declarar `xml:lang="es-MX"` en ventanas principales y diálogos.
 
 ## 6. Pulido UX
 

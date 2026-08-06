@@ -2,7 +2,9 @@
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:controls="clr-namespace:SistemaDocente.App.Wpf.Controls"
-        Title="Detalle de la Actividad" Height="500" Width="580" MinHeight="420" MinWidth="480"
+        xmlns:prop="clr-namespace:SistemaDocente.App.Wpf.Properties"
+        xml:lang="es-MX"
+        Title="{x:Static prop:Resources.DetalleActividadTitle}" Height="500" Width="580" MinHeight="420" MinWidth="480"
         WindowStartupLocation="CenterOwner" ShowInTaskbar="False">
     <Grid Background="{DynamicResource SectionBackgroundBrush}" Margin="{DynamicResource MarginXXXLarge}">
         <Grid.RowDefinitions>

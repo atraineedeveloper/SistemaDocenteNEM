@@ -1,0 +1,9 @@
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <!--
+        Tema claro.
+        Los valores por defecto se definen en DesignTokens.xaml.
+        Este diccionario existe para que ThemeManager pueda referenciar
+        un tema nominal claro sin duplicar tokens.
+    -->
+</ResourceDictionary>

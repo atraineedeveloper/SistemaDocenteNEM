@@ -9,6 +9,8 @@ using System.Windows.Media;
 using SistemaDocente.Core;
 using SistemaDocente.Presentation;
 
+using SistemaDocente.App.Wpf.Services;
+
 namespace SistemaDocente.App.Wpf;
 
 public partial class MainWindow : Window
@@ -467,6 +469,17 @@ public partial class MainWindow : Window
                 (System.Windows.Media.Color)System.Windows.Media.ColorConverter.ConvertFromString("#B2DDFF")),
             new System.Windows.Media.SolidColorBrush(
                 (System.Windows.Media.Color)System.Windows.Media.ColorConverter.ConvertFromString("#175CD3")));
+    /// <summary>Cambia al tema claro.</summary>
+    private void TemaClaro_Click(object sender, RoutedEventArgs e)
+        => ThemeService.ApplyTheme(ThemeService.Light);
+
+    /// <summary>Cambia al tema oscuro.</summary>
+    private void TemaOscuro_Click(object sender, RoutedEventArgs e)
+        => ThemeService.ApplyTheme(ThemeService.Dark);
+
+    /// <summary>Cambia al tema de alto contraste.</summary>
+    private void TemaAltoContraste_Click(object sender, RoutedEventArgs e)
+        => ThemeService.ApplyTheme(ThemeService.HighContrast);
 }
 
 // ══ Converter: bool → "activo" / "" para el indicador de pestaña ══════
