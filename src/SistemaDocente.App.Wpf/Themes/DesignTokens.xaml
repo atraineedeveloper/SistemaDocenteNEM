@@ -5,20 +5,20 @@
     <!-- PALETA DE COLORES PRINCIPAL -->
 
     <!-- Primarios -->
-    <Color x:Key="PrimaryColor">#173F5F</Color>
-    <Color x:Key="PrimaryHoverColor">#1D4F75</Color>
-    <Color x:Key="PrimaryPressedColor">#122F47</Color>
+    <Color x:Key="PrimaryColor">#691C32</Color>
+    <Color x:Key="PrimaryHoverColor">#7A2342</Color>
+    <Color x:Key="PrimaryPressedColor">#4E1220</Color>
     <SolidColorBrush x:Key="PrimaryBrush" Color="{StaticResource PrimaryColor}"/>
     <SolidColorBrush x:Key="PrimaryHoverBrush" Color="{StaticResource PrimaryHoverColor}"/>
     <SolidColorBrush x:Key="PrimaryPressedBrush" Color="{StaticResource PrimaryPressedColor}"/>
 
     <!-- Fondos -->
-    <Color x:Key="WindowBackgroundColor">#F4F6F8</Color>
+    <Color x:Key="WindowBackgroundColor">#FAF8F5</Color>
     <Color x:Key="CardBackgroundColor">#FFFFFF</Color>
-    <Color x:Key="SectionBackgroundColor">#F8FAFC</Color>
-    <Color x:Key="HoverBackgroundColor">#F2F4F7</Color>
-    <Color x:Key="PressedBackgroundColor">#EAECF0</Color>
-    <Color x:Key="DisabledBackgroundColor">#F2F4F7</Color>
+    <Color x:Key="SectionBackgroundColor">#F3EDE6</Color>
+    <Color x:Key="HoverBackgroundColor">#F1E6E0</Color>
+    <Color x:Key="PressedBackgroundColor">#E5D6C8</Color>
+    <Color x:Key="DisabledBackgroundColor">#F1E6E0</Color>
     <SolidColorBrush x:Key="WindowBackgroundBrush" Color="{StaticResource WindowBackgroundColor}"/>
     <SolidColorBrush x:Key="CardBackgroundBrush" Color="{StaticResource CardBackgroundColor}"/>
     <SolidColorBrush x:Key="SectionBackgroundBrush" Color="{StaticResource SectionBackgroundColor}"/>
@@ -27,13 +27,13 @@
     <SolidColorBrush x:Key="DisabledBackgroundBrush" Color="{StaticResource DisabledBackgroundColor}"/>
 
     <!-- Texto -->
-    <Color x:Key="TextPrimaryColor">#101828</Color>
-    <Color x:Key="TextSecondaryColor">#344054</Color>
-    <Color x:Key="TextMutedColor">#475467</Color>
-    <Color x:Key="TextCaptionColor">#64748B</Color>
-    <Color x:Key="TextDisabledColor">#98A2B3</Color>
+    <Color x:Key="TextPrimaryColor">#2B0F14</Color>
+    <Color x:Key="TextSecondaryColor">#4A2530</Color>
+    <Color x:Key="TextMutedColor">#6B4250</Color>
+    <Color x:Key="TextCaptionColor">#8A6B73</Color>
+    <Color x:Key="TextDisabledColor">#B8A0A6</Color>
     <Color x:Key="TextOnPrimaryColor">#FFFFFF</Color>
-    <Color x:Key="TextOnDarkColor">#A5C7DE</Color>
+    <Color x:Key="TextOnDarkColor">#DDC9A3</Color>
     <SolidColorBrush x:Key="TextPrimaryBrush" Color="{StaticResource TextPrimaryColor}"/>
     <SolidColorBrush x:Key="TextSecondaryBrush" Color="{StaticResource TextSecondaryColor}"/>
     <SolidColorBrush x:Key="TextMutedBrush" Color="{StaticResource TextMutedColor}"/>
@@ -43,9 +43,9 @@
     <SolidColorBrush x:Key="TextOnDarkBrush" Color="{StaticResource TextOnDarkColor}"/>
 
     <!-- Bordes -->
-    <Color x:Key="BorderDefaultColor">#D0D5DD</Color>
-    <Color x:Key="BorderLightColor">#EAECF0</Color>
-    <Color x:Key="BorderHoverColor">#B2DDFF</Color>
+    <Color x:Key="BorderDefaultColor">#D9C2B8</Color>
+    <Color x:Key="BorderLightColor">#EDE0D6</Color>
+    <Color x:Key="BorderHoverColor">#BC955C</Color>
     <SolidColorBrush x:Key="BorderDefaultBrush" Color="{StaticResource BorderDefaultColor}"/>
     <SolidColorBrush x:Key="BorderLightBrush" Color="{StaticResource BorderLightColor}"/>
     <SolidColorBrush x:Key="BorderHoverBrush" Color="{StaticResource BorderHoverColor}"/>
