@@ -122,5 +122,5 @@
 - [x] 9.4 Ejecutar `dotnet test SistemaDocente.sln --no-build` y confirmar todas las suites.
 - [x] 9.5 Ejecutar `openspec validate --all` y `git diff --check`.
 - [x] 9.6 Auditar referencias y código para confirmar ausencia de ciclos, SQL fuera de Data, WPF fuera de App.Wpf, async, `Task.Run`, DI, repositorios genéricos, ORM y paquetes UI externos.
-- [ ] 9.7 Probar manualmente creación y ciclo de proyecto, periodos incompatibles, actividad con 40 estudiantes, E/N/P, historial inactivo, anulación, conflictos, reapertura y redimensionamiento.
+- [x] 9.7 Probar manualmente creación y ciclo de proyecto, periodos incompatibles, actividad con 40 estudiantes, E/N/P, historial inactivo, anulación, conflictos, reapertura y redimensionamiento.
 
