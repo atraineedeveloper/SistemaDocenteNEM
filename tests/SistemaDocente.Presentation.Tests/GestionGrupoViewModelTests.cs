@@ -283,6 +283,11 @@ public sealed class GestionGrupoViewModelTests
             return Grupo;
         }
 
+        public IReadOnlyList<GrupoDetalle> ListarGrupos()
+        {
+            return [Grupo];
+        }
+
         public GrupoDetalle CambiarNombreGrupo(GrupoId grupoId, string nombreVisible)
         {
             Lanzar(ErrorRenombrarGrupo);

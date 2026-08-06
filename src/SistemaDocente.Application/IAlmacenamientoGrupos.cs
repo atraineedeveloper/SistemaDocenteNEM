@@ -9,4 +9,6 @@ public interface IAlmacenamientoGrupos
     bool Existe(GrupoId grupoId);
 
     void Guardar(Grupo grupo);
+
+    IReadOnlyList<Grupo> ListarTodos();
 }

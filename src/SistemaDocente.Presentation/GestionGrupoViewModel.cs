@@ -40,6 +40,7 @@ public sealed class GestionGrupoViewModel : ViewModelBase
         _confirmacion = confirmacion;
 
         CrearGrupoCommand = new RelayCommand(CrearGrupo, PuedeCrearGrupo);
+        AbrirNuevoGrupoCommand = new RelayCommand(AbrirNuevoGrupo, () => !EstaOcupado);
         AbrirCambioNombreCommand = new RelayCommand(AbrirCambioNombre, PuedeAdministrar);
         GuardarNombreGrupoCommand = new RelayCommand(GuardarNombreGrupo, PuedeGuardarEdicion);
         AbrirAgregarEstudianteCommand = new RelayCommand(AbrirAgregarEstudiante, PuedeAdministrar);
@@ -52,6 +53,7 @@ public sealed class GestionGrupoViewModel : ViewModelBase
     }
 
     public RelayCommand CrearGrupoCommand { get; }
+    public RelayCommand AbrirNuevoGrupoCommand { get; }
     public RelayCommand AbrirCambioNombreCommand { get; }
     public RelayCommand GuardarNombreGrupoCommand { get; }
     public RelayCommand AbrirAgregarEstudianteCommand { get; }
@@ -230,10 +232,32 @@ public sealed class GestionGrupoViewModel : ViewModelBase
         }
     }
 
+    private IReadOnlyList<GrupoDetalle> _gruposDisponibles = Array.Empty<GrupoDetalle>();
+    private GrupoDetalle? _grupoSeleccionadoCombo;
+
+    public IReadOnlyList<GrupoDetalle> GruposDisponibles
+    {
+        get => _gruposDisponibles;
+        private set => SetProperty(ref _gruposDisponibles, value);
+    }
+
+    public GrupoDetalle? GrupoSeleccionadoCombo
+    {
+        get => _grupoSeleccionadoCombo;
+        set
+        {
+            if (SetProperty(ref _grupoSeleccionadoCombo, value) && value is not null && value.GrupoId != GrupoIdActual)
+            {
+                CargarGrupoPorId(value.GrupoId);
+            }
+        }
+    }
+
     public void Inicializar()
     {
         EjecutarOcupado(() =>
         {
+            ActualizarListaGrupos();
             var referencia = _estadoAplicacion.Cargar();
             if (referencia.Estado == EstadoLecturaReferencia.Ausente)
             {
@@ -250,7 +274,7 @@ public sealed class GestionGrupoViewModel : ViewModelBase
 
             try
             {
-                AplicarGrupoConfirmado(_gestion.CargarGrupo(referencia.GrupoId.Value));
+                CargarGrupoPorId(referencia.GrupoId.Value);
             }
             catch (GrupoNoEncontradoException)
             {
@@ -261,15 +285,36 @@ public sealed class GestionGrupoViewModel : ViewModelBase
         });
     }
 
+    public void CargarGrupoPorId(GrupoId id)
+    {
+        var grupo = _gestion.CargarGrupo(id);
+        _estadoAplicacion.Guardar(grupo.GrupoId);
+        AplicarGrupoConfirmado(grupo);
+        _grupoSeleccionadoCombo = GruposDisponibles.FirstOrDefault(g => g.GrupoId == id);
+        OnPropertyChanged(nameof(GrupoSeleccionadoCombo));
+    }
+
+    private void ActualizarListaGrupos()
+    {
+        GruposDisponibles = _gestion.ListarGrupos();
+    }
+
     private void CrearGrupo()
     {
         EjecutarEdicion(() =>
         {
             var grupo = _gestion.CrearGrupo(NombreNuevoGrupo);
-            _estadoAplicacion.Guardar(grupo.GrupoId);
-            AplicarGrupoConfirmado(grupo);
+            ActualizarListaGrupos();
+            CargarGrupoPorId(grupo.GrupoId);
             NombreNuevoGrupo = string.Empty;
         });
+    }
+
+    private void AbrirNuevoGrupo()
+    {
+        NombreNuevoGrupo = string.Empty;
+        MensajeEdicion = string.Empty;
+        MostrarBienvenidaSegura();
     }
 
     private void AbrirCambioNombre()

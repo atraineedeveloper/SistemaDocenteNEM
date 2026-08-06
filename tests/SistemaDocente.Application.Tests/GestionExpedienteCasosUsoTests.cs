@@ -47,6 +47,7 @@ public sealed class GestionExpedienteCasosUsoTests
         public Grupo? Cargar(GrupoId grupoId) => _map.GetValueOrDefault(grupoId);
         public bool Existe(GrupoId grupoId) => _map.ContainsKey(grupoId);
         public void Guardar(Grupo grupo) => _map[grupo.Id] = grupo;
+        public IReadOnlyList<Grupo> ListarTodos() => _map.Values.ToList();
     }
 
     private sealed class StubAlmacenamientoAsistencias : IAlmacenamientoAsistencias

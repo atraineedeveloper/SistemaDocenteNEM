@@ -141,6 +141,37 @@ public sealed class PersistenciaGrupoSqlite : IAlmacenamientoGrupos
                 new DataAccessException("No fue posible comprobar la existencia del grupo.", exception));
         }
     }
+    public IReadOnlyList<Grupo> ListarTodos()
+    {
+        try
+        {
+            Inicializar();
+            using var conexion = AbrirConexion();
+            using var comando = conexion.CreateCommand();
+            comando.CommandText = "SELECT id FROM grupos ORDER BY nombre;";
+            var lista = new List<Grupo>();
+            using var lector = comando.ExecuteReader();
+            var ids = new List<GrupoId>();
+            while (lector.Read())
+            {
+                ids.Add(GrupoId.DesdeGuid(Guid.Parse(lector.GetString(0))));
+            }
+            foreach (var id in ids)
+            {
+                var g = Cargar(id);
+                if (g is not null) lista.Add(g);
+            }
+            return lista;
+        }
+        catch (DataAccessException exception)
+        {
+            throw Traducir(exception);
+        }
+        catch (SqliteException exception)
+        {
+            throw Traducir(new DataAccessException("No fue posible listar los grupos.", exception));
+        }
+    }
 
     private Grupo? CargarInterno(GrupoId grupoId)
     {

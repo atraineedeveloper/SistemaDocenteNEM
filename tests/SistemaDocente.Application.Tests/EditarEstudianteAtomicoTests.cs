@@ -140,6 +140,8 @@ public sealed class EditarEstudianteAtomicoTests
 
         internal int Cargas { get; private set; }
         internal int Guardados { get; private set; }
+
+        public IReadOnlyList<Grupo> ListarTodos() => _persistidos.Values.Select(s => s.Rehidratar()).ToList();
         internal bool FallarGuardado { get; set; }
 
         public Grupo? Cargar(GrupoId grupoId)

@@ -165,6 +165,7 @@ public sealed class GestionAsistenciaMensualTests
             : null;
         public bool Existe(GrupoId grupoId) => grupoId == grupo.Id;
         public void Guardar(Grupo valor) => throw new NotSupportedException();
+        public IReadOnlyList<Grupo> ListarTodos() => [grupo];
     }
 
     private sealed class AsistenciasDoble : IAlmacenamientoAsistencias

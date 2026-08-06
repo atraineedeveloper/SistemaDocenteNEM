@@ -21,6 +21,9 @@ public sealed class GestionGrupoCasosUso
 
     public GrupoDetalle CargarGrupo(GrupoId grupoId) => Proyectar(CargarRequerido(grupoId));
 
+    public IReadOnlyList<GrupoDetalle> ListarGrupos() =>
+        _almacenamiento.ListarTodos().Select(Proyectar).ToList();
+
     public bool Existe(GrupoId grupoId) => _almacenamiento.Existe(grupoId);
 
     public GrupoDetalle CambiarNombreGrupo(GrupoId grupoId, string nombreVisible)

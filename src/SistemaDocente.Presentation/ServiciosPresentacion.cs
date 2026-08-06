@@ -37,6 +37,7 @@ public interface IGestionGrupoPresentacion
 {
     GrupoDetalle CrearGrupo(string nombreVisible);
     GrupoDetalle CargarGrupo(GrupoId grupoId);
+    IReadOnlyList<GrupoDetalle> ListarGrupos();
     GrupoDetalle CambiarNombreGrupo(GrupoId grupoId, string nombreVisible);
     EstudianteDetalle AgregarEstudiante(
         GrupoId grupoId,
@@ -80,6 +81,7 @@ public sealed class GestionGrupoPresentacion : IGestionGrupoPresentacion
 
     public GrupoDetalle CrearGrupo(string nombreVisible) => _casosUso.CrearGrupo(nombreVisible);
     public GrupoDetalle CargarGrupo(GrupoId grupoId) => _casosUso.CargarGrupo(grupoId);
+    public IReadOnlyList<GrupoDetalle> ListarGrupos() => _casosUso.ListarGrupos();
     public GrupoDetalle CambiarNombreGrupo(GrupoId grupoId, string nombreVisible) =>
         _casosUso.CambiarNombreGrupo(grupoId, nombreVisible);
     public EstudianteDetalle AgregarEstudiante(

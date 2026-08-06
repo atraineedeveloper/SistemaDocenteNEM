@@ -297,6 +297,9 @@ public sealed class GestionGrupoCasosUsoTests
 
         internal ErrorPersistenciaAplicacionException? ErrorAlExistir { get; set; }
 
+        public IReadOnlyList<Grupo> ListarTodos() =>
+            _grupos.Values.Select(s => s.Rehidratar()).ToList();
+
         public Grupo? Cargar(GrupoId grupoId)
         {
             Cargas++;

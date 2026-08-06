@@ -222,6 +222,8 @@ public sealed class GestionAsistenciaCasosUsoTests
             }
         }
 
+        public IReadOnlyList<Grupo> ListarTodos() => _datos.Values.Select(s => s.Rehidratar()).ToList();
+
         public Grupo? Cargar(GrupoId grupoId) =>
             _datos.TryGetValue(grupoId, out var dato) ? dato.Rehidratar() : null;
 

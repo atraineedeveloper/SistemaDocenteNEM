@@ -77,6 +77,7 @@ public sealed class GestionExpedienteViewModelTests
         public Grupo? Cargar(GrupoId grupoId) => parent.Grupo;
         public bool Existe(GrupoId grupoId) => true;
         public void Guardar(Grupo grupo) { }
+        public IReadOnlyList<Grupo> ListarTodos() => parent.Grupo != null ? [parent.Grupo] : [];
     }
 
     private sealed class StubAsistencias : IAlmacenamientoAsistencias

@@ -82,6 +82,7 @@ public sealed class GestionProyectosActividadesTests
         public Grupo? Cargar(GrupoId grupoId) => grupoId == grupo.Id ? grupo : null;
         public bool Existe(GrupoId grupoId) => grupoId == grupo.Id;
         public void Guardar(Grupo valor) { }
+        public IReadOnlyList<Grupo> ListarTodos() => [grupo];
     }
 
     private sealed class ProyectosDoble : IAlmacenamientoProyectos
