@@ -23,6 +23,7 @@ public sealed class GestionGrupoViewModel : ViewModelBase
     private string _mensajeEdicion = string.Empty;
     private IReadOnlyList<EstudianteVisual> _estudiantes = Array.Empty<EstudianteVisual>();
     private EstudianteVisual? _estudianteSeleccionado;
+    private string _filtroBusqueda = string.Empty;
 
     public GestionGrupoViewModel(
         IGestionGrupoPresentacion gestion,
@@ -217,8 +218,16 @@ public sealed class GestionGrupoViewModel : ViewModelBase
     public IReadOnlyList<EstudianteVisual> Estudiantes
     {
         get => _estudiantes;
-        private set => SetProperty(ref _estudiantes, value);
+        private set { if (SetProperty(ref _estudiantes, value)) OnPropertyChanged(nameof(EstudiantesFiltrados)); }
     }
+
+    public string FiltroBusqueda
+    {
+        get => _filtroBusqueda;
+        set { if (SetProperty(ref _filtroBusqueda, value)) OnPropertyChanged(nameof(EstudiantesFiltrados)); }
+    }
+
+    public System.Collections.Generic.IEnumerable<EstudianteVisual> EstudiantesFiltrados => string.IsNullOrWhiteSpace(_filtroBusqueda) ? _estudiantes : _estudiantes.Where(e => e.Nombre.Contains(_filtroBusqueda, System.StringComparison.CurrentCultureIgnoreCase) || e.NumeroLista.ToString(System.Globalization.CultureInfo.CurrentCulture).Contains(_filtroBusqueda, System.StringComparison.Ordinal));
 
     public EstudianteVisual? EstudianteSeleccionado
     {

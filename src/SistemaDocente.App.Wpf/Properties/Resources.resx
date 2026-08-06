@@ -1,0 +1,138 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="assembly">
+            <xsd:complexType>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+
+  <!-- TÍTULOS DE VENTANA -->
+  <data name="AppTitle" xml:space="preserve">
+    <value>Sistema Docente Local</value>
+  </data>
+  <data name="DetalleProyectoTitle" xml:space="preserve">
+    <value>Detalle del Proyecto Didáctico</value>
+  </data>
+  <data name="DetalleActividadTitle" xml:space="preserve">
+    <value>Detalle de la Actividad</value>
+  </data>
+  <data name="ExpedienteTitle" xml:space="preserve">
+    <value>Expediente y Seguimiento Individual del Alumno</value>
+  </data>
+
+  <!-- BOTONES COMUNES -->
+  <data name="Guardar" xml:space="preserve">
+    <value>_Guardar</value>
+  </data>
+  <data name="Cancelar" xml:space="preserve">
+    <value>_Cancelar</value>
+  </data>
+  <data name="Cerrar" xml:space="preserve">
+    <value>_Cerrar</value>
+  </data>
+  <data name="Agregar" xml:space="preserve">
+    <value>_Agregar</value>
+  </data>
+  <data name="Eliminar" xml:space="preserve">
+    <value>_Eliminar</value>
+  </data>
+  <data name="Buscar" xml:space="preserve">
+    <value>_Buscar</value>
+  </data>
+
+  <!-- ETIQUETAS DE FORMULARIO -->
+  <data name="NombreGrupo" xml:space="preserve">
+    <value>Nombre del grupo</value>
+  </data>
+  <data name="NombreProyecto" xml:space="preserve">
+    <value>Nombre del proyecto</value>
+  </data>
+  <data name="Descripcion" xml:space="preserve">
+    <value>Descripción</value>
+  </data>
+  <data name="FechaInicio" xml:space="preserve">
+    <value>Fecha de inicio</value>
+  </data>
+  <data name="FechaTermino" xml:space="preserve">
+    <value>Fecha de término</value>
+  </data>
+  <data name="Observaciones" xml:space="preserve">
+    <value>Observaciones</value>
+  </data>
+
+  <!-- MENSAJES DE ESTADO -->
+  <data name="EmptyStateEstudiantes" xml:space="preserve">
+    <value>No hay estudiantes registrados en este grupo.</value>
+  </data>
+  <data name="EmptyStateActividades" xml:space="preserve">
+    <value>No hay actividades en este proyecto.</value>
+  </data>
+  <data name="EmptyStateExpediente" xml:space="preserve">
+    <value>No hay registros para este estudiante.</value>
+  </data>
+
+  <!-- ERRORES DE VALIDACIÓN -->
+  <data name="ErrorCampoRequerido" xml:space="preserve">
+    <value>Este campo es obligatorio.</value>
+  </data>
+  <data name="ErrorFechaInvalida" xml:space="preserve">
+    <value>La fecha ingresada no es válida.</value>
+  </data>
+  <data name="ErrorRangoFechas" xml:space="preserve">
+    <value>La fecha de término debe ser posterior a la de inicio.</value>
+  </data>
+
+</root>

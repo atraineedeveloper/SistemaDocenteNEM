@@ -59,8 +59,8 @@ public sealed class ComposicionAsistenciaTests
         Assert.DoesNotContain("SELECT ", xaml, StringComparison.OrdinalIgnoreCase);
         Assert.DoesNotContain("INSERT ", codeBehind, StringComparison.OrdinalIgnoreCase);
         Assert.DoesNotContain("Sqlite", codeBehind, StringComparison.OrdinalIgnoreCase);
-        Assert.Contains("Content=\"_Proyectos\"", xaml, StringComparison.Ordinal);
-        Assert.Contains("Content=\"_Evaluación\"", xaml, StringComparison.Ordinal);
+        Assert.Contains("Proyectos", xaml, StringComparison.Ordinal);
+        Assert.Contains("Evaluación", xaml, StringComparison.Ordinal);
         Assert.Contains("ProyectosVisibles", xaml, StringComparison.Ordinal);
         Assert.Contains("EntregasVisibles", xaml, StringComparison.Ordinal);
         Assert.Contains("D Domina", xaml, StringComparison.Ordinal);

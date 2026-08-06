@@ -4,9 +4,12 @@ using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
 using System.Windows.Data;
 using System.Windows.Input;
+using System.Windows.Media;
 
 using SistemaDocente.Core;
 using SistemaDocente.Presentation;
+
+using SistemaDocente.App.Wpf.Services;
 
 namespace SistemaDocente.App.Wpf;
 
@@ -32,12 +35,34 @@ public partial class MainWindow : Window
                 Dispatcher.BeginInvoke(CrearColumnasMensuales);
             }
         };
+        // Actualizar indicador de pestaña activa cuando cambie la vista
+        viewModel.PropertyChanged += (_, args) =>
+        {
+            if (args.PropertyName is nameof(MainWindowViewModel.MostrarGrupo)
+                or nameof(MainWindowViewModel.MostrarAsistenciaDiaria)
+                or nameof(MainWindowViewModel.MostrarAsistenciaMensual)
+                or nameof(MainWindowViewModel.MostrarProyectos)
+                or nameof(MainWindowViewModel.MostrarEvaluacion))
+            {
+                ActualizarPestañaActiva();
+            }
+        };
         Loaded += (_, _) =>
         {
             AsignarFocoInicial();
             CrearColumnasMensuales();
+            ActualizarPestañaActiva();
         };
     }
+
+    private void ActualizarPestañaActiva()
+    {
+        NavBtnGrupo.Tag = ViewModel.MostrarGrupo ? "activo" : "";
+        NavBtnAsistencia.Tag = (ViewModel.MostrarAsistenciaDiaria || ViewModel.MostrarAsistenciaMensual) ? "activo" : "";
+        NavBtnProyectos.Tag = ViewModel.MostrarProyectos ? "activo" : "";
+        NavBtnEvaluacion.Tag = ViewModel.MostrarEvaluacion ? "activo" : "";
+    }
+
 
     private MainWindowViewModel ViewModel => (MainWindowViewModel)DataContext;
 
@@ -82,7 +107,7 @@ public partial class MainWindow : Window
         });
         GrillaMensual.Columns.Add(new DataGridTextColumn
         {
-            Header = "Nombre",
+            Header = new TextBlock { Text = "Nombre", ToolTip = "Nombre completo del estudiante" },
             Binding = new Binding(nameof(AsistenciaEstudianteMesVisual.Nombre)),
             Width = 190,
         });
@@ -92,7 +117,7 @@ public partial class MainWindow : Window
             var dia = ViewModel.AsistenciaMensual.Dias[indice];
             GrillaMensual.Columns.Add(new DataGridTextColumn
             {
-                Header = $"{dia.NumeroDia}\n{dia.AbreviaturaDiaSemana}",
+                Header = new TextBlock { Text = $"{dia.NumeroDia}\n{dia.AbreviaturaDiaSemana}", ToolTip = $"Dia {dia.NumeroDia} - {dia.Fecha:dd/MM/yyyy}" },
                 Binding = new Binding($"Celdas[{indice}].Texto"),
                 Width = 43,
                 ElementStyle = CrearEstiloCelda(indice),
@@ -111,7 +136,7 @@ public partial class MainWindow : Window
     private void AgregarResumen(string encabezado, string propiedad, double ancho = 42) =>
         GrillaMensual.Columns.Add(new DataGridTextColumn
         {
-            Header = encabezado,
+            Header = new TextBlock { Text = encabezado, ToolTip = encabezado switch { "P" => "Total presentes", "F" => "Total faltas", "R" => "Total retardos", "J" => "Total justificadas", "%" => "Porcentaje asistencia", _ => encabezado } },
             Binding = new Binding(propiedad),
             Width = ancho,
         });
@@ -222,10 +247,6 @@ public partial class MainWindow : Window
         }
     }
 
-    private void OnProyectoPrincipalDobleClic(object sender, MouseButtonEventArgs e)
-    {
-        AbrirDetalleProyecto();
-    }
 
     private void OnAbrirDetalleProyectoClic(object sender, RoutedEventArgs e)
     {
@@ -325,9 +346,45 @@ public partial class MainWindow : Window
 
     private void AsignarFocoInicial()
     {
-        if (ViewModel.Grupo.MostrarBienvenida) NombreGrupoInicial.Focus();
-        else if (ViewModel.Grupo.MostrarEditorGrupo) NombreGrupoEdicion.Focus();
-        else if (ViewModel.Grupo.MostrarEditorEstudiante) PrimerApellidoEdicion.Focus();
+        UIElement? target = null;
+        if (ViewModel.Grupo.MostrarBienvenida)
+        {
+            target = FindFirstFocusableControl(GrupoBienvenidaPanel);
+        }
+        else if (ViewModel.Grupo.MostrarEditorGrupo)
+        {
+            target = FindFirstFocusableControl(GrupoEditorPanel);
+        }
+        else if (ViewModel.Grupo.MostrarEditorEstudiante)
+        {
+            target = FindFirstFocusableControl(EstudianteEditorPanel);
+        }
+
+        if (target is not null)
+        {
+            Dispatcher.BeginInvoke(() => target.Focus(), System.Windows.Threading.DispatcherPriority.Render);
+        }
+    }
+
+    private static UIElement? FindFirstFocusableControl(DependencyObject parent)
+    {
+        var count = VisualTreeHelper.GetChildrenCount(parent);
+        for (var i = 0; i < count; i++)
+        {
+            var child = VisualTreeHelper.GetChild(parent, i);
+            if (child is TextBox or ComboBox or DatePicker or Button { IsDefault: true })
+            {
+                return (UIElement)child;
+            }
+
+            var descendant = FindFirstFocusableControl(child);
+            if (descendant is not null)
+            {
+                return descendant;
+            }
+        }
+
+        return null;
     }
 
     private void OnClosing(object? sender, CancelEventArgs e)
@@ -337,4 +394,86 @@ public partial class MainWindow : Window
             e.Cancel = true;
         }
     }
+
+    // ══ Toast de confirmación ══════════════════════════════
+
+    private System.Windows.Threading.DispatcherTimer? _toastTimer;
+
+    /// <summary>Muestra un toast flotante con auto-dismiss después de <paramref name="segundos"/> segundos.</summary>
+    public void MostrarToast(string icono, string titulo, string mensaje,
+        System.Windows.Media.Brush fondo, System.Windows.Media.Brush borde,
+        System.Windows.Media.Brush colorTexto, int segundos = 3)
+    {
+        ToastIcon.Text = icono;
+        ToastTitle.Text = titulo;
+        ToastTitle.Foreground = colorTexto;
+        ToastMessage.Text = mensaje;
+        ToastMessage.Foreground = colorTexto;
+        ToastBanner.Background = fondo;
+        ToastBanner.BorderBrush = borde;
+        ToastBanner.Visibility = Visibility.Visible;
+
+        _toastTimer?.Stop();
+        _toastTimer = new System.Windows.Threading.DispatcherTimer
+        {
+            Interval = TimeSpan.FromSeconds(segundos)
+        };
+        _toastTimer.Tick += (_, _) =>
+        {
+            ToastBanner.Visibility = Visibility.Collapsed;
+            _toastTimer.Stop();
+        };
+        _toastTimer.Start();
+    }
+
+    /// <summary>Toast de éxito verde estándar.</summary>
+    public void MostrarToastExito(string mensaje, string titulo = "✅ Guardado exitosamente") =>
+        MostrarToast("✅", titulo, mensaje,
+            new System.Windows.Media.SolidColorBrush(
+                (System.Windows.Media.Color)System.Windows.Media.ColorConverter.ConvertFromString("#ECFDF3")),
+            new System.Windows.Media.SolidColorBrush(
+                (System.Windows.Media.Color)System.Windows.Media.ColorConverter.ConvertFromString("#ABEFC6")),
+            new System.Windows.Media.SolidColorBrush(
+                (System.Windows.Media.Color)System.Windows.Media.ColorConverter.ConvertFromString("#027A48")));
+
+    /// <summary>Toast de advertencia naranja estándar.</summary>
+    public void MostrarToastAdvertencia(string mensaje, string titulo = "⚠️ Advertencia") =>
+        MostrarToast("⚠️", titulo, mensaje,
+            new System.Windows.Media.SolidColorBrush(
+                (System.Windows.Media.Color)System.Windows.Media.ColorConverter.ConvertFromString("#FFFAEB")),
+            new System.Windows.Media.SolidColorBrush(
+                (System.Windows.Media.Color)System.Windows.Media.ColorConverter.ConvertFromString("#FEF0C7")),
+            new System.Windows.Media.SolidColorBrush(
+                (System.Windows.Media.Color)System.Windows.Media.ColorConverter.ConvertFromString("#B54708")));
+
+    /// <summary>Toast de error rojo estándar.</summary>
+    public void MostrarToastError(string mensaje, string titulo = "❌ Error") =>
+        MostrarToast("❌", titulo, mensaje,
+            new System.Windows.Media.SolidColorBrush(
+                (System.Windows.Media.Color)System.Windows.Media.ColorConverter.ConvertFromString("#FEF3F2")),
+            new System.Windows.Media.SolidColorBrush(
+                (System.Windows.Media.Color)System.Windows.Media.ColorConverter.ConvertFromString("#FECDCA")),
+            new System.Windows.Media.SolidColorBrush(
+                (System.Windows.Media.Color)System.Windows.Media.ColorConverter.ConvertFromString("#B42318")));
+
+    /// <summary>Toast de información azul estándar.</summary>
+    public void MostrarToastInfo(string mensaje, string titulo = "ℹ️ Información") =>
+        MostrarToast("ℹ️", titulo, mensaje,
+            new System.Windows.Media.SolidColorBrush(
+                (System.Windows.Media.Color)System.Windows.Media.ColorConverter.ConvertFromString("#EFF8FF")),
+            new System.Windows.Media.SolidColorBrush(
+                (System.Windows.Media.Color)System.Windows.Media.ColorConverter.ConvertFromString("#B2DDFF")),
+            new System.Windows.Media.SolidColorBrush(
+                (System.Windows.Media.Color)System.Windows.Media.ColorConverter.ConvertFromString("#175CD3")));
+    /// <summary>Cambia al tema claro.</summary>
+    private void TemaClaro_Click(object sender, RoutedEventArgs e)
+        => ThemeService.ApplyTheme(ThemeService.Light);
+
+    /// <summary>Cambia al tema oscuro.</summary>
+    private void TemaOscuro_Click(object sender, RoutedEventArgs e)
+        => ThemeService.ApplyTheme(ThemeService.Dark);
+
+    /// <summary>Cambia al tema de alto contraste.</summary>
+    private void TemaAltoContraste_Click(object sender, RoutedEventArgs e)
+        => ThemeService.ApplyTheme(ThemeService.HighContrast);
 }

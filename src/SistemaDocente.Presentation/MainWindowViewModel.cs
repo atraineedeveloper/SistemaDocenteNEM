@@ -40,8 +40,67 @@ public sealed class MainWindowViewModel : ViewModelBase
                 IrAEvaluacionCommand.NotifyCanExecuteChanged();
                 OnPropertyChanged(nameof(MostrarNavegacion));
             }
+
+            if (args.PropertyName == nameof(GestionGrupoViewModel.EstaOcupado))
+            {
+                OnPropertyChanged(nameof(EstaOcupado));
+            }
         };
+
+        Asistencia.PropertyChanged += (_, args) =>
+        {
+            if (args.PropertyName == nameof(GestionAsistenciaViewModel.EstaOcupado))
+            {
+                OnPropertyChanged(nameof(EstaOcupado));
+                IrAGrupoCommand.NotifyCanExecuteChanged();
+            }
+        };
+
+        AsistenciaMensual.PropertyChanged += (_, args) =>
+        {
+            if (args.PropertyName == nameof(GestionAsistenciaMensualViewModel.EstaOcupado))
+            {
+                OnPropertyChanged(nameof(EstaOcupado));
+            }
+        };
+
+        if (Proyectos is not null)
+        {
+            Proyectos.PropertyChanged += (_, args) =>
+            {
+                if (args.PropertyName == nameof(GestionProyectosViewModel.EstaOcupado))
+                {
+                    OnPropertyChanged(nameof(EstaOcupado));
+                }
+            };
+        }
+
+        if (Evaluacion is not null)
+        {
+            Evaluacion.PropertyChanged += (_, args) =>
+            {
+                if (args.PropertyName == nameof(EvaluacionActividadesViewModel.EstaOcupado))
+                {
+                    OnPropertyChanged(nameof(EstaOcupado));
+                }
+            };
+        }
+
+        if (Expediente is not null)
+        {
+            Expediente.PropertyChanged += (_, args) =>
+            {
+                // El expediente no expone EstaOcupado actualmente.
+            };
+        }
     }
+
+    public bool EstaOcupado =>
+        Grupo.EstaOcupado ||
+        Asistencia.EstaOcupado ||
+        AsistenciaMensual.EstaOcupado ||
+        (Proyectos?.EstaOcupado ?? false) ||
+        (Evaluacion?.EstaOcupado ?? false);
 
     public GestionGrupoViewModel Grupo { get; }
     public GestionAsistenciaViewModel Asistencia { get; }
@@ -82,6 +141,7 @@ public sealed class MainWindowViewModel : ViewModelBase
             if (SetProperty(ref _mostrarProyectos, value))
             {
                 OnPropertyChanged(nameof(MostrarGrupo));
+                OnPropertyChanged(nameof(TituloVentana));
                 OnPropertyChanged(nameof(MostrarAsistenciaDiaria));
                 OnPropertyChanged(nameof(MostrarAsistenciaMensual));
                 IrAProyectosCommand.NotifyCanExecuteChanged();
@@ -100,6 +160,7 @@ public sealed class MainWindowViewModel : ViewModelBase
             if (SetProperty(ref _mostrarEvaluacion, value))
             {
                 OnPropertyChanged(nameof(MostrarGrupo));
+                OnPropertyChanged(nameof(TituloVentana));
                 OnPropertyChanged(nameof(MostrarAsistenciaDiaria));
                 OnPropertyChanged(nameof(MostrarAsistenciaMensual));
                 IrAEvaluacionCommand.NotifyCanExecuteChanged();
@@ -118,6 +179,7 @@ public sealed class MainWindowViewModel : ViewModelBase
             if (SetProperty(ref _mostrarAsistencia, value))
             {
                 OnPropertyChanged(nameof(MostrarGrupo));
+                OnPropertyChanged(nameof(TituloVentana));
                 OnPropertyChanged(nameof(MostrarAsistenciaDiaria));
                 OnPropertyChanged(nameof(MostrarAsistenciaMensual));
                 IrAGrupoCommand.NotifyCanExecuteChanged();
@@ -130,6 +192,21 @@ public sealed class MainWindowViewModel : ViewModelBase
     public bool MostrarGrupo => !MostrarAsistencia && !MostrarProyectos && !MostrarEvaluacion;
 
     public bool MostrarNavegacion => Grupo.GrupoIdActual is not null;
+
+    public string TituloVentana
+    {
+        get
+        {
+            var titulo = "Sistema Docente Local";
+            if (!string.IsNullOrWhiteSpace(Grupo.NombreGrupo)) titulo += " - " + Grupo.NombreGrupo;
+            if (MostrarAsistenciaDiaria) titulo += " - Asistencia diaria";
+            else if (MostrarAsistenciaMensual) titulo += " - Asistencia mensual";
+            else if (MostrarProyectos) titulo += " - Proyectos";
+            else if (MostrarEvaluacion) titulo += " - Evaluacion";
+            else if (MostrarGrupo) titulo += " - Grupo";
+            return titulo;
+        }
+    }
 
     public bool SolicitarCerrar()
     {
