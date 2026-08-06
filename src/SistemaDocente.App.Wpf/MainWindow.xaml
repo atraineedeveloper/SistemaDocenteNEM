@@ -213,20 +213,22 @@
 
             <!-- ENCABEZADO Y CONTROLES DE FECHA REDISEÑADOS -->
             <DockPanel Margin="0,0,0,16">
-                <StackPanel DockPanel.Dock="Left">
+                <StackPanel DockPanel.Dock="Left" VerticalAlignment="Center">
                     <TextBlock Text="Asistencia del Grupo" Foreground="#475467" FontSize="13" FontWeight="Medium"/>
                     <TextBlock Text="Vista mensual" Foreground="#101828" FontSize="26" FontWeight="Bold"/>
                 </StackPanel>
-                <Border DockPanel.Dock="Right" Background="White" CornerRadius="8" Padding="8,4" BorderBrush="#EAECF0" BorderThickness="1">
-                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                        <Button TabIndex="200" Content="_Vista diaria" Command="{Binding DataContext.MostrarVistaDiariaCommand, RelativeSource={RelativeSource AncestorType=Window}}" Margin="0,0,8,0"/>
-                        <Button TabIndex="201" Content="&lt;" Command="{Binding MesAnteriorCommand}" MinWidth="36" Padding="6,4"/>
-                        <ComboBox TabIndex="202" Width="135" Margin="4,0" ItemsSource="{Binding Meses}" DisplayMemberPath="Nombre" SelectedValuePath="Numero" SelectedValue="{Binding MesSeleccionado}"/>
-                        <TextBox TabIndex="203" Width="75" Margin="4,0" Text="{Binding AnioSeleccionado, UpdateSourceTrigger=LostFocus}"/>
-                        <Button TabIndex="204" Content="&gt;" Command="{Binding MesSiguienteCommand}" MinWidth="36" Padding="6,4"/>
-                        <Button TabIndex="205" Content="_Mes actual" Command="{Binding IrMesActualCommand}" Margin="8,0,0,0"/>
-                    </StackPanel>
-                </Border>
+                <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center">
+                    <Border Background="White" CornerRadius="8" Padding="6,4" Margin="0,0,12,0" BorderBrush="#D0D5DD" BorderThickness="1">
+                        <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                            <Button TabIndex="201" Content="◄" Command="{Binding MesAnteriorCommand}" MinWidth="32" Padding="6,4" Margin="2,0"/>
+                            <ComboBox TabIndex="202" Width="130" Margin="2,0" ItemsSource="{Binding Meses}" DisplayMemberPath="Nombre" SelectedValuePath="Numero" SelectedValue="{Binding MesSeleccionado}"/>
+                            <TextBox TabIndex="203" Width="70" Margin="2,0" Text="{Binding AnioSeleccionado, UpdateSourceTrigger=LostFocus}"/>
+                            <Button TabIndex="204" Content="►" Command="{Binding MesSiguienteCommand}" MinWidth="32" Padding="6,4" Margin="2,0"/>
+                            <Button TabIndex="205" Content="Hoy" Command="{Binding IrMesActualCommand}" Margin="6,0,2,0"/>
+                        </StackPanel>
+                    </Border>
+                    <Button TabIndex="200" Style="{StaticResource PrimaryButton}" Content="📅 Vista diaria" Command="{Binding DataContext.MostrarVistaDiariaCommand, RelativeSource={RelativeSource AncestorType=Window}}"/>
+                </StackPanel>
             </DockPanel>
 
             <!-- TARJETAS MÉTRICAS Y DE ESTADO DE MES -->

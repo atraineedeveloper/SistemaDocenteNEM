@@ -111,5 +111,30 @@
             <Setter Property="BorderThickness" Value="1"/>
             <Setter Property="Background" Value="#FFFFFF"/>
         </Style>
+
+        <!-- ESTILO DATAGRID COLUMN HEADER FLUENT -->
+        <Style TargetType="DataGridColumnHeader">
+            <Setter Property="FontFamily" Value="{StaticResource AppFontFamily}"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="FontSize" Value="13"/>
+            <Setter Property="Foreground" Value="#344054"/>
+            <Setter Property="Background" Value="#F8F9FA"/>
+            <Setter Property="Padding" Value="10,9"/>
+            <Setter Property="BorderBrush" Value="#EAECF0"/>
+            <Setter Property="BorderThickness" Value="0,0,1,1"/>
+            <Setter Property="HorizontalContentAlignment" Value="Center"/>
+        </Style>
+
+        <!-- ESTILO DATAGRID FLUENT -->
+        <Style TargetType="DataGrid">
+            <Setter Property="FontFamily" Value="{StaticResource AppFontFamily}"/>
+            <Setter Property="Background" Value="#FFFFFF"/>
+            <Setter Property="BorderBrush" Value="#EAECF0"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="RowBackground" Value="#FFFFFF"/>
+            <Setter Property="AlternatingRowBackground" Value="#FAFAFA"/>
+            <Setter Property="HorizontalGridLinesBrush" Value="#F2F4F7"/>
+            <Setter Property="VerticalGridLinesBrush" Value="#EAECF0"/>
+        </Style>
     </Application.Resources>
 </Application>

@@ -122,10 +122,10 @@ public partial class MainWindow : Window
         estilo.Setters.Add(new Setter(TextBlock.TextAlignmentProperty, TextAlignment.Center));
         estilo.Setters.Add(new Setter(TextBlock.VerticalAlignmentProperty, VerticalAlignment.Center));
         estilo.Setters.Add(new Setter(TextBlock.FontWeightProperty, FontWeights.SemiBold));
-        AgregarColor(estilo, indice, "P", "#D9F2E6", "#176B45");
-        AgregarColor(estilo, indice, "F", "#FDE2E1", "#A61B1B");
-        AgregarColor(estilo, indice, "R", "#FFF0CC", "#8A5700");
-        AgregarColor(estilo, indice, "J", "#E4E8FF", "#3846A6");
+        AgregarColor(estilo, indice, "P", "#ECFDF3", "#027A48");
+        AgregarColor(estilo, indice, "F", "#FEF3F2", "#B42318");
+        AgregarColor(estilo, indice, "R", "#FFFAEB", "#B54708");
+        AgregarColor(estilo, indice, "J", "#EFF8FF", "#175CD3");
         return estilo;
     }
 
