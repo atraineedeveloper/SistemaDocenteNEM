@@ -47,14 +47,10 @@
                 <!-- Columna 3: Pestañas de navegación con indicador activo -->
                 <StackPanel Grid.Column="3" Orientation="Horizontal" VerticalAlignment="Stretch"
                             DataContext="{Binding DataContext, RelativeSource={RelativeSource AncestorType=Window}}">
-                    <Button x:Name="NavBtnGrupo" Style="{StaticResource NavTabButton}" Content="🏫 Grupo" Command="{Binding IrAGrupoCommand}" TabIndex="1"
-                            Tag="{Binding MostrarGrupo, Converter={StaticResource BoolToActiveTag}}"/>
-                    <Button x:Name="NavBtnAsistencia" Style="{StaticResource NavTabButton}" Content="📋 Asistencia" Command="{Binding IrAAsistenciaCommand}" TabIndex="2"
-                            Tag="{Binding MostrarAsistencia, Converter={StaticResource BoolToActiveTag}}"/>
-                    <Button x:Name="NavBtnProyectos" Style="{StaticResource NavTabButton}" Content="📁 Proyectos" Command="{Binding IrAProyectosCommand}" TabIndex="3"
-                            Tag="{Binding MostrarProyectos, Converter={StaticResource BoolToActiveTag}}"/>
-                    <Button x:Name="NavBtnEvaluacion" Style="{StaticResource NavTabButton}" Content="⭐ Evaluación" Command="{Binding IrAEvaluacionCommand}" TabIndex="4"
-                            Tag="{Binding MostrarEvaluacion, Converter={StaticResource BoolToActiveTag}}"/>
+                    <Button x:Name="NavBtnGrupo" Style="{StaticResource NavTabButton}" Content="🏫 Grupo" Command="{Binding IrAGrupoCommand}" TabIndex="1"/>
+                    <Button x:Name="NavBtnAsistencia" Style="{StaticResource NavTabButton}" Content="📋 Asistencia" Command="{Binding IrAAsistenciaCommand}" TabIndex="2"/>
+                    <Button x:Name="NavBtnProyectos" Style="{StaticResource NavTabButton}" Content="📁 Proyectos" Command="{Binding IrAProyectosCommand}" TabIndex="3"/>
+                    <Button x:Name="NavBtnEvaluacion" Style="{StaticResource NavTabButton}" Content="⭐ Evaluación" Command="{Binding IrAEvaluacionCommand}" TabIndex="4"/>
                 </StackPanel>
             </Grid>
         </Border>

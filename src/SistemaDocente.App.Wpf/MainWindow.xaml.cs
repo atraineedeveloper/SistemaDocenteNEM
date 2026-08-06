@@ -32,12 +32,34 @@ public partial class MainWindow : Window
                 Dispatcher.BeginInvoke(CrearColumnasMensuales);
             }
         };
+        // Actualizar indicador de pestaña activa cuando cambie la vista
+        viewModel.PropertyChanged += (_, args) =>
+        {
+            if (args.PropertyName is nameof(MainWindowViewModel.MostrarGrupo)
+                or nameof(MainWindowViewModel.MostrarAsistenciaDiaria)
+                or nameof(MainWindowViewModel.MostrarAsistenciaMensual)
+                or nameof(MainWindowViewModel.MostrarProyectos)
+                or nameof(MainWindowViewModel.MostrarEvaluacion))
+            {
+                ActualizarPestañaActiva();
+            }
+        };
         Loaded += (_, _) =>
         {
             AsignarFocoInicial();
             CrearColumnasMensuales();
+            ActualizarPestañaActiva();
         };
     }
+
+    private void ActualizarPestañaActiva()
+    {
+        NavBtnGrupo.Tag = ViewModel.MostrarGrupo ? "activo" : "";
+        NavBtnAsistencia.Tag = (ViewModel.MostrarAsistenciaDiaria || ViewModel.MostrarAsistenciaMensual) ? "activo" : "";
+        NavBtnProyectos.Tag = ViewModel.MostrarProyectos ? "activo" : "";
+        NavBtnEvaluacion.Tag = ViewModel.MostrarEvaluacion ? "activo" : "";
+    }
+
 
     private MainWindowViewModel ViewModel => (MainWindowViewModel)DataContext;
 
