@@ -25,10 +25,10 @@
                     <Button Content="+ Nuevo grupo" Command="{Binding AbrirNuevoGrupoCommand}" MinWidth="90" Padding="8,4"/>
                 </StackPanel>
                 <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" HorizontalAlignment="Right" DataContext="{Binding DataContext, RelativeSource={RelativeSource AncestorType=Window}}">
-                    <Button Content="_Grupo" Command="{Binding IrAGrupoCommand}" TabIndex="1"/>
-                    <Button Content="_Asistencia" Command="{Binding IrAAsistenciaCommand}" TabIndex="2"/>
-                    <Button Content="_Proyectos" Command="{Binding IrAProyectosCommand}" TabIndex="3"/>
-                    <Button Content="_Evaluación" Command="{Binding IrAEvaluacionCommand}" TabIndex="4"/>
+                    <Button Style="{StaticResource NavTabButton}" Content="_Grupo" Command="{Binding IrAGrupoCommand}" TabIndex="1"/>
+                    <Button Style="{StaticResource NavTabButton}" Content="_Asistencia" Command="{Binding IrAAsistenciaCommand}" TabIndex="2"/>
+                    <Button Style="{StaticResource NavTabButton}" Content="_Proyectos" Command="{Binding IrAProyectosCommand}" TabIndex="3"/>
+                    <Button Style="{StaticResource NavTabButton}" Content="_Evaluación" Command="{Binding IrAEvaluacionCommand}" TabIndex="4"/>
                 </StackPanel>
             </DockPanel>
         </Border>

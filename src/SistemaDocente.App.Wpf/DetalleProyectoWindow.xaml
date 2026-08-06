@@ -20,8 +20,8 @@
                 <TextBlock Text="Proyecto Didáctico" Foreground="#64748B" FontSize="13" FontWeight="SemiBold"/>
                 <TextBlock Text="{Binding NombreProyecto}" FontSize="22" FontWeight="Bold" Foreground="#0F172A"/>
             </StackPanel>
-            <Border DockPanel.Dock="Right" CornerRadius="12" Padding="10,4" VerticalAlignment="Center" Background="#E2E8F0">
-                <TextBlock Text="{Binding ProyectoSeleccionado.Estado}" FontWeight="SemiBold" Foreground="#334155"/>
+            <Border DockPanel.Dock="Right" CornerRadius="16" Padding="12,5" VerticalAlignment="Center" Background="#EFF8FF" BorderBrush="#B2DDFF" BorderThickness="1">
+                <TextBlock Text="{Binding ProyectoSeleccionado.Estado}" FontWeight="SemiBold" Foreground="#175CD3"/>
             </Border>
         </DockPanel>
 
@@ -44,17 +44,23 @@
                                 <ColumnDefinition Width="*"/>
                             </Grid.ColumnDefinitions>
                             <StackPanel>
-                                <TextBlock Text="Fecha Inicio" FontWeight="SemiBold"/>
+                                <TextBlock Text="Fecha Inicio (YYYY-MM-DD)" FontWeight="SemiBold"/>
                                 <TextBox Text="{Binding FechaInicio}"/>
                             </StackPanel>
                             <StackPanel Grid.Column="2">
-                                <TextBlock Text="Fecha Término" FontWeight="SemiBold"/>
+                                <TextBlock Text="Fecha Término (YYYY-MM-DD)" FontWeight="SemiBold"/>
                                 <TextBox Text="{Binding FechaTermino}"/>
                             </StackPanel>
                         </Grid>
 
-                        <TextBlock Foreground="#B45309" Text="⚠️ Duración fuera del rango estándar (14–31 días). Puedes guardar si es intencional."
-                                   Visibility="{Binding DuracionAtipica, Converter={StaticResource BoolToVisibility}}" Margin="0,0,0,8"/>
+                        <Border Background="#FFFAEB" BorderBrush="#FEF0C7" BorderThickness="1" CornerRadius="6" Padding="12,8" Margin="0,4,0,12"
+                                Visibility="{Binding DuracionAtipica, Converter={StaticResource BoolToVisibility}}">
+                            <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                <TextBlock Text="⚠️ " Foreground="#B54708" FontSize="14"/>
+                                <TextBlock Foreground="#B54708" FontWeight="Medium" TextWrapping="Wrap"
+                                           Text="Duración fuera del rango estándar (14–31 días). Puedes guardar si es intencional."/>
+                            </StackPanel>
+                        </Border>
 
                         <TextBlock Text="Observaciones" FontWeight="SemiBold"/>
                         <TextBox Text="{Binding ObservacionesProyecto, UpdateSourceTrigger=PropertyChanged}" AcceptsReturn="True" Height="55" TextWrapping="Wrap"/>
