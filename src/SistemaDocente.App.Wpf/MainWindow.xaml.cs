@@ -4,6 +4,7 @@ using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
 using System.Windows.Data;
 using System.Windows.Input;
+using System.Windows.Media;
 
 using SistemaDocente.Core;
 using SistemaDocente.Presentation;
@@ -347,9 +348,45 @@ public partial class MainWindow : Window
 
     private void AsignarFocoInicial()
     {
-        if (ViewModel.Grupo.MostrarBienvenida) NombreGrupoInicial.Focus();
-        else if (ViewModel.Grupo.MostrarEditorGrupo) NombreGrupoEdicion.Focus();
-        else if (ViewModel.Grupo.MostrarEditorEstudiante) PrimerApellidoEdicion.Focus();
+        UIElement? target = null;
+        if (ViewModel.Grupo.MostrarBienvenida)
+        {
+            target = FindFirstFocusableControl(GrupoBienvenidaPanel);
+        }
+        else if (ViewModel.Grupo.MostrarEditorGrupo)
+        {
+            target = FindFirstFocusableControl(GrupoEditorPanel);
+        }
+        else if (ViewModel.Grupo.MostrarEditorEstudiante)
+        {
+            target = FindFirstFocusableControl(EstudianteEditorPanel);
+        }
+
+        if (target is not null)
+        {
+            Dispatcher.BeginInvoke(() => target.Focus(), System.Windows.Threading.DispatcherPriority.Render);
+        }
+    }
+
+    private static UIElement? FindFirstFocusableControl(DependencyObject parent)
+    {
+        var count = VisualTreeHelper.GetChildrenCount(parent);
+        for (var i = 0; i < count; i++)
+        {
+            var child = VisualTreeHelper.GetChild(parent, i);
+            if (child is TextBox or ComboBox or DatePicker or Button { IsDefault: true })
+            {
+                return (UIElement)child;
+            }
+
+            var descendant = FindFirstFocusableControl(child);
+            if (descendant is not null)
+            {
+                return descendant;
+            }
+        }
+
+        return null;
     }
 
     private void OnClosing(object? sender, CancelEventArgs e)
@@ -410,6 +447,26 @@ public partial class MainWindow : Window
                 (System.Windows.Media.Color)System.Windows.Media.ColorConverter.ConvertFromString("#FEF0C7")),
             new System.Windows.Media.SolidColorBrush(
                 (System.Windows.Media.Color)System.Windows.Media.ColorConverter.ConvertFromString("#B54708")));
+
+    /// <summary>Toast de error rojo estándar.</summary>
+    public void MostrarToastError(string mensaje, string titulo = "❌ Error") =>
+        MostrarToast("❌", titulo, mensaje,
+            new System.Windows.Media.SolidColorBrush(
+                (System.Windows.Media.Color)System.Windows.Media.ColorConverter.ConvertFromString("#FEF3F2")),
+            new System.Windows.Media.SolidColorBrush(
+                (System.Windows.Media.Color)System.Windows.Media.ColorConverter.ConvertFromString("#FECDCA")),
+            new System.Windows.Media.SolidColorBrush(
+                (System.Windows.Media.Color)System.Windows.Media.ColorConverter.ConvertFromString("#B42318")));
+
+    /// <summary>Toast de información azul estándar.</summary>
+    public void MostrarToastInfo(string mensaje, string titulo = "ℹ️ Información") =>
+        MostrarToast("ℹ️", titulo, mensaje,
+            new System.Windows.Media.SolidColorBrush(
+                (System.Windows.Media.Color)System.Windows.Media.ColorConverter.ConvertFromString("#EFF8FF")),
+            new System.Windows.Media.SolidColorBrush(
+                (System.Windows.Media.Color)System.Windows.Media.ColorConverter.ConvertFromString("#B2DDFF")),
+            new System.Windows.Media.SolidColorBrush(
+                (System.Windows.Media.Color)System.Windows.Media.ColorConverter.ConvertFromString("#175CD3")));
 }
 
 // ══ Converter: bool → "activo" / "" para el indicador de pestaña ══════

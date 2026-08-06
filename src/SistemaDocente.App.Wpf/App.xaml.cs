@@ -27,7 +27,7 @@ public partial class App : System.Windows.Application
                 new GestionProyectosActividadesCasosUso(
                     persistencia, persistenciaProyectos, persistenciaProyectos));
             var estado = new AlmacenamientoEstadoJson(rutas.EstadoAplicacion);
-            var mensajes = new ServicioMensajesWpf();
+            var mensajes = new WpfNotificationService();
             var viewModelGrupo = new GestionGrupoViewModel(
                 gestion, estado, mensajes, new ServicioConfirmacionWpf());
             var viewModelAsistencia = new GestionAsistenciaViewModel(

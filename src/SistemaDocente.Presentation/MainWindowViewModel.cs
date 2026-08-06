@@ -40,8 +40,67 @@ public sealed class MainWindowViewModel : ViewModelBase
                 IrAEvaluacionCommand.NotifyCanExecuteChanged();
                 OnPropertyChanged(nameof(MostrarNavegacion));
             }
+
+            if (args.PropertyName == nameof(GestionGrupoViewModel.EstaOcupado))
+            {
+                OnPropertyChanged(nameof(EstaOcupado));
+            }
         };
+
+        Asistencia.PropertyChanged += (_, args) =>
+        {
+            if (args.PropertyName == nameof(GestionAsistenciaViewModel.EstaOcupado))
+            {
+                OnPropertyChanged(nameof(EstaOcupado));
+                IrAGrupoCommand.NotifyCanExecuteChanged();
+            }
+        };
+
+        AsistenciaMensual.PropertyChanged += (_, args) =>
+        {
+            if (args.PropertyName == nameof(GestionAsistenciaMensualViewModel.EstaOcupado))
+            {
+                OnPropertyChanged(nameof(EstaOcupado));
+            }
+        };
+
+        if (Proyectos is not null)
+        {
+            Proyectos.PropertyChanged += (_, args) =>
+            {
+                if (args.PropertyName == nameof(GestionProyectosViewModel.EstaOcupado))
+                {
+                    OnPropertyChanged(nameof(EstaOcupado));
+                }
+            };
+        }
+
+        if (Evaluacion is not null)
+        {
+            Evaluacion.PropertyChanged += (_, args) =>
+            {
+                if (args.PropertyName == nameof(EvaluacionActividadesViewModel.EstaOcupado))
+                {
+                    OnPropertyChanged(nameof(EstaOcupado));
+                }
+            };
+        }
+
+        if (Expediente is not null)
+        {
+            Expediente.PropertyChanged += (_, args) =>
+            {
+                // El expediente no expone EstaOcupado actualmente.
+            };
+        }
     }
+
+    public bool EstaOcupado =>
+        Grupo.EstaOcupado ||
+        Asistencia.EstaOcupado ||
+        AsistenciaMensual.EstaOcupado ||
+        (Proyectos?.EstaOcupado ?? false) ||
+        (Evaluacion?.EstaOcupado ?? false);
 
     public GestionGrupoViewModel Grupo { get; }
     public GestionAsistenciaViewModel Asistencia { get; }
