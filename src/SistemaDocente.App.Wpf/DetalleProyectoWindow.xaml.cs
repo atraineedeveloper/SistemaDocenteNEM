@@ -25,6 +25,15 @@ public partial class DetalleProyectoWindow : Window
         AbrirDetalleActividad();
     }
 
+    private void OnNuevaActividadClic(object sender, RoutedEventArgs e)
+    {
+        if (ViewModel.NuevaActividadCommand.CanExecute(null))
+        {
+            ViewModel.NuevaActividadCommand.Execute(null);
+            AbrirDetalleActividad();
+        }
+    }
+
     private void AbrirDetalleActividad()
     {
         if (ViewModel.ActividadSeleccionada is null && !ViewModel.TieneCambiosActividad) return;

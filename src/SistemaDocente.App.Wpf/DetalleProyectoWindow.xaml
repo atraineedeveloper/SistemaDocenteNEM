@@ -73,7 +73,7 @@
                     <StackPanel>
                         <DockPanel Margin="0,0,0,10">
                             <TextBlock DockPanel.Dock="Left" Text="Actividades del Proyecto" FontSize="16" FontWeight="SemiBold" Foreground="#1E293B" VerticalAlignment="Center"/>
-                            <Button DockPanel.Dock="Right" Content="+ Nueva Actividad" Command="{Binding NuevaActividadCommand}"/>
+                            <Button DockPanel.Dock="Right" Content="+ Nueva Actividad" Click="OnNuevaActividadClic"/>
                         </DockPanel>
 
                         <TextBox Text="{Binding BusquedaActividad, UpdateSourceTrigger=PropertyChanged}" ToolTip="Buscar actividad..."/>
