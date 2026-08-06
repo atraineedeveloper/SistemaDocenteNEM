@@ -87,7 +87,7 @@
                     <StackPanel Grid.Column="0">
                         <TextBlock Text="Fortalezas" FontSize="16" FontWeight="Bold" Foreground="#065F46" Margin="0,0,0,6"/>
                         <DockPanel Margin="0,0,0,8">
-                            <Button DockPanel.Dock="Right" Content="+ _Agregar" Command="{Binding AgregarFortalezaCommand}" TabIndex="110" AutomationProperties.Name="Agregar fortaleza"/>
+                            <Button DockPanel.Dock="Right" Content="+ Agregar" Command="{Binding AgregarFortalezaCommand}" TabIndex="110" AutomationProperties.Name="Agregar fortaleza"/>
                             <TextBox Text="{Binding NuevaFortaleza, UpdateSourceTrigger=PropertyChanged}" ToolTip="Escriba una fortaleza pedagógica..." TabIndex="109" AutomationProperties.Name="Nueva fortaleza pedagógica"/>
                         </DockPanel>
                         <Grid Height="300">
@@ -99,7 +99,7 @@
                     <StackPanel Grid.Column="2">
                         <TextBlock Text="Dificultades" FontSize="16" FontWeight="Bold" Foreground="#991B1B" Margin="0,0,0,6"/>
                         <DockPanel Margin="0,0,0,8">
-                            <Button DockPanel.Dock="Right" Content="+ _Agregar" Command="{Binding AgregarDificultadCommand}" TabIndex="120" AutomationProperties.Name="Agregar dificultad"/>
+                            <Button DockPanel.Dock="Right" Content="+ Agregar" Command="{Binding AgregarDificultadCommand}" TabIndex="120" AutomationProperties.Name="Agregar dificultad"/>
                             <TextBox Text="{Binding NuevaDificultad, UpdateSourceTrigger=PropertyChanged}" ToolTip="Escriba una dificultad pedagógica..." TabIndex="119" AutomationProperties.Name="Nueva dificultad pedagógica"/>
                         </DockPanel>
                         <Grid Height="300">
@@ -122,7 +122,7 @@
                     <StackPanel Grid.Column="0">
                         <TextBlock Text="Apoyos Aplicados" FontSize="16" FontWeight="Bold" Foreground="#1E3A8A" Margin="0,0,0,6"/>
                         <DockPanel Margin="0,0,0,8">
-                            <Button DockPanel.Dock="Right" Content="+ _Agregar" Command="{Binding AgregarApoyoCommand}" TabIndex="130" AutomationProperties.Name="Agregar apoyo aplicado"/>
+                            <Button DockPanel.Dock="Right" Content="+ Agregar" Command="{Binding AgregarApoyoCommand}" TabIndex="130" AutomationProperties.Name="Agregar apoyo aplicado"/>
                             <TextBox Text="{Binding NuevoApoyo, UpdateSourceTrigger=PropertyChanged}" ToolTip="Escriba un apoyo pedagógico aplicado..." TabIndex="129" AutomationProperties.Name="Nuevo apoyo pedagógico aplicado"/>
                         </DockPanel>
                         <Grid Height="300">
@@ -134,7 +134,7 @@
                     <StackPanel Grid.Column="2">
                         <TextBlock Text="Observaciones Cronológicas" FontSize="16" FontWeight="Bold" Foreground="#374151" Margin="0,0,0,6"/>
                         <DockPanel Margin="0,0,0,8">
-                            <Button DockPanel.Dock="Right" Content="+ _Agregar" Command="{Binding AgregarObservacionCommand}" TabIndex="140" AutomationProperties.Name="Agregar observación cronológica"/>
+                            <Button DockPanel.Dock="Right" Content="+ Agregar" Command="{Binding AgregarObservacionCommand}" TabIndex="140" AutomationProperties.Name="Agregar observación cronológica"/>
                             <TextBox Text="{Binding NuevaObservacion, UpdateSourceTrigger=PropertyChanged}" ToolTip="Escriba una observación cronológica..." TabIndex="139" AutomationProperties.Name="Nueva observación cronológica"/>
                         </DockPanel>
                         <Grid Height="300">
@@ -169,7 +169,7 @@
                         <DatePicker SelectedDate="{Binding FechaSeguimientoAcuerdo, UpdateSourceTrigger=PropertyChanged}" Margin="0,0,0,8" TabIndex="152" AutomationProperties.Name="Fecha de seguimiento del acuerdo"/>
 
                         <WrapPanel Margin="0,4,0,12" HorizontalAlignment="Right">
-                            <Button Content="+ _Registrar Acuerdo" Command="{Binding AgregarAcuerdoCommand}" TabIndex="153" AutomationProperties.Name="Registrar acuerdo con tutores"/>
+                            <Button Content="+ Registrar Acuerdo" Command="{Binding AgregarAcuerdoCommand}" TabIndex="153" AutomationProperties.Name="Registrar acuerdo con tutores"/>
                         </WrapPanel>
 
                         <TextBlock Text="Histórico de Acuerdos Registrados" FontSize="16" FontWeight="Bold" Foreground="#1E293B" Margin="0,8,0,8"/>
@@ -197,7 +197,7 @@
         </TabControl>
 
         <DockPanel Grid.Row="2">
-            <Button DockPanel.Dock="Right" Content="_Cerrar" Click="OnCerrarClic" IsCancel="True" TabIndex="900" AutomationProperties.Name="Cerrar expediente del estudiante"/>
+            <Button DockPanel.Dock="Right" Content="Cerrar" Click="OnCerrarClic" IsCancel="True" TabIndex="900" AutomationProperties.Name="Cerrar expediente del estudiante"/>
         </DockPanel>
     </Grid>
 </Window>

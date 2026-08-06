@@ -26,6 +26,10 @@ public partial class MainWindow : Window
                 or nameof(GestionGrupoViewModel.MostrarBienvenida))
             {
                 Dispatcher.BeginInvoke(AsignarFocoInicial);
+                if (viewModel.Grupo.PanelActual is PanelEdicion.AgregarEstudiante or PanelEdicion.EditarEstudiante)
+                {
+                    Dispatcher.BeginInvoke(AbrirEditorEstudianteVentana);
+                }
             }
         };
         viewModel.AsistenciaMensual.PropertyChanged += (_, args) =>
@@ -344,6 +348,17 @@ public partial class MainWindow : Window
         GrillaMensual.ScrollIntoView(GrillaMensual.CurrentItem, columna);
     }
 
+    private void AbrirEditorEstudianteVentana()
+    {
+        if (ViewModel.Grupo.PanelActual is not (PanelEdicion.AgregarEstudiante or PanelEdicion.EditarEstudiante))
+        {
+            return;
+        }
+
+        var ventana = new EditorEstudianteWindow(ViewModel.Grupo) { Owner = this };
+        ventana.ShowDialog();
+    }
+
     private void AsignarFocoInicial()
     {
         UIElement? target = null;
@@ -354,10 +369,6 @@ public partial class MainWindow : Window
         else if (ViewModel.Grupo.MostrarEditorGrupo)
         {
             target = FindFirstFocusableControl(GrupoEditorPanel);
-        }
-        else if (ViewModel.Grupo.MostrarEditorEstudiante)
-        {
-            target = FindFirstFocusableControl(EstudianteEditorPanel);
         }
 
         if (target is not null)

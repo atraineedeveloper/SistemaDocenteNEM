@@ -12,7 +12,7 @@ namespace SistemaDocente.App.Wpf.Controls
 
         public static readonly DependencyProperty HeaderProperty =
             DependencyProperty.Register(nameof(Header), typeof(string), typeof(FormField),
-                new PropertyMetadata(string.Empty, OnHeaderChanged));
+                new PropertyMetadata(string.Empty));
 
         public string Header
         {
@@ -30,20 +30,11 @@ namespace SistemaDocente.App.Wpf.Controls
             set => SetValue(ErrorProperty, value);
         }
 
-        private static void OnHeaderChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
-        {
-            if (d is FormField control && control.HeaderText != null)
-            {
-                control.HeaderText.Text = e.NewValue as string ?? string.Empty;
-            }
-        }
-
         private static void OnErrorChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
         {
             if (d is FormField control && control.ErrorText != null)
             {
                 var error = e.NewValue as string;
-                control.ErrorText.Text = error ?? string.Empty;
                 control.ErrorText.Visibility = string.IsNullOrWhiteSpace(error) ? Visibility.Collapsed : Visibility.Visible;
             }
         }

@@ -43,11 +43,11 @@ public sealed class ComposicionAsistenciaTests
         Assert.Contains("DatePicker", xaml, StringComparison.Ordinal);
         Assert.Contains("DataGrid", xaml, StringComparison.Ordinal);
         Assert.Contains("Falta justificada", xaml, StringComparison.Ordinal);
-        Assert.Contains("Marcar _todos presentes", xaml, StringComparison.Ordinal);
+        Assert.Contains("Marcar todos presentes", xaml, StringComparison.Ordinal);
         Assert.Contains("Modifiers=\"Control\" Key=\"S\"", xaml, StringComparison.Ordinal);
         Assert.Contains("FrozenColumnCount=\"2\"", xaml, StringComparison.Ordinal);
         Assert.Contains("GrillaMensual", xaml, StringComparison.Ordinal);
-        Assert.Contains("G_uardar cambios (Ctrl+S)", xaml, StringComparison.Ordinal);
+        Assert.Contains("Guardar cambios (Ctrl+S)", xaml, StringComparison.Ordinal);
         Assert.DoesNotContain("No lectivo", xaml, StringComparison.Ordinal);
         Assert.DoesNotContain("No lectivo", codeBehind, StringComparison.Ordinal);
         Assert.Contains("EsCierreSemana", codeBehind, StringComparison.Ordinal);
