@@ -349,6 +349,7 @@
         <!-- VISTA: EVALUACIÓN NEM (Pantalla Completa en Aula) -->
         <Grid Grid.Row="1" Margin="28" DataContext="{Binding Evaluacion}"
               Visibility="{Binding DataContext.MostrarEvaluacion, RelativeSource={RelativeSource AncestorType=Window}, Converter={StaticResource BoolToVisibility}}">
+            <Grid.Style><Style TargetType="Grid"><Setter Property="IsEnabled" Value="True"/><Style.Triggers><DataTrigger Binding="{Binding EstaOcupado}" Value="True"><Setter Property="IsEnabled" Value="False"/></DataTrigger></Style.Triggers></Style></Grid.Style>
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto"/>
                 <RowDefinition Height="Auto"/>
@@ -357,14 +358,16 @@
                 <RowDefinition Height="Auto"/>
             </Grid.RowDefinitions>
 
-            <DockPanel Margin="0,0,0,12">
-                <StackPanel DockPanel.Dock="Left">
-                    <TextBlock Text="Evaluación de Desempeño NEM" Foreground="#475467"/>
-                    <TextBlock Text="Registro Pedagógico de Actividades" Foreground="#101828" FontSize="27" FontWeight="SemiBold"/>
+            <!-- ENCABEZADO PRINCIPAL -->
+            <DockPanel Margin="0,0,0,16">
+                <StackPanel DockPanel.Dock="Left" VerticalAlignment="Center">
+                    <TextBlock Text="Evaluación de Desempeño NEM" Foreground="#475467" FontSize="13" FontWeight="Medium"/>
+                    <TextBlock Text="Registro Pedagógico de Actividades" Foreground="#101828" FontSize="26" FontWeight="Bold"/>
                 </StackPanel>
             </DockPanel>
 
-            <Border Grid.Row="1" Background="White" CornerRadius="8" Padding="14" Margin="0,0,0,12" BorderBrush="#E2E8F0" BorderThickness="1">
+            <!-- TARJETA DE SELECCIÓN DE PROYECTO Y ACTIVIDAD -->
+            <Border Grid.Row="1" Background="White" CornerRadius="8" Padding="16" Margin="0,0,0,14" BorderBrush="#EAECF0" BorderThickness="1">
                 <Grid>
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="*"/>
@@ -373,37 +376,45 @@
                     </Grid.ColumnDefinitions>
 
                     <StackPanel Grid.Column="0">
-                        <TextBlock Text="1. Seleccionar Proyecto Didáctico" Foreground="#101828" FontWeight="SemiBold" Margin="0,0,0,4"/>
+                        <TextBlock Text="1. Seleccionar Proyecto Didáctico" Foreground="#101828" FontWeight="SemiBold" Margin="0,0,0,6"/>
                         <ComboBox ItemsSource="{Binding Proyectos}" SelectedItem="{Binding ProyectoSeleccionado}" DisplayMemberPath="Nombre"/>
                     </StackPanel>
 
                     <StackPanel Grid.Column="2">
-                        <TextBlock Text="2. Seleccionar Actividad a Evaluar" Foreground="#101828" FontWeight="SemiBold" Margin="0,0,0,4"/>
+                        <TextBlock Text="2. Seleccionar Actividad a Evaluar" Foreground="#101828" FontWeight="SemiBold" Margin="0,0,0,6"/>
                         <ComboBox ItemsSource="{Binding Actividades}" SelectedItem="{Binding ActividadSeleccionada}" DisplayMemberPath="Titulo"/>
                     </StackPanel>
                 </Grid>
             </Border>
 
-            <DockPanel Grid.Row="2" Margin="0,0,0,10">
+            <!-- BARRA DE BÚSQUEDA Y TARJETAS MÉTRICAS DE NIVEL NEM -->
+            <DockPanel Grid.Row="2" Margin="0,0,0,14">
                 <StackPanel DockPanel.Dock="Left" Orientation="Horizontal" VerticalAlignment="Center">
                     <TextBox Width="200" Text="{Binding BusquedaEstudiante, UpdateSourceTrigger=PropertyChanged}" ToolTip="Buscar estudiante..."/>
                     <ComboBox Width="160" Margin="8,0" ItemsSource="{Binding FiltrosEntrega}" SelectedItem="{Binding FiltroEntrega}"/>
                 </StackPanel>
-                <TextBlock DockPanel.Dock="Right" VerticalAlignment="Center" Foreground="#101828" FontSize="13">
-                    <Run Text="Total "/><Run Text="{Binding Total, Mode=OneWay}"/>
-                    <Run Text=" · Pend. "/><Run Text="{Binding Pendientes, Mode=OneWay}"/>
-                    <Run Text=" · Domina "/><Run Text="{Binding Domina, Mode=OneWay}"/>
-                    <Run Text=" · Suficiente "/><Run Text="{Binding Suficiente, Mode=OneWay}"/>
-                    <Run Text=" · En proceso "/><Run Text="{Binding EnProceso, Mode=OneWay}"/>
-                    <Run Text=" · Req. apoyo "/><Run Text="{Binding RequiereApoyo, Mode=OneWay}"/>
-                    <Run Text=" · No entregó "/><Run Text="{Binding NoEntrego, Mode=OneWay}"/>
-                </TextBlock>
+                <WrapPanel DockPanel.Dock="Right" HorizontalAlignment="Right" VerticalAlignment="Center">
+                    <Border Background="#F8F9FA" CornerRadius="6" Padding="10,6" Margin="4,0" BorderBrush="#EAECF0" BorderThickness="1"><TextBlock Foreground="#101828" FontWeight="SemiBold"><Run Text="Total: "/><Run Text="{Binding Total, Mode=OneWay}"/></TextBlock></Border>
+                    <Border Background="#F2F4F7" CornerRadius="6" Padding="10,6" Margin="4,0"><TextBlock Foreground="#344054" FontWeight="SemiBold"><Run Text="Pend.: "/><Run Text="{Binding Pendientes, Mode=OneWay}"/></TextBlock></Border>
+                    <Border Background="#ECFDF3" CornerRadius="6" Padding="10,6" Margin="4,0"><TextBlock Foreground="#027A48" FontWeight="SemiBold"><Run Text="Domina: "/><Run Text="{Binding Domina, Mode=OneWay}"/></TextBlock></Border>
+                    <Border Background="#EFF8FF" CornerRadius="6" Padding="10,6" Margin="4,0"><TextBlock Foreground="#175CD3" FontWeight="SemiBold"><Run Text="Suficiente: "/><Run Text="{Binding Suficiente, Mode=OneWay}"/></TextBlock></Border>
+                    <Border Background="#FFFAEB" CornerRadius="6" Padding="10,6" Margin="4,0"><TextBlock Foreground="#B54708" FontWeight="SemiBold"><Run Text="En proceso: "/><Run Text="{Binding EnProceso, Mode=OneWay}"/></TextBlock></Border>
+                    <Border Background="#FEF3F2" CornerRadius="6" Padding="10,6" Margin="4,0"><TextBlock Foreground="#B42318" FontWeight="SemiBold"><Run Text="Req. apoyo: "/><Run Text="{Binding RequiereApoyo, Mode=OneWay}"/></TextBlock></Border>
+                    <Border Background="#F2F4F7" CornerRadius="6" Padding="10,6" Margin="4,0"><TextBlock Foreground="#475467" FontWeight="SemiBold"><Run Text="No entregó: "/><Run Text="{Binding NoEntrego, Mode=OneWay}"/></TextBlock></Border>
+                </WrapPanel>
             </DockPanel>
 
+            <!-- DATAGRID DE ENTREGAS Y EVALUACIÓN DE ACTIVIDADES -->
             <DataGrid x:Name="GrillaEntregasEvaluacion" Grid.Row="3" ItemsSource="{Binding EntregasVisibles}" AutoGenerateColumns="False" CanUserAddRows="False" RowHeaderWidth="0" EnableRowVirtualization="True" PreviewKeyDown="OnGrillaEntregasEvaluacionPreviewKeyDown">
                 <DataGrid.ContextMenu>
                     <ContextMenu>
-                        <MenuItem Header="🌟 Domina (D)" Command="{Binding GuardarCommand}"/>
+                        <MenuItem Header="🌟 Domina (D)" Command="{Binding MarcarDominaCommand}"/>
+                        <MenuItem Header="📘 Suficiente (S)" Command="{Binding MarcarSuficienteCommand}"/>
+                        <MenuItem Header="📙 En proceso (E)" Command="{Binding MarcarEnProcesoCommand}"/>
+                        <MenuItem Header="🔴 Requiere apoyo (R)" Command="{Binding MarcarRequiereApoyoCommand}"/>
+                        <MenuItem Header="⚪ No entregó (N)" Command="{Binding MarcarNoEntregoCommand}"/>
+                        <Separator/>
+                        <MenuItem Header="⚪ Marcar pendiente (P)" Command="{Binding MarcarPendienteCommand}"/>
                     </ContextMenu>
                 </DataGrid.ContextMenu>
                 <DataGrid.Columns>
@@ -419,24 +430,24 @@
                                 <Setter Property="Padding" Value="6,2"/>
                                 <Style.Triggers>
                                     <DataTrigger Binding="{Binding EtiquetaNivel}" Value="D">
-                                        <Setter Property="Foreground" Value="#0F5132"/>
-                                        <Setter Property="Background" Value="#D1E7DD"/>
+                                        <Setter Property="Foreground" Value="#027A48"/>
+                                        <Setter Property="Background" Value="#ECFDF3"/>
                                     </DataTrigger>
                                     <DataTrigger Binding="{Binding EtiquetaNivel}" Value="S">
-                                        <Setter Property="Foreground" Value="#084298"/>
-                                        <Setter Property="Background" Value="#CFE2FF"/>
+                                        <Setter Property="Foreground" Value="#175CD3"/>
+                                        <Setter Property="Background" Value="#EFF8FF"/>
                                     </DataTrigger>
                                     <DataTrigger Binding="{Binding EtiquetaNivel}" Value="EP">
-                                        <Setter Property="Foreground" Value="#664D03"/>
-                                        <Setter Property="Background" Value="#FFF3CD"/>
+                                        <Setter Property="Foreground" Value="#B54708"/>
+                                        <Setter Property="Background" Value="#FFFAEB"/>
                                     </DataTrigger>
                                     <DataTrigger Binding="{Binding EtiquetaNivel}" Value="RA">
-                                        <Setter Property="Foreground" Value="#842029"/>
-                                        <Setter Property="Background" Value="#F8D7DA"/>
+                                        <Setter Property="Foreground" Value="#B42318"/>
+                                        <Setter Property="Background" Value="#FEF3F2"/>
                                     </DataTrigger>
                                     <DataTrigger Binding="{Binding EtiquetaNivel}" Value="NE">
-                                        <Setter Property="Foreground" Value="#41464B"/>
-                                        <Setter Property="Background" Value="#E2E3E5"/>
+                                        <Setter Property="Foreground" Value="#475467"/>
+                                        <Setter Property="Background" Value="#F2F4F7"/>
                                     </DataTrigger>
                                 </Style.Triggers>
                             </Style>
@@ -446,18 +457,19 @@
                 </DataGrid.Columns>
             </DataGrid>
 
-            <DockPanel Grid.Row="4" Margin="0,10,0,0">
+            <!-- BOTONERA DE CAPTURA RÁPIDA Y ACCIÓN PRIMARIA -->
+            <DockPanel Grid.Row="4" Margin="0,14,0,0">
                 <WrapPanel DockPanel.Dock="Left">
-                    <Button Content="D Domina" Command="{Binding MarcarDominaCommand}" MinWidth="80"/>
-                    <Button Content="S Suficiente" Command="{Binding MarcarSuficienteCommand}" MinWidth="90"/>
-                    <Button Content="E En proceso" Command="{Binding MarcarEnProcesoCommand}" MinWidth="95"/>
-                    <Button Content="R Req. apoyo" Command="{Binding MarcarRequiereApoyoCommand}" MinWidth="95"/>
-                    <Button Content="N No entregó" Command="{Binding MarcarNoEntregoCommand}" MinWidth="95"/>
-                    <Button Content="P Pendiente" Command="{Binding MarcarPendienteCommand}" MinWidth="85"/>
+                    <Button Content="D Domina" Command="{Binding MarcarDominaCommand}" MinWidth="85"/>
+                    <Button Content="S Suficiente" Command="{Binding MarcarSuficienteCommand}" MinWidth="95"/>
+                    <Button Content="E En proceso" Command="{Binding MarcarEnProcesoCommand}" MinWidth="100"/>
+                    <Button Content="R Req. apoyo" Command="{Binding MarcarRequiereApoyoCommand}" MinWidth="100"/>
+                    <Button Content="N No entregó" Command="{Binding MarcarNoEntregoCommand}" MinWidth="100"/>
+                    <Button Content="P Pendiente" Command="{Binding MarcarPendienteCommand}" MinWidth="90"/>
                 </WrapPanel>
                 <WrapPanel DockPanel.Dock="Right">
-                    <Button Content="Descartar" Command="{Binding DescartarActividadCommand}"/>
-                    <Button Content="Guardar cambios (Ctrl+S)" Command="{Binding GuardarActividadCommand}"/>
+                    <Button Content="Descartar" Command="{Binding DescartarActividadCommand}" Margin="0,0,6,0"/>
+                    <Button Style="{StaticResource PrimaryButton}" Content="Guardar cambios (Ctrl+S)" Command="{Binding GuardarActividadCommand}"/>
                 </WrapPanel>
             </DockPanel>
             <Grid.InputBindings><KeyBinding Modifiers="Control" Key="S" Command="{Binding GuardarActividadCommand}"/></Grid.InputBindings>
