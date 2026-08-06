@@ -493,6 +493,7 @@ data/
 respaldos/
 backups/
 exportaciones/
+audit/
 
 # Configuración privada
 appsettings.Local.json

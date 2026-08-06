@@ -118,6 +118,19 @@ internal static class EsquemaSqlite
         )
         """;
 
+    private const string TablaEntregasV3 = """
+        CREATE TABLE entregas_actividad (
+            actividad_id TEXT NOT NULL,
+            estudiante_id TEXT NOT NULL,
+            grupo_id TEXT NOT NULL,
+            estado_entrega INTEGER NOT NULL CHECK (estado_entrega IN (0, 1, 2)),
+            observacion TEXT NOT NULL CHECK (length(observacion) <= 500),
+            PRIMARY KEY (actividad_id, estudiante_id),
+            FOREIGN KEY (actividad_id, grupo_id) REFERENCES actividades_proyecto(actividad_id, grupo_id) ON DELETE RESTRICT,
+            FOREIGN KEY (estudiante_id, grupo_id) REFERENCES estudiantes(id, grupo_id) ON DELETE RESTRICT
+        )
+        """;
+
     private const string TablaEntregas = """
         CREATE TABLE entregas_actividad (
             actividad_id TEXT NOT NULL,
@@ -152,6 +165,17 @@ internal static class EsquemaSqlite
             ["registros_asistencia"] = TablaRegistros,
             ["ix_asistencias_diarias_grupo_fecha"] = IndiceAsistenciasGrupoFecha,
             ["ix_registros_asistencia_estudiante_id"] = IndiceRegistrosEstudiante,
+        };
+
+    private static readonly IReadOnlyDictionary<string, string> ObjetosProyectosV3 =
+        new Dictionary<string, string>(StringComparer.Ordinal)
+        {
+            ["proyectos_didacticos"] = TablaProyectos,
+            ["actividades_proyecto"] = TablaActividades,
+            ["entregas_actividad"] = TablaEntregasV3,
+            ["ix_proyectos_grupo_estado_fecha"] = IndiceProyectos,
+            ["ix_actividades_proyecto_fecha"] = IndiceActividades,
+            ["ix_entregas_estudiante"] = IndiceEntregas,
         };
 
     private static readonly IReadOnlyDictionary<string, string> ObjetosProyectos =
@@ -329,12 +353,13 @@ internal static class EsquemaSqlite
     private static void ValidarVersionTres(SqliteConnection conexion)
     {
         ValidarVersionDos(conexion);
-        ValidarObjetos(conexion, ObjetosProyectos);
+        ValidarObjetos(conexion, ObjetosProyectosV3);
     }
 
     private static void ValidarVersionCuatro(SqliteConnection conexion)
     {
-        ValidarVersionTres(conexion);
+        ValidarVersionDos(conexion);
+        ValidarObjetos(conexion, ObjetosProyectos);
     }
 
     private static void CrearObjetos(
