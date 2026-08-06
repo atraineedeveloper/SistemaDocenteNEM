@@ -16,6 +16,7 @@ public sealed class EvaluacionActividadesViewModel : ViewModelBase
     private IReadOnlyList<ActividadProyectoResumen> _actividades = [];
     private IReadOnlyList<EntregaActividadVisual> _entregas = [];
     private IReadOnlyList<EntregaActividadVisual> _entregasVisibles = [];
+    private EntregaActividadVisual? _entregaSeleccionada;
     private bool _estaOcupado;
     private FiltroEntrega _filtroEntrega;
     private string _busquedaEstudiante = string.Empty;
@@ -47,6 +48,17 @@ public sealed class EvaluacionActividadesViewModel : ViewModelBase
             () => Marcar(NivelLogro.NoEntrego), () => PuedeEditar);
         MarcarPendienteCommand = new RelayCommand(
             () => Marcar(NivelLogro.Pendiente), () => PuedeEditar);
+
+        MarcarTodosDominaCommand = new RelayCommand(
+            () => MarcarTodos(NivelLogro.Domina), () => PuedeEditar);
+        MarcarTodosSuficienteCommand = new RelayCommand(
+            () => MarcarTodos(NivelLogro.Suficiente), () => PuedeEditar);
+        MarcarTodosEnProcesoCommand = new RelayCommand(
+            () => MarcarTodos(NivelLogro.EnProceso), () => PuedeEditar);
+        MarcarTodosRequiereApoyoCommand = new RelayCommand(
+            () => MarcarTodos(NivelLogro.RequiereApoyo), () => PuedeEditar);
+        MarcarTodosNoEntregoCommand = new RelayCommand(
+            () => MarcarTodos(NivelLogro.NoEntrego), () => PuedeEditar);
     }
 
     public RelayCommand GuardarActividadCommand { get; }
@@ -57,6 +69,17 @@ public sealed class EvaluacionActividadesViewModel : ViewModelBase
     public RelayCommand MarcarRequiereApoyoCommand { get; }
     public RelayCommand MarcarNoEntregoCommand { get; }
     public RelayCommand MarcarPendienteCommand { get; }
+    public RelayCommand MarcarTodosDominaCommand { get; }
+    public RelayCommand MarcarTodosSuficienteCommand { get; }
+    public RelayCommand MarcarTodosEnProcesoCommand { get; }
+    public RelayCommand MarcarTodosRequiereApoyoCommand { get; }
+    public RelayCommand MarcarTodosNoEntregoCommand { get; }
+
+    public EntregaActividadVisual? EntregaSeleccionada
+    {
+        get => _entregaSeleccionada;
+        set => SetProperty(ref _entregaSeleccionada, value);
+    }
 
     public IReadOnlyList<FiltroEntrega> FiltrosEntrega { get; } = Enum.GetValues<FiltroEntrega>();
 
@@ -272,9 +295,28 @@ public sealed class EvaluacionActividadesViewModel : ViewModelBase
 
     private void Marcar(NivelLogro nivel)
     {
-        var filas = Entregas.Where(x => x.Seleccionada).ToArray();
-        if (filas.Length == 0) filas = EntregasVisibles.ToArray();
-        foreach (var fila in filas) fila.NivelLogro = nivel;
+        var marcados = Entregas.Where(x => x.Seleccionada).ToArray();
+        if (marcados.Length > 0)
+        {
+            foreach (var fila in marcados) fila.NivelLogro = nivel;
+        }
+        else if (EntregaSeleccionada is not null)
+        {
+            EntregaSeleccionada.NivelLogro = nivel;
+        }
+        else
+        {
+            foreach (var fila in EntregasVisibles) fila.NivelLogro = nivel;
+        }
+
+        AplicarFiltros();
+        NotificarEdicion();
+    }
+
+    private void MarcarTodos(NivelLogro nivel)
+    {
+        foreach (var fila in EntregasVisibles) fila.NivelLogro = nivel;
+        AplicarFiltros();
         NotificarEdicion();
     }
 

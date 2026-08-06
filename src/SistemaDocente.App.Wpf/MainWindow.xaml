@@ -405,14 +405,14 @@
             </DockPanel>
 
             <!-- DATAGRID DE ENTREGAS Y EVALUACIÓN DE ACTIVIDADES -->
-            <DataGrid x:Name="GrillaEntregasEvaluacion" Grid.Row="3" ItemsSource="{Binding EntregasVisibles}" AutoGenerateColumns="False" CanUserAddRows="False" RowHeaderWidth="0" EnableRowVirtualization="True" PreviewKeyDown="OnGrillaEntregasEvaluacionPreviewKeyDown">
+            <DataGrid x:Name="GrillaEntregasEvaluacion" Grid.Row="3" ItemsSource="{Binding EntregasVisibles}" SelectedItem="{Binding EntregaSeleccionada, Mode=TwoWay}" AutoGenerateColumns="False" CanUserAddRows="False" RowHeaderWidth="0" EnableRowVirtualization="True" PreviewKeyDown="OnGrillaEntregasEvaluacionPreviewKeyDown">
                 <DataGrid.ContextMenu>
                     <ContextMenu>
-                        <MenuItem Header="🌟 Domina (D)" Command="{Binding MarcarDominaCommand}"/>
-                        <MenuItem Header="📘 Suficiente (S)" Command="{Binding MarcarSuficienteCommand}"/>
-                        <MenuItem Header="📙 En proceso (E)" Command="{Binding MarcarEnProcesoCommand}"/>
-                        <MenuItem Header="🔴 Requiere apoyo (R)" Command="{Binding MarcarRequiereApoyoCommand}"/>
-                        <MenuItem Header="⚪ No entregó (N)" Command="{Binding MarcarNoEntregoCommand}"/>
+                        <MenuItem Header="🌟 Domina (D) — Alumno seleccionado" Command="{Binding MarcarDominaCommand}"/>
+                        <MenuItem Header="📘 Suficiente (S) — Alumno seleccionado" Command="{Binding MarcarSuficienteCommand}"/>
+                        <MenuItem Header="📙 En proceso (E) — Alumno seleccionado" Command="{Binding MarcarEnProcesoCommand}"/>
+                        <MenuItem Header="🔴 Requiere apoyo (R) — Alumno seleccionado" Command="{Binding MarcarRequiereApoyoCommand}"/>
+                        <MenuItem Header="⚪ No entregó (N) — Alumno seleccionado" Command="{Binding MarcarNoEntregoCommand}"/>
                         <Separator/>
                         <MenuItem Header="⚪ Marcar pendiente (P)" Command="{Binding MarcarPendienteCommand}"/>
                     </ContextMenu>
@@ -459,15 +459,28 @@
 
             <!-- BOTONERA DE CAPTURA RÁPIDA Y ACCIÓN PRIMARIA -->
             <DockPanel Grid.Row="4" Margin="0,14,0,0">
-                <WrapPanel DockPanel.Dock="Left">
+                <WrapPanel DockPanel.Dock="Left" VerticalAlignment="Center">
+                    <TextBlock Text="Calificar alumno:" VerticalAlignment="Center" Foreground="#344054" FontWeight="SemiBold" Margin="0,0,6,0"/>
                     <Button Content="D Domina" Command="{Binding MarcarDominaCommand}" MinWidth="85"/>
                     <Button Content="S Suficiente" Command="{Binding MarcarSuficienteCommand}" MinWidth="95"/>
                     <Button Content="E En proceso" Command="{Binding MarcarEnProcesoCommand}" MinWidth="100"/>
                     <Button Content="R Req. apoyo" Command="{Binding MarcarRequiereApoyoCommand}" MinWidth="100"/>
                     <Button Content="N No entregó" Command="{Binding MarcarNoEntregoCommand}" MinWidth="100"/>
                     <Button Content="P Pendiente" Command="{Binding MarcarPendienteCommand}" MinWidth="90"/>
+
+                    <Border Width="1" Height="24" Background="#D0D5DD" Margin="10,0"/>
+
+                    <Menu Background="Transparent" VerticalAlignment="Center">
+                        <MenuItem Header="👥 Marcar a todo el grupo ▾" Foreground="#101828" FontWeight="SemiBold">
+                            <MenuItem Header="🌟 Asignar 'Domina' a todos" Command="{Binding MarcarTodosDominaCommand}"/>
+                            <MenuItem Header="📘 Asignar 'Suficiente' a todos" Command="{Binding MarcarTodosSuficienteCommand}"/>
+                            <MenuItem Header="📙 Asignar 'En proceso' a todos" Command="{Binding MarcarTodosEnProcesoCommand}"/>
+                            <MenuItem Header="🔴 Asignar 'Requiere apoyo' a todos" Command="{Binding MarcarTodosRequiereApoyoCommand}"/>
+                            <MenuItem Header="⚪ Asignar 'No entregó' a todos" Command="{Binding MarcarTodosNoEntregoCommand}"/>
+                        </MenuItem>
+                    </Menu>
                 </WrapPanel>
-                <WrapPanel DockPanel.Dock="Right">
+                <WrapPanel DockPanel.Dock="Right" VerticalAlignment="Center">
                     <Button Content="Descartar" Command="{Binding DescartarActividadCommand}" Margin="0,0,6,0"/>
                     <Button Style="{StaticResource PrimaryButton}" Content="Guardar cambios (Ctrl+S)" Command="{Binding GuardarActividadCommand}"/>
                 </WrapPanel>
