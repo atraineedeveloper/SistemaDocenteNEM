@@ -12,7 +12,8 @@ public sealed class MainWindowViewModel : ViewModelBase
         GestionAsistenciaViewModel asistencia,
         GestionAsistenciaMensualViewModel asistenciaMensual,
         GestionProyectosViewModel? proyectos = null,
-        EvaluacionActividadesViewModel? evaluacion = null)
+        EvaluacionActividadesViewModel? evaluacion = null,
+        GestionExpedienteViewModel? expediente = null)
     {
         ArgumentNullException.ThrowIfNull(grupo);
         ArgumentNullException.ThrowIfNull(asistencia);
@@ -21,6 +22,7 @@ public sealed class MainWindowViewModel : ViewModelBase
         AsistenciaMensual = asistenciaMensual;
         Proyectos = proyectos;
         Evaluacion = evaluacion;
+        Expediente = expediente;
 
         IrAGrupoCommand = new RelayCommand(IrAGrupo, () => (MostrarAsistencia || MostrarProyectos || MostrarEvaluacion) && !Asistencia.EstaOcupado);
         IrAAsistenciaCommand = new RelayCommand(IrAAsistencia, () => !MostrarAsistencia && Grupo.GrupoIdActual is not null);
@@ -46,6 +48,7 @@ public sealed class MainWindowViewModel : ViewModelBase
     public GestionAsistenciaMensualViewModel AsistenciaMensual { get; }
     public GestionProyectosViewModel? Proyectos { get; }
     public EvaluacionActividadesViewModel? Evaluacion { get; }
+    public GestionExpedienteViewModel? Expediente { get; }
 
     public RelayCommand IrAGrupoCommand { get; }
     public RelayCommand IrAAsistenciaCommand { get; }

@@ -17,9 +17,9 @@ public sealed class InicializacionSqliteTests : IDisposable
 
         Assert.True(File.Exists(_base.Ruta));
         using var conexion = _base.AbrirConexion();
-        Assert.Equal(4L, EscalarLong(conexion, "PRAGMA user_version;"));
+        Assert.Equal(5L, EscalarLong(conexion, "PRAGMA user_version;"));
         Assert.Equal(
-            15L,
+            19L,
             EscalarLong(
                 conexion,
                 """
@@ -39,7 +39,11 @@ public sealed class InicializacionSqliteTests : IDisposable
                     'entregas_actividad',
                     'ix_proyectos_grupo_estado_fecha',
                     'ix_actividades_proyecto_fecha',
-                    'ix_entregas_estudiante');
+                    'ix_entregas_estudiante',
+                    'notas_pedagogicas_estudiantes',
+                    'acuerdos_tutores_estudiantes',
+                    'ix_notas_pedagogicas_estudiante',
+                    'ix_acuerdos_tutores_estudiante');
                 """));
     }
 
@@ -120,7 +124,7 @@ public sealed class InicializacionSqliteTests : IDisposable
         Assert.Throws<SchemaIncompatibleException>(() => _base.Persistencia.Inicializar());
 
         using var comprobacion = _base.AbrirConexion();
-        Assert.Equal(4L, EscalarLong(comprobacion, "PRAGMA user_version;"));
+        Assert.Equal(5L, EscalarLong(comprobacion, "PRAGMA user_version;"));
     }
 
     [Fact]

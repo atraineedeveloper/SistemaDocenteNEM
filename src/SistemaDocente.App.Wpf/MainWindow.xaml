@@ -52,7 +52,13 @@
                     <DataGrid.RowStyle><Style TargetType="DataGridRow"><Style.Triggers><DataTrigger Binding="{Binding EstaActivo}" Value="False"><Setter Property="Foreground" Value="#5D6670"/><Setter Property="Background" Value="#ECEFF2"/><Setter Property="FontStyle" Value="Italic"/></DataTrigger></Style.Triggers></Style></DataGrid.RowStyle>
                     <DataGrid.Columns><DataGridTextColumn Header="Núm." Binding="{Binding NumeroLista}" Width="90"/><DataGridTextColumn Header="Nombre" Binding="{Binding Nombre}" Width="*"/><DataGridTextColumn Header="Estado" Binding="{Binding Estado}" Width="140"/></DataGrid.Columns>
                 </DataGrid>
-                <WrapPanel Grid.Row="2" Margin="0,14,0,6"><Button Content="Agregar estudiante" Command="{Binding AbrirAgregarEstudianteCommand}"/><Button Content="Editar estudiante" Command="{Binding AbrirEditarEstudianteCommand}"/><Button Content="Desactivar" Command="{Binding DesactivarEstudianteCommand}"/><Button Content="Reactivar" Command="{Binding ReactivarEstudianteCommand}"/></WrapPanel>
+                <WrapPanel Grid.Row="2" Margin="0,14,0,6">
+                    <Button Content="Ver Expediente" Click="OnVerExpedienteEstudianteClic"/>
+                    <Button Content="Agregar estudiante" Command="{Binding AbrirAgregarEstudianteCommand}"/>
+                    <Button Content="Editar estudiante" Command="{Binding AbrirEditarEstudianteCommand}"/>
+                    <Button Content="Desactivar" Command="{Binding DesactivarEstudianteCommand}"/>
+                    <Button Content="Reactivar" Command="{Binding ReactivarEstudianteCommand}"/>
+                </WrapPanel>
                 <Border Grid.Row="3" Padding="18" Background="White" CornerRadius="8" Visibility="{Binding MostrarEditorGrupo, Converter={StaticResource BoolToVisibility}}">
                     <StackPanel><TextBlock Text="Cambiar nombre del grupo" FontSize="19" FontWeight="SemiBold"/><TextBlock Margin="0,10,0,0" Text="Nuevo nombre"/><TextBox x:Name="NombreGrupoEdicion" Text="{Binding NombreEdicionGrupo, UpdateSourceTrigger=PropertyChanged}"><TextBox.InputBindings><KeyBinding Key="Enter" Command="{Binding GuardarNombreGrupoCommand}"/></TextBox.InputBindings></TextBox><TextBlock Foreground="#B42318" Text="{Binding MensajeEdicion}"/><WrapPanel><Button Content="Guardar nombre" Command="{Binding GuardarNombreGrupoCommand}"/><Button Content="Cancelar" Command="{Binding CancelarEdicionCommand}"/></WrapPanel></StackPanel>
                 </Border>

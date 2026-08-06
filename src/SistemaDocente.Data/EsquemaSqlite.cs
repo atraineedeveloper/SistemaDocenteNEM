@@ -6,7 +6,44 @@ namespace SistemaDocente.Data;
 
 internal static class EsquemaSqlite
 {
-    internal const int VersionActual = 4;
+    internal const int VersionActual = 5;
+
+    private const string TablaNotasPedagogicas = """
+        CREATE TABLE notas_pedagogicas_estudiantes (
+            nota_id TEXT NOT NULL PRIMARY KEY,
+            estudiante_id TEXT NOT NULL,
+            grupo_id TEXT NOT NULL,
+            tipo INTEGER NOT NULL CHECK (tipo IN (0, 1, 2, 3)),
+            contenido TEXT NOT NULL CHECK (length(trim(contenido)) > 0),
+            fecha_hora_registro TEXT NOT NULL,
+            FOREIGN KEY (estudiante_id, grupo_id) REFERENCES estudiantes(id, grupo_id) ON DELETE CASCADE
+        )
+        """;
+
+    private const string TablaAcuerdosTutores = """
+        CREATE TABLE acuerdos_tutores_estudiantes (
+            acuerdo_id TEXT NOT NULL PRIMARY KEY,
+            estudiante_id TEXT NOT NULL,
+            grupo_id TEXT NOT NULL,
+            motivo TEXT NOT NULL CHECK (length(trim(motivo)) > 0),
+            acuerdo_convenido TEXT NOT NULL CHECK (length(trim(acuerdo_convenido)) > 0),
+            fecha_reunion TEXT NOT NULL,
+            fecha_seguimiento TEXT,
+            FOREIGN KEY (estudiante_id, grupo_id) REFERENCES estudiantes(id, grupo_id) ON DELETE CASCADE
+        )
+        """;
+
+    private const string IndiceNotasEstudiante = "CREATE INDEX ix_notas_pedagogicas_estudiante ON notas_pedagogicas_estudiantes(estudiante_id, tipo)";
+    private const string IndiceAcuerdosEstudiante = "CREATE INDEX ix_acuerdos_tutores_estudiante ON acuerdos_tutores_estudiantes(estudiante_id)";
+
+    private static readonly IReadOnlyDictionary<string, string> ObjetosExpedientes =
+        new Dictionary<string, string>(StringComparer.Ordinal)
+        {
+            ["notas_pedagogicas_estudiantes"] = TablaNotasPedagogicas,
+            ["acuerdos_tutores_estudiantes"] = TablaAcuerdosTutores,
+            ["ix_notas_pedagogicas_estudiante"] = IndiceNotasEstudiante,
+            ["ix_acuerdos_tutores_estudiante"] = IndiceAcuerdosEstudiante,
+        };
 
     private const string TablaGrupos = """
         CREATE TABLE grupos (
@@ -201,7 +238,7 @@ internal static class EsquemaSqlite
                     "Una base sin versión no puede contener objetos preexistentes.");
             }
 
-            CrearVersionCuatro(conexion);
+            CrearVersionCinco(conexion);
             return;
         }
 
@@ -210,6 +247,8 @@ internal static class EsquemaSqlite
             ValidarObjetos(conexion, ObjetosVersionUno);
             MigrarVersionUno(conexion);
             MigrarVersionDos(conexion);
+            MigrarVersionTres(conexion);
+            MigrarVersionCuatro(conexion);
             return;
         }
 
@@ -217,6 +256,8 @@ internal static class EsquemaSqlite
         {
             ValidarVersionDos(conexion);
             MigrarVersionDos(conexion);
+            MigrarVersionTres(conexion);
+            MigrarVersionCuatro(conexion);
             return;
         }
 
@@ -224,6 +265,14 @@ internal static class EsquemaSqlite
         {
             ValidarVersionTres(conexion);
             MigrarVersionTres(conexion);
+            MigrarVersionCuatro(conexion);
+            return;
+        }
+
+        if (version == 4)
+        {
+            ValidarVersionCuatro(conexion);
+            MigrarVersionCuatro(conexion);
             return;
         }
 
@@ -233,7 +282,7 @@ internal static class EsquemaSqlite
                 $"La versión de esquema {version} no es compatible con la versión {VersionActual}.");
         }
 
-        ValidarVersionCuatro(conexion);
+        ValidarVersionCinco(conexion);
     }
 
     private static long LeerVersion(SqliteConnection conexion)
@@ -255,12 +304,13 @@ internal static class EsquemaSqlite
         return (long)(comando.ExecuteScalar() ?? 0L) == 0;
     }
 
-    private static void CrearVersionCuatro(SqliteConnection conexion)
+    private static void CrearVersionCinco(SqliteConnection conexion)
     {
         using var transaccion = conexion.BeginTransaction();
         CrearObjetos(conexion, transaccion, ObjetosVersionUno.Values);
         CrearObjetos(conexion, transaccion, ObjetosAsistencia.Values);
         CrearObjetos(conexion, transaccion, ObjetosProyectos.Values);
+        CrearObjetos(conexion, transaccion, ObjetosExpedientes.Values);
         EstablecerVersion(conexion, transaccion, VersionActual);
         transaccion.Commit();
     }
@@ -288,9 +338,9 @@ internal static class EsquemaSqlite
         using var transaccion = conexion.BeginTransaction();
         try
         {
-            CrearObjetos(conexion, transaccion, ObjetosProyectos.Values);
-            ValidarObjetos(conexion, ObjetosProyectos, transaccion);
-            EstablecerVersion(conexion, transaccion, VersionActual);
+            CrearObjetos(conexion, transaccion, ObjetosProyectosV3.Values);
+            ValidarObjetos(conexion, ObjetosProyectosV3, transaccion);
+            EstablecerVersion(conexion, transaccion, 3);
             transaccion.Commit();
         }
         catch
@@ -334,7 +384,7 @@ internal static class EsquemaSqlite
             }
 
             ValidarObjetos(conexion, ObjetosProyectos, transaccion);
-            EstablecerVersion(conexion, transaccion, VersionActual);
+            EstablecerVersion(conexion, transaccion, 4);
             transaccion.Commit();
         }
         catch
@@ -356,10 +406,60 @@ internal static class EsquemaSqlite
         ValidarObjetos(conexion, ObjetosProyectosV3);
     }
 
+    private static void MigrarVersionCuatro(SqliteConnection conexion)
+    {
+        using var transaccion = conexion.BeginTransaction();
+        try
+        {
+            using (var cmd = conexion.CreateCommand())
+            {
+                cmd.Transaction = transaccion;
+                cmd.CommandText = """
+                    CREATE TABLE IF NOT EXISTS notas_pedagogicas_estudiantes (
+                        nota_id TEXT NOT NULL PRIMARY KEY,
+                        estudiante_id TEXT NOT NULL,
+                        grupo_id TEXT NOT NULL,
+                        tipo INTEGER NOT NULL CHECK (tipo IN (0, 1, 2, 3)),
+                        contenido TEXT NOT NULL CHECK (length(trim(contenido)) > 0),
+                        fecha_hora_registro TEXT NOT NULL,
+                        FOREIGN KEY (estudiante_id, grupo_id) REFERENCES estudiantes(id, grupo_id) ON DELETE CASCADE
+                    );
+                    CREATE TABLE IF NOT EXISTS acuerdos_tutores_estudiantes (
+                        acuerdo_id TEXT NOT NULL PRIMARY KEY,
+                        estudiante_id TEXT NOT NULL,
+                        grupo_id TEXT NOT NULL,
+                        motivo TEXT NOT NULL CHECK (length(trim(motivo)) > 0),
+                        acuerdo_convenido TEXT NOT NULL CHECK (length(trim(acuerdo_convenido)) > 0),
+                        fecha_reunion TEXT NOT NULL,
+                        fecha_seguimiento TEXT,
+                        FOREIGN KEY (estudiante_id, grupo_id) REFERENCES estudiantes(id, grupo_id) ON DELETE CASCADE
+                    );
+                    CREATE INDEX IF NOT EXISTS ix_notas_pedagogicas_estudiante ON notas_pedagogicas_estudiantes(estudiante_id, tipo);
+                    CREATE INDEX IF NOT EXISTS ix_acuerdos_tutores_estudiante ON acuerdos_tutores_estudiantes(estudiante_id);
+                    """;
+                cmd.ExecuteNonQuery();
+            }
+            ValidarObjetos(conexion, ObjetosExpedientes, transaccion);
+            EstablecerVersion(conexion, transaccion, VersionActual);
+            transaccion.Commit();
+        }
+        catch
+        {
+            transaccion.Rollback();
+            throw;
+        }
+    }
+
     private static void ValidarVersionCuatro(SqliteConnection conexion)
     {
         ValidarVersionDos(conexion);
         ValidarObjetos(conexion, ObjetosProyectos);
+    }
+
+    private static void ValidarVersionCinco(SqliteConnection conexion)
+    {
+        ValidarVersionCuatro(conexion);
+        ValidarObjetos(conexion, ObjetosExpedientes);
     }
 
     private static void CrearObjetos(

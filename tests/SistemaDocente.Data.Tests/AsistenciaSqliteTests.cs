@@ -171,7 +171,7 @@ public sealed class AsistenciaSqliteTests : IDisposable
         using var conexion = _base.AbrirConexion();
         using var comando = conexion.CreateCommand();
         comando.CommandText = "PRAGMA user_version;";
-        Assert.Equal(4L, comando.ExecuteScalar());
+        Assert.Equal(5L, comando.ExecuteScalar());
     }
 
     [Fact]
@@ -203,7 +203,7 @@ public sealed class AsistenciaSqliteTests : IDisposable
         using (var conexion = _base.AbrirConexion())
         using (var comando = conexion.CreateCommand())
         {
-            comando.CommandText = "PRAGMA user_version = 5;";
+            comando.CommandText = "DROP TABLE registros_asistencia;";
             comando.ExecuteNonQuery();
         }
         var almacenamiento = new PersistenciaAsistenciaSqlite(_base.Ruta);

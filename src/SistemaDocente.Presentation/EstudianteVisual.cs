@@ -1,4 +1,7 @@
+using System.Runtime.CompilerServices;
 using SistemaDocente.Core;
+
+[assembly: InternalsVisibleTo("SistemaDocente.App.Wpf")]
 
 namespace SistemaDocente.Presentation;
 

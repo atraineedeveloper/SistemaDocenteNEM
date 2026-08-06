@@ -49,8 +49,13 @@ public partial class App : System.Windows.Application
                 gestionProyectos,
                 new DialogoCambiosPendientesWpf(),
                 mensajes);
+            var persistenciaExpediente = new PersistenciaExpedienteSqlite(rutas.BaseSqlite);
+            var gestionExpedienteCasosUso = new GestionExpedienteCasosUso(
+                persistencia, persistenciaAsistencia, persistenciaProyectos, persistenciaProyectos, persistenciaExpediente);
+            var viewModelExpediente = new GestionExpedienteViewModel(gestionExpedienteCasosUso, mensajes);
+
             var viewModel = new MainWindowViewModel(
-                viewModelGrupo, viewModelAsistencia, viewModelMensual, viewModelProyectos, viewModelEvaluacion);
+                viewModelGrupo, viewModelAsistencia, viewModelMensual, viewModelProyectos, viewModelEvaluacion, viewModelExpediente);
             var ventana = new MainWindow(viewModel);
             MainWindow = ventana;
             ventana.Show();

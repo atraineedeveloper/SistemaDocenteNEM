@@ -89,17 +89,17 @@ Este módulo transformará la información formativa en resultados de periodo. D
 
 ## 4. Expediente y seguimiento individual del alumno
 
-- [ ] Crear una ficha individual por estudiante.
-- [ ] Integrar asistencia.
-- [ ] Integrar entregas de actividades.
-- [ ] Integrar evaluaciones.
+- [x] Crear una ficha individual por estudiante.
+- [x] Integrar asistencia.
+- [x] Integrar entregas de actividades.
+- [x] Integrar evaluaciones.
 - [ ] Integrar calificaciones.
-- [ ] Registrar fortalezas.
-- [ ] Registrar dificultades.
-- [ ] Registrar apoyos aplicados.
-- [ ] Registrar acuerdos con familiares o tutores.
-- [ ] Registrar observaciones cronológicas.
-- [ ] Mostrar alertas pedagógicas sin emitir diagnósticos.
+- [x] Registrar fortalezas.
+- [x] Registrar dificultades.
+- [x] Registrar apoyos aplicados.
+- [x] Registrar acuerdos con familiares o tutores.
+- [x] Registrar observaciones cronológicas.
+- [x] Mostrar alertas pedagógicas sin emitir diagnósticos.
 
 **Descripción:**  
 Reunirá en un solo lugar la información relevante de cada alumno para facilitar el acompañamiento, las reuniones con familias y la toma de decisiones pedagógicas.

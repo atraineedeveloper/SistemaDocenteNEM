@@ -207,6 +207,21 @@ public partial class MainWindow : Window
         }
     }
 
+    private void OnVerExpedienteEstudianteClic(object sender, RoutedEventArgs e)
+    {
+        if (ViewModel.Grupo.GrupoIdActual is not { } grupoId || ViewModel.Grupo.EstudianteSeleccionado is not { } estudiante)
+        {
+            return;
+        }
+
+        if (ViewModel.Expediente is not null)
+        {
+            ViewModel.Expediente.Cargar(grupoId, estudiante.Id);
+            var ventanaExpediente = new ExpedienteEstudianteWindow(ViewModel.Expediente) { Owner = this };
+            ventanaExpediente.ShowDialog();
+        }
+    }
+
     private void OnProyectoPrincipalDobleClic(object sender, MouseButtonEventArgs e)
     {
         AbrirDetalleProyecto();

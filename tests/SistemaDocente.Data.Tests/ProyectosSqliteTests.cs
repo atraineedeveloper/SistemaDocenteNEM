@@ -62,7 +62,7 @@ public sealed class ProyectosSqliteTests : IDisposable
 
         Assert.NotNull(_base.Persistencia.Cargar(grupo.Id));
         using var verificacion = _base.AbrirConexion(); using var consulta = verificacion.CreateCommand(); consulta.CommandText = "PRAGMA user_version";
-        Assert.Equal(4L, consulta.ExecuteScalar());
+        Assert.Equal(5L, consulta.ExecuteScalar());
     }
 
     [Fact]
@@ -108,7 +108,7 @@ public sealed class ProyectosSqliteTests : IDisposable
         using var verificacion = _base.AbrirConexion();
         using var consulta = verificacion.CreateCommand();
         consulta.CommandText = "PRAGMA user_version";
-        Assert.Equal(4L, consulta.ExecuteScalar());
+        Assert.Equal(5L, consulta.ExecuteScalar());
 
         var reabierta = new PersistenciaProyectosSqlite(_base.Ruta);
         var cargada = ((IAlmacenamientoActividadesProyecto)reabierta).Cargar(actividad.Id)!;
