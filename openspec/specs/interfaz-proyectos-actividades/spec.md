@@ -1,7 +1,8 @@
-# Interfaz Proyectos y Actividades (Delta UX Ventanas Dedicadas y Evaluación)
+# interfaz-proyectos-actividades Specification
 
-## MODIFIED Requirements
-
+## Purpose
+TBD - created by archiving change rediseno-ux-proyectos-evaluacion. Update Purpose after archive.
+## Requirements
 ### Requirement: NAVEGACION_VISTAS_PROYECTOS
 El sistema DEBE organizar el flujo de trabajo en dos espacios principales separados:
 1. **Módulo de Proyectos (Planeación):** Lista amplia de proyectos que permite abrir ventanas dedicadas de detalle para proyectos y actividades.
@@ -21,3 +22,4 @@ El sistema DEBE organizar el flujo de trabajo en dos espacios principales separa
 - **Given** que el usuario está en la ventana de detalle del proyecto
 - **When** hace clic en una actividad o en "+ Nueva Actividad"
 - **Then** el sistema abre la ventana dedicada `DetalleActividadWindow` para editar los datos de esa actividad.
+

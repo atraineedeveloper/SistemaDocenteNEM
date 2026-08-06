@@ -1,10 +1,10 @@
 # Proposal: Rediseño de Interfaz de Proyectos (Ventanas Dedicadas) y Módulo Independiente de Evaluación NEM
 
-## Intent
+## Why
 
-Separar la planeación y gestión de proyectos didácticos de la evaluación de actividades con alumnos en el aula, eliminando el amontonamiento de tres zonas en una sola pantalla. La nueva experiencia proporciona una lista limpia de proyectos en pantalla completa, ventanas dedicadas para ver y editar los detalles del proyecto y sus actividades, y una nueva pestaña superior dedicada exclusivamente a la Evaluación de Desempeño NEM a pantalla completa.
+La interfaz anterior combinaba 3 columnas apretadas en una sola pantalla, generando una experiencia saturada. Se requiere separar la planeación (gestión de proyectos/actividades) de la ejecución cotidiana (evaluación pedagógica NEM en aula).
 
-## Scope
+## What Changes
 
 1. **Presentation Layer:**
    - Crear `EvaluacionActividadesViewModel` para la gestión y filtrado síncrono del flujo de evaluación por proyecto y actividad.
