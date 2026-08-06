@@ -16,18 +16,30 @@
         </Grid.RowDefinitions>
 
         <!-- Cabecera del Alumno -->
-        <DockPanel Margin="0,0,0,14" DataContext="{Binding Expediente}">
-            <StackPanel DockPanel.Dock="Left">
-                <TextBlock Text="Ficha Individual del Estudiante" Foreground="#64748B" FontSize="13" FontWeight="SemiBold"/>
-                <StackPanel Orientation="Horizontal">
-                    <TextBlock Text="{Binding NumeroLista, StringFormat=#{0}}" FontSize="22" FontWeight="Bold" Foreground="#0F172A" Margin="0,0,8,0"/>
-                    <TextBlock Text="{Binding NombreEstudiante}" FontSize="22" FontWeight="Bold" Foreground="#0F172A"/>
+        <Border Margin="0,0,0,14" DataContext="{Binding Expediente}" Background="White" BorderBrush="#E2E8F0" BorderThickness="1" CornerRadius="10" Padding="16,12">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+                <StackPanel Grid.Column="0">
+                    <StackPanel Orientation="Horizontal" Margin="0,0,0,4">
+                        <TextBlock Text="{Binding NumeroLista, StringFormat=#{0}}" FontSize="20" FontWeight="Bold" Foreground="#0F172A" Margin="0,0,8,0"/>
+                        <TextBlock Text="{Binding NombreEstudiante}" FontSize="20" FontWeight="Bold" Foreground="#0F172A"/>
+                    </StackPanel>
+                    <WrapPanel Margin="0,2,0,0">
+                        <TextBlock Text="{Binding Genero, StringFormat=Género: {0}}" Foreground="#475569" FontSize="13" Margin="0,0,16,4"/>
+                        <TextBlock Text="{Binding Edad, StringFormat=Edad: {0} años}" Foreground="#475569" FontSize="13" Margin="0,0,16,4"/>
+                        <TextBlock Text="{Binding FechaNacimiento, StringFormat=Nacimiento: {0:dd/MM/yyyy}}" Foreground="#475569" FontSize="13" Margin="0,0,16,4"/>
+                        <TextBlock Text="{Binding FechaIngreso, StringFormat=Ingreso: {0:dd/MM/yyyy}}" Foreground="#475569" FontSize="13" Margin="0,0,16,4"/>
+                    </WrapPanel>
+                    <TextBlock Text="{Binding ObservacionesAlumno, StringFormat=Observaciones: {0}}" Foreground="#64748B" FontSize="12" FontStyle="Italic" TextWrapping="Wrap" Margin="0,2,0,0"/>
                 </StackPanel>
-            </StackPanel>
-            <Border DockPanel.Dock="Right" CornerRadius="12" Padding="12,6" VerticalAlignment="Center" Background="#E2E8F0">
-                <TextBlock Text="{Binding Asistencia.PorcentajeAsistencia, StringFormat=Asistencia: {0:F1}%}" FontWeight="Bold" Foreground="#1E293B"/>
-            </Border>
-        </DockPanel>
+                <Border Grid.Column="1" CornerRadius="12" Padding="12,6" VerticalAlignment="Center" Background="#E2E8F0" Margin="12,0,0,0">
+                    <TextBlock Text="{Binding Asistencia.PorcentajeAsistencia, StringFormat=Asistencia: {0:F1}%}" FontWeight="Bold" Foreground="#1E293B"/>
+                </Border>
+            </Grid>
+        </Border>
 
         <!-- Contenido por Pestañas -->
         <TabControl Grid.Row="1" Background="White" BorderBrush="#CBD5E1" Margin="0,0,0,10">

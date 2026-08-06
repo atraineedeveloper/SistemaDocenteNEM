@@ -327,7 +327,7 @@ public partial class MainWindow : Window
     {
         if (ViewModel.Grupo.MostrarBienvenida) NombreGrupoInicial.Focus();
         else if (ViewModel.Grupo.MostrarEditorGrupo) NombreGrupoEdicion.Focus();
-        else if (ViewModel.Grupo.MostrarEditorEstudiante) NombreEstudianteEdicion.Focus();
+        else if (ViewModel.Grupo.MostrarEditorEstudiante) PrimerApellidoEdicion.Focus();
     }
 
     private void OnClosing(object? sender, CancelEventArgs e)

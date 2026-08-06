@@ -87,7 +87,18 @@ public sealed class Grupo
             }
 
             estudiantesValidados.Add(
-                new Estudiante(datos.Id, nombreEstudiante, datos.NumeroLista, datos.EstaActivo));
+                new Estudiante(
+                    datos.Id,
+                    nombreEstudiante,
+                    datos.PrimerApellido,
+                    datos.SegundoApellido,
+                    datos.Nombres,
+                    datos.FechaNacimiento,
+                    datos.Genero,
+                    datos.FechaIngreso,
+                    datos.Observaciones,
+                    datos.NumeroLista,
+                    datos.EstaActivo));
         }
 
         return new Grupo(id, nombreValidado, estudiantesValidados);
@@ -103,16 +114,55 @@ public sealed class Grupo
         NombreVisible = nombreNormalizado;
     }
 
-    public Estudiante AgregarEstudiante(string nombreVisible, int numeroLista)
+    public Estudiante AgregarEstudiante(
+        string nombreVisible,
+        int numeroLista,
+        string primerApellido = "",
+        string segundoApellido = "",
+        string nombres = "",
+        DateOnly? fechaNacimiento = null,
+        GeneroEstudiante genero = GeneroEstudiante.NoEspecificado,
+        DateOnly? fechaIngreso = null,
+        string observaciones = "")
     {
         var nombreNormalizado = ValidarNombreEstudiante(nombreVisible);
         ValidarNumeroLista(numeroLista);
         ValidarNumeroDisponible(numeroLista);
 
-        var estudiante = new Estudiante(nombreNormalizado, numeroLista);
+        var estudiante = new Estudiante(
+            EstudianteId.Crear(),
+            nombreNormalizado,
+            primerApellido,
+            segundoApellido,
+            nombres,
+            fechaNacimiento,
+            genero,
+            fechaIngreso,
+            observaciones,
+            numeroLista,
+            true);
+
         _estudiantes.Add(estudiante);
 
         return estudiante;
+    }
+
+    public void ActualizarDatosEstudiante(
+        EstudianteId estudianteId,
+        string nombreVisible,
+        string primerApellido,
+        string segundoApellido,
+        string nombres,
+        DateOnly? fechaNacimiento,
+        GeneroEstudiante genero,
+        DateOnly? fechaIngreso,
+        string observaciones)
+    {
+        var estudiante = ObtenerEstudiante(estudianteId);
+        var nombreNormalizado = ValidarNombreEstudiante(nombreVisible);
+
+        estudiante.Renombrar(nombreNormalizado);
+        estudiante.ActualizarDatos(primerApellido, segundoApellido, nombres, fechaNacimiento, genero, fechaIngreso, observaciones);
     }
 
     public void RenombrarEstudiante(EstudianteId estudianteId, string nombreVisible)

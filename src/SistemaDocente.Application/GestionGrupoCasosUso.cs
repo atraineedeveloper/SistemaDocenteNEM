@@ -34,10 +34,17 @@ public sealed class GestionGrupoCasosUso
     public EstudianteDetalle AgregarEstudiante(
         GrupoId grupoId,
         string nombreVisible,
-        int numeroLista)
+        int numeroLista,
+        string primerApellido = "",
+        string segundoApellido = "",
+        string nombres = "",
+        DateOnly? fechaNacimiento = null,
+        GeneroEstudiante genero = GeneroEstudiante.NoEspecificado,
+        DateOnly? fechaIngreso = null,
+        string observaciones = "")
     {
         var grupo = CargarRequerido(grupoId);
-        var estudiante = grupo.AgregarEstudiante(nombreVisible, numeroLista);
+        var estudiante = grupo.AgregarEstudiante(nombreVisible, numeroLista, primerApellido, segundoApellido, nombres, fechaNacimiento, genero, fechaIngreso, observaciones);
         _almacenamiento.Guardar(grupo);
         return Proyectar(estudiante);
     }
@@ -68,10 +75,17 @@ public sealed class GestionGrupoCasosUso
         GrupoId grupoId,
         EstudianteId estudianteId,
         string nombreVisible,
-        int numeroLista)
+        int numeroLista,
+        string primerApellido = "",
+        string segundoApellido = "",
+        string nombres = "",
+        DateOnly? fechaNacimiento = null,
+        GeneroEstudiante genero = GeneroEstudiante.NoEspecificado,
+        DateOnly? fechaIngreso = null,
+        string observaciones = "")
     {
         var grupo = CargarRequerido(grupoId);
-        grupo.RenombrarEstudiante(estudianteId, nombreVisible);
+        grupo.ActualizarDatosEstudiante(estudianteId, nombreVisible, primerApellido, segundoApellido, nombres, fechaNacimiento, genero, fechaIngreso, observaciones);
         grupo.CambiarNumeroLista(estudianteId, numeroLista);
         _almacenamiento.Guardar(grupo);
         return Proyectar(ObtenerEstudiante(grupo, estudianteId));
@@ -117,6 +131,14 @@ public sealed class GestionGrupoCasosUso
         new(
             estudiante.Id,
             estudiante.NombreVisible,
+            estudiante.PrimerApellido,
+            estudiante.SegundoApellido,
+            estudiante.Nombres,
+            estudiante.FechaNacimiento,
+            estudiante.Edad,
+            estudiante.Genero,
+            estudiante.FechaIngreso,
+            estudiante.Observaciones,
             estudiante.NumeroLista,
             estudiante.EstaActivo);
 

@@ -6,7 +6,7 @@ namespace SistemaDocente.Data;
 
 internal static class EsquemaSqlite
 {
-    internal const int VersionActual = 5;
+    internal const int VersionActual = 6;
 
     private const string TablaNotasPedagogicas = """
         CREATE TABLE notas_pedagogicas_estudiantes (
@@ -52,13 +52,32 @@ internal static class EsquemaSqlite
         )
         """;
 
-    private const string TablaEstudiantes = """
+    private const string TablaEstudiantesV1 = """
         CREATE TABLE estudiantes (
             id TEXT NOT NULL PRIMARY KEY,
             grupo_id TEXT NOT NULL,
             nombre TEXT NOT NULL CHECK (length(trim(nombre)) BETWEEN 1 AND 150),
             numero_lista INTEGER NOT NULL CHECK (numero_lista > 0),
             activo INTEGER NOT NULL CHECK (activo IN (0, 1)),
+            FOREIGN KEY (grupo_id) REFERENCES grupos(id) ON DELETE RESTRICT
+        )
+        """;
+
+    private const string TablaEstudiantes = """
+        CREATE TABLE estudiantes (
+            id TEXT NOT NULL,
+            grupo_id TEXT NOT NULL,
+            nombre TEXT NOT NULL CHECK (length(trim(nombre)) BETWEEN 1 AND 150),
+            primer_apellido TEXT NOT NULL DEFAULT '',
+            segundo_apellido TEXT NOT NULL DEFAULT '',
+            nombres TEXT NOT NULL DEFAULT '',
+            fecha_nacimiento TEXT,
+            genero INTEGER NOT NULL DEFAULT 0,
+            fecha_ingreso TEXT,
+            observaciones TEXT NOT NULL DEFAULT '',
+            numero_lista INTEGER NOT NULL CHECK (numero_lista > 0),
+            activo INTEGER NOT NULL CHECK (activo IN (0, 1)),
+            PRIMARY KEY (id, grupo_id),
             FOREIGN KEY (grupo_id) REFERENCES grupos(id) ON DELETE RESTRICT
         )
         """;
@@ -185,11 +204,35 @@ internal static class EsquemaSqlite
     private const string IndiceActividades = "CREATE INDEX ix_actividades_proyecto_fecha ON actividades_proyecto(proyecto_id, fecha_realizacion)";
     private const string IndiceEntregas = "CREATE INDEX ix_entregas_estudiante ON entregas_actividad(estudiante_id)";
 
-    private static readonly IReadOnlyDictionary<string, string> ObjetosVersionUno =
+    private static readonly IReadOnlyDictionary<string, string> ObjetosVersionSeis =
         new Dictionary<string, string>(StringComparer.Ordinal)
         {
             ["grupos"] = TablaGrupos,
             ["estudiantes"] = TablaEstudiantes,
+            ["ix_estudiantes_grupo_id"] = IndiceGrupo,
+            ["ux_estudiantes_grupo_numero_activo"] = IndiceNumeroActivo,
+            ["ux_estudiantes_id_grupo_id"] = IndicePertenencia,
+            ["asistencias_diarias"] = TablaAsistencias,
+            ["registros_asistencia"] = TablaRegistros,
+            ["ix_asistencias_diarias_grupo_fecha"] = IndiceAsistenciasGrupoFecha,
+            ["ix_registros_asistencia_estudiante_id"] = IndiceRegistrosEstudiante,
+            ["proyectos_didacticos"] = TablaProyectos,
+            ["actividades_proyecto"] = TablaActividades,
+            ["entregas_actividad"] = TablaEntregas,
+            ["ix_proyectos_grupo_estado_fecha"] = IndiceProyectos,
+            ["ix_actividades_proyecto_fecha"] = IndiceActividades,
+            ["ix_entregas_estudiante"] = IndiceEntregas,
+            ["notas_pedagogicas_estudiantes"] = TablaNotasPedagogicas,
+            ["acuerdos_tutores_estudiantes"] = TablaAcuerdosTutores,
+            ["ix_notas_pedagogicas_estudiante"] = IndiceNotasEstudiante,
+            ["ix_acuerdos_tutores_estudiante"] = IndiceAcuerdosEstudiante,
+        };
+
+    private static readonly IReadOnlyDictionary<string, string> ObjetosVersionUno =
+        new Dictionary<string, string>(StringComparer.Ordinal)
+        {
+            ["grupos"] = TablaGrupos,
+            ["estudiantes"] = TablaEstudiantesV1,
             ["ix_estudiantes_grupo_id"] = IndiceGrupo,
             ["ux_estudiantes_grupo_numero_activo"] = IndiceNumeroActivo,
         };
@@ -238,7 +281,7 @@ internal static class EsquemaSqlite
                     "Una base sin versión no puede contener objetos preexistentes.");
             }
 
-            CrearVersionCinco(conexion);
+            CrearVersionSeis(conexion);
             return;
         }
 
@@ -249,6 +292,7 @@ internal static class EsquemaSqlite
             MigrarVersionDos(conexion);
             MigrarVersionTres(conexion);
             MigrarVersionCuatro(conexion);
+            MigrarVersionCinco(conexion);
             return;
         }
 
@@ -258,6 +302,7 @@ internal static class EsquemaSqlite
             MigrarVersionDos(conexion);
             MigrarVersionTres(conexion);
             MigrarVersionCuatro(conexion);
+            MigrarVersionCinco(conexion);
             return;
         }
 
@@ -266,6 +311,7 @@ internal static class EsquemaSqlite
             ValidarVersionTres(conexion);
             MigrarVersionTres(conexion);
             MigrarVersionCuatro(conexion);
+            MigrarVersionCinco(conexion);
             return;
         }
 
@@ -273,6 +319,14 @@ internal static class EsquemaSqlite
         {
             ValidarVersionCuatro(conexion);
             MigrarVersionCuatro(conexion);
+            MigrarVersionCinco(conexion);
+            return;
+        }
+
+        if (version == 5)
+        {
+            ValidarVersionCinco(conexion);
+            MigrarVersionCinco(conexion);
             return;
         }
 
@@ -282,7 +336,7 @@ internal static class EsquemaSqlite
                 $"La versión de esquema {version} no es compatible con la versión {VersionActual}.");
         }
 
-        ValidarVersionCinco(conexion);
+        ValidarVersionSeis(conexion);
     }
 
     private static long LeerVersion(SqliteConnection conexion)
@@ -396,13 +450,11 @@ internal static class EsquemaSqlite
 
     private static void ValidarVersionDos(SqliteConnection conexion)
     {
-        ValidarObjetos(conexion, ObjetosVersionUno);
         ValidarObjetos(conexion, ObjetosAsistencia);
     }
 
     private static void ValidarVersionTres(SqliteConnection conexion)
     {
-        ValidarVersionDos(conexion);
         ValidarObjetos(conexion, ObjetosProyectosV3);
     }
 
@@ -450,16 +502,105 @@ internal static class EsquemaSqlite
         }
     }
 
+    private static void CrearVersionSeis(SqliteConnection conexion)
+    {
+        using var transaccion = conexion.BeginTransaction();
+        try
+        {
+            CrearObjetos(
+                conexion,
+                transaccion,
+                [
+                    TablaGrupos,
+                    TablaEstudiantes,
+                    IndiceGrupo,
+                    IndiceNumeroActivo,
+                    IndicePertenencia,
+                    TablaAsistencias,
+                    TablaRegistros,
+                    IndiceAsistenciasGrupoFecha,
+                    IndiceRegistrosEstudiante,
+                    TablaProyectos,
+                    TablaActividades,
+                    TablaEntregas,
+                    IndiceProyectos,
+                    IndiceActividades,
+                    IndiceEntregas,
+                    TablaNotasPedagogicas,
+                    TablaAcuerdosTutores,
+                    IndiceNotasEstudiante,
+                    IndiceAcuerdosEstudiante,
+                ]);
+
+            EstablecerVersion(conexion, transaccion, 6);
+            transaccion.Commit();
+        }
+        catch
+        {
+            transaccion.Rollback();
+            throw;
+        }
+    }
+
+    private static void MigrarVersionCinco(SqliteConnection conexion)
+    {
+        using var transaccion = conexion.BeginTransaction();
+        try
+        {
+            if (!ExisteColumna(conexion, transaccion, "estudiantes", "primer_apellido"))
+            {
+                using var cmd = conexion.CreateCommand();
+                cmd.Transaction = transaccion;
+                cmd.CommandText = """
+                    ALTER TABLE estudiantes ADD COLUMN primer_apellido TEXT NOT NULL DEFAULT '';
+                    ALTER TABLE estudiantes ADD COLUMN segundo_apellido TEXT NOT NULL DEFAULT '';
+                    ALTER TABLE estudiantes ADD COLUMN nombres TEXT NOT NULL DEFAULT '';
+                    ALTER TABLE estudiantes ADD COLUMN fecha_nacimiento TEXT;
+                    ALTER TABLE estudiantes ADD COLUMN genero INTEGER NOT NULL DEFAULT 0;
+                    ALTER TABLE estudiantes ADD COLUMN fecha_ingreso TEXT;
+                    ALTER TABLE estudiantes ADD COLUMN observaciones TEXT NOT NULL DEFAULT '';
+                    """;
+                cmd.ExecuteNonQuery();
+            }
+            EstablecerVersion(conexion, transaccion, 6);
+            transaccion.Commit();
+        }
+        catch
+        {
+            transaccion.Rollback();
+            throw;
+        }
+    }
+
+    private static bool ExisteColumna(SqliteConnection conexion, SqliteTransaction transaccion, string tabla, string columna)
+    {
+        using var cmd = conexion.CreateCommand();
+        cmd.Transaction = transaccion;
+        cmd.CommandText = $"PRAGMA table_info('{tabla}');";
+        using var reader = cmd.ExecuteReader();
+        while (reader.Read())
+        {
+            if (string.Equals(reader.GetString(1), columna, StringComparison.OrdinalIgnoreCase))
+            {
+                return true;
+            }
+        }
+        return false;
+    }
+
     private static void ValidarVersionCuatro(SqliteConnection conexion)
     {
-        ValidarVersionDos(conexion);
         ValidarObjetos(conexion, ObjetosProyectos);
     }
 
     private static void ValidarVersionCinco(SqliteConnection conexion)
     {
-        ValidarVersionCuatro(conexion);
         ValidarObjetos(conexion, ObjetosExpedientes);
+    }
+
+    private static void ValidarVersionSeis(SqliteConnection conexion)
+    {
+        ValidarObjetos(conexion, ObjetosVersionSeis);
     }
 
     private static void CrearObjetos(

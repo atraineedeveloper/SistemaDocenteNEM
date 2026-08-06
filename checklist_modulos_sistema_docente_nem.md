@@ -13,10 +13,12 @@
 
 - [x] **Grupo y estudiantes**
   - Registro del grupo.
-  - Alta y edición de estudiantes.
+  - Alta y edición de estudiantes con datos desglosados (Primer Apellido, Segundo Apellido, Nombres, Edad calculada dinámicamente, Género, Fecha de Ingreso y Observaciones cualitativas).
+  - Exclusión explícita de CURP.
   - Activación e inactivación.
   - Conservación del historial.
-  - Persistencia local.
+  - Persistencia local con migración SQLite v6.
+  - Tipografía tipográfica global Montserrat en la interfaz WPF.
 
 - [x] **Asistencia**
   - Asistencia diaria como unidad atómica.

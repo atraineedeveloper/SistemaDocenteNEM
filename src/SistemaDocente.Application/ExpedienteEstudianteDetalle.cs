@@ -21,6 +21,14 @@ public sealed record ExpedienteEstudianteDetalle(
     EstudianteId EstudianteId,
     GrupoId GrupoId,
     string NombreEstudiante,
+    string PrimerApellido,
+    string SegundoApellido,
+    string Nombres,
+    DateOnly? FechaNacimiento,
+    int? Edad,
+    GeneroEstudiante Genero,
+    DateOnly? FechaIngreso,
+    string ObservacionesAlumno,
     int NumeroLista,
     bool EstaActivo,
     ResumenAsistenciaEstudiante Asistencia,
@@ -29,5 +37,5 @@ public sealed record ExpedienteEstudianteDetalle(
     IReadOnlyList<NotaPedagogica> Dificultades,
     IReadOnlyList<NotaPedagogica> ApoyosAplicados,
     IReadOnlyList<NotaPedagogica> ObservacionesCronologicas,
-    IReadOnlyList<AcuerdoTutor> AcuerdosTutores,
-    IReadOnlyList<AlertaPedagogica> AlertasPedagogicas);
+    IReadOnlyList<AcuerdoTutor> Acuerdos,
+    IReadOnlyList<AlertaPedagogica> Alertas);

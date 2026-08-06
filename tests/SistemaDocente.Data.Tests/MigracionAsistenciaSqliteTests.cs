@@ -16,7 +16,7 @@ public sealed class MigracionAsistenciaSqliteTests : IDisposable
         _base.Persistencia.Inicializar();
 
         using var conexion = _base.AbrirConexion();
-        Assert.Equal(5L, Escalar(conexion, "PRAGMA user_version;"));
+        Assert.Equal(6L, Escalar(conexion, "PRAGMA user_version;"));
         Assert.Equal(1L, Escalar(conexion, "SELECT COUNT(*) FROM grupos;"));
         Assert.Equal(1L, Escalar(conexion, "SELECT COUNT(*) FROM estudiantes;"));
         Assert.Equal(1L, Escalar(

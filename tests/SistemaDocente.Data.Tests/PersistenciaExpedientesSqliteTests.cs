@@ -22,7 +22,7 @@ public sealed class PersistenciaExpedientesSqliteTests
                 using var cmd = conexion.CreateCommand();
                 cmd.CommandText = """
                     INSERT INTO grupos VALUES ($g, 'Grupo Test');
-                    INSERT INTO estudiantes VALUES ($e, $g, 'Estudiante Test', 1, 1);
+                    INSERT INTO estudiantes (id, grupo_id, nombre, numero_lista, activo) VALUES ($e, $g, 'Estudiante Test', 1, 1);
                     """;
                 cmd.Parameters.AddWithValue("$g", grupoId.Valor.ToString());
                 cmd.Parameters.AddWithValue("$e", estId.Valor.ToString());

@@ -290,11 +290,33 @@ public sealed class GestionGrupoViewModelTests
             return Grupo;
         }
 
-        public EstudianteDetalle AgregarEstudiante(GrupoId grupoId, string nombreVisible, int numeroLista)
+        public EstudianteDetalle AgregarEstudiante(
+            GrupoId grupoId,
+            string nombreVisible,
+            int numeroLista,
+            string primerApellido = "",
+            string segundoApellido = "",
+            string nombres = "",
+            DateOnly? fechaNacimiento = null,
+            GeneroEstudiante genero = GeneroEstudiante.NoEspecificado,
+            DateOnly? fechaIngreso = null,
+            string observaciones = "")
         {
             Altas++;
             Lanzar(ErrorAgregar);
-            var estudiante = new EstudianteDetalle(EstudianteId.DesdeGuid(Guid.NewGuid()), nombreVisible, numeroLista, true);
+            var estudiante = new EstudianteDetalle(
+                EstudianteId: EstudianteId.DesdeGuid(Guid.NewGuid()),
+                NombreVisible: nombreVisible,
+                PrimerApellido: primerApellido,
+                SegundoApellido: segundoApellido,
+                Nombres: nombres,
+                FechaNacimiento: fechaNacimiento,
+                Edad: null,
+                Genero: genero,
+                FechaIngreso: fechaIngreso,
+                Observaciones: observaciones,
+                NumeroLista: numeroLista,
+                EstaActivo: true);
             _estudiantes.Add(estudiante);
             Grupo = CrearDetalle(Grupo.NombreVisible);
             return estudiante;
@@ -320,12 +342,19 @@ public sealed class GestionGrupoViewModelTests
             GrupoId grupoId,
             EstudianteId id,
             string nombre,
-            int numero)
+            int numero,
+            string primerApellido = "",
+            string segundoApellido = "",
+            string nombres = "",
+            DateOnly? fechaNacimiento = null,
+            GeneroEstudiante genero = GeneroEstudiante.NoEspecificado,
+            DateOnly? fechaIngreso = null,
+            string observaciones = "")
         {
             Ediciones++;
             Lanzar(ErrorEditar);
             var actual = Buscar(id);
-            Reemplazar(actual with { NombreVisible = nombre, NumeroLista = numero });
+            Reemplazar(actual with { NombreVisible = nombre, NumeroLista = numero, PrimerApellido = primerApellido, SegundoApellido = segundoApellido, Nombres = nombres, FechaNacimiento = fechaNacimiento, Genero = genero, FechaIngreso = fechaIngreso, Observaciones = observaciones });
             return Buscar(id);
         }
 

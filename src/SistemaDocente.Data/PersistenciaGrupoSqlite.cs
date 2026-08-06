@@ -1,3 +1,4 @@
+using System.Globalization;
 using Microsoft.Data.Sqlite;
 
 using SistemaDocente.Application;
@@ -279,22 +280,50 @@ public sealed class PersistenciaGrupoSqlite : IAlmacenamientoGrupos
                 id,
                 grupo_id,
                 nombre,
+                primer_apellido,
+                segundo_apellido,
+                nombres,
+                fecha_nacimiento,
+                genero,
+                fecha_ingreso,
+                observaciones,
                 numero_lista,
                 activo)
             VALUES (
                 $id,
                 $grupoId,
                 $nombre,
+                $primerApellido,
+                $segundoApellido,
+                $nombres,
+                $fechaNacimiento,
+                $genero,
+                $fechaIngreso,
+                $observaciones,
                 $numeroLista,
                 $activo)
-            ON CONFLICT(id) DO UPDATE SET
+            ON CONFLICT(id, grupo_id) DO UPDATE SET
                 nombre = excluded.nombre,
+                primer_apellido = excluded.primer_apellido,
+                segundo_apellido = excluded.segundo_apellido,
+                nombres = excluded.nombres,
+                fecha_nacimiento = excluded.fecha_nacimiento,
+                genero = excluded.genero,
+                fecha_ingreso = excluded.fecha_ingreso,
+                observaciones = excluded.observaciones,
                 numero_lista = excluded.numero_lista,
                 activo = excluded.activo;
             """;
         comando.Parameters.AddWithValue("$id", Formatear(estudiante.Id.Valor));
         comando.Parameters.AddWithValue("$grupoId", Formatear(grupoId.Valor));
         comando.Parameters.AddWithValue("$nombre", estudiante.NombreVisible);
+        comando.Parameters.AddWithValue("$primerApellido", estudiante.PrimerApellido);
+        comando.Parameters.AddWithValue("$segundoApellido", estudiante.SegundoApellido);
+        comando.Parameters.AddWithValue("$nombres", estudiante.Nombres);
+        comando.Parameters.AddWithValue("$fechaNacimiento", (object?)estudiante.FechaNacimiento?.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture) ?? DBNull.Value);
+        comando.Parameters.AddWithValue("$genero", (int)estudiante.Genero);
+        comando.Parameters.AddWithValue("$fechaIngreso", (object?)estudiante.FechaIngreso?.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture) ?? DBNull.Value);
+        comando.Parameters.AddWithValue("$observaciones", estudiante.Observaciones);
         comando.Parameters.AddWithValue("$numeroLista", estudiante.NumeroLista);
         comando.Parameters.AddWithValue("$activo", estudiante.EstaActivo ? 1 : 0);
         comando.ExecuteNonQuery();
@@ -314,7 +343,7 @@ public sealed class PersistenciaGrupoSqlite : IAlmacenamientoGrupos
     {
         using var comando = conexion.CreateCommand();
         comando.CommandText = """
-            SELECT id, nombre, numero_lista, activo
+            SELECT id, nombre, primer_apellido, segundo_apellido, nombres, fecha_nacimiento, genero, fecha_ingreso, observaciones, numero_lista, activo
             FROM estudiantes
             WHERE grupo_id = $grupoId
             ORDER BY rowid;
@@ -326,12 +355,25 @@ public sealed class PersistenciaGrupoSqlite : IAlmacenamientoGrupos
 
         while (lector.Read())
         {
+            var fechaNacStr = lector.IsDBNull(5) ? null : lector.GetString(5);
+            DateOnly? fechaNac = string.IsNullOrEmpty(fechaNacStr) ? null : DateOnly.ParseExact(fechaNacStr, "yyyy-MM-dd", CultureInfo.InvariantCulture);
+
+            var fechaIngStr = lector.IsDBNull(7) ? null : lector.GetString(7);
+            DateOnly? fechaIng = string.IsNullOrEmpty(fechaIngStr) ? null : DateOnly.ParseExact(fechaIngStr, "yyyy-MM-dd", CultureInfo.InvariantCulture);
+
             estudiantes.Add(
                 new DatosEstudianteRehidratado(
                     EstudianteId.DesdeGuid(Guid.Parse(lector.GetString(0))),
                     lector.GetString(1),
-                    lector.GetInt32(2),
-                    lector.GetInt32(3) == 1));
+                    lector.IsDBNull(2) ? "" : lector.GetString(2),
+                    lector.IsDBNull(3) ? "" : lector.GetString(3),
+                    lector.IsDBNull(4) ? "" : lector.GetString(4),
+                    fechaNac,
+                    (GeneroEstudiante)(lector.IsDBNull(6) ? 0 : lector.GetInt32(6)),
+                    fechaIng,
+                    lector.IsDBNull(8) ? "" : lector.GetString(8),
+                    lector.GetInt32(9),
+                    lector.GetInt32(10) == 1));
         }
 
         return estudiantes;

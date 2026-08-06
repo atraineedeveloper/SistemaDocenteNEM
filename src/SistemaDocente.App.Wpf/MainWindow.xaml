@@ -50,7 +50,13 @@
                 </DockPanel>
                 <DataGrid Grid.Row="1" ItemsSource="{Binding Estudiantes}" SelectedItem="{Binding EstudianteSeleccionado}" AutoGenerateColumns="False" IsReadOnly="True" CanUserSortColumns="False" SelectionMode="Single" SelectionUnit="FullRow" TabIndex="20" HeadersVisibility="Column" GridLinesVisibility="Horizontal" RowHeaderWidth="0" FontSize="15">
                     <DataGrid.RowStyle><Style TargetType="DataGridRow"><Style.Triggers><DataTrigger Binding="{Binding EstaActivo}" Value="False"><Setter Property="Foreground" Value="#5D6670"/><Setter Property="Background" Value="#ECEFF2"/><Setter Property="FontStyle" Value="Italic"/></DataTrigger></Style.Triggers></Style></DataGrid.RowStyle>
-                    <DataGrid.Columns><DataGridTextColumn Header="Núm." Binding="{Binding NumeroLista}" Width="90"/><DataGridTextColumn Header="Nombre" Binding="{Binding Nombre}" Width="*"/><DataGridTextColumn Header="Estado" Binding="{Binding Estado}" Width="140"/></DataGrid.Columns>
+                    <DataGrid.Columns>
+                        <DataGridTextColumn Header="Núm." Binding="{Binding NumeroLista}" Width="65"/>
+                        <DataGridTextColumn Header="Nombre del Estudiante" Binding="{Binding Nombre}" Width="*"/>
+                        <DataGridTextColumn Header="Género" Binding="{Binding GeneroTexto}" Width="120"/>
+                        <DataGridTextColumn Header="Edad" Binding="{Binding Edad}" Width="70"/>
+                        <DataGridTextColumn Header="Estado" Binding="{Binding Estado}" Width="100"/>
+                    </DataGrid.Columns>
                 </DataGrid>
                 <WrapPanel Grid.Row="2" Margin="0,14,0,6">
                     <Button Content="Ver Expediente" Click="OnVerExpedienteEstudianteClic"/>
@@ -63,7 +69,60 @@
                     <StackPanel><TextBlock Text="Cambiar nombre del grupo" FontSize="19" FontWeight="SemiBold"/><TextBlock Margin="0,10,0,0" Text="Nuevo nombre"/><TextBox x:Name="NombreGrupoEdicion" Text="{Binding NombreEdicionGrupo, UpdateSourceTrigger=PropertyChanged}"><TextBox.InputBindings><KeyBinding Key="Enter" Command="{Binding GuardarNombreGrupoCommand}"/></TextBox.InputBindings></TextBox><TextBlock Foreground="#B42318" Text="{Binding MensajeEdicion}"/><WrapPanel><Button Content="Guardar nombre" Command="{Binding GuardarNombreGrupoCommand}"/><Button Content="Cancelar" Command="{Binding CancelarEdicionCommand}"/></WrapPanel></StackPanel>
                 </Border>
                 <Border Grid.Row="3" Padding="18" Background="White" CornerRadius="8" Visibility="{Binding MostrarEditorEstudiante, Converter={StaticResource BoolToVisibility}}">
-                    <StackPanel><TextBlock Text="{Binding TituloEditorEstudiante}" FontSize="19" FontWeight="SemiBold"/><Grid Margin="0,10,0,0"><Grid.ColumnDefinitions><ColumnDefinition Width="3*"/><ColumnDefinition Width="20"/><ColumnDefinition Width="*"/></Grid.ColumnDefinitions><StackPanel><TextBlock Text="Nombre"/><TextBox x:Name="NombreEstudianteEdicion" Text="{Binding NombreEstudianteEdicion, UpdateSourceTrigger=PropertyChanged}"/></StackPanel><StackPanel Grid.Column="2"><TextBlock Text="Número de lista"/><TextBox Text="{Binding NumeroListaEdicion, UpdateSourceTrigger=PropertyChanged}"><TextBox.InputBindings><KeyBinding Key="Enter" Command="{Binding GuardarEstudianteCommand}"/></TextBox.InputBindings></TextBox></StackPanel></Grid><TextBlock Foreground="#B42318" Text="{Binding MensajeEdicion}"/><WrapPanel><Button Content="Guardar estudiante" Command="{Binding GuardarEstudianteCommand}"/><Button Content="Cancelar" Command="{Binding CancelarEdicionCommand}"/></WrapPanel></StackPanel>
+                    <StackPanel>
+                        <TextBlock Text="{Binding TituloEditorEstudiante}" FontSize="19" FontWeight="SemiBold"/>
+                        <Grid Margin="0,10,0,0">
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                            </Grid.RowDefinitions>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="12"/>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="12"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <StackPanel Grid.Row="0" Grid.Column="0">
+                                <TextBlock Text="Primer apellido"/>
+                                <TextBox x:Name="PrimerApellidoEdicion" Text="{Binding PrimerApellidoEdicion, UpdateSourceTrigger=PropertyChanged}"/>
+                            </StackPanel>
+                            <StackPanel Grid.Row="0" Grid.Column="2">
+                                <TextBlock Text="Segundo apellido"/>
+                                <TextBox Text="{Binding SegundoApellidoEdicion, UpdateSourceTrigger=PropertyChanged}"/>
+                            </StackPanel>
+                            <StackPanel Grid.Row="0" Grid.Column="4">
+                                <TextBlock Text="Nombres"/>
+                                <TextBox Text="{Binding NombresEdicion, UpdateSourceTrigger=PropertyChanged}"/>
+                            </StackPanel>
+                            <StackPanel Grid.Row="1" Grid.Column="0" Margin="0,8,0,0">
+                                <TextBlock Text="Número de lista"/>
+                                <TextBox Text="{Binding NumeroListaEdicion, UpdateSourceTrigger=PropertyChanged}"/>
+                            </StackPanel>
+                            <StackPanel Grid.Row="1" Grid.Column="2" Margin="0,8,0,0">
+                                <TextBlock Text="Género"/>
+                                <ComboBox SelectedIndex="{Binding GeneroIndexEdicion, Mode=TwoWay}">
+                                    <ComboBoxItem Content="No especificado"/>
+                                    <ComboBoxItem Content="Hombre"/>
+                                    <ComboBoxItem Content="Mujer"/>
+                                </ComboBox>
+                            </StackPanel>
+                            <StackPanel Grid.Row="1" Grid.Column="4" Margin="0,8,0,0">
+                                <TextBlock Text="Fecha de nacimiento"/>
+                                <DatePicker SelectedDate="{Binding FechaNacimientoEdicion, Mode=TwoWay}"/>
+                            </StackPanel>
+                            <StackPanel Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="5" Margin="0,8,0,0">
+                                <TextBlock Text="Observaciones particulares (cualitativo/pedagógico)"/>
+                                <TextBox Text="{Binding ObservacionesEdicion, UpdateSourceTrigger=PropertyChanged}" Height="55" TextWrapping="Wrap" AcceptsReturn="True"/>
+                            </StackPanel>
+                        </Grid>
+                        <TextBlock Foreground="#B42318" Text="{Binding MensajeEdicion}" Margin="0,4,0,4"/>
+                        <WrapPanel>
+                            <Button Content="Guardar estudiante" Command="{Binding GuardarEstudianteCommand}"/>
+                            <Button Content="Cancelar" Command="{Binding CancelarEdicionCommand}"/>
+                        </WrapPanel>
+                    </StackPanel>
                 </Border>
             </Grid>
             <Border VerticalAlignment="Top" HorizontalAlignment="Right" Margin="18" Padding="12,7" Background="#1F4B6E" CornerRadius="5" Visibility="{Binding EstaOcupado, Converter={StaticResource BoolToVisibility}}"><TextBlock Foreground="White" Text="Procesando…"/></Border>

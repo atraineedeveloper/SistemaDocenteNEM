@@ -157,6 +157,55 @@ public sealed class GestionGrupoViewModel : ViewModelBase
         set => SetProperty(ref _numeroListaEdicion, value);
     }
 
+    private string _primerApellidoEdicion = string.Empty;
+    public string PrimerApellidoEdicion
+    {
+        get => _primerApellidoEdicion;
+        set => SetProperty(ref _primerApellidoEdicion, value);
+    }
+
+    private string _segundoApellidoEdicion = string.Empty;
+    public string SegundoApellidoEdicion
+    {
+        get => _segundoApellidoEdicion;
+        set => SetProperty(ref _segundoApellidoEdicion, value);
+    }
+
+    private string _nombresEdicion = string.Empty;
+    public string NombresEdicion
+    {
+        get => _nombresEdicion;
+        set => SetProperty(ref _nombresEdicion, value);
+    }
+
+    private DateTime? _fechaNacimientoEdicion;
+    public DateTime? FechaNacimientoEdicion
+    {
+        get => _fechaNacimientoEdicion;
+        set => SetProperty(ref _fechaNacimientoEdicion, value);
+    }
+
+    private int _generoIndexEdicion;
+    public int GeneroIndexEdicion
+    {
+        get => _generoIndexEdicion;
+        set => SetProperty(ref _generoIndexEdicion, value);
+    }
+
+    private DateTime? _fechaIngresoEdicion;
+    public DateTime? FechaIngresoEdicion
+    {
+        get => _fechaIngresoEdicion;
+        set => SetProperty(ref _fechaIngresoEdicion, value);
+    }
+
+    private string _observacionesEdicion = string.Empty;
+    public string ObservacionesEdicion
+    {
+        get => _observacionesEdicion;
+        set => SetProperty(ref _observacionesEdicion, value);
+    }
+
     public string MensajeEdicion
     {
         get => _mensajeEdicion;
@@ -247,7 +296,14 @@ public sealed class GestionGrupoViewModel : ViewModelBase
     private void AbrirAgregarEstudiante()
     {
         NombreEstudianteEdicion = string.Empty;
+        PrimerApellidoEdicion = string.Empty;
+        SegundoApellidoEdicion = string.Empty;
+        NombresEdicion = string.Empty;
         NumeroListaEdicion = string.Empty;
+        FechaNacimientoEdicion = null;
+        GeneroIndexEdicion = 0;
+        FechaIngresoEdicion = null;
+        ObservacionesEdicion = string.Empty;
         MensajeEdicion = string.Empty;
         PanelActual = PanelEdicion.AgregarEstudiante;
         OnPropertyChanged(nameof(TituloEditorEstudiante));
@@ -261,7 +317,14 @@ public sealed class GestionGrupoViewModel : ViewModelBase
         }
 
         NombreEstudianteEdicion = EstudianteSeleccionado.Nombre;
+        PrimerApellidoEdicion = EstudianteSeleccionado.PrimerApellido;
+        SegundoApellidoEdicion = EstudianteSeleccionado.SegundoApellido;
+        NombresEdicion = EstudianteSeleccionado.Nombres;
         NumeroListaEdicion = EstudianteSeleccionado.NumeroLista.ToString(System.Globalization.CultureInfo.CurrentCulture);
+        FechaNacimientoEdicion = EstudianteSeleccionado.FechaNacimiento.HasValue ? EstudianteSeleccionado.FechaNacimiento.Value.ToDateTime(TimeOnly.MinValue) : null;
+        GeneroIndexEdicion = (int)EstudianteSeleccionado.Genero;
+        FechaIngresoEdicion = EstudianteSeleccionado.FechaIngreso.HasValue ? EstudianteSeleccionado.FechaIngreso.Value.ToDateTime(TimeOnly.MinValue) : null;
+        ObservacionesEdicion = EstudianteSeleccionado.Observaciones;
         MensajeEdicion = string.Empty;
         PanelActual = PanelEdicion.EditarEstudiante;
         OnPropertyChanged(nameof(TituloEditorEstudiante));
@@ -280,11 +343,25 @@ public sealed class GestionGrupoViewModel : ViewModelBase
             return;
         }
 
+        DateOnly? fechaNac = FechaNacimientoEdicion.HasValue ? DateOnly.FromDateTime(FechaNacimientoEdicion.Value) : null;
+        DateOnly? fechaIng = FechaIngresoEdicion.HasValue ? DateOnly.FromDateTime(FechaIngresoEdicion.Value) : null;
+        var genero = (GeneroEstudiante)GeneroIndexEdicion;
+
         EjecutarEdicion(() =>
         {
             if (PanelActual == PanelEdicion.AgregarEstudiante)
             {
-                _gestion.AgregarEstudiante(_grupoConfirmado.GrupoId, NombreEstudianteEdicion, numeroLista);
+                _gestion.AgregarEstudiante(
+                    _grupoConfirmado.GrupoId,
+                    NombreEstudianteEdicion,
+                    numeroLista,
+                    PrimerApellidoEdicion,
+                    SegundoApellidoEdicion,
+                    NombresEdicion,
+                    fechaNac,
+                    genero,
+                    fechaIng,
+                    ObservacionesEdicion);
             }
             else if (EstudianteSeleccionado is not null)
             {
@@ -292,7 +369,14 @@ public sealed class GestionGrupoViewModel : ViewModelBase
                     _grupoConfirmado.GrupoId,
                     EstudianteSeleccionado.Id,
                     NombreEstudianteEdicion,
-                    numeroLista);
+                    numeroLista,
+                    PrimerApellidoEdicion,
+                    SegundoApellidoEdicion,
+                    NombresEdicion,
+                    fechaNac,
+                    genero,
+                    fechaIng,
+                    ObservacionesEdicion);
             }
 
             RefrescarGrupo();
@@ -462,5 +546,17 @@ public sealed class GestionGrupoViewModel : ViewModelBase
     }
 
     private static EstudianteVisual Proyectar(EstudianteDetalle estudiante) =>
-        new(estudiante.EstudianteId, estudiante.NombreVisible, estudiante.NumeroLista, estudiante.EstaActivo);
+        new(
+            estudiante.EstudianteId,
+            estudiante.NombreVisible,
+            estudiante.PrimerApellido,
+            estudiante.SegundoApellido,
+            estudiante.Nombres,
+            estudiante.FechaNacimiento,
+            estudiante.Edad,
+            estudiante.Genero,
+            estudiante.FechaIngreso,
+            estudiante.Observaciones,
+            estudiante.NumeroLista,
+            estudiante.EstaActivo);
 }

@@ -171,7 +171,7 @@ public sealed class AsistenciaSqliteTests : IDisposable
         using var conexion = _base.AbrirConexion();
         using var comando = conexion.CreateCommand();
         comando.CommandText = "PRAGMA user_version;";
-        Assert.Equal(5L, comando.ExecuteScalar());
+        Assert.Equal(6L, comando.ExecuteScalar());
     }
 
     [Fact]
@@ -215,7 +215,7 @@ public sealed class AsistenciaSqliteTests : IDisposable
         using var verificacion = _base.AbrirConexion();
         using var consulta = verificacion.CreateCommand();
         consulta.CommandText = "PRAGMA user_version;";
-        Assert.Equal(5L, consulta.ExecuteScalar());
+        Assert.Equal(6L, consulta.ExecuteScalar());
     }
 
     public void Dispose() => _base.Dispose();

@@ -1,8 +1,18 @@
-﻿<Application x:Class="SistemaDocente.App.Wpf.App"
+<Application x:Class="SistemaDocente.App.Wpf.App"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:local="clr-namespace:SistemaDocente.App.Wpf">
     <Application.Resources>
-         
+        <FontFamily x:Key="AppFontFamily">Montserrat, Segoe UI, sans-serif</FontFamily>
+
+        <Style TargetType="Window">
+            <Setter Property="FontFamily" Value="{StaticResource AppFontFamily}"/>
+        </Style>
+        <Style TargetType="Control">
+            <Setter Property="FontFamily" Value="{StaticResource AppFontFamily}"/>
+        </Style>
+        <Style TargetType="TextBlock">
+            <Setter Property="FontFamily" Value="{StaticResource AppFontFamily}"/>
+        </Style>
     </Application.Resources>
 </Application>

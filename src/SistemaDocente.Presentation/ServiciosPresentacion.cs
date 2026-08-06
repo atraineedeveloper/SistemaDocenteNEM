@@ -38,14 +38,31 @@ public interface IGestionGrupoPresentacion
     GrupoDetalle CrearGrupo(string nombreVisible);
     GrupoDetalle CargarGrupo(GrupoId grupoId);
     GrupoDetalle CambiarNombreGrupo(GrupoId grupoId, string nombreVisible);
-    EstudianteDetalle AgregarEstudiante(GrupoId grupoId, string nombreVisible, int numeroLista);
+    EstudianteDetalle AgregarEstudiante(
+        GrupoId grupoId,
+        string nombreVisible,
+        int numeroLista,
+        string primerApellido = "",
+        string segundoApellido = "",
+        string nombres = "",
+        DateOnly? fechaNacimiento = null,
+        GeneroEstudiante genero = GeneroEstudiante.NoEspecificado,
+        DateOnly? fechaIngreso = null,
+        string observaciones = "");
     EstudianteDetalle RenombrarEstudiante(GrupoId grupoId, EstudianteId estudianteId, string nombreVisible);
     EstudianteDetalle CambiarNumeroLista(GrupoId grupoId, EstudianteId estudianteId, int numeroLista);
     EstudianteDetalle EditarEstudiante(
         GrupoId grupoId,
         EstudianteId estudianteId,
         string nombreVisible,
-        int numeroLista);
+        int numeroLista,
+        string primerApellido = "",
+        string segundoApellido = "",
+        string nombres = "",
+        DateOnly? fechaNacimiento = null,
+        GeneroEstudiante genero = GeneroEstudiante.NoEspecificado,
+        DateOnly? fechaIngreso = null,
+        string observaciones = "");
     EstudianteDetalle DesactivarEstudiante(GrupoId grupoId, EstudianteId estudianteId);
     EstudianteDetalle ReactivarEstudiante(GrupoId grupoId, EstudianteId estudianteId);
     IReadOnlyList<EstudianteDetalle> ObtenerTodosLosEstudiantes(GrupoId grupoId);
@@ -65,8 +82,18 @@ public sealed class GestionGrupoPresentacion : IGestionGrupoPresentacion
     public GrupoDetalle CargarGrupo(GrupoId grupoId) => _casosUso.CargarGrupo(grupoId);
     public GrupoDetalle CambiarNombreGrupo(GrupoId grupoId, string nombreVisible) =>
         _casosUso.CambiarNombreGrupo(grupoId, nombreVisible);
-    public EstudianteDetalle AgregarEstudiante(GrupoId grupoId, string nombreVisible, int numeroLista) =>
-        _casosUso.AgregarEstudiante(grupoId, nombreVisible, numeroLista);
+    public EstudianteDetalle AgregarEstudiante(
+        GrupoId grupoId,
+        string nombreVisible,
+        int numeroLista,
+        string primerApellido = "",
+        string segundoApellido = "",
+        string nombres = "",
+        DateOnly? fechaNacimiento = null,
+        GeneroEstudiante genero = GeneroEstudiante.NoEspecificado,
+        DateOnly? fechaIngreso = null,
+        string observaciones = "") =>
+        _casosUso.AgregarEstudiante(grupoId, nombreVisible, numeroLista, primerApellido, segundoApellido, nombres, fechaNacimiento, genero, fechaIngreso, observaciones);
     public EstudianteDetalle RenombrarEstudiante(GrupoId grupoId, EstudianteId estudianteId, string nombreVisible) =>
         _casosUso.RenombrarEstudiante(grupoId, estudianteId, nombreVisible);
     public EstudianteDetalle CambiarNumeroLista(GrupoId grupoId, EstudianteId estudianteId, int numeroLista) =>
@@ -75,8 +102,15 @@ public sealed class GestionGrupoPresentacion : IGestionGrupoPresentacion
         GrupoId grupoId,
         EstudianteId estudianteId,
         string nombreVisible,
-        int numeroLista) =>
-        _casosUso.EditarEstudiante(grupoId, estudianteId, nombreVisible, numeroLista);
+        int numeroLista,
+        string primerApellido = "",
+        string segundoApellido = "",
+        string nombres = "",
+        DateOnly? fechaNacimiento = null,
+        GeneroEstudiante genero = GeneroEstudiante.NoEspecificado,
+        DateOnly? fechaIngreso = null,
+        string observaciones = "") =>
+        _casosUso.EditarEstudiante(grupoId, estudianteId, nombreVisible, numeroLista, primerApellido, segundoApellido, nombres, fechaNacimiento, genero, fechaIngreso, observaciones);
     public EstudianteDetalle DesactivarEstudiante(GrupoId grupoId, EstudianteId estudianteId) =>
         _casosUso.DesactivarEstudiante(grupoId, estudianteId);
     public EstudianteDetalle ReactivarEstudiante(GrupoId grupoId, EstudianteId estudianteId) =>
