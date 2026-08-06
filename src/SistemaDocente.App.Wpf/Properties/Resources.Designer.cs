@@ -70,27 +70,27 @@ namespace SistemaDocente.App.Wpf.Properties
             }
         }
 
-        internal static string AppTitle => ResourceManager.GetString("AppTitle", resourceCulture);
-        internal static string DetalleProyectoTitle => ResourceManager.GetString("DetalleProyectoTitle", resourceCulture);
-        internal static string DetalleActividadTitle => ResourceManager.GetString("DetalleActividadTitle", resourceCulture);
-        internal static string ExpedienteTitle => ResourceManager.GetString("ExpedienteTitle", resourceCulture);
-        internal static string Guardar => ResourceManager.GetString("Guardar", resourceCulture);
-        internal static string Cancelar => ResourceManager.GetString("Cancelar", resourceCulture);
-        internal static string Cerrar => ResourceManager.GetString("Cerrar", resourceCulture);
-        internal static string Agregar => ResourceManager.GetString("Agregar", resourceCulture);
-        internal static string Eliminar => ResourceManager.GetString("Eliminar", resourceCulture);
-        internal static string Buscar => ResourceManager.GetString("Buscar", resourceCulture);
-        internal static string NombreGrupo => ResourceManager.GetString("NombreGrupo", resourceCulture);
-        internal static string NombreProyecto => ResourceManager.GetString("NombreProyecto", resourceCulture);
-        internal static string Descripcion => ResourceManager.GetString("Descripcion", resourceCulture);
-        internal static string FechaInicio => ResourceManager.GetString("FechaInicio", resourceCulture);
-        internal static string FechaTermino => ResourceManager.GetString("FechaTermino", resourceCulture);
-        internal static string Observaciones => ResourceManager.GetString("Observaciones", resourceCulture);
-        internal static string EmptyStateEstudiantes => ResourceManager.GetString("EmptyStateEstudiantes", resourceCulture);
-        internal static string EmptyStateActividades => ResourceManager.GetString("EmptyStateActividades", resourceCulture);
-        internal static string EmptyStateExpediente => ResourceManager.GetString("EmptyStateExpediente", resourceCulture);
-        internal static string ErrorCampoRequerido => ResourceManager.GetString("ErrorCampoRequerido", resourceCulture);
-        internal static string ErrorFechaInvalida => ResourceManager.GetString("ErrorFechaInvalida", resourceCulture);
-        internal static string ErrorRangoFechas => ResourceManager.GetString("ErrorRangoFechas", resourceCulture);
+        public static string AppTitle => ResourceManager.GetString("AppTitle", resourceCulture);
+        public static string DetalleProyectoTitle => ResourceManager.GetString("DetalleProyectoTitle", resourceCulture);
+        public static string DetalleActividadTitle => ResourceManager.GetString("DetalleActividadTitle", resourceCulture);
+        public static string ExpedienteTitle => ResourceManager.GetString("ExpedienteTitle", resourceCulture);
+        public static string Guardar => ResourceManager.GetString("Guardar", resourceCulture);
+        public static string Cancelar => ResourceManager.GetString("Cancelar", resourceCulture);
+        public static string Cerrar => ResourceManager.GetString("Cerrar", resourceCulture);
+        public static string Agregar => ResourceManager.GetString("Agregar", resourceCulture);
+        public static string Eliminar => ResourceManager.GetString("Eliminar", resourceCulture);
+        public static string Buscar => ResourceManager.GetString("Buscar", resourceCulture);
+        public static string NombreGrupo => ResourceManager.GetString("NombreGrupo", resourceCulture);
+        public static string NombreProyecto => ResourceManager.GetString("NombreProyecto", resourceCulture);
+        public static string Descripcion => ResourceManager.GetString("Descripcion", resourceCulture);
+        public static string FechaInicio => ResourceManager.GetString("FechaInicio", resourceCulture);
+        public static string FechaTermino => ResourceManager.GetString("FechaTermino", resourceCulture);
+        public static string Observaciones => ResourceManager.GetString("Observaciones", resourceCulture);
+        public static string EmptyStateEstudiantes => ResourceManager.GetString("EmptyStateEstudiantes", resourceCulture);
+        public static string EmptyStateActividades => ResourceManager.GetString("EmptyStateActividades", resourceCulture);
+        public static string EmptyStateExpediente => ResourceManager.GetString("EmptyStateExpediente", resourceCulture);
+        public static string ErrorCampoRequerido => ResourceManager.GetString("ErrorCampoRequerido", resourceCulture);
+        public static string ErrorFechaInvalida => ResourceManager.GetString("ErrorFechaInvalida", resourceCulture);
+        public static string ErrorRangoFechas => ResourceManager.GetString("ErrorRangoFechas", resourceCulture);
     }
 }

@@ -1,6 +1,7 @@
 using System.IO;
 using System.Diagnostics;
 using System.Windows;
+using System.Windows.Threading;
 
 using SistemaDocente.Application;
 using SistemaDocente.Data;
@@ -10,6 +11,40 @@ namespace SistemaDocente.App.Wpf;
 
 public partial class App : System.Windows.Application
 {
+    public App()
+    {
+        DispatcherUnhandledException += OnDispatcherUnhandledException;
+        AppDomain.CurrentDomain.UnhandledException += OnCurrentDomainUnhandledException;
+    }
+
+    private static void OnDispatcherUnhandledException(object sender, DispatcherUnhandledExceptionEventArgs e)
+    {
+        LogException(e.Exception);
+        e.Handled = true;
+    }
+
+    private static void OnCurrentDomainUnhandledException(object sender, UnhandledExceptionEventArgs e)
+    {
+        if (e.ExceptionObject is Exception ex)
+            LogException(ex);
+    }
+
+    private static void LogException(Exception exception)
+    {
+        try
+        {
+            var logPath = Path.Combine(
+                Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
+                "SistemaDocenteNEM", "crash.log");
+            Directory.CreateDirectory(Path.GetDirectoryName(logPath)!);
+            File.AppendAllText(logPath, $"[{DateTime.Now:O}] {exception}\n\n");
+        }
+        catch
+        {
+            // Ignorar fallos de logging.
+        }
+    }
+
     protected override void OnStartup(StartupEventArgs e)
     {
         base.OnStartup(e);
