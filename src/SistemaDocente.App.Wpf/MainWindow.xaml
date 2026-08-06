@@ -162,12 +162,30 @@
             <Grid.InputBindings><KeyBinding Modifiers="Control" Key="S" Command="{Binding GuardarCommand}"/></Grid.InputBindings>
             <Grid.Style><Style TargetType="Grid"><Setter Property="IsEnabled" Value="True"/><Style.Triggers><DataTrigger Binding="{Binding EstaOcupado}" Value="True"><Setter Property="IsEnabled" Value="False"/></DataTrigger></Style.Triggers></Style></Grid.Style>
             <Grid.RowDefinitions><RowDefinition Height="Auto"/><RowDefinition Height="Auto"/><RowDefinition Height="*"/><RowDefinition Height="Auto"/></Grid.RowDefinitions>
-            <DockPanel Margin="0,0,0,12">
-                <StackPanel DockPanel.Dock="Left"><TextBlock Text="Asistencia" Foreground="#475467"/><TextBlock Text="Registro diario" Foreground="#101828" FontSize="27" FontWeight="SemiBold"/></StackPanel>
-                <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" HorizontalAlignment="Right"><Button TabIndex="100" Content="_Vista mensual" Command="{Binding DataContext.MostrarVistaMensualCommand, RelativeSource={RelativeSource AncestorType=Window}}"/><StackPanel><TextBlock Text="Fecha" Foreground="#101828" FontWeight="SemiBold"/><DatePicker TabIndex="101" Width="170" SelectedDate="{Binding FechaSeleccionada, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/></StackPanel></StackPanel>
+            <DockPanel Margin="0,0,0,14">
+                <StackPanel DockPanel.Dock="Left">
+                    <TextBlock Text="Asistencia de Estudiantes" Foreground="#475467" FontSize="13" FontWeight="Medium"/>
+                    <TextBlock Text="Registro diario" Foreground="#101828" FontSize="26" FontWeight="Bold"/>
+                </StackPanel>
+                <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center">
+                    <Button TabIndex="100" Content="_Vista mensual" Command="{Binding DataContext.MostrarVistaMensualCommand, RelativeSource={RelativeSource AncestorType=Window}}" Margin="0,0,12,0"/>
+                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                        <TextBlock Text="Fecha: " Foreground="#101828" FontWeight="SemiBold" VerticalAlignment="Center"/>
+                        <DatePicker TabIndex="101" Width="160" SelectedDate="{Binding FechaSeleccionada, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
+                    </StackPanel>
+                </StackPanel>
             </DockPanel>
-            <Border Grid.Row="1" Margin="0,0,0,12" Padding="14" Background="White" CornerRadius="8">
-                <DockPanel><TextBlock DockPanel.Dock="Left" Foreground="#101828" FontWeight="SemiBold" Text="{Binding EstadoGuardado}"/><StackPanel DockPanel.Dock="Right" Orientation="Horizontal"><TextBlock Margin="12,0" Foreground="#101828" Text="{Binding Total, StringFormat=Total: {0}}"/><TextBlock Margin="12,0" Foreground="#027A48" Text="{Binding Presentes, StringFormat=Presentes: {0}}"/><TextBlock Margin="12,0" Foreground="#B42318" Text="{Binding Faltas, StringFormat=Faltas: {0}}"/><TextBlock Margin="12,0" Foreground="#B54708" Text="{Binding Retardos, StringFormat=Retardos: {0}}"/><TextBlock Margin="12,0" Foreground="#175CD3" Text="{Binding Justificadas, StringFormat=Falta justificada: {0}}"/></StackPanel></DockPanel>
+            <Border Grid.Row="1" Margin="0,0,0,14" Padding="16,12" Background="White" CornerRadius="8" BorderBrush="#EAECF0" BorderThickness="1">
+                <DockPanel>
+                    <TextBlock DockPanel.Dock="Left" Foreground="#101828" FontWeight="SemiBold" VerticalAlignment="Center" Text="{Binding EstadoGuardado}"/>
+                    <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" VerticalAlignment="Center">
+                        <Border Background="#F8F9FA" CornerRadius="6" Padding="10,6" Margin="4,0"><TextBlock Foreground="#101828" FontWeight="SemiBold" Text="{Binding Total, StringFormat=Total: {0}}"/></Border>
+                        <Border Background="#ECFDF3" CornerRadius="6" Padding="10,6" Margin="4,0"><TextBlock Foreground="#027A48" FontWeight="SemiBold" Text="{Binding Presentes, StringFormat=Presentes: {0}}"/></Border>
+                        <Border Background="#FEF3F2" CornerRadius="6" Padding="10,6" Margin="4,0"><TextBlock Foreground="#B42318" FontWeight="SemiBold" Text="{Binding Faltas, StringFormat=Faltas: {0}}"/></Border>
+                        <Border Background="#FFFAEB" CornerRadius="6" Padding="10,6" Margin="4,0"><TextBlock Foreground="#B54708" FontWeight="SemiBold" Text="{Binding Retardos, StringFormat=Retardos: {0}}"/></Border>
+                        <Border Background="#EFF8FF" CornerRadius="6" Padding="10,6" Margin="4,0"><TextBlock Foreground="#175CD3" FontWeight="SemiBold" Text="{Binding Justificadas, StringFormat=Falta justificada: {0}}"/></Border>
+                    </StackPanel>
+                </DockPanel>
             </Border>
             <DataGrid Grid.Row="2" ItemsSource="{Binding Estudiantes}" AutoGenerateColumns="False" CanUserAddRows="False" CanUserDeleteRows="False" CanUserSortColumns="False" RowHeaderWidth="0" GridLinesVisibility="Horizontal" FontSize="15" EnableRowVirtualization="True" TabIndex="102">
                 <DataGrid.ContextMenu>
@@ -182,39 +200,67 @@
                     <DataGridTextColumn Header="Situación actual" Binding="{Binding SituacionActual}" Width="180" IsReadOnly="True"/>
                 </DataGrid.Columns>
             </DataGrid>
-            <DockPanel Grid.Row="3" Margin="0,12,0,0"><Button TabIndex="103" DockPanel.Dock="Left" Content="Marcar _todos presentes" Command="{Binding MarcarTodosPresentesCommand}"/><Button TabIndex="104" DockPanel.Dock="Right" Content="_Guardar (Ctrl+S)" Command="{Binding GuardarCommand}"/></DockPanel>
+            <DockPanel Grid.Row="3" Margin="0,14,0,0">
+                <Button TabIndex="103" DockPanel.Dock="Left" Content="Marcar _todos presentes" Command="{Binding MarcarTodosPresentesCommand}"/>
+                <Button TabIndex="104" DockPanel.Dock="Right" Style="{StaticResource PrimaryButton}" Content="_Guardar (Ctrl+S)" Command="{Binding GuardarCommand}"/>
+            </DockPanel>
         </Grid>
 
-        <Grid Grid.Row="1" Margin="20" DataContext="{Binding AsistenciaMensual}"
+        <Grid Grid.Row="1" Margin="24" DataContext="{Binding AsistenciaMensual}"
               Visibility="{Binding DataContext.MostrarAsistenciaMensual, RelativeSource={RelativeSource AncestorType=Window}, Converter={StaticResource BoolToVisibility}}">
             <Grid.Style><Style TargetType="Grid"><Setter Property="IsEnabled" Value="True"/><Style.Triggers><DataTrigger Binding="{Binding EstaOcupado}" Value="True"><Setter Property="IsEnabled" Value="False"/></DataTrigger></Style.Triggers></Style></Grid.Style>
             <Grid.RowDefinitions><RowDefinition Height="Auto"/><RowDefinition Height="Auto"/><RowDefinition Height="Auto"/><RowDefinition Height="*"/><RowDefinition Height="Auto"/></Grid.RowDefinitions>
-            <DockPanel Margin="0,0,0,10">
-                <StackPanel DockPanel.Dock="Left"><TextBlock Text="Asistencia" Foreground="#475467"/><TextBlock Text="Vista mensual" Foreground="#101828" FontSize="27" FontWeight="SemiBold"/></StackPanel>
-                <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" VerticalAlignment="Center">
-                    <Button TabIndex="200" Content="_Vista diaria" Command="{Binding DataContext.MostrarVistaDiariaCommand, RelativeSource={RelativeSource AncestorType=Window}}"/>
-                    <Button TabIndex="201" Content="&lt;" Command="{Binding MesAnteriorCommand}" MinWidth="42"/>
-                    <ComboBox TabIndex="202" Width="135" Margin="4" ItemsSource="{Binding Meses}" DisplayMemberPath="Nombre" SelectedValuePath="Numero" SelectedValue="{Binding MesSeleccionado}"/>
-                    <TextBox TabIndex="203" Width="78" Margin="4" Text="{Binding AnioSeleccionado, UpdateSourceTrigger=LostFocus}"/>
-                    <Button TabIndex="204" Content="&gt;" Command="{Binding MesSiguienteCommand}" MinWidth="42"/>
-                    <Button TabIndex="205" Content="_Mes actual" Command="{Binding IrMesActualCommand}"/>
+
+            <!-- ENCABEZADO Y CONTROLES DE FECHA REDISEÑADOS -->
+            <DockPanel Margin="0,0,0,16">
+                <StackPanel DockPanel.Dock="Left">
+                    <TextBlock Text="Asistencia del Grupo" Foreground="#475467" FontSize="13" FontWeight="Medium"/>
+                    <TextBlock Text="Vista mensual" Foreground="#101828" FontSize="26" FontWeight="Bold"/>
                 </StackPanel>
+                <Border DockPanel.Dock="Right" Background="White" CornerRadius="8" Padding="8,4" BorderBrush="#EAECF0" BorderThickness="1">
+                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                        <Button TabIndex="200" Content="_Vista diaria" Command="{Binding DataContext.MostrarVistaDiariaCommand, RelativeSource={RelativeSource AncestorType=Window}}" Margin="0,0,8,0"/>
+                        <Button TabIndex="201" Content="&lt;" Command="{Binding MesAnteriorCommand}" MinWidth="36" Padding="6,4"/>
+                        <ComboBox TabIndex="202" Width="135" Margin="4,0" ItemsSource="{Binding Meses}" DisplayMemberPath="Nombre" SelectedValuePath="Numero" SelectedValue="{Binding MesSeleccionado}"/>
+                        <TextBox TabIndex="203" Width="75" Margin="4,0" Text="{Binding AnioSeleccionado, UpdateSourceTrigger=LostFocus}"/>
+                        <Button TabIndex="204" Content="&gt;" Command="{Binding MesSiguienteCommand}" MinWidth="36" Padding="6,4"/>
+                        <Button TabIndex="205" Content="_Mes actual" Command="{Binding IrMesActualCommand}" Margin="8,0,0,0"/>
+                    </StackPanel>
+                </Border>
             </DockPanel>
-            <WrapPanel Grid.Row="1" Margin="0,0,0,10">
-                <Border Background="White" Padding="12,8" Margin="0,0,8,0" CornerRadius="6"><TextBlock Foreground="#101828" Text="{Binding EstadoMes}" FontWeight="SemiBold"/></Border>
-                <Border Background="White" Padding="12,8" Margin="0,0,8,0" CornerRadius="6"><TextBlock Foreground="#101828" Text="{Binding AlumnosVisibles, StringFormat=Alumnos: {0}}"/></Border>
-                <Border Background="White" Padding="12,8" Margin="0,0,8,0" CornerRadius="6"><TextBlock Foreground="#101828" Text="{Binding DiasGuardados, StringFormat=Días guardados: {0}}"/></Border>
-                <Border Background="#FFF4CE" Padding="12,8" CornerRadius="6"><TextBlock Foreground="#B54708" Text="Los conteos incluyen borradores" Visibility="{Binding IncluyeBorradores, Converter={StaticResource BoolToVisibility}}"/></Border>
+
+            <!-- TARJETAS MÉTRICAS Y DE ESTADO DE MES -->
+            <WrapPanel Grid.Row="1" Margin="0,0,0,14">
+                <Border Background="White" Padding="14,10" Margin="0,0,10,0" CornerRadius="8" BorderBrush="#EAECF0" BorderThickness="1">
+                    <TextBlock Foreground="#101828" Text="{Binding EstadoMes}" FontWeight="SemiBold"/>
+                </Border>
+                <Border Background="White" Padding="14,10" Margin="0,0,10,0" CornerRadius="8" BorderBrush="#EAECF0" BorderThickness="1">
+                    <TextBlock Foreground="#344054" Text="{Binding AlumnosVisibles, StringFormat=Alumnos: {0}}"/>
+                </Border>
+                <Border Background="White" Padding="14,10" Margin="0,0,10,0" CornerRadius="8" BorderBrush="#EAECF0" BorderThickness="1">
+                    <TextBlock Foreground="#344054" Text="{Binding DiasGuardados, StringFormat=Días guardados: {0}}"/>
+                </Border>
+                <Border Background="#FFFAEB" Padding="14,10" CornerRadius="8" BorderBrush="#FEF0C7" BorderThickness="1"
+                        Visibility="{Binding IncluyeBorradores, Converter={StaticResource BoolToVisibility}}">
+                    <TextBlock Foreground="#B54708" FontWeight="Medium" Text="Los conteos incluyen borradores"/>
+                </Border>
             </WrapPanel>
-            <DockPanel Grid.Row="2" Margin="0,0,0,10">
-                <TextBox TabIndex="210" DockPanel.Dock="Left" Width="260" Margin="0" Text="{Binding Busqueda, UpdateSourceTrigger=PropertyChanged}" ToolTip="Buscar estudiante"/>
-                <ComboBox TabIndex="211" DockPanel.Dock="Left" Width="220" Margin="8,0" ItemsSource="{Binding Filtros}" SelectedItem="{Binding Filtro}"/>
-                <TextBlock DockPanel.Dock="Right" VerticalAlignment="Center" Foreground="#101828" Text="{Binding FechaSeleccionadaTexto}" FontWeight="SemiBold"/>
+
+            <!-- BARRA DE BÚSQUEDA Y FILTRO -->
+            <DockPanel Grid.Row="2" Margin="0,0,0,12">
+                <StackPanel DockPanel.Dock="Left" Orientation="Horizontal">
+                    <TextBox TabIndex="210" Width="260" Margin="0,0,10,0" Text="{Binding Busqueda, UpdateSourceTrigger=PropertyChanged}" ToolTip="Buscar estudiante por nombre..."/>
+                    <ComboBox TabIndex="211" Width="200" ItemsSource="{Binding Filtros}" SelectedItem="{Binding Filtro}"/>
+                </StackPanel>
+                <Border DockPanel.Dock="Right" Background="White" CornerRadius="6" Padding="12,6" BorderBrush="#EAECF0" BorderThickness="1">
+                    <TextBlock VerticalAlignment="Center" Foreground="#101828" Text="{Binding FechaSeleccionadaTexto}" FontWeight="SemiBold"/>
+                </Border>
             </DockPanel>
+
             <DataGrid x:Name="GrillaMensual" Grid.Row="3" ItemsSource="{Binding FilasVisibles}" AutoGenerateColumns="False"
                       CanUserAddRows="False" CanUserDeleteRows="False" CanUserSortColumns="False" IsReadOnly="True"
                       FrozenColumnCount="2" HeadersVisibility="Column" RowHeaderWidth="0" GridLinesVisibility="All"
-                      EnableRowVirtualization="True" EnableColumnVirtualization="True" RowHeight="30"
+                      EnableRowVirtualization="True" EnableColumnVirtualization="True" RowHeight="32"
                       SelectionUnit="Cell" SelectionMode="Single" CurrentCellChanged="OnCeldaMensualSeleccionada"
                       MouseDoubleClick="OnCeldaMensualDobleClic" PreviewKeyDown="OnGrillaMensualPreviewKeyDown" TabIndex="212">
                 <DataGrid.ContextMenu>
@@ -226,16 +272,19 @@
                     </ContextMenu>
                 </DataGrid.ContextMenu>
             </DataGrid>
-            <DockPanel Grid.Row="4" Margin="0,10,0,0">
+
+            <DockPanel Grid.Row="4" Margin="0,14,0,0">
                 <StackPanel DockPanel.Dock="Left" Orientation="Horizontal">
                     <Button TabIndex="220" Content="_Marcar día presente" Command="{Binding MarcarDiaPresenteCommand}"/>
                     <Button TabIndex="221" Content="_Descartar día" Command="{Binding DescartarDiaCommand}"/>
                     <Button TabIndex="222" Content="D_escartar mes" Command="{Binding DescartarMesCommand}"/>
                 </StackPanel>
-                <StackPanel DockPanel.Dock="Right" Orientation="Horizontal">
-                    <TextBlock VerticalAlignment="Center" Foreground="#344054" Margin="8" Text="P Presente · F Falta · R Retardo · J Justificada"/>
-                    <Button TabIndex="223" Content="_Guardar día" Command="{Binding GuardarDiaCommand}"/>
-                    <Button TabIndex="224" Content="G_uardar cambios (Ctrl+S)" Command="{Binding GuardarMesCommand}"/>
+                <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" VerticalAlignment="Center">
+                    <Border Background="White" CornerRadius="6" Padding="12,6" Margin="0,0,12,0" BorderBrush="#EAECF0" BorderThickness="1">
+                        <TextBlock VerticalAlignment="Center" Foreground="#475467" FontSize="13" Text="P Presente · F Falta · R Retardo · J Justificada"/>
+                    </Border>
+                    <Button TabIndex="223" Content="_Guardar día" Command="{Binding GuardarDiaCommand}" Margin="0,0,6,0"/>
+                    <Button TabIndex="224" Style="{StaticResource PrimaryButton}" Content="G_uardar cambios (Ctrl+S)" Command="{Binding GuardarMesCommand}"/>
                 </StackPanel>
             </DockPanel>
         </Grid>
