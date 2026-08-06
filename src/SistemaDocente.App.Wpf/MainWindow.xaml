@@ -22,7 +22,7 @@
                               ItemsSource="{Binding GruposDisponibles}"
                               SelectedItem="{Binding GrupoSeleccionadoCombo, Mode=TwoWay}"
                               DisplayMemberPath="NombreGrupo"/>
-                    <Button Content="+ Nuevo grupo" Command="{Binding AbrirNuevoGrupoCommand}" MinWidth="90" Padding="8,4"/>
+                    <Button Style="{StaticResource HeaderButton}" Content="+ Nuevo grupo" Command="{Binding AbrirNuevoGrupoCommand}" MinWidth="90"/>
                 </StackPanel>
                 <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" HorizontalAlignment="Right" DataContext="{Binding DataContext, RelativeSource={RelativeSource AncestorType=Window}}">
                     <Button Style="{StaticResource NavTabButton}" Content="_Grupo" Command="{Binding IrAGrupoCommand}" TabIndex="1"/>

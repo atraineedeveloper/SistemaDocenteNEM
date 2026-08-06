@@ -15,11 +15,11 @@
         </Grid.RowDefinitions>
 
         <DockPanel Margin="0,0,0,14">
-            <StackPanel DockPanel.Dock="Left">
+            <StackPanel DockPanel.Dock="Left" VerticalAlignment="Center">
                 <TextBlock Text="Actividad de Proyecto" Foreground="#64748B" FontSize="13" FontWeight="SemiBold"/>
                 <TextBlock Text="{Binding TituloActividad}" FontSize="20" FontWeight="Bold" Foreground="#0F172A"/>
             </StackPanel>
-            <Border DockPanel.Dock="Right" CornerRadius="16" Padding="12,5" VerticalAlignment="Center" Background="#ECFDF3" BorderBrush="#ABE5C6" BorderThickness="1">
+            <Border DockPanel.Dock="Right" HorizontalAlignment="Right" CornerRadius="16" Padding="12,5" VerticalAlignment="Center" Background="#ECFDF3" BorderBrush="#ABE5C6" BorderThickness="1">
                 <TextBlock Text="{Binding ActividadSeleccionada.Estado}" FontWeight="SemiBold" Foreground="#027A48"/>
             </Border>
         </DockPanel>
@@ -59,8 +59,8 @@
             </Border>
         </ScrollViewer>
 
-        <DockPanel Grid.Row="2" Margin="0,4,0,0">
-            <Button DockPanel.Dock="Right" Content="Cerrar" Click="OnCerrarClic" IsCancel="True"/>
-        </DockPanel>
+        <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,10,0,0">
+            <Button Content="Cerrar" Click="OnCerrarClic" IsCancel="True" MinWidth="110"/>
+        </StackPanel>
     </Grid>
 </Window>

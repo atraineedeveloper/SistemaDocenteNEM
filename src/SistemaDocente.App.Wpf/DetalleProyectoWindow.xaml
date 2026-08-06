@@ -16,11 +16,11 @@
         </Grid.RowDefinitions>
 
         <DockPanel Margin="0,0,0,14">
-            <StackPanel DockPanel.Dock="Left">
+            <StackPanel DockPanel.Dock="Left" VerticalAlignment="Center">
                 <TextBlock Text="Proyecto Didáctico" Foreground="#64748B" FontSize="13" FontWeight="SemiBold"/>
                 <TextBlock Text="{Binding NombreProyecto}" FontSize="22" FontWeight="Bold" Foreground="#0F172A"/>
             </StackPanel>
-            <Border DockPanel.Dock="Right" CornerRadius="16" Padding="12,5" VerticalAlignment="Center" Background="#EFF8FF" BorderBrush="#B2DDFF" BorderThickness="1">
+            <Border DockPanel.Dock="Right" HorizontalAlignment="Right" CornerRadius="16" Padding="12,5" VerticalAlignment="Center" Background="#EFF8FF" BorderBrush="#B2DDFF" BorderThickness="1">
                 <TextBlock Text="{Binding ProyectoSeleccionado.Estado}" FontWeight="SemiBold" Foreground="#175CD3"/>
             </Border>
         </DockPanel>
@@ -79,10 +79,10 @@
                     <StackPanel>
                         <DockPanel Margin="0,0,0,10">
                             <TextBlock DockPanel.Dock="Left" Text="Actividades del Proyecto" FontSize="16" FontWeight="SemiBold" Foreground="#1E293B" VerticalAlignment="Center"/>
-                            <Button DockPanel.Dock="Right" Style="{StaticResource PrimaryButton}" Content="+ Nueva Actividad" Click="OnNuevaActividadClic"/>
+                            <Button DockPanel.Dock="Right" HorizontalAlignment="Right" Style="{StaticResource PrimaryButton}" Content="+ Nueva Actividad" Click="OnNuevaActividadClic"/>
                         </DockPanel>
 
-                        <TextBox Text="{Binding BusquedaActividad, UpdateSourceTrigger=PropertyChanged}" ToolTip="Buscar actividad..."/>
+                        <TextBox Text="{Binding BusquedaActividad, UpdateSourceTrigger=PropertyChanged}" ToolTip="Buscar actividad..." Margin="0,0,0,10"/>
 
                         <ListBox x:Name="ListaActividades" Height="170" ItemsSource="{Binding Actividades}" SelectedItem="{Binding ActividadSeleccionada}" MouseDoubleClick="OnActividadDobleClic">
                             <ListBox.ItemTemplate>
@@ -108,8 +108,8 @@
             </StackPanel>
         </ScrollViewer>
 
-        <DockPanel Grid.Row="2" Margin="0,6,0,0">
-            <Button DockPanel.Dock="Right" Content="Cerrar" Click="OnCerrarClic" IsCancel="True"/>
-        </DockPanel>
+        <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,10,0,0">
+            <Button Content="Cerrar" Click="OnCerrarClic" IsCancel="True" MinWidth="110"/>
+        </StackPanel>
     </Grid>
 </Window>
