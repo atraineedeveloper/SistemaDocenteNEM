@@ -302,20 +302,22 @@
             </Grid.RowDefinitions>
 
             <DockPanel Margin="0,0,0,16">
-                <StackPanel DockPanel.Dock="Left">
-                    <TextBlock Text="Planeación Didáctica" Foreground="#475467"/>
-                    <TextBlock Text="Proyectos Didácticos" Foreground="#101828" FontSize="27" FontWeight="SemiBold"/>
+                <StackPanel DockPanel.Dock="Left" VerticalAlignment="Center">
+                    <TextBlock Text="Planeación Didáctica" Foreground="#475467" FontSize="13" FontWeight="Medium"/>
+                    <TextBlock Text="Proyectos Didácticos" Foreground="#101828" FontSize="26" FontWeight="Bold"/>
                 </StackPanel>
                 <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" VerticalAlignment="Center">
-                    <Button Content="+ Nuevo Proyecto" Command="{Binding NuevoProyectoCommand}"/>
+                    <Button Style="{StaticResource PrimaryButton}" Content="+ Nuevo Proyecto" Command="{Binding NuevoProyectoCommand}"/>
                 </StackPanel>
             </DockPanel>
 
-            <DockPanel Grid.Row="1" Margin="0,0,0,12">
-                <StackPanel DockPanel.Dock="Left" Orientation="Horizontal">
-                    <TextBlock Text="Filtrar por estado: " Foreground="#101828" VerticalAlignment="Center" FontWeight="SemiBold"/>
-                    <ComboBox Width="180" ItemsSource="{Binding FiltrosProyecto}" SelectedItem="{Binding FiltroProyecto}"/>
-                </StackPanel>
+            <DockPanel Grid.Row="1" Margin="0,0,0,14">
+                <Border DockPanel.Dock="Left" Background="White" CornerRadius="8" Padding="12,8" BorderBrush="#EAECF0" BorderThickness="1">
+                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                        <TextBlock Text="Filtrar por estado: " Foreground="#101828" VerticalAlignment="Center" FontWeight="SemiBold" Margin="0,0,8,0"/>
+                        <ComboBox Width="180" ItemsSource="{Binding FiltrosProyecto}" SelectedItem="{Binding FiltroProyecto}"/>
+                    </StackPanel>
+                </Border>
             </DockPanel>
 
             <DataGrid x:Name="GrillaProyectosPrincipal" Grid.Row="2" ItemsSource="{Binding ProyectosVisibles}" SelectedItem="{Binding ProyectoSeleccionado}"
@@ -339,7 +341,7 @@
 
             <DockPanel Grid.Row="3" Margin="0,14,0,0">
                 <WrapPanel DockPanel.Dock="Left">
-                    <Button Content="Ver / Editar Detalle del Proyecto" Click="OnAbrirDetalleProyectoClic"/>
+                    <Button Style="{StaticResource PrimaryButton}" Content="📂 Ver / Editar Detalle del Proyecto" Click="OnAbrirDetalleProyectoClic"/>
                 </WrapPanel>
             </DockPanel>
         </Grid>

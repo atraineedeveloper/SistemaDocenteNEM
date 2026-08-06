@@ -50,7 +50,7 @@
                     <TextBox Text="{Binding ObservacionesActividad, UpdateSourceTrigger=PropertyChanged}" AcceptsReturn="True" Height="65" TextWrapping="Wrap"/>
 
                     <WrapPanel Margin="0,10,0,0">
-                        <Button Content="Guardar actividad" Command="{Binding GuardarActividadCommand}"/>
+                        <Button Style="{StaticResource PrimaryButton}" Content="Guardar actividad" Command="{Binding GuardarActividadCommand}"/>
                         <Button Content="Descartar cambios" Command="{Binding DescartarActividadCommand}"/>
                         <Button Content="Anular actividad" Command="{Binding AnularActividadCommand}"/>
                         <Button Content="Eliminar sin seguimiento" Command="{Binding EliminarActividadCommand}"/>

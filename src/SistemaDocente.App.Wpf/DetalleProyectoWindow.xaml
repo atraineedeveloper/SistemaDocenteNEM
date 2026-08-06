@@ -59,8 +59,8 @@
                         <TextBlock Text="Observaciones" FontWeight="SemiBold"/>
                         <TextBox Text="{Binding ObservacionesProyecto, UpdateSourceTrigger=PropertyChanged}" AcceptsReturn="True" Height="55" TextWrapping="Wrap"/>
 
-                        <WrapPanel Margin="0,6,0,0">
-                            <Button Content="Guardar cambios" Command="{Binding GuardarProyectoCommand}"/>
+                        <WrapPanel Margin="0,8,0,0">
+                            <Button Style="{StaticResource PrimaryButton}" Content="Guardar cambios" Command="{Binding GuardarProyectoCommand}"/>
                             <Button Content="Iniciar" Command="{Binding IniciarProyectoCommand}"/>
                             <Button Content="Finalizar" Command="{Binding FinalizarProyectoCommand}"/>
                             <Button Content="Reabrir" Command="{Binding ReabrirProyectoCommand}"/>
@@ -73,7 +73,7 @@
                     <StackPanel>
                         <DockPanel Margin="0,0,0,10">
                             <TextBlock DockPanel.Dock="Left" Text="Actividades del Proyecto" FontSize="16" FontWeight="SemiBold" Foreground="#1E293B" VerticalAlignment="Center"/>
-                            <Button DockPanel.Dock="Right" Content="+ Nueva Actividad" Click="OnNuevaActividadClic"/>
+                            <Button DockPanel.Dock="Right" Style="{StaticResource PrimaryButton}" Content="+ Nueva Actividad" Click="OnNuevaActividadClic"/>
                         </DockPanel>
 
                         <TextBox Text="{Binding BusquedaActividad, UpdateSourceTrigger=PropertyChanged}" ToolTip="Buscar actividad..."/>
@@ -82,10 +82,12 @@
                             <ListBox.ItemTemplate>
                                 <DataTemplate>
                                     <DockPanel Margin="4">
-                                        <TextBlock DockPanel.Dock="Right" Text="{Binding Estado}" Foreground="#64748B" VerticalAlignment="Center"/>
+                                        <Border DockPanel.Dock="Right" Background="#F1F5F9" CornerRadius="4" Padding="6,2" VerticalAlignment="Center">
+                                            <TextBlock Text="{Binding Estado}" Foreground="#475569" FontSize="12" FontWeight="SemiBold"/>
+                                        </Border>
                                         <StackPanel DockPanel.Dock="Left">
-                                            <TextBlock Text="{Binding Titulo}" FontWeight="SemiBold" FontSize="14"/>
-                                            <TextBlock Text="{Binding FechaRealizacion, StringFormat=Fecha: {0:dd/MM/yyyy}}" Foreground="#475569" FontSize="12"/>
+                                            <TextBlock Text="{Binding Titulo}" FontWeight="SemiBold" FontSize="14" Foreground="#0F172A"/>
+                                            <TextBlock Text="{Binding FechaRealizacion, StringFormat=Fecha: {0:dd/MM/yyyy}}" Foreground="#64748B" FontSize="12"/>
                                         </StackPanel>
                                     </DockPanel>
                                 </DataTemplate>
@@ -93,14 +95,14 @@
                         </ListBox>
                         
                         <WrapPanel Margin="0,8,0,0" HorizontalAlignment="Right">
-                            <Button Content="Editar actividad seleccionada" Click="OnEditarActividadClic"/>
+                            <Button Content="✏️ Editar actividad seleccionada" Click="OnEditarActividadClic"/>
                         </WrapPanel>
                     </StackPanel>
                 </Border>
             </StackPanel>
         </ScrollViewer>
 
-        <DockPanel Grid.Row="2" Margin="0,4,0,0">
+        <DockPanel Grid.Row="2" Margin="0,6,0,0">
             <Button DockPanel.Dock="Right" Content="Cerrar" Click="OnCerrarClic" IsCancel="True"/>
         </DockPanel>
     </Grid>
