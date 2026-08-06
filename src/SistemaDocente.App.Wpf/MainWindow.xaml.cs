@@ -207,25 +207,45 @@ public partial class MainWindow : Window
         }
     }
 
-    private void OnGrillaEntregasPreviewKeyDown(object sender, KeyEventArgs e)
+    private void OnProyectoPrincipalDobleClic(object sender, MouseButtonEventArgs e)
+    {
+        AbrirDetalleProyecto();
+    }
+
+    private void OnAbrirDetalleProyectoClic(object sender, RoutedEventArgs e)
+    {
+        AbrirDetalleProyecto();
+    }
+
+    private void AbrirDetalleProyecto()
+    {
+        if (ViewModel.Proyectos?.ProyectoSeleccionado is null && !ViewModel.Proyectos?.TieneCambiosProyecto == true) return;
+        if (ViewModel.Proyectos is not null)
+        {
+            var ventanaProyecto = new DetalleProyectoWindow(ViewModel.Proyectos) { Owner = this };
+            ventanaProyecto.ShowDialog();
+        }
+    }
+
+    private void OnGrillaEntregasEvaluacionPreviewKeyDown(object sender, KeyEventArgs e)
     {
         if (e.Key is not (Key.D or Key.S or Key.E or Key.R or Key.N or Key.P)
             || Keyboard.Modifiers != ModifierKeys.None
             || Keyboard.FocusedElement is TextBoxBase
             || Keyboard.FocusedElement is not DependencyObject foco
-            || !GrillaEntregas.IsAncestorOf(foco))
+            || !GrillaEntregasEvaluacion.IsAncestorOf(foco))
         {
             return;
         }
 
         var command = e.Key switch
         {
-            Key.D => ViewModel.Proyectos?.MarcarDominaCommand,
-            Key.S => ViewModel.Proyectos?.MarcarSuficienteCommand,
-            Key.E => ViewModel.Proyectos?.MarcarEnProcesoCommand,
-            Key.R => ViewModel.Proyectos?.MarcarRequiereApoyoCommand,
-            Key.N => ViewModel.Proyectos?.MarcarNoEntregoCommand,
-            _ => ViewModel.Proyectos?.MarcarPendienteCommand,
+            Key.D => ViewModel.Evaluacion?.MarcarDominaCommand,
+            Key.S => ViewModel.Evaluacion?.MarcarSuficienteCommand,
+            Key.E => ViewModel.Evaluacion?.MarcarEnProcesoCommand,
+            Key.R => ViewModel.Evaluacion?.MarcarRequiereApoyoCommand,
+            Key.N => ViewModel.Evaluacion?.MarcarNoEntregoCommand,
+            _ => ViewModel.Evaluacion?.MarcarPendienteCommand,
         };
         if (command?.CanExecute(null) == true)
         {

@@ -60,13 +60,12 @@ public sealed class ComposicionAsistenciaTests
         Assert.DoesNotContain("INSERT ", codeBehind, StringComparison.OrdinalIgnoreCase);
         Assert.DoesNotContain("Sqlite", codeBehind, StringComparison.OrdinalIgnoreCase);
         Assert.Contains("Content=\"Proyectos\"", xaml, StringComparison.Ordinal);
+        Assert.Contains("Content=\"Evaluación\"", xaml, StringComparison.Ordinal);
         Assert.Contains("ProyectosVisibles", xaml, StringComparison.Ordinal);
-        Assert.Contains("Actividades", xaml, StringComparison.Ordinal);
         Assert.Contains("EntregasVisibles", xaml, StringComparison.Ordinal);
         Assert.Contains("D Domina", xaml, StringComparison.Ordinal);
         Assert.Contains("S Suficiente", xaml, StringComparison.Ordinal);
         Assert.Contains("P Pendiente", xaml, StringComparison.Ordinal);
-        Assert.Contains("MinWidth=\"360\"", xaml, StringComparison.Ordinal);
     }
 
     [Fact]
@@ -92,10 +91,10 @@ public sealed class ComposicionAsistenciaTests
 
         Assert.DoesNotMatch("<KeyBinding\\s+Key=\"[ENP]\"", xaml);
         Assert.Contains("Modifiers=\"Control\" Key=\"S\"", xaml, StringComparison.Ordinal);
-        Assert.Contains("x:Name=\"GrillaEntregas\"", xaml, StringComparison.Ordinal);
-        Assert.Contains("PreviewKeyDown=\"OnGrillaEntregasPreviewKeyDown\"", xaml, StringComparison.Ordinal);
+        Assert.Contains("x:Name=\"GrillaEntregasEvaluacion\"", xaml, StringComparison.Ordinal);
+        Assert.Contains("PreviewKeyDown=\"OnGrillaEntregasEvaluacionPreviewKeyDown\"", xaml, StringComparison.Ordinal);
         Assert.Contains("Keyboard.FocusedElement is TextBoxBase", codeBehind, StringComparison.Ordinal);
-        Assert.Contains("GrillaEntregas.IsAncestorOf(foco)", codeBehind, StringComparison.Ordinal);
+        Assert.Contains("GrillaEntregasEvaluacion.IsAncestorOf(foco)", codeBehind, StringComparison.Ordinal);
         Assert.Contains("MarcarDominaCommand", codeBehind, StringComparison.Ordinal);
         Assert.Contains("MarcarSuficienteCommand", codeBehind, StringComparison.Ordinal);
         Assert.Contains("MarcarEnProcesoCommand", codeBehind, StringComparison.Ordinal);

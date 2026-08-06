@@ -45,8 +45,12 @@ public partial class App : System.Windows.Application
                 new DialogoCambiosPendientesWpf(),
                 new ConfirmacionProyectosWpf(),
                 mensajes);
+            var viewModelEvaluacion = new EvaluacionActividadesViewModel(
+                gestionProyectos,
+                new DialogoCambiosPendientesWpf(),
+                mensajes);
             var viewModel = new MainWindowViewModel(
-                viewModelGrupo, viewModelAsistencia, viewModelMensual, viewModelProyectos);
+                viewModelGrupo, viewModelAsistencia, viewModelMensual, viewModelProyectos, viewModelEvaluacion);
             var ventana = new MainWindow(viewModel);
             MainWindow = ventana;
             ventana.Show();

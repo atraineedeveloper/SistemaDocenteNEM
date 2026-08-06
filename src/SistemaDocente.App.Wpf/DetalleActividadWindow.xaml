@@ -1,0 +1,66 @@
+<Window x:Class="SistemaDocente.App.Wpf.DetalleActividadWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Detalle de la Actividad" Height="500" Width="580" MinHeight="420" MinWidth="480"
+        WindowStartupLocation="CenterOwner" ShowInTaskbar="False">
+    <Window.Resources>
+        <Style TargetType="Button"><Setter Property="Padding" Value="14,7"/><Setter Property="Margin" Value="4"/><Setter Property="MinWidth" Value="100"/></Style>
+        <Style TargetType="TextBox"><Setter Property="Padding" Value="8,6"/><Setter Property="Margin" Value="0,4,0,10"/></Style>
+    </Window.Resources>
+    <Grid Background="#F8FAFC" Margin="20">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <DockPanel Margin="0,0,0,14">
+            <StackPanel DockPanel.Dock="Left">
+                <TextBlock Text="Actividad de Proyecto" Foreground="#64748B" FontSize="13" FontWeight="SemiBold"/>
+                <TextBlock Text="{Binding TituloActividad}" FontSize="20" FontWeight="Bold" Foreground="#0F172A"/>
+            </StackPanel>
+            <Border DockPanel.Dock="Right" CornerRadius="12" Padding="10,4" VerticalAlignment="Center" Background="#E2E8F0">
+                <TextBlock Text="{Binding ActividadSeleccionada.Estado}" FontWeight="SemiBold" Foreground="#334155"/>
+            </Border>
+        </DockPanel>
+
+        <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" Margin="0,0,0,10">
+            <Border Background="White" CornerRadius="8" Padding="16" BorderBrush="#E2E8F0" BorderThickness="1">
+                <StackPanel>
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="2*"/>
+                            <ColumnDefinition Width="12"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <StackPanel>
+                            <TextBlock Text="Título de la Actividad" FontWeight="SemiBold"/>
+                            <TextBox Text="{Binding TituloActividad, UpdateSourceTrigger=PropertyChanged}"/>
+                        </StackPanel>
+                        <StackPanel Grid.Column="2">
+                            <TextBlock Text="Fecha de Realización" FontWeight="SemiBold"/>
+                            <TextBox Text="{Binding FechaActividad}"/>
+                        </StackPanel>
+                    </Grid>
+
+                    <TextBlock Text="Descripción" FontWeight="SemiBold"/>
+                    <TextBox Text="{Binding DescripcionActividad, UpdateSourceTrigger=PropertyChanged}" AcceptsReturn="True" Height="75" TextWrapping="Wrap"/>
+
+                    <TextBlock Text="Observaciones Generales" FontWeight="SemiBold"/>
+                    <TextBox Text="{Binding ObservacionesActividad, UpdateSourceTrigger=PropertyChanged}" AcceptsReturn="True" Height="65" TextWrapping="Wrap"/>
+
+                    <WrapPanel Margin="0,10,0,0">
+                        <Button Content="Guardar actividad" Command="{Binding GuardarActividadCommand}"/>
+                        <Button Content="Descartar cambios" Command="{Binding DescartarActividadCommand}"/>
+                        <Button Content="Anular actividad" Command="{Binding AnularActividadCommand}"/>
+                        <Button Content="Eliminar sin seguimiento" Command="{Binding EliminarActividadCommand}"/>
+                    </WrapPanel>
+                </StackPanel>
+            </Border>
+        </ScrollViewer>
+
+        <DockPanel Grid.Row="2" Margin="0,4,0,0">
+            <Button DockPanel.Dock="Right" Content="Cerrar" Click="OnCerrarClic" IsCancel="True"/>
+        </DockPanel>
+    </Grid>
+</Window>
