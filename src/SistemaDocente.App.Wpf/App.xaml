@@ -137,35 +137,53 @@
             <Setter Property="VerticalGridLinesBrush" Value="#EAECF0"/>
         </Style>
 
-        <!-- ESTILO BOTÓN PESTAÑA NAVEGACIÓN FLUENT -->
+        <!-- ESTILO BOTÓN PESTAÑA NAVEGACIÓN FLUENT — con indicador de activo -->
         <Style x:Key="NavTabButton" TargetType="Button">
             <Setter Property="FontFamily" Value="{StaticResource AppFontFamily}"/>
-            <Setter Property="Padding" Value="16,8"/>
-            <Setter Property="Margin" Value="4,0"/>
+            <Setter Property="Padding" Value="16,10"/>
+            <Setter Property="Margin" Value="2,0"/>
             <Setter Property="MinWidth" Value="90"/>
             <Setter Property="Cursor" Value="Hand"/>
             <Setter Property="Background" Value="Transparent"/>
-            <Setter Property="Foreground" Value="#FFFFFF"/>
+            <Setter Property="Foreground" Value="#B0C4DE"/>
             <Setter Property="BorderThickness" Value="0"/>
             <Setter Property="FontWeight" Value="SemiBold"/>
-            <Setter Property="FontSize" Value="14"/>
+            <Setter Property="FontSize" Value="13"/>
+            <Setter Property="Opacity" Value="0.85"/>
             <Setter Property="Template">
                 <Setter.Value>
                     <ControlTemplate TargetType="Button">
-                        <Border x:Name="border"
-                                Background="{TemplateBinding Background}"
-                                CornerRadius="6"
-                                Padding="{TemplateBinding Padding}">
-                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" RecognizesAccessKey="True"/>
-                        </Border>
+                        <Grid>
+                            <Border x:Name="border"
+                                    Background="{TemplateBinding Background}"
+                                    CornerRadius="6,6,0,0"
+                                    Padding="{TemplateBinding Padding}">
+                                <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" RecognizesAccessKey="True"/>
+                            </Border>
+                            <!-- Indicador inferior de pestaña activa -->
+                            <Border x:Name="ActiveIndicator"
+                                    Height="3" VerticalAlignment="Bottom"
+                                    CornerRadius="2,2,0,0"
+                                    Background="#60A5FA"
+                                    Opacity="0"/>
+                        </Grid>
                         <ControlTemplate.Triggers>
                             <Trigger Property="IsMouseOver" Value="True">
-                                <Setter TargetName="border" Property="Background" Value="#255177"/>
+                                <Setter TargetName="border" Property="Background" Value="#1E4A6E"/>
                                 <Setter Property="Foreground" Value="#FFFFFF"/>
+                                <Setter Property="Opacity" Value="1"/>
                             </Trigger>
                             <Trigger Property="IsPressed" Value="True">
                                 <Setter TargetName="border" Property="Background" Value="#1E40AF"/>
                                 <Setter Property="Foreground" Value="#FFFFFF"/>
+                            </Trigger>
+                            <!-- Tag="activo" = pestaña activa actual -->
+                            <Trigger Property="Tag" Value="activo">
+                                <Setter TargetName="border" Property="Background" Value="#1E4A6E"/>
+                                <Setter Property="Foreground" Value="#FFFFFF"/>
+                                <Setter Property="Opacity" Value="1"/>
+                                <Setter Property="FontWeight" Value="Bold"/>
+                                <Setter TargetName="ActiveIndicator" Property="Opacity" Value="1"/>
                             </Trigger>
                         </ControlTemplate.Triggers>
                     </ControlTemplate>
@@ -205,5 +223,103 @@
                 </Setter.Value>
             </Setter>
         </Style>
+
+        <!-- ════════════════════════════════════════════════════
+             SISTEMA TIPOGRÁFICO UNIFICADO
+             ════════════════════════════════════════════════════ -->
+
+        <Style x:Key="Heading1" TargetType="TextBlock">
+            <Setter Property="FontFamily" Value="{StaticResource AppFontFamily}"/>
+            <Setter Property="FontSize" Value="26"/>
+            <Setter Property="FontWeight" Value="Bold"/>
+            <Setter Property="Foreground" Value="#101828"/>
+        </Style>
+
+        <Style x:Key="Heading2" TargetType="TextBlock">
+            <Setter Property="FontFamily" Value="{StaticResource AppFontFamily}"/>
+            <Setter Property="FontSize" Value="19"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="Foreground" Value="#101828"/>
+        </Style>
+
+        <Style x:Key="Heading3" TargetType="TextBlock">
+            <Setter Property="FontFamily" Value="{StaticResource AppFontFamily}"/>
+            <Setter Property="FontSize" Value="15"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="Foreground" Value="#344054"/>
+        </Style>
+
+        <Style x:Key="FormLabel" TargetType="TextBlock">
+            <Setter Property="FontFamily" Value="{StaticResource AppFontFamily}"/>
+            <Setter Property="FontSize" Value="13"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="Foreground" Value="#344054"/>
+            <Setter Property="Margin" Value="0,0,0,3"/>
+        </Style>
+
+        <Style x:Key="Caption" TargetType="TextBlock">
+            <Setter Property="FontFamily" Value="{StaticResource AppFontFamily}"/>
+            <Setter Property="FontSize" Value="11"/>
+            <Setter Property="Foreground" Value="#64748B"/>
+        </Style>
+
+        <!-- Subtítulo de sección (texto muted encima de un heading) -->
+        <Style x:Key="SectionSubtitle" TargetType="TextBlock">
+            <Setter Property="FontFamily" Value="{StaticResource AppFontFamily}"/>
+            <Setter Property="FontSize" Value="13"/>
+            <Setter Property="FontWeight" Value="Medium"/>
+            <Setter Property="Foreground" Value="#475467"/>
+        </Style>
+
+        <!-- ════════════════════════════════════════════════════
+             CARD DE SECCIÓN — para formularios
+             ════════════════════════════════════════════════════ -->
+        <Style x:Key="SectionCard" TargetType="Border">
+            <Setter Property="Background" Value="#F8FAFC"/>
+            <Setter Property="CornerRadius" Value="8"/>
+            <Setter Property="Padding" Value="14,12"/>
+            <Setter Property="Margin" Value="0,0,0,12"/>
+            <Setter Property="BorderBrush" Value="#E2E8F0"/>
+            <Setter Property="BorderThickness" Value="1"/>
+        </Style>
+
+        <!-- Card estándar (blanca, con borde suave) -->
+        <Style x:Key="ContentCard" TargetType="Border">
+            <Setter Property="Background" Value="#FFFFFF"/>
+            <Setter Property="CornerRadius" Value="8"/>
+            <Setter Property="Padding" Value="16"/>
+            <Setter Property="Margin" Value="0,0,0,14"/>
+            <Setter Property="BorderBrush" Value="#EAECF0"/>
+            <Setter Property="BorderThickness" Value="1"/>
+        </Style>
+
+        <!-- Banner de advertencia -->
+        <Style x:Key="AlertWarningBanner" TargetType="Border">
+            <Setter Property="Background" Value="#FFFAEB"/>
+            <Setter Property="CornerRadius" Value="6"/>
+            <Setter Property="Padding" Value="12,8"/>
+            <Setter Property="Margin" Value="0,4,0,8"/>
+            <Setter Property="BorderBrush" Value="#FEF0C7"/>
+            <Setter Property="BorderThickness" Value="1"/>
+        </Style>
+
+        <!-- Banner de error -->
+        <Style x:Key="AlertErrorBanner" TargetType="Border">
+            <Setter Property="Background" Value="#FEF3F2"/>
+            <Setter Property="CornerRadius" Value="6"/>
+            <Setter Property="Padding" Value="12,8"/>
+            <Setter Property="BorderBrush" Value="#FECDCA"/>
+            <Setter Property="BorderThickness" Value="1"/>
+        </Style>
+
+        <!-- Banner de éxito -->
+        <Style x:Key="AlertSuccessBanner" TargetType="Border">
+            <Setter Property="Background" Value="#ECFDF3"/>
+            <Setter Property="CornerRadius" Value="6"/>
+            <Setter Property="Padding" Value="12,8"/>
+            <Setter Property="BorderBrush" Value="#ABEFC6"/>
+            <Setter Property="BorderThickness" Value="1"/>
+        </Style>
+
     </Application.Resources>
 </Application>

@@ -337,4 +337,68 @@ public partial class MainWindow : Window
             e.Cancel = true;
         }
     }
+
+    // ══ Toast de confirmación ══════════════════════════════
+
+    private System.Windows.Threading.DispatcherTimer? _toastTimer;
+
+    /// <summary>Muestra un toast flotante con auto-dismiss después de <paramref name="segundos"/> segundos.</summary>
+    public void MostrarToast(string icono, string titulo, string mensaje,
+        System.Windows.Media.Brush fondo, System.Windows.Media.Brush borde,
+        System.Windows.Media.Brush colorTexto, int segundos = 3)
+    {
+        ToastIcon.Text = icono;
+        ToastTitle.Text = titulo;
+        ToastTitle.Foreground = colorTexto;
+        ToastMessage.Text = mensaje;
+        ToastMessage.Foreground = colorTexto;
+        ToastBanner.Background = fondo;
+        ToastBanner.BorderBrush = borde;
+        ToastBanner.Visibility = Visibility.Visible;
+
+        _toastTimer?.Stop();
+        _toastTimer = new System.Windows.Threading.DispatcherTimer
+        {
+            Interval = TimeSpan.FromSeconds(segundos)
+        };
+        _toastTimer.Tick += (_, _) =>
+        {
+            ToastBanner.Visibility = Visibility.Collapsed;
+            _toastTimer.Stop();
+        };
+        _toastTimer.Start();
+    }
+
+    /// <summary>Toast de éxito verde estándar.</summary>
+    public void MostrarToastExito(string mensaje, string titulo = "✅ Guardado exitosamente") =>
+        MostrarToast("✅", titulo, mensaje,
+            new System.Windows.Media.SolidColorBrush(
+                (System.Windows.Media.Color)System.Windows.Media.ColorConverter.ConvertFromString("#ECFDF3")),
+            new System.Windows.Media.SolidColorBrush(
+                (System.Windows.Media.Color)System.Windows.Media.ColorConverter.ConvertFromString("#ABEFC6")),
+            new System.Windows.Media.SolidColorBrush(
+                (System.Windows.Media.Color)System.Windows.Media.ColorConverter.ConvertFromString("#027A48")));
+
+    /// <summary>Toast de advertencia naranja estándar.</summary>
+    public void MostrarToastAdvertencia(string mensaje, string titulo = "⚠️ Advertencia") =>
+        MostrarToast("⚠️", titulo, mensaje,
+            new System.Windows.Media.SolidColorBrush(
+                (System.Windows.Media.Color)System.Windows.Media.ColorConverter.ConvertFromString("#FFFAEB")),
+            new System.Windows.Media.SolidColorBrush(
+                (System.Windows.Media.Color)System.Windows.Media.ColorConverter.ConvertFromString("#FEF0C7")),
+            new System.Windows.Media.SolidColorBrush(
+                (System.Windows.Media.Color)System.Windows.Media.ColorConverter.ConvertFromString("#B54708")));
+}
+
+// ══ Converter: bool → "activo" / "" para el indicador de pestaña ══════
+
+/// <summary>Convierte un bool en el string "activo" o "", usado por NavTabButton para mostrar el indicador inferior.</summary>
+[System.Windows.Data.ValueConversion(typeof(bool), typeof(string))]
+public sealed class BoolToActiveTagConverter : System.Windows.Data.IValueConverter
+{
+    public object Convert(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
+        => value is true ? "activo" : string.Empty;
+
+    public object ConvertBack(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
+        => throw new NotImplementedException();
 }
