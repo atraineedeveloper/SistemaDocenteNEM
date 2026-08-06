@@ -16,19 +16,21 @@ public sealed record EntradaProyecto(
 
 public sealed record EntregaActividadDetalle(
     EstudianteId EstudianteId, int NumeroLista, string NombreVisible,
-    bool EstaActivoActualmente, EstadoEntrega Estado, string Observacion);
+    bool EstaActivoActualmente, NivelLogro NivelLogro, string Observacion);
 
 public sealed record ActividadProyectoResumen(
     ActividadId ActividadId, ProyectoId ProyectoId, string Titulo, DateOnly FechaRealizacion,
-    EstadoActividad Estado, int Total, int Pendientes, int Entregadas, int NoEntregadas, int Version);
+    EstadoActividad Estado, int Total, int Pendientes, int Domina, int Suficiente,
+    int EnProceso, int RequiereApoyo, int NoEntrego, int Version);
 
 public sealed record ActividadProyectoDetalle(
     ActividadId ActividadId, ProyectoId ProyectoId, GrupoId GrupoId, string Titulo,
     string Descripcion, DateOnly FechaRealizacion, string ObservacionesGenerales,
     EstadoActividad Estado, IReadOnlyList<EntregaActividadDetalle> Entregas,
-    int Total, int Pendientes, int Entregadas, int NoEntregadas, int Version);
+    int Total, int Pendientes, int Domina, int Suficiente, int EnProceso,
+    int RequiereApoyo, int NoEntrego, int Version);
 
-public sealed record EntradaEntregaActividad(EstudianteId EstudianteId, EstadoEntrega Estado, string Observacion);
+public sealed record EntradaEntregaActividad(EstudianteId EstudianteId, NivelLogro NivelLogro, string Observacion);
 
 public sealed record EntradaActividad(
     string Titulo, string Descripcion, DateOnly FechaRealizacion,

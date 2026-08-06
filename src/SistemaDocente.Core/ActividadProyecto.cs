@@ -40,7 +40,7 @@ public sealed class ActividadProyecto
         var ids = ValidarIdentidades(estudiantes);
         return new(ActividadId.Crear(), proyectoId, grupoId, datos.Titulo, datos.Descripcion,
             fechaRealizacion, datos.Observaciones, EstadoActividad.Activa, 1,
-            ids.Select(id => new EntregaActividad(id, EstadoEntrega.Pendiente, string.Empty)).ToList());
+            ids.Select(id => new EntregaActividad(id, NivelLogro.Pendiente, string.Empty)).ToList());
     }
 
     public static ActividadProyecto Rehidratar(ActividadId id, ProyectoId proyectoId, GrupoId grupoId,
@@ -59,8 +59,8 @@ public sealed class ActividadProyecto
         {
             if (entrega.EstudianteId == default || !ids.Add(entrega.EstudianteId))
                 throw new DomainValidationException("Las identidades de entrega deben ser válidas y únicas.");
-            ValidarEstadoEntrega(entrega.Estado);
-            registros.Add(new(entrega.EstudianteId, entrega.Estado, ValidarObservacion(entrega.Observacion)));
+            ValidarNivelLogro(entrega.NivelLogro);
+            registros.Add(new(entrega.EstudianteId, entrega.NivelLogro, ValidarObservacion(entrega.Observacion)));
         }
         return new(id, proyectoId, grupoId, datos.Titulo, datos.Descripcion, fechaRealizacion,
             datos.Observaciones, estado, version, registros);
@@ -83,11 +83,11 @@ public sealed class ActividadProyecto
         if (snapshot.Length != _entregas.Count || snapshot.Select(x => x.EstudianteId).Distinct().Count() != snapshot.Length
             || snapshot.Select(x => x.EstudianteId).ToHashSet().SetEquals(_entregas.Select(x => x.EstudianteId)) == false)
             throw new DomainValidationException("Debe proporcionarse exactamente el padrón histórico completo.");
-        var validadas = snapshot.Select(x => { ValidarEstadoEntrega(x.Estado); return new DatosEntregaActividadRehidratada(x.EstudianteId, x.Estado, ValidarObservacion(x.Observacion)); }).ToArray();
+        var validadas = snapshot.Select(x => { ValidarNivelLogro(x.NivelLogro); return new DatosEntregaActividadRehidratada(x.EstudianteId, x.NivelLogro, ValidarObservacion(x.Observacion)); }).ToArray();
         foreach (var datos in validadas)
         {
             var entrega = _entregas.Single(x => x.EstudianteId == datos.EstudianteId);
-            entrega.Estado = datos.Estado; entrega.Observacion = datos.Observacion;
+            entrega.NivelLogro = datos.NivelLogro; entrega.Observacion = datos.Observacion;
         }
     }
 
@@ -129,8 +129,8 @@ public sealed class ActividadProyecto
         return texto;
     }
 
-    private static void ValidarEstadoEntrega(EstadoEntrega estado)
+    private static void ValidarNivelLogro(NivelLogro nivel)
     {
-        if (!Enum.IsDefined(estado)) throw new DomainValidationException("El estado de entrega no es válido.");
+        if (!Enum.IsDefined(nivel)) throw new DomainValidationException("El nivel de logro no es válido.");
     }
 }

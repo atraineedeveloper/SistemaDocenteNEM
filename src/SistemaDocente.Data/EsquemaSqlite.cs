@@ -6,7 +6,7 @@ namespace SistemaDocente.Data;
 
 internal static class EsquemaSqlite
 {
-    internal const int VersionActual = 3;
+    internal const int VersionActual = 4;
 
     private const string TablaGrupos = """
         CREATE TABLE grupos (
@@ -123,7 +123,7 @@ internal static class EsquemaSqlite
             actividad_id TEXT NOT NULL,
             estudiante_id TEXT NOT NULL,
             grupo_id TEXT NOT NULL,
-            estado_entrega INTEGER NOT NULL CHECK (estado_entrega IN (0, 1, 2)),
+            estado_entrega INTEGER NOT NULL CHECK (estado_entrega IN (0, 1, 2, 3, 4, 5)),
             observacion TEXT NOT NULL CHECK (length(observacion) <= 500),
             PRIMARY KEY (actividad_id, estudiante_id),
             FOREIGN KEY (actividad_id, grupo_id) REFERENCES actividades_proyecto(actividad_id, grupo_id) ON DELETE RESTRICT,
@@ -177,7 +177,7 @@ internal static class EsquemaSqlite
                     "Una base sin versión no puede contener objetos preexistentes.");
             }
 
-            CrearVersionTres(conexion);
+            CrearVersionCuatro(conexion);
             return;
         }
 
@@ -196,13 +196,20 @@ internal static class EsquemaSqlite
             return;
         }
 
+        if (version == 3)
+        {
+            ValidarVersionTres(conexion);
+            MigrarVersionTres(conexion);
+            return;
+        }
+
         if (version != VersionActual)
         {
             throw new SchemaIncompatibleException(
                 $"La versión de esquema {version} no es compatible con la versión {VersionActual}.");
         }
 
-        ValidarVersionTres(conexion);
+        ValidarVersionCuatro(conexion);
     }
 
     private static long LeerVersion(SqliteConnection conexion)
@@ -224,7 +231,7 @@ internal static class EsquemaSqlite
         return (long)(comando.ExecuteScalar() ?? 0L) == 0;
     }
 
-    private static void CrearVersionTres(SqliteConnection conexion)
+    private static void CrearVersionCuatro(SqliteConnection conexion)
     {
         using var transaccion = conexion.BeginTransaction();
         CrearObjetos(conexion, transaccion, ObjetosVersionUno.Values);
@@ -269,6 +276,50 @@ internal static class EsquemaSqlite
         }
     }
 
+    private static void MigrarVersionTres(SqliteConnection conexion)
+    {
+        using var transaccion = conexion.BeginTransaction();
+        try
+        {
+            using (var cmd = conexion.CreateCommand())
+            {
+                cmd.Transaction = transaccion;
+                cmd.CommandText = """
+                    CREATE TABLE entregas_actividad_temp AS SELECT * FROM entregas_actividad;
+                    DROP TABLE entregas_actividad;
+                    """;
+                cmd.ExecuteNonQuery();
+            }
+
+            using (var cmd = conexion.CreateCommand())
+            {
+                cmd.Transaction = transaccion;
+                cmd.CommandText = TablaEntregas;
+                cmd.ExecuteNonQuery();
+            }
+
+            using (var cmd = conexion.CreateCommand())
+            {
+                cmd.Transaction = transaccion;
+                cmd.CommandText = """
+                    INSERT INTO entregas_actividad SELECT actividad_id, estudiante_id, grupo_id, estado_entrega, observacion FROM entregas_actividad_temp;
+                    DROP TABLE entregas_actividad_temp;
+                    CREATE INDEX IF NOT EXISTS ix_entregas_estudiante ON entregas_actividad(estudiante_id);
+                    """;
+                cmd.ExecuteNonQuery();
+            }
+
+            ValidarObjetos(conexion, ObjetosProyectos, transaccion);
+            EstablecerVersion(conexion, transaccion, VersionActual);
+            transaccion.Commit();
+        }
+        catch
+        {
+            transaccion.Rollback();
+            throw;
+        }
+    }
+
     private static void ValidarVersionDos(SqliteConnection conexion)
     {
         ValidarObjetos(conexion, ObjetosVersionUno);
@@ -279,6 +330,11 @@ internal static class EsquemaSqlite
     {
         ValidarVersionDos(conexion);
         ValidarObjetos(conexion, ObjetosProyectos);
+    }
+
+    private static void ValidarVersionCuatro(SqliteConnection conexion)
+    {
+        ValidarVersionTres(conexion);
     }
 
     private static void CrearObjetos(

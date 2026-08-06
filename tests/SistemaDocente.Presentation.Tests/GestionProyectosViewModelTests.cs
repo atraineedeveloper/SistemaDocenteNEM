@@ -173,9 +173,9 @@ public sealed class GestionProyectosViewModelTests
         vm.NuevaActividadCommand.Execute(null);
         vm.Entregas[0].Seleccionada = true;
 
-        vm.MarcarEntregadaCommand.Execute(null);
+        vm.MarcarDominaCommand.Execute(null);
 
-        Assert.Equal(1, vm.Entregadas);
+        Assert.Equal(1, vm.Domina);
         Assert.True(vm.TieneCambiosActividad);
         Assert.True(vm.GuardarActividadCommand.CanExecute(null));
         vm.GuardarActividadCommand.Execute(null);
@@ -343,11 +343,11 @@ public sealed class GestionProyectosViewModelTests
             var entregas = Enumerable.Range(1, CantidadEstudiantes)
                 .Select(numero => new EntregaActividadDetalle(
                     EstudianteId.DesdeGuid(GuidUtility(numero)), numero, $"Estudiante {numero}",
-                    true, EstadoEntrega.Pendiente, ""))
+                    true, NivelLogro.Pendiente, ""))
                 .ToArray();
             return new(
                 _actividadId, _proyecto1, GrupoId, titulo, "", new DateOnly(2026, 1, 2), "",
-                EstadoActividad.Activa, entregas, entregas.Length, entregas.Length, 0, 0, version);
+                EstadoActividad.Activa, entregas, entregas.Length, entregas.Length, 0, 0, 0, 0, 0, version);
         }
 
         private static Guid GuidUtility(int numero)
@@ -363,8 +363,8 @@ public sealed class GestionProyectosViewModelTests
 
         private static ActividadProyectoResumen Resumir(ActividadProyectoDetalle actividad) => new(
             actividad.ActividadId, actividad.ProyectoId, actividad.Titulo, actividad.FechaRealizacion,
-            actividad.Estado, actividad.Total, actividad.Pendientes, actividad.Entregadas,
-            actividad.NoEntregadas, actividad.Version);
+            actividad.Estado, actividad.Total, actividad.Pendientes, actividad.Domina,
+            actividad.Suficiente, actividad.EnProceso, actividad.RequiereApoyo, actividad.NoEntrego, actividad.Version);
 
         private static void FallarSiCorresponde(bool fallar)
         {

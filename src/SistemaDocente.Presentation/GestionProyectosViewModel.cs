@@ -80,16 +80,22 @@ public sealed class GestionProyectosViewModel : ViewModelBase
             EliminarActividad,
             () => ActividadSeleccionada?.Pendientes == ActividadSeleccionada?.Total
                 && !_nuevaActividad && !EstaOcupado);
-        MarcarEntregadaCommand = new RelayCommand(
-            () => Marcar(EstadoEntrega.Entregada), () => PuedeEditarActividad);
-        MarcarNoEntregadaCommand = new RelayCommand(
-            () => Marcar(EstadoEntrega.NoEntregada), () => PuedeEditarActividad);
+        MarcarDominaCommand = new RelayCommand(
+            () => Marcar(NivelLogro.Domina), () => PuedeEditarActividad);
+        MarcarSuficienteCommand = new RelayCommand(
+            () => Marcar(NivelLogro.Suficiente), () => PuedeEditarActividad);
+        MarcarEnProcesoCommand = new RelayCommand(
+            () => Marcar(NivelLogro.EnProceso), () => PuedeEditarActividad);
+        MarcarRequiereApoyoCommand = new RelayCommand(
+            () => Marcar(NivelLogro.RequiereApoyo), () => PuedeEditarActividad);
+        MarcarNoEntregoCommand = new RelayCommand(
+            () => Marcar(NivelLogro.NoEntrego), () => PuedeEditarActividad);
         MarcarPendienteCommand = new RelayCommand(
-            () => Marcar(EstadoEntrega.Pendiente), () => PuedeEditarActividad);
+            () => Marcar(NivelLogro.Pendiente), () => PuedeEditarActividad);
         MarcarTodosEntregadaCommand = new RelayCommand(
             () =>
             {
-                foreach (var fila in Entregas) fila.Estado = EstadoEntrega.Entregada;
+                foreach (var fila in Entregas) fila.NivelLogro = NivelLogro.Domina;
                 NotificarEdicion();
             },
             () => PuedeEditarActividad);
@@ -106,8 +112,11 @@ public sealed class GestionProyectosViewModel : ViewModelBase
     public RelayCommand DescartarActividadCommand { get; }
     public RelayCommand AnularActividadCommand { get; }
     public RelayCommand EliminarActividadCommand { get; }
-    public RelayCommand MarcarEntregadaCommand { get; }
-    public RelayCommand MarcarNoEntregadaCommand { get; }
+    public RelayCommand MarcarDominaCommand { get; }
+    public RelayCommand MarcarSuficienteCommand { get; }
+    public RelayCommand MarcarEnProcesoCommand { get; }
+    public RelayCommand MarcarRequiereApoyoCommand { get; }
+    public RelayCommand MarcarNoEntregoCommand { get; }
     public RelayCommand MarcarPendienteCommand { get; }
     public RelayCommand MarcarTodosEntregadaCommand { get; }
     public IReadOnlyList<FiltroProyecto> FiltrosProyecto { get; } = Enum.GetValues<FiltroProyecto>();
@@ -266,15 +275,18 @@ public sealed class GestionProyectosViewModel : ViewModelBase
             || Entregas.Any(fila =>
             {
                 var confirmada = _actividadConfirmada.Entregas.Single(x => x.EstudianteId == fila.EstudianteId);
-                return confirmada.Estado != fila.Estado || confirmada.Observacion != fila.Observacion;
+                return confirmada.NivelLogro != fila.NivelLogro || confirmada.Observacion != fila.Observacion;
             }));
     public bool PuedeEditarActividad => !EstaOcupado
         && ProyectoSeleccionado?.Estado != EstadoProyecto.Finalizado
         && (_nuevaActividad || ActividadSeleccionada?.Estado == EstadoActividad.Activa);
     public int Total => Entregas.Count;
-    public int Pendientes => Entregas.Count(x => x.Estado == EstadoEntrega.Pendiente);
-    public int Entregadas => Entregas.Count(x => x.Estado == EstadoEntrega.Entregada);
-    public int NoEntregadas => Entregas.Count(x => x.Estado == EstadoEntrega.NoEntregada);
+    public int Pendientes => Entregas.Count(x => x.NivelLogro == NivelLogro.Pendiente);
+    public int Domina => Entregas.Count(x => x.NivelLogro == NivelLogro.Domina);
+    public int Suficiente => Entregas.Count(x => x.NivelLogro == NivelLogro.Suficiente);
+    public int EnProceso => Entregas.Count(x => x.NivelLogro == NivelLogro.EnProceso);
+    public int RequiereApoyo => Entregas.Count(x => x.NivelLogro == NivelLogro.RequiereApoyo);
+    public int NoEntrego => Entregas.Count(x => x.NivelLogro == NivelLogro.NoEntrego);
 
     public void Inicializar(GrupoId grupoId)
     {
@@ -467,7 +479,7 @@ public sealed class GestionProyectosViewModel : ViewModelBase
         if (_proyecto is null) return false;
         ActividadProyectoDetalle? guardada = null;
         var entradas = Entregas.Select(x =>
-            new EntradaEntregaActividad(x.EstudianteId, x.Estado, x.Observacion)).ToArray();
+            new EntradaEntregaActividad(x.EstudianteId, x.NivelLogro, x.Observacion)).ToArray();
         var entrada = new EntradaActividad(
             TituloActividad, DescripcionActividad, FechaActividad, ObservacionesActividad, entradas);
         var correcto = Ejecutar(() => guardada = _nuevaActividad
@@ -515,11 +527,11 @@ public sealed class GestionProyectosViewModel : ViewModelBase
         });
     }
 
-    private void Marcar(EstadoEntrega estado)
+    private void Marcar(NivelLogro nivel)
     {
         var filas = Entregas.Where(x => x.Seleccionada).ToArray();
         if (filas.Length == 0) filas = EntregasVisibles.ToArray();
-        foreach (var fila in filas) fila.Estado = estado;
+        foreach (var fila in filas) fila.NivelLogro = nivel;
         NotificarEdicion();
     }
 
@@ -624,17 +636,24 @@ public sealed class GestionProyectosViewModel : ViewModelBase
                     .Contains(BusquedaActividad, StringComparison.Ordinal)).ToArray();
         EntregasVisibles = Entregas.Where(x => FiltroEntrega switch
         {
-            FiltroEntrega.Pendientes => x.Estado == EstadoEntrega.Pendiente,
-            FiltroEntrega.Entregadas => x.Estado == EstadoEntrega.Entregada,
-            FiltroEntrega.NoEntregadas => x.Estado == EstadoEntrega.NoEntregada,
-            FiltroEntrega.SoloIncidencias => x.Estado != EstadoEntrega.Entregada,
+            FiltroEntrega.Pendientes => x.NivelLogro == NivelLogro.Pendiente,
+            FiltroEntrega.Domina => x.NivelLogro == NivelLogro.Domina,
+            FiltroEntrega.Suficiente => x.NivelLogro == NivelLogro.Suficiente,
+            FiltroEntrega.EnProceso => x.NivelLogro == NivelLogro.EnProceso,
+            FiltroEntrega.RequiereApoyo => x.NivelLogro == NivelLogro.RequiereApoyo,
+            FiltroEntrega.NoEntrego => x.NivelLogro == NivelLogro.NoEntrego,
+            FiltroEntrega.SoloIncidencias => x.NivelLogro == NivelLogro.Pendiente
+                || x.NivelLogro == NivelLogro.RequiereApoyo || x.NivelLogro == NivelLogro.NoEntrego,
             FiltroEntrega.SoloActivos => x.EstaActivoActualmente,
             _ => true,
         }).ToArray();
         OnPropertyChanged(nameof(Total));
         OnPropertyChanged(nameof(Pendientes));
-        OnPropertyChanged(nameof(Entregadas));
-        OnPropertyChanged(nameof(NoEntregadas));
+        OnPropertyChanged(nameof(Domina));
+        OnPropertyChanged(nameof(Suficiente));
+        OnPropertyChanged(nameof(EnProceso));
+        OnPropertyChanged(nameof(RequiereApoyo));
+        OnPropertyChanged(nameof(NoEntrego));
     }
 
     private bool Ejecutar(Action accion)
@@ -697,8 +716,9 @@ public sealed class GestionProyectosViewModel : ViewModelBase
             NuevoProyectoCommand, GuardarProyectoCommand, IniciarProyectoCommand,
             FinalizarProyectoCommand, ReabrirProyectoCommand, EliminarProyectoCommand,
             NuevaActividadCommand, GuardarActividadCommand, DescartarActividadCommand,
-            AnularActividadCommand, EliminarActividadCommand, MarcarEntregadaCommand,
-            MarcarNoEntregadaCommand, MarcarPendienteCommand, MarcarTodosEntregadaCommand,
+            AnularActividadCommand, EliminarActividadCommand, MarcarDominaCommand,
+            MarcarSuficienteCommand, MarcarEnProcesoCommand, MarcarRequiereApoyoCommand,
+            MarcarNoEntregoCommand, MarcarPendienteCommand, MarcarTodosEntregadaCommand,
         })
         {
             comando.NotifyCanExecuteChanged();
@@ -711,6 +731,7 @@ public sealed class GestionProyectosViewModel : ViewModelBase
 
     private static ActividadProyectoResumen Resumir(ActividadProyectoDetalle actividad) => new(
         actividad.ActividadId, actividad.ProyectoId, actividad.Titulo, actividad.FechaRealizacion,
-        actividad.Estado, actividad.Total, actividad.Pendientes, actividad.Entregadas,
-        actividad.NoEntregadas, actividad.Version);
+        actividad.Estado, actividad.Total, actividad.Pendientes, actividad.Domina,
+        actividad.Suficiente, actividad.EnProceso, actividad.RequiereApoyo,
+        actividad.NoEntrego, actividad.Version);
 }

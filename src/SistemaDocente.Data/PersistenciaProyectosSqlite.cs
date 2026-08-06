@@ -102,7 +102,7 @@ public sealed class PersistenciaProyectosSqlite : IAlmacenamientoProyectos, IAlm
             using var detalle = conexion.CreateCommand(); detalle.Transaction = transaccion;
             detalle.CommandText = "INSERT INTO entregas_actividad(actividad_id,estudiante_id,grupo_id,estado_entrega,observacion) VALUES($actividad,$estudiante,$grupo,$estado,$observacion) ON CONFLICT(actividad_id,estudiante_id) DO UPDATE SET estado_entrega=excluded.estado_entrega,observacion=excluded.observacion";
             detalle.Parameters.AddWithValue("$actividad", actividad.Id.ToString()); detalle.Parameters.AddWithValue("$estudiante", entrega.EstudianteId.ToString());
-            detalle.Parameters.AddWithValue("$grupo", actividad.GrupoId.ToString()); detalle.Parameters.AddWithValue("$estado", (int)entrega.Estado); detalle.Parameters.AddWithValue("$observacion", entrega.Observacion); detalle.ExecuteNonQuery();
+            detalle.Parameters.AddWithValue("$grupo", actividad.GrupoId.ToString()); detalle.Parameters.AddWithValue("$estado", (int)entrega.NivelLogro); detalle.Parameters.AddWithValue("$observacion", entrega.Observacion); detalle.ExecuteNonQuery();
         }
         transaccion.Commit();
     });
@@ -129,7 +129,7 @@ public sealed class PersistenciaProyectosSqlite : IAlmacenamientoProyectos, IAlm
         var titulo = lector.GetString(3); var descripcion = lector.GetString(4); var fecha = LeerFecha(lector.GetString(5)); var observaciones = lector.GetString(6); var estado = (EstadoActividad)lector.GetInt32(7); var version = lector.GetInt32(8); lector.Close();
         using var detalles = conexion.CreateCommand(); detalles.CommandText = "SELECT estudiante_id,estado_entrega,observacion FROM entregas_actividad WHERE actividad_id=$id ORDER BY estudiante_id"; detalles.Parameters.AddWithValue("$id", id.ToString());
         using var lectorDetalles = detalles.ExecuteReader(); var entregas = new List<DatosEntregaActividadRehidratada>();
-        while (lectorDetalles.Read()) entregas.Add(new(EstudianteId.DesdeGuid(Guid.Parse(lectorDetalles.GetString(0))), (EstadoEntrega)lectorDetalles.GetInt32(1), lectorDetalles.GetString(2)));
+        while (lectorDetalles.Read()) entregas.Add(new(EstudianteId.DesdeGuid(Guid.Parse(lectorDetalles.GetString(0))), (NivelLogro)lectorDetalles.GetInt32(1), lectorDetalles.GetString(2)));
         return ActividadProyecto.Rehidratar(actividadId, proyectoId, grupoId, titulo, descripcion, fecha, observaciones, estado, version, entregas);
     }
 

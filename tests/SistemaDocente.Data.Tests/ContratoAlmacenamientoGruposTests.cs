@@ -45,7 +45,7 @@ public sealed class ContratoAlmacenamientoGruposTests : IDisposable
         using (var conexion = _base.AbrirConexion())
         using (var comando = conexion.CreateCommand())
         {
-            comando.CommandText = "PRAGMA user_version = 4;";
+            comando.CommandText = "PRAGMA user_version = 5;";
             comando.ExecuteNonQuery();
         }
 

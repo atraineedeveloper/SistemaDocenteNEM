@@ -179,18 +179,63 @@
                         <StackPanel><TextBlock Text="Título"/><TextBox Text="{Binding TituloActividad, UpdateSourceTrigger=PropertyChanged}"/></StackPanel>
                         <StackPanel Grid.Column="2"><TextBlock Text="Fecha"/><TextBox Text="{Binding FechaActividad}"/></StackPanel>
                     </Grid>
-                    <DockPanel Grid.Row="2" Margin="0,4,0,8"><ComboBox DockPanel.Dock="Left" Width="180" ItemsSource="{Binding FiltrosEntrega}" SelectedItem="{Binding FiltroEntrega}"/><TextBlock DockPanel.Dock="Right" VerticalAlignment="Center"><Run Text="Total "/><Run Text="{Binding Total, Mode=OneWay}"/><Run Text=" · Pendientes "/><Run Text="{Binding Pendientes, Mode=OneWay}"/><Run Text=" · Entregadas "/><Run Text="{Binding Entregadas, Mode=OneWay}"/><Run Text=" · No entregadas "/><Run Text="{Binding NoEntregadas, Mode=OneWay}"/></TextBlock></DockPanel>
+                    <DockPanel Grid.Row="2" Margin="0,4,0,8"><ComboBox DockPanel.Dock="Left" Width="180" ItemsSource="{Binding FiltrosEntrega}" SelectedItem="{Binding FiltroEntrega}"/><TextBlock DockPanel.Dock="Right" VerticalAlignment="Center" FontSize="12"><Run Text="Total "/><Run Text="{Binding Total, Mode=OneWay}"/><Run Text=" · Pend. "/><Run Text="{Binding Pendientes, Mode=OneWay}"/><Run Text=" · Domina "/><Run Text="{Binding Domina, Mode=OneWay}"/><Run Text=" · Suficiente "/><Run Text="{Binding Suficiente, Mode=OneWay}"/><Run Text=" · En proceso "/><Run Text="{Binding EnProceso, Mode=OneWay}"/><Run Text=" · Req. apoyo "/><Run Text="{Binding RequiereApoyo, Mode=OneWay}"/><Run Text=" · No entregó "/><Run Text="{Binding NoEntrego, Mode=OneWay}"/></TextBlock></DockPanel>
                     <DataGrid x:Name="GrillaEntregas" Grid.Row="3" ItemsSource="{Binding EntregasVisibles}" AutoGenerateColumns="False" CanUserAddRows="False" RowHeaderWidth="0" EnableRowVirtualization="True" PreviewKeyDown="OnGrillaEntregasPreviewKeyDown">
                         <DataGrid.Columns>
                             <DataGridCheckBoxColumn Header="Sel." Binding="{Binding Seleccionada}" Width="45"/>
                             <DataGridTextColumn Header="Núm." Binding="{Binding NumeroLista}" IsReadOnly="True" Width="55"/>
                             <DataGridTextColumn Header="Nombre" Binding="{Binding Nombre}" IsReadOnly="True" Width="*"/>
                             <DataGridTextColumn Header="Situación" Binding="{Binding SituacionActual}" IsReadOnly="True" Width="130"/>
-                            <DataGridTextColumn Header="Estado E/N/P" Binding="{Binding Estado}" IsReadOnly="True" Width="105"/>
+                            <DataGridTextColumn Header="Nivel de logro" Binding="{Binding EtiquetaNivel}" IsReadOnly="True" Width="110">
+                                <DataGridTextColumn.ElementStyle>
+                                    <Style TargetType="TextBlock">
+                                        <Setter Property="HorizontalAlignment" Value="Center"/>
+                                        <Setter Property="FontWeight" Value="SemiBold"/>
+                                        <Setter Property="Padding" Value="4,2"/>
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding EtiquetaNivel}" Value="D">
+                                                <Setter Property="Foreground" Value="#0F5132"/>
+                                                <Setter Property="Background" Value="#D1E7DD"/>
+                                            </DataTrigger>
+                                            <DataTrigger Binding="{Binding EtiquetaNivel}" Value="S">
+                                                <Setter Property="Foreground" Value="#084298"/>
+                                                <Setter Property="Background" Value="#CFE2FF"/>
+                                            </DataTrigger>
+                                            <DataTrigger Binding="{Binding EtiquetaNivel}" Value="EP">
+                                                <Setter Property="Foreground" Value="#664D03"/>
+                                                <Setter Property="Background" Value="#FFF3CD"/>
+                                            </DataTrigger>
+                                            <DataTrigger Binding="{Binding EtiquetaNivel}" Value="RA">
+                                                <Setter Property="Foreground" Value="#842029"/>
+                                                <Setter Property="Background" Value="#F8D7DA"/>
+                                            </DataTrigger>
+                                            <DataTrigger Binding="{Binding EtiquetaNivel}" Value="NE">
+                                                <Setter Property="Foreground" Value="#41464B"/>
+                                                <Setter Property="Background" Value="#E2E3E5"/>
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </DataGridTextColumn.ElementStyle>
+                            </DataGridTextColumn>
                             <DataGridTextColumn Header="Observación" Binding="{Binding Observacion, UpdateSourceTrigger=PropertyChanged}" Width="180"/>
                         </DataGrid.Columns>
                     </DataGrid>
-                    <DockPanel Grid.Row="4" Margin="0,8,0,0"><WrapPanel DockPanel.Dock="Left"><Button Content="E Entregada" Command="{Binding MarcarEntregadaCommand}"/><Button Content="N No entregada" Command="{Binding MarcarNoEntregadaCommand}"/><Button Content="P Pendiente" Command="{Binding MarcarPendienteCommand}"/><Button Content="Todos entregada" Command="{Binding MarcarTodosEntregadaCommand}"/></WrapPanel><WrapPanel DockPanel.Dock="Right"><Button Content="Anular" Command="{Binding AnularActividadCommand}"/><Button Content="Eliminar" Command="{Binding EliminarActividadCommand}"/><Button Content="Descartar" Command="{Binding DescartarActividadCommand}"/><Button Content="Guardar (Ctrl+S)" Command="{Binding GuardarActividadCommand}"/></WrapPanel></DockPanel>
+                    <DockPanel Grid.Row="4" Margin="0,8,0,0">
+                        <WrapPanel DockPanel.Dock="Left">
+                            <Button Content="D Domina" Command="{Binding MarcarDominaCommand}" MinWidth="75"/>
+                            <Button Content="S Suficiente" Command="{Binding MarcarSuficienteCommand}" MinWidth="85"/>
+                            <Button Content="E En proceso" Command="{Binding MarcarEnProcesoCommand}" MinWidth="90"/>
+                            <Button Content="R Req. apoyo" Command="{Binding MarcarRequiereApoyoCommand}" MinWidth="90"/>
+                            <Button Content="N No entregó" Command="{Binding MarcarNoEntregoCommand}" MinWidth="90"/>
+                            <Button Content="P Pendiente" Command="{Binding MarcarPendienteCommand}" MinWidth="80"/>
+                        </WrapPanel>
+                        <WrapPanel DockPanel.Dock="Right">
+                            <Button Content="Anular" Command="{Binding AnularActividadCommand}"/>
+                            <Button Content="Eliminar" Command="{Binding EliminarActividadCommand}"/>
+                            <Button Content="Descartar" Command="{Binding DescartarActividadCommand}"/>
+                            <Button Content="Guardar (Ctrl+S)" Command="{Binding GuardarActividadCommand}"/>
+                        </WrapPanel>
+                    </DockPanel>
                 </Grid>
             </Border>
             <Grid.InputBindings><KeyBinding Modifiers="Control" Key="S" Command="{Binding GuardarActividadCommand}"/></Grid.InputBindings>

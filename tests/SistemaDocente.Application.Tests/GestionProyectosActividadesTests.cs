@@ -36,11 +36,11 @@ public sealed class GestionProyectosActividadesTests
         Assert.Equal(2, preparada.Pendientes);
         Assert.Equal(0, contexto.Actividades.Guardados);
         var entradas = preparada.Entregas.Select((x, i) => new EntradaEntregaActividad(
-            x.EstudianteId, i == 0 ? EstadoEntrega.Entregada : EstadoEntrega.NoEntregada, "")).ToArray();
+            x.EstudianteId, i == 0 ? NivelLogro.Domina : NivelLogro.NoEntrego, "")).ToArray();
         var guardada = contexto.Casos.CrearActividad(proyecto.ProyectoId,
             new("A", "", new DateOnly(2026, 1, 10), "", entradas));
-        Assert.Equal(1, guardada.Entregadas);
-        Assert.Equal(1, guardada.NoEntregadas);
+        Assert.Equal(1, guardada.Domina);
+        Assert.Equal(1, guardada.NoEntrego);
         Assert.Equal(1, contexto.Actividades.Guardados);
     }
 
@@ -53,7 +53,7 @@ public sealed class GestionProyectosActividadesTests
             new("P", "", new DateOnly(2026, 1, 1), new DateOnly(2026, 1, 31), ""));
         var preparada = contexto.Casos.PrepararNuevaActividad(proyecto.ProyectoId, "A", "", new DateOnly(2026, 1, 2), "");
         var guardada = contexto.Casos.CrearActividad(proyecto.ProyectoId,
-            new("A", "", new DateOnly(2026, 1, 2), "", preparada.Entregas.Select(x => new EntradaEntregaActividad(x.EstudianteId, x.Estado, "")).ToArray()));
+            new("A", "", new DateOnly(2026, 1, 2), "", preparada.Entregas.Select(x => new EntradaEntregaActividad(x.EstudianteId, x.NivelLogro, "")).ToArray()));
         contexto.Grupo.DesactivarEstudiante(historico.Id);
         contexto.Grupo.AgregarEstudiante("Nuevo", 2);
 
@@ -102,7 +102,7 @@ public sealed class GestionProyectosActividadesTests
         public int Guardados { get; private set; }
         public ActividadProyecto? Cargar(ActividadId id) => _datos.GetValueOrDefault(id);
         public IReadOnlyList<ActividadProyecto> ListarPorProyecto(ProyectoId id) => _datos.Values.Where(x => x.ProyectoId == id).ToArray();
-        public void Guardar(ActividadProyecto a, int? version) { Guardados++; _datos[a.Id] = ActividadProyecto.Rehidratar(a.Id, a.ProyectoId, a.GrupoId, a.Titulo, a.Descripcion, a.FechaRealizacion, a.ObservacionesGenerales, a.Estado, (version ?? 0) + 1, a.Entregas.Select(x => new DatosEntregaActividadRehidratada(x.EstudianteId, x.Estado, x.Observacion)).ToArray()); }
+        public void Guardar(ActividadProyecto a, int? version) { Guardados++; _datos[a.Id] = ActividadProyecto.Rehidratar(a.Id, a.ProyectoId, a.GrupoId, a.Titulo, a.Descripcion, a.FechaRealizacion, a.ObservacionesGenerales, a.Estado, (version ?? 0) + 1, a.Entregas.Select(x => new DatosEntregaActividadRehidratada(x.EstudianteId, x.NivelLogro, x.Observacion)).ToArray()); }
         public void Eliminar(ActividadId id, int version) => _datos.Remove(id);
     }
 }

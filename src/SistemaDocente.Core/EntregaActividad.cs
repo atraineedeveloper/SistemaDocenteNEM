@@ -2,14 +2,14 @@ namespace SistemaDocente.Core;
 
 public sealed class EntregaActividad
 {
-    internal EntregaActividad(EstudianteId estudianteId, EstadoEntrega estado, string observacion)
+    internal EntregaActividad(EstudianteId estudianteId, NivelLogro nivelLogro, string observacion)
     {
         EstudianteId = estudianteId;
-        Estado = estado;
+        NivelLogro = nivelLogro;
         Observacion = observacion;
     }
 
     public EstudianteId EstudianteId { get; }
-    public EstadoEntrega Estado { get; internal set; }
+    public NivelLogro NivelLogro { get; internal set; }
     public string Observacion { get; internal set; }
 }

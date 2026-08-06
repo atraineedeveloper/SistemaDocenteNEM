@@ -37,13 +37,13 @@ public sealed class ProyectosSqliteTests : IDisposable
         almacenamiento.Guardar(proyecto, null);
         var actividad = ActividadProyecto.Crear(proyecto.Id, grupo.Id, "A", "",
             new DateOnly(2026, 1, 10), "", proyecto.FechaInicio, proyecto.FechaTermino, [estudiante.Id]);
-        actividad.ActualizarEntregas([new(estudiante.Id, EstadoEntrega.Entregada, "Bien")]);
+        actividad.ActualizarEntregas([new(estudiante.Id, NivelLogro.Domina, "Bien")]);
 
         almacenamiento.Guardar(actividad, null);
         var reabierta = new PersistenciaProyectosSqlite(_base.Ruta);
         var cargada = ((IAlmacenamientoActividadesProyecto)reabierta).Cargar(actividad.Id)!;
 
-        Assert.Equal(EstadoEntrega.Entregada, Assert.Single(cargada.Entregas).Estado);
+        Assert.Equal(NivelLogro.Domina, Assert.Single(cargada.Entregas).NivelLogro);
         Assert.Single(reabierta.ListarPorProyecto(proyecto.Id));
     }
 
@@ -62,7 +62,7 @@ public sealed class ProyectosSqliteTests : IDisposable
 
         Assert.NotNull(_base.Persistencia.Cargar(grupo.Id));
         using var verificacion = _base.AbrirConexion(); using var consulta = verificacion.CreateCommand(); consulta.CommandText = "PRAGMA user_version";
-        Assert.Equal(3L, consulta.ExecuteScalar());
+        Assert.Equal(4L, consulta.ExecuteScalar());
     }
 
     private Grupo CrearGrupo()

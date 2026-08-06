@@ -56,11 +56,11 @@ public sealed class ProyectosActividadesTests
             new DateOnly(2026, 1, 1), new DateOnly(2026, 1, 31), estudiantes);
 
         Assert.Equal("Actividad uno", actividad.Titulo);
-        Assert.All(actividad.Entregas, x => Assert.Equal(EstadoEntrega.Pendiente, x.Estado));
+        Assert.All(actividad.Entregas, x => Assert.Equal(NivelLogro.Pendiente, x.NivelLogro));
         actividad.ActualizarEntregas([
-            new(estudiantes[0], EstadoEntrega.Entregada, "Bien"),
-            new(estudiantes[1], EstadoEntrega.NoEntregada, "Sin entrega")]);
-        Assert.Equal(EstadoEntrega.Entregada, actividad.Entregas[0].Estado);
+            new(estudiantes[0], NivelLogro.Domina, "Bien"),
+            new(estudiantes[1], NivelLogro.NoEntrego, "Sin entrega")]);
+        Assert.Equal(NivelLogro.Domina, actividad.Entregas[0].NivelLogro);
     }
 
     [Fact]
@@ -77,7 +77,7 @@ public sealed class ProyectosActividadesTests
         var actividad = ActividadProyecto.Crear(ProyectoId.DesdeGuid(Guid.NewGuid()), GrupoId, "A", null,
             new DateOnly(2026, 1, 1), null, new DateOnly(2026, 1, 1), new DateOnly(2026, 1, 31), [estudiante]);
         Assert.Throws<DomainValidationException>(() => actividad.ActualizarEntregas([]));
-        Assert.Equal(EstadoEntrega.Pendiente, actividad.Entregas[0].Estado);
+        Assert.Equal(NivelLogro.Pendiente, actividad.Entregas[0].NivelLogro);
     }
 
     [Fact]

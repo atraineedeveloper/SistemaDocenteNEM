@@ -209,7 +209,7 @@ public partial class MainWindow : Window
 
     private void OnGrillaEntregasPreviewKeyDown(object sender, KeyEventArgs e)
     {
-        if (e.Key is not (Key.E or Key.N or Key.P)
+        if (e.Key is not (Key.D or Key.S or Key.E or Key.R or Key.N or Key.P)
             || Keyboard.Modifiers != ModifierKeys.None
             || Keyboard.FocusedElement is TextBoxBase
             || Keyboard.FocusedElement is not DependencyObject foco
@@ -220,8 +220,11 @@ public partial class MainWindow : Window
 
         var command = e.Key switch
         {
-            Key.E => ViewModel.Proyectos?.MarcarEntregadaCommand,
-            Key.N => ViewModel.Proyectos?.MarcarNoEntregadaCommand,
+            Key.D => ViewModel.Proyectos?.MarcarDominaCommand,
+            Key.S => ViewModel.Proyectos?.MarcarSuficienteCommand,
+            Key.E => ViewModel.Proyectos?.MarcarEnProcesoCommand,
+            Key.R => ViewModel.Proyectos?.MarcarRequiereApoyoCommand,
+            Key.N => ViewModel.Proyectos?.MarcarNoEntregoCommand,
             _ => ViewModel.Proyectos?.MarcarPendienteCommand,
         };
         if (command?.CanExecute(null) == true)

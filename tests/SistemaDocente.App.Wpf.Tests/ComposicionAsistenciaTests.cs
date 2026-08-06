@@ -63,8 +63,8 @@ public sealed class ComposicionAsistenciaTests
         Assert.Contains("ProyectosVisibles", xaml, StringComparison.Ordinal);
         Assert.Contains("Actividades", xaml, StringComparison.Ordinal);
         Assert.Contains("EntregasVisibles", xaml, StringComparison.Ordinal);
-        Assert.Contains("E Entregada", xaml, StringComparison.Ordinal);
-        Assert.Contains("N No entregada", xaml, StringComparison.Ordinal);
+        Assert.Contains("D Domina", xaml, StringComparison.Ordinal);
+        Assert.Contains("S Suficiente", xaml, StringComparison.Ordinal);
         Assert.Contains("P Pendiente", xaml, StringComparison.Ordinal);
         Assert.Contains("MinWidth=\"360\"", xaml, StringComparison.Ordinal);
     }
@@ -75,7 +75,7 @@ public sealed class ComposicionAsistenciaTests
         var xaml = LeerArchivoAplicacion("MainWindow.xaml");
 
         _ = XDocument.Parse(xaml);
-        foreach (var propiedad in new[] { "Total", "Pendientes", "Entregadas", "NoEntregadas" })
+        foreach (var propiedad in new[] { "Total", "Pendientes", "Domina", "Suficiente", "EnProceso", "RequiereApoyo", "NoEntrego" })
         {
             Assert.Contains($"{{Binding {propiedad}, Mode=OneWay}}", xaml, StringComparison.Ordinal);
             Assert.DoesNotMatch(
@@ -96,9 +96,13 @@ public sealed class ComposicionAsistenciaTests
         Assert.Contains("PreviewKeyDown=\"OnGrillaEntregasPreviewKeyDown\"", xaml, StringComparison.Ordinal);
         Assert.Contains("Keyboard.FocusedElement is TextBoxBase", codeBehind, StringComparison.Ordinal);
         Assert.Contains("GrillaEntregas.IsAncestorOf(foco)", codeBehind, StringComparison.Ordinal);
-        Assert.Contains("MarcarEntregadaCommand", codeBehind, StringComparison.Ordinal);
-        Assert.Contains("MarcarNoEntregadaCommand", codeBehind, StringComparison.Ordinal);
+        Assert.Contains("MarcarDominaCommand", codeBehind, StringComparison.Ordinal);
+        Assert.Contains("MarcarSuficienteCommand", codeBehind, StringComparison.Ordinal);
+        Assert.Contains("MarcarEnProcesoCommand", codeBehind, StringComparison.Ordinal);
+        Assert.Contains("MarcarRequiereApoyoCommand", codeBehind, StringComparison.Ordinal);
+        Assert.Contains("MarcarNoEntregoCommand", codeBehind, StringComparison.Ordinal);
         Assert.Contains("MarcarPendienteCommand", codeBehind, StringComparison.Ordinal);
+        Assert.DoesNotContain("NivelLogro.", codeBehind, StringComparison.Ordinal);
         Assert.DoesNotContain("EstadoEntrega.", codeBehind, StringComparison.Ordinal);
     }
 
