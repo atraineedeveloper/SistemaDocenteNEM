@@ -166,10 +166,15 @@
                 <StackPanel DockPanel.Dock="Left"><TextBlock Text="Asistencia" Foreground="#475467"/><TextBlock Text="Registro diario" Foreground="#101828" FontSize="27" FontWeight="SemiBold"/></StackPanel>
                 <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" HorizontalAlignment="Right"><Button TabIndex="100" Content="_Vista mensual" Command="{Binding DataContext.MostrarVistaMensualCommand, RelativeSource={RelativeSource AncestorType=Window}}"/><StackPanel><TextBlock Text="Fecha" Foreground="#101828" FontWeight="SemiBold"/><DatePicker TabIndex="101" Width="170" SelectedDate="{Binding FechaSeleccionada, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/></StackPanel></StackPanel>
             </DockPanel>
-            <Border Grid.Row="1" Margin="0,0,0,12" Padding="14" Background="White" CornerRadius="7">
+            <Border Grid.Row="1" Margin="0,0,0,12" Padding="14" Background="White" CornerRadius="8">
                 <DockPanel><TextBlock DockPanel.Dock="Left" Foreground="#101828" FontWeight="SemiBold" Text="{Binding EstadoGuardado}"/><StackPanel DockPanel.Dock="Right" Orientation="Horizontal"><TextBlock Margin="12,0" Foreground="#101828" Text="{Binding Total, StringFormat=Total: {0}}"/><TextBlock Margin="12,0" Foreground="#027A48" Text="{Binding Presentes, StringFormat=Presentes: {0}}"/><TextBlock Margin="12,0" Foreground="#B42318" Text="{Binding Faltas, StringFormat=Faltas: {0}}"/><TextBlock Margin="12,0" Foreground="#B54708" Text="{Binding Retardos, StringFormat=Retardos: {0}}"/><TextBlock Margin="12,0" Foreground="#175CD3" Text="{Binding Justificadas, StringFormat=Falta justificada: {0}}"/></StackPanel></DockPanel>
             </Border>
             <DataGrid Grid.Row="2" ItemsSource="{Binding Estudiantes}" AutoGenerateColumns="False" CanUserAddRows="False" CanUserDeleteRows="False" CanUserSortColumns="False" RowHeaderWidth="0" GridLinesVisibility="Horizontal" FontSize="15" EnableRowVirtualization="True" TabIndex="102">
+                <DataGrid.ContextMenu>
+                    <ContextMenu>
+                        <MenuItem Header="✔️ Marcar Presente" Command="{Binding MarcarTodosPresentesCommand}"/>
+                    </ContextMenu>
+                </DataGrid.ContextMenu>
                 <DataGrid.Columns>
                     <DataGridTextColumn Header="Núm." Binding="{Binding NumeroLista}" Width="75" IsReadOnly="True"/>
                     <DataGridTextColumn Header="Nombre" Binding="{Binding Nombre}" Width="*" IsReadOnly="True"/>
@@ -196,10 +201,10 @@
                 </StackPanel>
             </DockPanel>
             <WrapPanel Grid.Row="1" Margin="0,0,0,10">
-                <Border Background="White" Padding="12,8" Margin="0,0,8,0"><TextBlock Foreground="#101828" Text="{Binding EstadoMes}" FontWeight="SemiBold"/></Border>
-                <Border Background="White" Padding="12,8" Margin="0,0,8,0"><TextBlock Foreground="#101828" Text="{Binding AlumnosVisibles, StringFormat=Alumnos: {0}}"/></Border>
-                <Border Background="White" Padding="12,8" Margin="0,0,8,0"><TextBlock Foreground="#101828" Text="{Binding DiasGuardados, StringFormat=Días guardados: {0}}"/></Border>
-                <Border Background="#FFF4CE" Padding="12,8"><TextBlock Foreground="#B54708" Text="Los conteos incluyen borradores" Visibility="{Binding IncluyeBorradores, Converter={StaticResource BoolToVisibility}}"/></Border>
+                <Border Background="White" Padding="12,8" Margin="0,0,8,0" CornerRadius="6"><TextBlock Foreground="#101828" Text="{Binding EstadoMes}" FontWeight="SemiBold"/></Border>
+                <Border Background="White" Padding="12,8" Margin="0,0,8,0" CornerRadius="6"><TextBlock Foreground="#101828" Text="{Binding AlumnosVisibles, StringFormat=Alumnos: {0}}"/></Border>
+                <Border Background="White" Padding="12,8" Margin="0,0,8,0" CornerRadius="6"><TextBlock Foreground="#101828" Text="{Binding DiasGuardados, StringFormat=Días guardados: {0}}"/></Border>
+                <Border Background="#FFF4CE" Padding="12,8" CornerRadius="6"><TextBlock Foreground="#B54708" Text="Los conteos incluyen borradores" Visibility="{Binding IncluyeBorradores, Converter={StaticResource BoolToVisibility}}"/></Border>
             </WrapPanel>
             <DockPanel Grid.Row="2" Margin="0,0,0,10">
                 <TextBox TabIndex="210" DockPanel.Dock="Left" Width="260" Margin="0" Text="{Binding Busqueda, UpdateSourceTrigger=PropertyChanged}" ToolTip="Buscar estudiante"/>
@@ -211,7 +216,16 @@
                       FrozenColumnCount="2" HeadersVisibility="Column" RowHeaderWidth="0" GridLinesVisibility="All"
                       EnableRowVirtualization="True" EnableColumnVirtualization="True" RowHeight="30"
                       SelectionUnit="Cell" SelectionMode="Single" CurrentCellChanged="OnCeldaMensualSeleccionada"
-                      MouseDoubleClick="OnCeldaMensualDobleClic" PreviewKeyDown="OnGrillaMensualPreviewKeyDown" TabIndex="212"/>
+                      MouseDoubleClick="OnCeldaMensualDobleClic" PreviewKeyDown="OnGrillaMensualPreviewKeyDown" TabIndex="212">
+                <DataGrid.ContextMenu>
+                    <ContextMenu>
+                        <MenuItem Header="✔️ Marcar día presente" Command="{Binding MarcarDiaPresenteCommand}"/>
+                        <MenuItem Header="💾 Guardar día" Command="{Binding GuardarDiaCommand}"/>
+                        <Separator/>
+                        <MenuItem Header="🗑️ Descartar día" Command="{Binding DescartarDiaCommand}"/>
+                    </ContextMenu>
+                </DataGrid.ContextMenu>
+            </DataGrid>
             <DockPanel Grid.Row="4" Margin="0,10,0,0">
                 <StackPanel DockPanel.Dock="Left" Orientation="Horizontal">
                     <Button TabIndex="220" Content="_Marcar día presente" Command="{Binding MarcarDiaPresenteCommand}"/>
@@ -238,8 +252,8 @@
 
             <DockPanel Margin="0,0,0,16">
                 <StackPanel DockPanel.Dock="Left">
-                    <TextBlock Text="Planeación Didáctica" Foreground="#52606D"/>
-                    <TextBlock Text="Proyectos Didácticos" FontSize="27" FontWeight="SemiBold"/>
+                    <TextBlock Text="Planeación Didáctica" Foreground="#475467"/>
+                    <TextBlock Text="Proyectos Didácticos" Foreground="#101828" FontSize="27" FontWeight="SemiBold"/>
                 </StackPanel>
                 <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" VerticalAlignment="Center">
                     <Button Content="+ Nuevo Proyecto" Command="{Binding NuevoProyectoCommand}"/>
@@ -248,17 +262,24 @@
 
             <DockPanel Grid.Row="1" Margin="0,0,0,12">
                 <StackPanel DockPanel.Dock="Left" Orientation="Horizontal">
-                    <TextBlock Text="Filtrar por estado: " VerticalAlignment="Center" FontWeight="SemiBold"/>
+                    <TextBlock Text="Filtrar por estado: " Foreground="#101828" VerticalAlignment="Center" FontWeight="SemiBold"/>
                     <ComboBox Width="180" ItemsSource="{Binding FiltrosProyecto}" SelectedItem="{Binding FiltroProyecto}"/>
                 </StackPanel>
             </DockPanel>
 
             <DataGrid x:Name="GrillaProyectosPrincipal" Grid.Row="2" ItemsSource="{Binding ProyectosVisibles}" SelectedItem="{Binding ProyectoSeleccionado}"
                       AutoGenerateColumns="False" IsReadOnly="True" CanUserSortColumns="False" SelectionMode="Single" SelectionUnit="FullRow"
-                      HeadersVisibility="Column" GridLinesVisibility="Horizontal" RowHeaderWidth="0" FontSize="15" MouseDoubleClick="OnProyectoPrincipalDobleClic">
+                      HeadersVisibility="Column" GridLinesVisibility="Horizontal" RowHeaderWidth="0" FontSize="15" MouseDoubleClick="OnAbrirDetalleProyectoClic">
+                <DataGrid.ContextMenu>
+                    <ContextMenu>
+                        <MenuItem Header="📂 Ver / Editar Detalle del Proyecto" Click="OnAbrirDetalleProyectoClic"/>
+                        <Separator/>
+                        <MenuItem Header="✨ Nuevo Proyecto" Command="{Binding NuevoProyectoCommand}"/>
+                    </ContextMenu>
+                </DataGrid.ContextMenu>
                 <DataGrid.Columns>
                     <DataGridTextColumn Header="Nombre del Proyecto" Binding="{Binding Nombre}" Width="2*"/>
-                    <DataGridTextColumn Header="Estado" Binding="{Binding Estado}" Width="120"/>
+                    <DataGridTextColumn Header="Estado" Binding="{Binding Estado}" Width="140"/>
                     <DataGridTextColumn Header="Inicio" Binding="{Binding FechaInicio, StringFormat=dd/MM/yyyy}" Width="110"/>
                     <DataGridTextColumn Header="Término" Binding="{Binding FechaTermino, StringFormat=dd/MM/yyyy}" Width="110"/>
                     <DataGridTextColumn Header="Actividades" Binding="{Binding NumeroActividades}" Width="100"/>
@@ -285,8 +306,8 @@
 
             <DockPanel Margin="0,0,0,12">
                 <StackPanel DockPanel.Dock="Left">
-                    <TextBlock Text="Evaluación de Desempeño NEM" Foreground="#52606D"/>
-                    <TextBlock Text="Registro Pedagógico de Actividades" FontSize="27" FontWeight="SemiBold"/>
+                    <TextBlock Text="Evaluación de Desempeño NEM" Foreground="#475467"/>
+                    <TextBlock Text="Registro Pedagógico de Actividades" Foreground="#101828" FontSize="27" FontWeight="SemiBold"/>
                 </StackPanel>
             </DockPanel>
 
@@ -299,12 +320,12 @@
                     </Grid.ColumnDefinitions>
 
                     <StackPanel Grid.Column="0">
-                        <TextBlock Text="1. Seleccionar Proyecto Didáctico" FontWeight="SemiBold" Margin="0,0,0,4"/>
+                        <TextBlock Text="1. Seleccionar Proyecto Didáctico" Foreground="#101828" FontWeight="SemiBold" Margin="0,0,0,4"/>
                         <ComboBox ItemsSource="{Binding Proyectos}" SelectedItem="{Binding ProyectoSeleccionado}" DisplayMemberPath="Nombre"/>
                     </StackPanel>
 
                     <StackPanel Grid.Column="2">
-                        <TextBlock Text="2. Seleccionar Actividad a Evaluar" FontWeight="SemiBold" Margin="0,0,0,4"/>
+                        <TextBlock Text="2. Seleccionar Actividad a Evaluar" Foreground="#101828" FontWeight="SemiBold" Margin="0,0,0,4"/>
                         <ComboBox ItemsSource="{Binding Actividades}" SelectedItem="{Binding ActividadSeleccionada}" DisplayMemberPath="Titulo"/>
                     </StackPanel>
                 </Grid>
@@ -315,7 +336,7 @@
                     <TextBox Width="200" Text="{Binding BusquedaEstudiante, UpdateSourceTrigger=PropertyChanged}" ToolTip="Buscar estudiante..."/>
                     <ComboBox Width="160" Margin="8,0" ItemsSource="{Binding FiltrosEntrega}" SelectedItem="{Binding FiltroEntrega}"/>
                 </StackPanel>
-                <TextBlock DockPanel.Dock="Right" VerticalAlignment="Center" FontSize="13">
+                <TextBlock DockPanel.Dock="Right" VerticalAlignment="Center" Foreground="#101828" FontSize="13">
                     <Run Text="Total "/><Run Text="{Binding Total, Mode=OneWay}"/>
                     <Run Text=" · Pend. "/><Run Text="{Binding Pendientes, Mode=OneWay}"/>
                     <Run Text=" · Domina "/><Run Text="{Binding Domina, Mode=OneWay}"/>
@@ -327,6 +348,11 @@
             </DockPanel>
 
             <DataGrid x:Name="GrillaEntregasEvaluacion" Grid.Row="3" ItemsSource="{Binding EntregasVisibles}" AutoGenerateColumns="False" CanUserAddRows="False" RowHeaderWidth="0" EnableRowVirtualization="True" PreviewKeyDown="OnGrillaEntregasEvaluacionPreviewKeyDown">
+                <DataGrid.ContextMenu>
+                    <ContextMenu>
+                        <MenuItem Header="🌟 Domina (D)" Command="{Binding GuardarCommand}"/>
+                    </ContextMenu>
+                </DataGrid.ContextMenu>
                 <DataGrid.Columns>
                     <DataGridCheckBoxColumn Header="Sel." Binding="{Binding Seleccionada}" Width="45"/>
                     <DataGridTextColumn Header="Núm." Binding="{Binding NumeroLista}" IsReadOnly="True" Width="55"/>
