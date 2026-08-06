@@ -48,18 +48,18 @@
 
 ## 6. Pulido UX
 
-- [ ] 6.1 Habilitar `CanUserSortColumns="True"` en grillas donde aplique.
-- [ ] 6.2 Implementar caja de búsqueda filtrable en la grilla de estudiantes.
-- [ ] 6.3 Actualizar `Title` de la ventana principal con grupo activo / vista actual.
-- [ ] 6.4 Agregar breadcrumb en diálogos anidados (proyecto → actividad → evaluación).
-- [ ] 6.5 Agregar `ToolTip` descriptivos en encabezados mensuales y columnas ambiguas.
-- [ ] 6.6 Eliminar código muerto identificado (`BoolToActiveTagConverter`, `OnProyectoPrincipalDobleClic`, etc.).
-- [ ] 6.7 Corregir `MarcarTodosEntregadaCommand`.
+- [x] 6.1 Habilitar `CanUserSortColumns="True"` en grillas donde aplique.
+- [x] 6.2 Implementar caja de búsqueda filtrable en la grilla de estudiantes.
+- [x] 6.3 Actualizar `Title` de la ventana principal con grupo activo / vista actual.
+- [x] 6.4 Agregar breadcrumb en diálogos anidados (proyecto → actividad → evaluación).
+- [x] 6.5 Agregar `ToolTip` descriptivos en encabezados mensuales y columnas ambiguas.
+- [x] 6.6 Eliminar código muerto identificado (`BoolToActiveTagConverter`, `OnProyectoPrincipalDobleClic`, etc.).
+- [x] 6.7 Corregir `MarcarTodosEntregadaCommand`.
 
 ## 7. Validación y pruebas
 
-- [ ] 7.1 Ejecutar `openspec validate --all` y corregir cualquier issue.
-- [ ] 7.2 Compilar la solución con `dotnet build`.
-- [ ] 7.3 Ejecutar `dotnet test`.
-- [ ] 7.4 Verificar navegación por teclado en ventanas principales.
-- [ ] 7.5 Verificar contraste y nombres accesibles con inspector de accesibilidad.
+- [x] 7.1 Ejecutar `openspec validate --all` y corregir cualquier issue.
+- [x] 7.2 Compilar la solución con `dotnet build`.
+- [x] 7.3 Ejecutar `dotnet test`.
+- [x] 7.4 Verificar navegación por teclado en ventanas principales.
+- [x] 7.5 Verificar contraste y nombres accesibles con inspector de accesibilidad.

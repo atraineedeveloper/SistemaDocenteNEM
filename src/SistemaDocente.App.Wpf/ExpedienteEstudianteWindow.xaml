@@ -61,7 +61,7 @@
 
                         <TextBlock Text="Historial de Entregas por Proyectos" FontSize="16" FontWeight="Bold" Foreground="#1E293B" Margin="0,8,0,8"/>
                         <Grid Height="210">
-                            <DataGrid ItemsSource="{Binding Entregas}" AutoGenerateColumns="False" IsReadOnly="True" HeadersVisibility="Column" GridLinesVisibility="Horizontal">
+                            <DataGrid ItemsSource="{Binding Entregas}" AutoGenerateColumns="False" IsReadOnly="True" HeadersVisibility="Column" GridLinesVisibility="Horizontal" CanUserSortColumns="True">
                                 <DataGrid.Columns>
                                     <DataGridTextColumn Header="Proyecto" Binding="{Binding NombreProyecto}" Width="*"/>
                                     <DataGridTextColumn Header="Actividad" Binding="{Binding TituloActividad}" Width="*"/>

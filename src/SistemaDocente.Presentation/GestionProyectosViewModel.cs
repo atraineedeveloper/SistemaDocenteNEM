@@ -92,7 +92,7 @@ public sealed class GestionProyectosViewModel : ViewModelBase
             () => Marcar(NivelLogro.NoEntrego), () => PuedeEditarActividad);
         MarcarPendienteCommand = new RelayCommand(
             () => Marcar(NivelLogro.Pendiente), () => PuedeEditarActividad);
-        MarcarTodosEntregadaCommand = new RelayCommand(
+        MarcarTodosDominaCommand = new RelayCommand(
             () =>
             {
                 foreach (var fila in Entregas) fila.NivelLogro = NivelLogro.Domina;
@@ -118,7 +118,7 @@ public sealed class GestionProyectosViewModel : ViewModelBase
     public RelayCommand MarcarRequiereApoyoCommand { get; }
     public RelayCommand MarcarNoEntregoCommand { get; }
     public RelayCommand MarcarPendienteCommand { get; }
-    public RelayCommand MarcarTodosEntregadaCommand { get; }
+    public RelayCommand MarcarTodosDominaCommand { get; }
     public IReadOnlyList<FiltroProyecto> FiltrosProyecto { get; } = Enum.GetValues<FiltroProyecto>();
     public IReadOnlyList<FiltroEntrega> FiltrosEntrega { get; } = Enum.GetValues<FiltroEntrega>();
     public IReadOnlyList<ProyectoResumen> ProyectosVisibles
@@ -718,7 +718,7 @@ public sealed class GestionProyectosViewModel : ViewModelBase
             NuevaActividadCommand, GuardarActividadCommand, DescartarActividadCommand,
             AnularActividadCommand, EliminarActividadCommand, MarcarDominaCommand,
             MarcarSuficienteCommand, MarcarEnProcesoCommand, MarcarRequiereApoyoCommand,
-            MarcarNoEntregoCommand, MarcarPendienteCommand, MarcarTodosEntregadaCommand,
+            MarcarNoEntregoCommand, MarcarPendienteCommand, MarcarTodosDominaCommand,
         })
         {
             comando.NotifyCanExecuteChanged();

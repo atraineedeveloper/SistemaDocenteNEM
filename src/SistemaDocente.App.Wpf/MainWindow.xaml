@@ -4,7 +4,7 @@
         xmlns:controls="clr-namespace:SistemaDocente.App.Wpf.Controls"
         xmlns:prop="clr-namespace:SistemaDocente.App.Wpf.Properties"
         xml:lang="es-MX"
-        Title="{x:Static prop:Resources.AppTitle}" Height="740" Width="1060" MinHeight="600" MinWidth="860"
+        Title="{Binding TituloVentana}" Height="740" Width="1060" MinHeight="600" MinWidth="860"
         WindowStartupLocation="CenterScreen" PreviewKeyDown="OnPreviewKeyDown" Closing="OnClosing">
     <Grid Background="{DynamicResource WindowBackgroundBrush}">
         <Grid.RowDefinitions><RowDefinition Height="Auto"/><RowDefinition Height="*"/></Grid.RowDefinitions>
@@ -128,8 +128,10 @@
 
                         <!-- DataGrid de estudiantes con virtualización -->
                         <Grid Grid.Row="1">
-                            <DataGrid ItemsSource="{Binding Estudiantes}" SelectedItem="{Binding EstudianteSeleccionado}"
-                                      AutoGenerateColumns="False" IsReadOnly="True" CanUserSortColumns="False"
+                            <Grid.RowDefinitions><RowDefinition Height="Auto"/><RowDefinition Height="*"/></Grid.RowDefinitions>
+                            <DockPanel Grid.Row="0" Margin="0,0,0,8"><TextBlock Text="Buscar:" VerticalAlignment="Center" Margin="0,0,6,0" Foreground="{DynamicResource TextSecondaryBrush}"/><TextBox Width="260" HorizontalAlignment="Left" TabIndex="25" AutomationProperties.Name="Buscar estudiante por nombre o numero de lista" ToolTip="Filtra por nombre o numero de lista" Text="{Binding FiltroBusqueda, UpdateSourceTrigger=PropertyChanged}"/></DockPanel>
+                            <DataGrid Grid.Row="1" ItemsSource="{Binding EstudiantesFiltrados}" SelectedItem="{Binding EstudianteSeleccionado}"
+                                      AutoGenerateColumns="False" IsReadOnly="True" CanUserSortColumns="True"
                                       SelectionMode="Single" SelectionUnit="FullRow" TabIndex="30"
                                       HeadersVisibility="Column" GridLinesVisibility="Horizontal" RowHeaderWidth="0"
                                       FontSize="14" MinHeight="220"
@@ -309,7 +311,7 @@
                     </StackPanel>
                 </DockPanel>
             </Border>
-            <DataGrid Grid.Row="2" ItemsSource="{Binding Estudiantes}" AutoGenerateColumns="False" CanUserAddRows="False" CanUserDeleteRows="False" CanUserSortColumns="False" RowHeaderWidth="0" GridLinesVisibility="Horizontal" FontSize="15" EnableRowVirtualization="True" TabIndex="102">
+            <DataGrid Grid.Row="2" ItemsSource="{Binding Estudiantes}" AutoGenerateColumns="False" CanUserAddRows="False" CanUserDeleteRows="False" CanUserSortColumns="True" RowHeaderWidth="0" GridLinesVisibility="Horizontal" FontSize="15" EnableRowVirtualization="True" TabIndex="102">
                 <DataGrid.ContextMenu>
                     <ContextMenu>
                         <MenuItem Header="✔️ Marcar Presente" Command="{Binding MarcarTodosPresentesCommand}"/>
@@ -401,7 +403,7 @@
             </DockPanel>
 
             <DataGrid x:Name="GrillaMensual" Grid.Row="3" ItemsSource="{Binding FilasVisibles}" AutoGenerateColumns="False"
-                      CanUserAddRows="False" CanUserDeleteRows="False" CanUserSortColumns="False" IsReadOnly="True"
+                      CanUserAddRows="False" CanUserDeleteRows="False" CanUserSortColumns="True" IsReadOnly="True"
                       FrozenColumnCount="2" HeadersVisibility="Column" RowHeaderWidth="0" GridLinesVisibility="All"
                       EnableRowVirtualization="True" EnableColumnVirtualization="True" RowHeight="32"
                       SelectionUnit="Cell" SelectionMode="Single" CurrentCellChanged="OnCeldaMensualSeleccionada"
@@ -462,7 +464,7 @@
             </DockPanel>
 
             <DataGrid x:Name="GrillaProyectosPrincipal" Grid.Row="2" ItemsSource="{Binding ProyectosVisibles}" SelectedItem="{Binding ProyectoSeleccionado}"
-                      AutoGenerateColumns="False" IsReadOnly="True" CanUserSortColumns="False" SelectionMode="Single" SelectionUnit="FullRow"
+                      AutoGenerateColumns="False" IsReadOnly="True" CanUserSortColumns="True" SelectionMode="Single" SelectionUnit="FullRow"
                       HeadersVisibility="Column" GridLinesVisibility="Horizontal" RowHeaderWidth="0" FontSize="14" MouseDoubleClick="OnAbrirDetalleProyectoClic"
                       EnableRowVirtualization="True" EnableColumnVirtualization="True">
                 <DataGrid.ContextMenu>

@@ -107,7 +107,7 @@ public partial class MainWindow : Window
         });
         GrillaMensual.Columns.Add(new DataGridTextColumn
         {
-            Header = "Nombre",
+            Header = new TextBlock { Text = "Nombre", ToolTip = "Nombre completo del estudiante" },
             Binding = new Binding(nameof(AsistenciaEstudianteMesVisual.Nombre)),
             Width = 190,
         });
@@ -117,7 +117,7 @@ public partial class MainWindow : Window
             var dia = ViewModel.AsistenciaMensual.Dias[indice];
             GrillaMensual.Columns.Add(new DataGridTextColumn
             {
-                Header = $"{dia.NumeroDia}\n{dia.AbreviaturaDiaSemana}",
+                Header = new TextBlock { Text = $"{dia.NumeroDia}\n{dia.AbreviaturaDiaSemana}", ToolTip = $"Dia {dia.NumeroDia} - {dia.Fecha:dd/MM/yyyy}" },
                 Binding = new Binding($"Celdas[{indice}].Texto"),
                 Width = 43,
                 ElementStyle = CrearEstiloCelda(indice),
@@ -136,7 +136,7 @@ public partial class MainWindow : Window
     private void AgregarResumen(string encabezado, string propiedad, double ancho = 42) =>
         GrillaMensual.Columns.Add(new DataGridTextColumn
         {
-            Header = encabezado,
+            Header = new TextBlock { Text = encabezado, ToolTip = encabezado switch { "P" => "Total presentes", "F" => "Total faltas", "R" => "Total retardos", "J" => "Total justificadas", "%" => "Porcentaje asistencia", _ => encabezado } },
             Binding = new Binding(propiedad),
             Width = ancho,
         });
@@ -247,10 +247,6 @@ public partial class MainWindow : Window
         }
     }
 
-    private void OnProyectoPrincipalDobleClic(object sender, MouseButtonEventArgs e)
-    {
-        AbrirDetalleProyecto();
-    }
 
     private void OnAbrirDetalleProyectoClic(object sender, RoutedEventArgs e)
     {
@@ -480,17 +476,4 @@ public partial class MainWindow : Window
     /// <summary>Cambia al tema de alto contraste.</summary>
     private void TemaAltoContraste_Click(object sender, RoutedEventArgs e)
         => ThemeService.ApplyTheme(ThemeService.HighContrast);
-}
-
-// ══ Converter: bool → "activo" / "" para el indicador de pestaña ══════
-
-/// <summary>Convierte un bool en el string "activo" o "", usado por NavTabButton para mostrar el indicador inferior.</summary>
-[System.Windows.Data.ValueConversion(typeof(bool), typeof(string))]
-public sealed class BoolToActiveTagConverter : System.Windows.Data.IValueConverter
-{
-    public object Convert(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
-        => value is true ? "activo" : string.Empty;
-
-    public object ConvertBack(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
-        => throw new NotImplementedException();
 }

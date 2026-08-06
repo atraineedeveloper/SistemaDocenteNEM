@@ -141,6 +141,7 @@ public sealed class MainWindowViewModel : ViewModelBase
             if (SetProperty(ref _mostrarProyectos, value))
             {
                 OnPropertyChanged(nameof(MostrarGrupo));
+                OnPropertyChanged(nameof(TituloVentana));
                 OnPropertyChanged(nameof(MostrarAsistenciaDiaria));
                 OnPropertyChanged(nameof(MostrarAsistenciaMensual));
                 IrAProyectosCommand.NotifyCanExecuteChanged();
@@ -159,6 +160,7 @@ public sealed class MainWindowViewModel : ViewModelBase
             if (SetProperty(ref _mostrarEvaluacion, value))
             {
                 OnPropertyChanged(nameof(MostrarGrupo));
+                OnPropertyChanged(nameof(TituloVentana));
                 OnPropertyChanged(nameof(MostrarAsistenciaDiaria));
                 OnPropertyChanged(nameof(MostrarAsistenciaMensual));
                 IrAEvaluacionCommand.NotifyCanExecuteChanged();
@@ -177,6 +179,7 @@ public sealed class MainWindowViewModel : ViewModelBase
             if (SetProperty(ref _mostrarAsistencia, value))
             {
                 OnPropertyChanged(nameof(MostrarGrupo));
+                OnPropertyChanged(nameof(TituloVentana));
                 OnPropertyChanged(nameof(MostrarAsistenciaDiaria));
                 OnPropertyChanged(nameof(MostrarAsistenciaMensual));
                 IrAGrupoCommand.NotifyCanExecuteChanged();
@@ -189,6 +192,21 @@ public sealed class MainWindowViewModel : ViewModelBase
     public bool MostrarGrupo => !MostrarAsistencia && !MostrarProyectos && !MostrarEvaluacion;
 
     public bool MostrarNavegacion => Grupo.GrupoIdActual is not null;
+
+    public string TituloVentana
+    {
+        get
+        {
+            var titulo = "Sistema Docente Local";
+            if (!string.IsNullOrWhiteSpace(Grupo.NombreGrupo)) titulo += " - " + Grupo.NombreGrupo;
+            if (MostrarAsistenciaDiaria) titulo += " - Asistencia diaria";
+            else if (MostrarAsistenciaMensual) titulo += " - Asistencia mensual";
+            else if (MostrarProyectos) titulo += " - Proyectos";
+            else if (MostrarEvaluacion) titulo += " - Evaluacion";
+            else if (MostrarGrupo) titulo += " - Grupo";
+            return titulo;
+        }
+    }
 
     public bool SolicitarCerrar()
     {
