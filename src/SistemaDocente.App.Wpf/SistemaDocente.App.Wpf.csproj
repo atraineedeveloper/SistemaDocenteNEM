@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <OutputType>WinExe</OutputType>
@@ -11,6 +11,10 @@
     <ProjectReference Include="..\SistemaDocente.Application\SistemaDocente.Application.csproj" />
     <ProjectReference Include="..\SistemaDocente.Data\SistemaDocente.Data.csproj" />
     <ProjectReference Include="..\SistemaDocente.Presentation\SistemaDocente.Presentation.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Resource Include="Fonts\*.ttf" />
   </ItemGroup>
 
 </Project>

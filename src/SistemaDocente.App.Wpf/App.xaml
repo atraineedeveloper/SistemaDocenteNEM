@@ -3,7 +3,7 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:local="clr-namespace:SistemaDocente.App.Wpf">
     <Application.Resources>
-        <FontFamily x:Key="AppFontFamily">Montserrat, Segoe UI, sans-serif</FontFamily>
+        <FontFamily x:Key="AppFontFamily">pack://application:,,,/SistemaDocente.App.Wpf;component/Fonts/#Montserrat, Segoe UI, sans-serif</FontFamily>
 
         <Style TargetType="Window">
             <Setter Property="FontFamily" Value="{StaticResource AppFontFamily}"/>
