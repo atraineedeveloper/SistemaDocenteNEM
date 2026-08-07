@@ -64,6 +64,7 @@ public partial class App : System.Windows.Application
             var persistenciaAsistencia = new PersistenciaAsistenciaSqlite(rutas.BaseSqlite);
             var persistenciaProyectos = new PersistenciaProyectosSqlite(rutas.BaseSqlite);
             var persistenciaExpediente = new PersistenciaExpedienteSqlite(rutas.BaseSqlite);
+            var persistenciaContexto = new PersistenciaContextoGrupoSqlite(rutas.BaseSqlite);
             var estado = new AlmacenamientoEstadoJson(rutas.EstadoAplicacion);
 
             if (modoDemo)
@@ -76,12 +77,30 @@ public partial class App : System.Windows.Application
                 estado.Guardar(grupoDemo);
             }
 
-            var gestion = new GestionGrupoPresentacion(new GestionGrupoCasosUso(persistencia));
+            var gestionGrupoCasosUso = new GestionGrupoCasosUso(persistencia);
+            var gestion = new GestionGrupoPresentacion(gestionGrupoCasosUso);
             var gestionAsistencia = new GestionAsistenciaPresentacion(
                 new GestionAsistenciaCasosUso(persistencia, persistenciaAsistencia));
-            var gestionProyectos = new GestionProyectosPresentacion(
-                new GestionProyectosActividadesCasosUso(
-                    persistencia, persistenciaProyectos, persistenciaProyectos));
+            var gestionProyectosCasosUso = new GestionProyectosActividadesCasosUso(
+                persistencia, persistenciaProyectos, persistenciaProyectos);
+            var gestionProyectos = new GestionProyectosPresentacion(gestionProyectosCasosUso);
+            var gestionExpedienteCasosUso = new GestionExpedienteCasosUso(
+                persistencia,
+                persistenciaAsistencia,
+                persistenciaProyectos,
+                persistenciaProyectos,
+                persistenciaExpediente);
+            var gestionContextoCasosUso = new GestionContextoGrupoCasosUso(
+                persistencia,
+                persistenciaContexto);
+            var gestionReportesCasosUso = new GestionReportesCasosUso(
+                persistencia,
+                persistenciaAsistencia,
+                persistenciaProyectos,
+                persistenciaProyectos,
+                persistenciaExpediente,
+                persistenciaContexto);
+
             var mensajes = new WpfNotificationService();
             var viewModelGrupo = new GestionGrupoViewModel(
                 gestion, estado, mensajes, new ServicioConfirmacionWpf());
@@ -104,9 +123,14 @@ public partial class App : System.Windows.Application
                 gestionProyectos,
                 new DialogoCambiosPendientesWpf(),
                 mensajes);
-            var gestionExpedienteCasosUso = new GestionExpedienteCasosUso(
-                persistencia, persistenciaAsistencia, persistenciaProyectos, persistenciaProyectos, persistenciaExpediente);
-            var viewModelExpediente = new GestionExpedienteViewModel(gestionExpedienteCasosUso, mensajes);
+            var viewModelExpediente = new GestionExpedienteViewModel(
+                gestionExpedienteCasosUso,
+                mensajes);
+            var viewModelReportes = new GestionReportesViewModel(
+                gestionGrupoCasosUso,
+                gestionReportesCasosUso);
+            var viewModelConfiguracion = new ConfiguracionGrupoViewModel(
+                gestionContextoCasosUso);
 
             var viewModel = new MainWindowViewModel(
                 viewModelGrupo,
@@ -115,8 +139,9 @@ public partial class App : System.Windows.Application
                 viewModelProyectos,
                 viewModelEvaluacion,
                 viewModelExpediente,
-                modoDemo);
-            var ventana = new MainWindow(viewModel);
+                modoDemo,
+                viewModelReportes);
+            var ventana = new MainWindow(viewModel, viewModelConfiguracion);
             MainWindow = ventana;
             ventana.Show();
             viewModelGrupo.Inicializar();
