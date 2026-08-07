@@ -21,7 +21,7 @@ Se añadirá un modo de demostración explícito que use almacenamiento separado
 - Asistencia con jerarquía, controles y barra de acciones consistentes, preservando su densidad operativa.
 - Proyectos con búsqueda, métricas y punto de entrada claro a las ventanas dedicadas.
 - Evaluación sin selector de actividad: columnas dinámicas por actividad y filas por estudiante.
-- Identificador visual de actividad generado por el sistema (`A01`, `A02`, ...), con nombre/fecha accesibles mediante tooltip y nombre de automatización.
+- Identificador visual **estable** de actividad generado por el sistema a partir de `ActividadId` (por ejemplo `A4F2C91`), con nombre/fecha accesibles mediante tooltip y nombre de automatización. El código no depende de posición, fecha ni título, por lo que no se renumera si otras actividades cambian de orden o se anulan.
 - Columnas `Núm.` y `Estudiante` congeladas en Evaluación.
 - Atajos D/S/E/R/N/P sólo dentro de la grilla de Evaluación.
 - Guardado de cambios de Evaluación por actividad, secuencialmente, manteniendo la actividad como unidad atómica.
@@ -37,7 +37,7 @@ Se añadirá un modo de demostración explícito que use almacenamiento separado
 - Introducir sidebar permanente.
 - Reintroducir master-detail de tres zonas.
 - Añadir ORM, framework de navegación, DI container o paquetes UI.
-- Convertir el identificador visual `Axx` en una identidad de dominio o clave externa.
+- Convertir el identificador visual de actividad en una nueva identidad de dominio o clave externa; `ActividadId` sigue siendo la identidad real.
 - Reportes/exportación.
 
 ## Compatibilidad
