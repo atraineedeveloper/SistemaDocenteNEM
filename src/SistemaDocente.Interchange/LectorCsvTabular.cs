@@ -4,11 +4,13 @@ using SistemaDocente.Application;
 
 namespace SistemaDocente.Interchange;
 
-public sealed class LectorCsvTabular
+public sealed class LectorCsvTabular : ILectorImportacionTabular
 {
     private static readonly char[] DelimitadoresSoportados = [',', ';', '\t'];
 
-    public DocumentoTabular Leer(string rutaArchivo, char? delimitador = null)
+    public DocumentoTabular Leer(string rutaArchivo) => Leer(rutaArchivo, null);
+
+    public static DocumentoTabular Leer(string rutaArchivo, char? delimitador)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(rutaArchivo);
 
@@ -114,7 +116,7 @@ public sealed class LectorCsvTabular
         return conteo;
     }
 
-    private static IReadOnlyList<FilaCsv> Parsear(string contenido, char delimitador)
+    private static List<FilaCsv> Parsear(string contenido, char delimitador)
     {
         var filas = new List<FilaCsv>();
         var valores = new List<string>();
