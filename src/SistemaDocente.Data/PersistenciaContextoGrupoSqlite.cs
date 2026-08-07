@@ -122,9 +122,12 @@ public sealed class PersistenciaContextoGrupoSqlite : IAlmacenamientoContextoGru
         new PersistenciaGrupoSqlite(_ruta).Inicializar();
         var conexion = new SqliteConnection(_cadena);
         conexion.Open();
-        using var comando = conexion.CreateCommand();
-        comando.CommandText = "PRAGMA foreign_keys = ON; PRAGMA busy_timeout = 5000;";
-        comando.ExecuteNonQuery();
+        using (var comando = conexion.CreateCommand())
+        {
+            comando.CommandText = "PRAGMA foreign_keys = ON; PRAGMA busy_timeout = 5000;";
+            comando.ExecuteNonQuery();
+        }
+        EsquemaReportesSqlite.Inicializar(conexion);
         return conexion;
     }
 
