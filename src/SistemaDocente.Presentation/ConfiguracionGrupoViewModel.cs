@@ -20,6 +20,7 @@ public sealed record OpcionGradoPrimaria(
 public sealed class ConfiguracionGrupoViewModel : ViewModelBase
 {
     private readonly GestionContextoGrupoCasosUso _casosUso;
+    private readonly IReadOnlyList<string> _entidadesFederativas;
     private GrupoId? _grupoId;
     private string _cicloEscolar = string.Empty;
     private string _nombreEscuela = string.Empty;
@@ -47,6 +48,7 @@ public sealed class ConfiguracionGrupoViewModel : ViewModelBase
     public ConfiguracionGrupoViewModel(GestionContextoGrupoCasosUso casosUso)
     {
         _casosUso = casosUso ?? throw new ArgumentNullException(nameof(casosUso));
+        _entidadesFederativas = CatalogoGeograficoMexico.EntidadesFederativas;
         GuardarCommand = new RelayCommand(Guardar, () => _grupoId is not null);
     }
 
@@ -84,7 +86,7 @@ public sealed class ConfiguracionGrupoViewModel : ViewModelBase
         new(GradoPrimaria.Sexto, "6.º"),
     ];
 
-    public IReadOnlyList<string> EntidadesFederativas => CatalogoGeograficoMexico.EntidadesFederativas;
+    public IReadOnlyList<string> EntidadesFederativas => _entidadesFederativas;
 
     public IReadOnlyList<string> MunicipiosDisponibles
     {
@@ -286,7 +288,7 @@ public sealed class ConfiguracionGrupoViewModel : ViewModelBase
         if (SetProperty(ref campo, valor)) NotificarContextoDerivado();
     }
 
-    private IReadOnlyList<GradoPrimaria> ObtenerGradosSeleccionados()
+    private List<GradoPrimaria> ObtenerGradosSeleccionados()
     {
         var grados = new List<GradoPrimaria>(6);
         if (PrimerGrado) grados.Add(GradoPrimaria.Primero);
