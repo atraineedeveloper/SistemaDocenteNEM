@@ -2,8 +2,8 @@ using System.Globalization;
 using System.Windows.Data;
 
 using SistemaDocente.Application;
-using SistemaDocente.Presentation;
 using SistemaDocente.Core;
+using SistemaDocente.Presentation;
 
 namespace SistemaDocente.App.Wpf.Converters;
 
