@@ -44,10 +44,21 @@ public sealed class GestionGrupoCasosUso
         DateOnly? fechaNacimiento = null,
         GeneroEstudiante genero = GeneroEstudiante.NoEspecificado,
         DateOnly? fechaIngreso = null,
-        string observaciones = "")
+        string observaciones = "",
+        GradoPrimaria grado = GradoPrimaria.NoEspecificado)
     {
         var grupo = CargarRequerido(grupoId);
-        var estudiante = grupo.AgregarEstudiante(nombreVisible, numeroLista, primerApellido, segundoApellido, nombres, fechaNacimiento, genero, fechaIngreso, observaciones);
+        var estudiante = grupo.AgregarEstudiante(
+            nombreVisible,
+            numeroLista,
+            primerApellido,
+            segundoApellido,
+            nombres,
+            fechaNacimiento,
+            genero,
+            fechaIngreso,
+            observaciones,
+            grado);
         _almacenamiento.Guardar(grupo);
         return Proyectar(estudiante);
     }
@@ -74,6 +85,17 @@ public sealed class GestionGrupoCasosUso
         return Proyectar(ObtenerEstudiante(grupo, estudianteId));
     }
 
+    public EstudianteDetalle CambiarGradoEstudiante(
+        GrupoId grupoId,
+        EstudianteId estudianteId,
+        GradoPrimaria grado)
+    {
+        var grupo = CargarRequerido(grupoId);
+        grupo.CambiarGradoEstudiante(estudianteId, grado);
+        _almacenamiento.Guardar(grupo);
+        return Proyectar(ObtenerEstudiante(grupo, estudianteId));
+    }
+
     public EstudianteDetalle EditarEstudiante(
         GrupoId grupoId,
         EstudianteId estudianteId,
@@ -85,10 +107,21 @@ public sealed class GestionGrupoCasosUso
         DateOnly? fechaNacimiento = null,
         GeneroEstudiante genero = GeneroEstudiante.NoEspecificado,
         DateOnly? fechaIngreso = null,
-        string observaciones = "")
+        string observaciones = "",
+        GradoPrimaria? grado = null)
     {
         var grupo = CargarRequerido(grupoId);
-        grupo.ActualizarDatosEstudiante(estudianteId, nombreVisible, primerApellido, segundoApellido, nombres, fechaNacimiento, genero, fechaIngreso, observaciones);
+        grupo.ActualizarDatosEstudiante(
+            estudianteId,
+            nombreVisible,
+            primerApellido,
+            segundoApellido,
+            nombres,
+            fechaNacimiento,
+            genero,
+            fechaIngreso,
+            observaciones,
+            grado);
         grupo.CambiarNumeroLista(estudianteId, numeroLista);
         _almacenamiento.Guardar(grupo);
         return Proyectar(ObtenerEstudiante(grupo, estudianteId));
@@ -143,7 +176,8 @@ public sealed class GestionGrupoCasosUso
             estudiante.FechaIngreso,
             estudiante.Observaciones,
             estudiante.NumeroLista,
-            estudiante.EstaActivo);
+            estudiante.EstaActivo,
+            estudiante.Grado);
 
     private static EstudianteDetalle[] ProyectarEstudiantes(IEnumerable<Estudiante> estudiantes) =>
         estudiantes
