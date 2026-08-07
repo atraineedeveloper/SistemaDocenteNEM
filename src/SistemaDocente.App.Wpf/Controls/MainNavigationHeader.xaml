@@ -4,57 +4,119 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              mc:Ignorable="d"
-             d:DesignHeight="64" d:DesignWidth="1100"
-             Background="{DynamicResource PrimaryBrush}"
+             d:DesignHeight="76" d:DesignWidth="1280"
+             Background="{DynamicResource CardBackgroundBrush}"
              Visibility="{Binding MostrarNavegacion, Converter={StaticResource BoolToVisibility}}"
              xml:lang="es-MX">
-    <Grid Margin="20,0">
-        <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="Auto"/>
-            <ColumnDefinition Width="*"/>
-            <ColumnDefinition Width="Auto"/>
-            <ColumnDefinition Width="Auto"/>
-            <ColumnDefinition Width="Auto"/>
-        </Grid.ColumnDefinitions>
+    <UserControl.Resources>
+        <Style x:Key="ModernHeaderNavButton" TargetType="Button">
+            <Setter Property="Padding" Value="15,22,15,18"/>
+            <Setter Property="Margin" Value="2,0"/>
+            <Setter Property="MinWidth" Value="96"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="Foreground" Value="{DynamicResource TextSecondaryBrush}"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="FontSize" Value="13"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Grid>
+                            <Border x:Name="Surface"
+                                    Background="{TemplateBinding Background}"
+                                    CornerRadius="8"
+                                    Margin="2,9,2,9"
+                                    Padding="{TemplateBinding Padding}">
+                                <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                            </Border>
+                            <Border x:Name="Indicator"
+                                    Height="3" Margin="10,0"
+                                    VerticalAlignment="Bottom"
+                                    Background="{DynamicResource PrimaryBrush}"
+                                    CornerRadius="2,2,0,0"
+                                    Opacity="0"/>
+                        </Grid>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="Surface" Property="Background" Value="{DynamicResource HoverBackgroundBrush}"/>
+                                <Setter Property="Foreground" Value="{DynamicResource PrimaryBrush}"/>
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter TargetName="Surface" Property="Background" Value="{DynamicResource PressedBackgroundBrush}"/>
+                            </Trigger>
+                            <Trigger Property="Tag" Value="activo">
+                                <Setter TargetName="Surface" Property="Background" Value="{DynamicResource HoverBackgroundBrush}"/>
+                                <Setter TargetName="Indicator" Property="Opacity" Value="1"/>
+                                <Setter Property="Foreground" Value="{DynamicResource PrimaryBrush}"/>
+                                <Setter Property="FontWeight" Value="Bold"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+    </UserControl.Resources>
 
-        <!-- Branding -->
-        <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center" Margin="0,10">
-            <Border Background="{DynamicResource HeaderIconBackgroundBrush}" CornerRadius="8" Padding="9,7" Margin="0,0,12,0">
-                <TextBlock Text="📚" Style="{StaticResource Heading2}" VerticalAlignment="Center"/>
-            </Border>
-            <StackPanel VerticalAlignment="Center">
-                <TextBlock Text="Sistema Docente Local" Foreground="{DynamicResource TextOnPrimaryBrush}" Style="{StaticResource Heading3}" FontWeight="Bold"/>
-                <TextBlock Text="Gestión de Aula" Foreground="{DynamicResource TextOnPrimaryBrush}" Style="{StaticResource Caption}"/>
+    <Border BorderBrush="{DynamicResource BorderLightBrush}" BorderThickness="0,0,0,1">
+        <Grid Margin="20,0">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+
+            <!-- Branding -->
+            <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center" Margin="0,9">
+                <Border Width="48" Height="48" Background="{DynamicResource PrimaryBrush}" CornerRadius="10" Margin="0,0,12,0">
+                    <TextBlock Text="📚" FontSize="23" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                </Border>
+                <StackPanel VerticalAlignment="Center">
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock Text="Sistema Docente Local" Foreground="{DynamicResource TextPrimaryBrush}" FontSize="17" FontWeight="Bold"/>
+                        <Border Margin="9,0,0,0" Padding="7,2" CornerRadius="5"
+                                Background="{DynamicResource WarningBackgroundBrush}"
+                                BorderBrush="{DynamicResource WarningBorderBrush}" BorderThickness="1"
+                                Visibility="{Binding ModoDemostracion, Converter={StaticResource BoolToVisibility}}">
+                            <TextBlock Text="DEMO" Foreground="{DynamicResource WarningBrush}" FontSize="10" FontWeight="Bold"/>
+                        </Border>
+                    </StackPanel>
+                    <TextBlock Text="Gestión de aula" Foreground="{DynamicResource TextMutedBrush}" Style="{StaticResource Caption}" Margin="0,2,0,0"/>
+                </StackPanel>
             </StackPanel>
-        </StackPanel>
 
-        <!-- Selector de grupo -->
-        <StackPanel Grid.Column="2" Orientation="Horizontal" VerticalAlignment="Center"
-                    DataContext="{Binding Grupo}" Margin="0,10,16,10">
-            <TextBlock Text="Grupo:" Foreground="{DynamicResource TextOnPrimaryBrush}" VerticalAlignment="Center" Margin="0,0,8,0" Style="{StaticResource Caption}"/>
-            <ComboBox Width="150" MinWidth="120" VerticalAlignment="Center" Margin="0,0,8,0" TabIndex="1"
-                      ItemsSource="{Binding GruposDisponibles}"
-                      SelectedItem="{Binding GrupoSeleccionadoCombo, Mode=TwoWay}"
-                      DisplayMemberPath="NombreGrupo"
-                      AutomationProperties.Name="Selector de grupo"/>
-            <Button Style="{StaticResource HeaderButton}" Content="Nuevo" Command="{Binding AbrirNuevoGrupoCommand}" MinWidth="70" TabIndex="2" AutomationProperties.Name="Crear nuevo grupo"/>
-        </StackPanel>
+            <!-- Selector de grupo -->
+            <StackPanel Grid.Column="2" Orientation="Horizontal" VerticalAlignment="Center"
+                        DataContext="{Binding Grupo}" Margin="16,9,12,9">
+                <TextBlock Text="Grupo" Foreground="{DynamicResource TextMutedBrush}" VerticalAlignment="Center" Margin="0,0,7,0" Style="{StaticResource Caption}"/>
+                <ComboBox Width="190" MinWidth="160" VerticalAlignment="Center" Margin="0,0,8,0" TabIndex="1"
+                          ItemsSource="{Binding GruposDisponibles}"
+                          SelectedItem="{Binding GrupoSeleccionadoCombo, Mode=TwoWay}"
+                          DisplayMemberPath="NombreGrupo"
+                          AutomationProperties.Name="Selector de grupo"/>
+                <Button Style="{StaticResource PrimaryButton}" Content="＋ Nuevo" Command="{Binding AbrirNuevoGrupoCommand}"
+                        MinWidth="82" TabIndex="2" AutomationProperties.Name="Crear nuevo grupo"/>
+            </StackPanel>
 
-        <!-- Navegación principal -->
-        <StackPanel Grid.Column="3" Orientation="Horizontal" VerticalAlignment="Stretch">
-            <Button x:Name="NavBtnGrupo" Style="{StaticResource NavTabButton}" Foreground="{DynamicResource TextOnPrimaryBrush}" Content="🏫 Grupo" Command="{Binding IrAGrupoCommand}" TabIndex="3" AutomationProperties.Name="Navegar a Grupo"/>
-            <Button x:Name="NavBtnAsistencia" Style="{StaticResource NavTabButton}" Foreground="{DynamicResource TextOnPrimaryBrush}" Content="📋 Asistencia" Command="{Binding IrAAsistenciaCommand}" TabIndex="4" AutomationProperties.Name="Navegar a Asistencia"/>
-            <Button x:Name="NavBtnProyectos" Style="{StaticResource NavTabButton}" Foreground="{DynamicResource TextOnPrimaryBrush}" Content="📁 Proyectos" Command="{Binding IrAProyectosCommand}" TabIndex="5" AutomationProperties.Name="Navegar a Proyectos"/>
-            <Button x:Name="NavBtnEvaluacion" Style="{StaticResource NavTabButton}" Foreground="{DynamicResource TextOnPrimaryBrush}" Content="⭐ Evaluación" Command="{Binding IrAEvaluacionCommand}" TabIndex="6" AutomationProperties.Name="Navegar a Evaluación"/>
-        </StackPanel>
+            <!-- Navegación principal -->
+            <StackPanel Grid.Column="3" Orientation="Horizontal" VerticalAlignment="Stretch">
+                <Button x:Name="NavBtnGrupo" Style="{StaticResource ModernHeaderNavButton}" Content="👥  Grupo" Command="{Binding IrAGrupoCommand}" TabIndex="3" AutomationProperties.Name="Navegar a Grupo"/>
+                <Button x:Name="NavBtnAsistencia" Style="{StaticResource ModernHeaderNavButton}" Content="✓  Asistencia" Command="{Binding IrAAsistenciaCommand}" TabIndex="4" AutomationProperties.Name="Navegar a Asistencia"/>
+                <Button x:Name="NavBtnProyectos" Style="{StaticResource ModernHeaderNavButton}" Content="▱  Proyectos" Command="{Binding IrAProyectosCommand}" TabIndex="5" AutomationProperties.Name="Navegar a Proyectos"/>
+                <Button x:Name="NavBtnEvaluacion" Style="{StaticResource ModernHeaderNavButton}" Content="☆  Evaluación" Command="{Binding IrAEvaluacionCommand}" TabIndex="6" AutomationProperties.Name="Navegar a Evaluación"/>
+            </StackPanel>
 
-        <!-- Selector de tema -->
-        <Menu Grid.Column="4" VerticalAlignment="Center" Margin="8,0,0,0" Background="Transparent">
-            <MenuItem Header="🎨 Tema" Foreground="{DynamicResource TextOnPrimaryBrush}" TabIndex="7" AutomationProperties.Name="Seleccionar tema">
-                <MenuItem Header="Claro" Click="TemaClaro_Click" AutomationProperties.Name="Tema claro"/>
-                <MenuItem Header="Oscuro" Click="TemaOscuro_Click" AutomationProperties.Name="Tema oscuro"/>
-                <MenuItem Header="Alto contraste" Click="TemaAltoContraste_Click" AutomationProperties.Name="Tema alto contraste"/>
-            </MenuItem>
-        </Menu>
-    </Grid>
+            <!-- Selector de tema -->
+            <Menu Grid.Column="4" VerticalAlignment="Center" Margin="6,0,0,0" Background="Transparent">
+                <MenuItem Header="☼  Tema" Foreground="{DynamicResource TextSecondaryBrush}" FontWeight="SemiBold"
+                          Padding="10,8" TabIndex="7" AutomationProperties.Name="Seleccionar tema">
+                    <MenuItem Header="Claro" Click="TemaClaro_Click" AutomationProperties.Name="Tema claro"/>
+                    <MenuItem Header="Oscuro" Click="TemaOscuro_Click" AutomationProperties.Name="Tema oscuro"/>
+                    <MenuItem Header="Alto contraste" Click="TemaAltoContraste_Click" AutomationProperties.Name="Tema alto contraste"/>
+                </MenuItem>
+            </Menu>
+        </Grid>
+    </Border>
 </UserControl>
