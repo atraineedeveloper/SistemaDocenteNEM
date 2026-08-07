@@ -100,9 +100,16 @@ public sealed class PersistenciaProyectosSqlite : IAlmacenamientoProyectos, IAlm
         foreach (var entrega in actividad.Entregas)
         {
             using var detalle = conexion.CreateCommand(); detalle.Transaction = transaccion;
-            detalle.CommandText = "INSERT INTO entregas_actividad(actividad_id,estudiante_id,grupo_id,estado_entrega,observacion) VALUES($actividad,$estudiante,$grupo,$estado,$observacion) ON CONFLICT(actividad_id,estudiante_id) DO UPDATE SET estado_entrega=excluded.estado_entrega,observacion=excluded.observacion";
+            detalle.CommandText = "INSERT INTO entregas_actividad(actividad_id,estudiante_id,grupo_id,estado_entrega,observacion) VALUES($actividad,$estudiante,$grupo,$nivel,$observacion) ON CONFLICT(actividad_id,estudiante_id) DO UPDATE SET estado_entrega=excluded.estado_entrega,observacion=excluded.observacion";
             detalle.Parameters.AddWithValue("$actividad", actividad.Id.ToString()); detalle.Parameters.AddWithValue("$estudiante", entrega.EstudianteId.ToString());
-            detalle.Parameters.AddWithValue("$grupo", actividad.GrupoId.ToString()); detalle.Parameters.AddWithValue("$estado", (int)entrega.NivelLogro); detalle.Parameters.AddWithValue("$observacion", entrega.Observacion); detalle.ExecuteNonQuery();
+            detalle.Parameters.AddWithValue("$grupo", actividad.GrupoId.ToString()); detalle.Parameters.AddWithValue("$nivel", (int)entrega.NivelLogro); detalle.Parameters.AddWithValue("$observacion", entrega.Observacion); detalle.ExecuteNonQuery();
+
+            using var estadoEntrega = conexion.CreateCommand(); estadoEntrega.Transaction = transaccion;
+            estadoEntrega.CommandText = "INSERT INTO estados_entrega_actividad(actividad_id,estudiante_id,estado_entrega) VALUES($actividad,$estudiante,$estado) ON CONFLICT(actividad_id,estudiante_id) DO UPDATE SET estado_entrega=excluded.estado_entrega";
+            estadoEntrega.Parameters.AddWithValue("$actividad", actividad.Id.ToString());
+            estadoEntrega.Parameters.AddWithValue("$estudiante", entrega.EstudianteId.ToString());
+            estadoEntrega.Parameters.AddWithValue("$estado", (int)entrega.EstadoEntrega);
+            estadoEntrega.ExecuteNonQuery();
         }
         transaccion.Commit();
     });
@@ -111,7 +118,18 @@ public sealed class PersistenciaProyectosSqlite : IAlmacenamientoProyectos, IAlm
     {
         using var conexion = Abrir(); using var transaccion = conexion.BeginTransaction();
         using var entregas = conexion.CreateCommand(); entregas.Transaction = transaccion;
-        entregas.CommandText = "DELETE FROM entregas_actividad WHERE actividad_id=$id AND NOT EXISTS(SELECT 1 FROM entregas_actividad WHERE actividad_id=$id AND estado_entrega<>0) AND EXISTS(SELECT 1 FROM actividades_proyecto WHERE actividad_id=$id AND version=$version)";
+        entregas.CommandText = """
+            DELETE FROM entregas_actividad
+            WHERE actividad_id=$id
+              AND NOT EXISTS(
+                  SELECT 1
+                  FROM entregas_actividad e
+                  LEFT JOIN estados_entrega_actividad s
+                    ON s.actividad_id=e.actividad_id AND s.estudiante_id=e.estudiante_id
+                  WHERE e.actividad_id=$id
+                    AND (e.estado_entrega<>0 OR COALESCE(s.estado_entrega,0)<>0))
+              AND EXISTS(SELECT 1 FROM actividades_proyecto WHERE actividad_id=$id AND version=$version)
+            """;
         entregas.Parameters.AddWithValue("$id", actividadId.ToString()); entregas.Parameters.AddWithValue("$version", versionEsperada); entregas.ExecuteNonQuery();
         using var actividad = conexion.CreateCommand(); actividad.Transaction = transaccion;
         actividad.CommandText = "DELETE FROM actividades_proyecto WHERE actividad_id=$id AND version=$version AND NOT EXISTS(SELECT 1 FROM entregas_actividad WHERE actividad_id=$id)";
@@ -127,16 +145,38 @@ public sealed class PersistenciaProyectosSqlite : IAlmacenamientoProyectos, IAlm
         comando.Parameters.AddWithValue("$id", id.ToString()); using var lector = comando.ExecuteReader(); if (!lector.Read()) return null;
         var actividadId = ActividadId.DesdeGuid(Guid.Parse(lector.GetString(0))); var proyectoId = ProyectoId.DesdeGuid(Guid.Parse(lector.GetString(1))); var grupoId = GrupoId.DesdeGuid(Guid.Parse(lector.GetString(2)));
         var titulo = lector.GetString(3); var descripcion = lector.GetString(4); var fecha = LeerFecha(lector.GetString(5)); var observaciones = lector.GetString(6); var estado = (EstadoActividad)lector.GetInt32(7); var version = lector.GetInt32(8); lector.Close();
-        using var detalles = conexion.CreateCommand(); detalles.CommandText = "SELECT estudiante_id,estado_entrega,observacion FROM entregas_actividad WHERE actividad_id=$id ORDER BY estudiante_id"; detalles.Parameters.AddWithValue("$id", id.ToString());
+        using var detalles = conexion.CreateCommand();
+        detalles.CommandText = """
+            SELECT e.estudiante_id,
+                   COALESCE(s.estado_entrega, CASE e.estado_entrega WHEN 5 THEN 2 WHEN 0 THEN 0 ELSE 1 END),
+                   CASE WHEN e.estado_entrega = 5 THEN 0 ELSE e.estado_entrega END,
+                   e.observacion
+            FROM entregas_actividad e
+            LEFT JOIN estados_entrega_actividad s
+              ON s.actividad_id=e.actividad_id AND s.estudiante_id=e.estudiante_id
+            WHERE e.actividad_id=$id
+            ORDER BY e.estudiante_id
+            """;
+        detalles.Parameters.AddWithValue("$id", id.ToString());
         using var lectorDetalles = detalles.ExecuteReader(); var entregas = new List<DatosEntregaActividadRehidratada>();
-        while (lectorDetalles.Read()) entregas.Add(new(EstudianteId.DesdeGuid(Guid.Parse(lectorDetalles.GetString(0))), (NivelLogro)lectorDetalles.GetInt32(1), lectorDetalles.GetString(2)));
+        while (lectorDetalles.Read()) entregas.Add(new(
+            EstudianteId.DesdeGuid(Guid.Parse(lectorDetalles.GetString(0))),
+            (EstadoEntregaActividad)lectorDetalles.GetInt32(1),
+            (NivelLogro)lectorDetalles.GetInt32(2),
+            lectorDetalles.GetString(3)));
         return ActividadProyecto.Rehidratar(actividadId, proyectoId, grupoId, titulo, descripcion, fecha, observaciones, estado, version, entregas);
     }
 
     private SqliteConnection Abrir()
     {
         new PersistenciaGrupoSqlite(_ruta).Inicializar(); var conexion = new SqliteConnection(_cadena); conexion.Open();
-        using var comando = conexion.CreateCommand(); comando.CommandText = "PRAGMA foreign_keys = ON; PRAGMA busy_timeout = 5000;"; comando.ExecuteNonQuery(); return conexion;
+        using (var comando = conexion.CreateCommand())
+        {
+            comando.CommandText = "PRAGMA foreign_keys = ON; PRAGMA busy_timeout = 5000;";
+            comando.ExecuteNonQuery();
+        }
+        EsquemaReportesSqlite.Inicializar(conexion);
+        return conexion;
     }
 
     private static ProyectoDidactico LeerProyecto(SqliteDataReader l) => ProyectoDidactico.Rehidratar(
