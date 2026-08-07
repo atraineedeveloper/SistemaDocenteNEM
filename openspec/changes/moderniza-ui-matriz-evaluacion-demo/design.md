@@ -23,8 +23,6 @@ No se añade barra lateral porque duplicaría la navegación y reduciría el esp
 
 ## Grupo
 
-Estructura:
-
 ```text
 Lista de estudiantes                         [Cambiar nombre]
 Grupo ...
@@ -41,20 +39,11 @@ N estudiantes · M activos
 
 ## Asistencia
 
-Se conserva la lógica y densidad actuales. La modernización se concentra en:
-
-- encabezado y selector de periodo;
-- métricas compactas;
-- búsqueda/filtros;
-- mejor card/superficie para la grilla;
-- leyenda y acciones simplificadas;
-- acción primaria `Guardar cambios`.
+Se conserva la lógica y densidad actuales. La modernización se concentra en encabezado/periodo, métricas compactas, búsqueda/filtros, superficie de la grilla, leyenda y una barra donde `Guardar cambios` es la acción primaria.
 
 La grilla mensual mantiene dos columnas congeladas, separación semanal real y atajos P/F/R/J contextuales.
 
 ## Proyectos
-
-Estructura:
 
 ```text
 Planeación didáctica                         [Nuevo proyecto]
@@ -67,7 +56,7 @@ Organiza proyectos y actividades del grupo
 
 [ tabla ]
 
-[Abrir proyecto] [Acciones ▾]
+[Abrir proyecto]
 ```
 
 La lista sigue abriendo `DetalleProyectoWindow`, que a su vez mantiene `DetalleActividadWindow`. No se introduce master-detail.
@@ -82,23 +71,25 @@ Registro pedagógico de actividades
 
 Proyecto [................................ ▾]
 
-Actividad seleccionada: A03 · Investigación ... · 10 ago 2026
+Actividad seleccionada: A4F2C91 · Investigación ... · 10 ago 2026
 [Total] [Pend.] [Domina] [Suficiente] [En proceso] [Req. apoyo] [No entregó]
 
 [Buscar estudiante...] [Nivel ▾]
 
-Núm. | Estudiante | A01 | A02 | A03 | A04 | ...
------|------------|-----|-----|-----|-----|----
-  1  | Ana ...    |  S  |  E  |  P  |  D  |
-  2  | ...        |  D  |  S  |  S  |  E  |
+Núm. | Estudiante | A4F2C91 | A10C8D2 | A8E131B | ...
+-----|------------|---------|---------|---------|----
+  1  | Ana ...    |    S    |    E    |    P    |
+  2  | ...        |    D    |    S    |    S    |
 ```
 
 ### Columnas de actividad
 
-- se ordenan por el orden estable que entrega Application (`fecha`, `título`, `ActividadId`);
-- reciben un identificador visual `A01`, `A02`, ... dentro del proyecto cargado;
-- el identificador es una ayuda visual, no reemplaza `ActividadId`;
-- tooltip/nombre accesible: `A03 · Investigación de noticias · 10/08/2026`;
+- las actividades conservan el orden funcional entregado por Application;
+- cada encabezado recibe un código compacto estable con formato `A` + seis caracteres hexadecimales derivados de la identidad inmutable `ActividadId`;
+- ejemplo: `A4F2C91`;
+- el código no depende de la posición, fecha ni título, por lo que no cambia al reordenar, editar o anular otras actividades;
+- no se añade una columna SQLite sólo para una necesidad de presentación; `ActividadId` sigue siendo la identidad real;
+- tooltip/nombre accesible: `A4F2C91 · Investigación de noticias · 10/08/2026`;
 - actividades anuladas permanecen visibles cuando existan, pero sus celdas son sólo lectura.
 
 ### Filas y padrón histórico
@@ -112,8 +103,6 @@ La matriz se construye con la unión de estudiantes presentes en los padrones de
 
 ### Celdas
 
-Etiquetas compactas:
-
 - `D` Domina;
 - `S` Suficiente;
 - `E` En proceso;
@@ -126,16 +115,11 @@ El color siempre acompaña a una letra; nunca es el único indicador.
 
 ### Selección
 
-La columna de la celda actual se considera `Actividad seleccionada`. Esto habilita:
-
-- contexto del encabezado;
-- métricas de esa actividad;
-- `Marcar a todo el grupo`;
-- edición masiva sólo sobre el padrón real de esa actividad.
+La columna de la celda actual se considera `Actividad seleccionada`. Esto habilita contexto del encabezado, métricas de esa actividad, acción `Marcar a todo el grupo` y edición masiva sólo sobre el padrón real de esa actividad.
 
 ### Observación
 
-La observación no ocupa una columna por actividad. Enter/doble clic sobre una celda abre un editor compacto de la evaluación seleccionada. Cancelar restaura nivel/observación previos a la apertura del editor; aceptar conserva la edición local hasta `Guardar cambios`.
+La observación no ocupa una columna por actividad. Enter, F2 o doble clic sobre una celda abre un editor compacto de la evaluación seleccionada. Cancelar restaura nivel/observación previos a la apertura del editor; aceptar conserva la edición local hasta `Guardar cambios`.
 
 ### Guardado
 
@@ -167,25 +151,22 @@ Demo:
 %LOCALAPPDATA%\SistemaDocenteNEM-Demo\data\...
 ```
 
-`--demo` nunca abre ni escribe la base real.
-
-`--demo-reset` elimina únicamente los archivos de la carpeta demo y vuelve a crear el conjunto ficticio.
+`--demo` nunca abre ni escribe la base real. `--demo-reset` elimina únicamente los archivos de la carpeta demo y vuelve a crear el conjunto ficticio.
 
 ### Dataset
 
-El seeder usa APIs productivas/domain/application existentes, no SQL directo desde WPF.
+El seeder usa APIs productivas de Core/Application y adaptadores existentes, no SQL directo desde WPF.
 
 Incluye:
 
-- grupo de demostración;
-- alrededor de 30 estudiantes con datos personales ficticios;
-- al menos un estudiante inactivo con historial;
-- al menos un estudiante incorporado después de actividades tempranas;
+- grupo de demostración con alrededor de 30 estudiantes;
+- estudiante inactivo con historial;
+- estudiante incorporado después de actividades tempranas;
 - asistencia de varias semanas con P/F/R/J;
 - proyecto finalizado histórico;
 - proyecto en curso con 8–10 actividades;
 - proyecto borrador;
-- distribución variada de niveles de logro;
+- niveles de logro variados;
 - observaciones en algunas entregas;
 - notas pedagógicas y acuerdos de tutor ficticios.
 
@@ -194,8 +175,8 @@ Todos los nombres y datos son inventados. Se identifica claramente el modo con u
 ## Accesibilidad
 
 - tooltips de actividad no dependen sólo del mouse;
-- `AutomationProperties.Name` describe columnas/celdas relevantes;
+- `AutomationProperties.Name` describe encabezados relevantes;
 - foco visible;
 - atajos simples sólo con foco dentro de la grilla operativa;
-- temas Claro/Oscuro/Alto contraste siguen usando recursos semánticos;
+- temas Claro/Oscuro/Alto contraste usan recursos semánticos;
 - `—` identifica explícitamente celdas no aplicables.
