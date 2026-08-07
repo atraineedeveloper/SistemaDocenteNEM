@@ -43,6 +43,7 @@ public sealed class EstudianteVisual
     public string Nombres { get; }
     public DateOnly? FechaNacimiento { get; }
     public int? Edad { get; }
+    public string EdadTexto => Edad?.ToString(System.Globalization.CultureInfo.CurrentCulture) ?? "—";
     public GeneroEstudiante Genero { get; }
     public string GeneroTexto => Genero switch
     {
@@ -55,4 +56,21 @@ public sealed class EstudianteVisual
     public int NumeroLista { get; }
     public bool EstaActivo { get; }
     public string Estado => EstaActivo ? "Activo" : "Inactivo";
+
+    /// <summary>
+    /// Iniciales puramente visuales para identificar rápidamente una fila sin introducir
+    /// archivos de avatar ni datos personales adicionales.
+    /// </summary>
+    public string Iniciales
+    {
+        get
+        {
+            var partes = Nombre.Split(' ', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+            if (partes.Length == 0) return "?";
+            if (partes.Length == 1) return char.ToUpper(partes[0][0], System.Globalization.CultureInfo.CurrentCulture).ToString();
+            return string.Concat(
+                char.ToUpper(partes[0][0], System.Globalization.CultureInfo.CurrentCulture),
+                char.ToUpper(partes[1][0], System.Globalization.CultureInfo.CurrentCulture));
+        }
+    }
 }
