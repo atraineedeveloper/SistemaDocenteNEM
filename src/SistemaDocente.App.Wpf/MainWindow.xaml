@@ -16,6 +16,10 @@
         <controls:MainNavigationHeader Grid.Row="0"/>
 
         <Grid Grid.Row="1">
+            <views:InicioGruposView
+                DataContext="{Binding DataContext, ElementName=RootWindow}"
+                Visibility="{Binding DataContext.MostrarInicio, ElementName=RootWindow, Converter={StaticResource BoolToVisibility}}"/>
+
             <views:GrupoView
                 DataContext="{Binding DataContext.Grupo, ElementName=RootWindow}"
                 Expediente="{Binding DataContext.Expediente, ElementName=RootWindow}"
