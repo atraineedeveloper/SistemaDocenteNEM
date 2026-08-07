@@ -16,7 +16,7 @@ public sealed class EvaluacionActividadesViewModelTests
         Assert.Equal(3, vm.Actividades.Count);
         var codigos = vm.ColumnasActividades.Select(x => x.Codigo).ToArray();
         Assert.Equal(3, codigos.Distinct(StringComparer.Ordinal).Count());
-        Assert.All(codigos, codigo => Assert.Matches("^A[0-9A-F]{6}$", codigo));
+        Assert.All(codigos, codigo => Assert.Matches("^A[0-9A-F]{8}$", codigo));
         Assert.Equal(4, vm.Filas.Count);
         Assert.NotNull(vm.ActividadSeleccionada);
         Assert.Equal(codigos[0], vm.ActividadColumnaSeleccionada?.Codigo);
