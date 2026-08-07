@@ -1,3 +1,5 @@
+using System.Reflection;
+
 using SistemaDocente.Core;
 
 namespace SistemaDocente.Presentation.Tests;
@@ -54,11 +56,32 @@ public sealed class EvaluacionResultadoVisualTests
         Assert.Equal("Entregada · pendiente de evaluación", celda.NombreNivel);
     }
 
-    private static EvaluacionCeldaVisual CrearCelda() => new(
-        ActividadId.DesdeGuid(Guid.NewGuid()),
-        EstudianteId.DesdeGuid(Guid.NewGuid()),
-        true,
-        true,
-        EstadoEntregaActividad.Pendiente,
-        NivelLogro.Pendiente);
+    private static EvaluacionCeldaVisual CrearCelda()
+    {
+        var constructor = typeof(EvaluacionCeldaVisual).GetConstructor(
+            BindingFlags.Instance | BindingFlags.NonPublic,
+            binder: null,
+            [
+                typeof(ActividadId),
+                typeof(EstudianteId),
+                typeof(bool),
+                typeof(bool),
+                typeof(EstadoEntregaActividad),
+                typeof(NivelLogro),
+                typeof(string),
+            ],
+            modifiers: null);
+
+        Assert.NotNull(constructor);
+        return (EvaluacionCeldaVisual)constructor.Invoke(
+        [
+            ActividadId.DesdeGuid(Guid.NewGuid()),
+            EstudianteId.DesdeGuid(Guid.NewGuid()),
+            true,
+            true,
+            EstadoEntregaActividad.Pendiente,
+            NivelLogro.Pendiente,
+            string.Empty,
+        ]);
+    }
 }
