@@ -10,13 +10,33 @@ public sealed class ActividadProyecto
     private readonly List<EntregaActividad> _entregas;
     private readonly ReadOnlyCollection<EntregaActividad> _vistaEntregas;
 
-    private ActividadProyecto(ActividadId id, ProyectoId proyectoId, GrupoId grupoId, string titulo,
-        string descripcion, DateOnly fechaRealizacion, string observacionesGenerales,
-        EstadoActividad estado, int version, List<EntregaActividad> entregas)
+    private ActividadProyecto(
+        ActividadId id,
+        ProyectoId proyectoId,
+        GrupoId grupoId,
+        string titulo,
+        string descripcion,
+        DateOnly fechaRealizacion,
+        string observacionesGenerales,
+        EstadoActividad estado,
+        int version,
+        List<EntregaActividad> entregas,
+        CampoFormativoNem campoFormativo,
+        IReadOnlyList<GradoPrimaria> gradosObjetivo)
     {
-        Id = id; ProyectoId = proyectoId; GrupoId = grupoId; Titulo = titulo; Descripcion = descripcion;
-        FechaRealizacion = fechaRealizacion; ObservacionesGenerales = observacionesGenerales;
-        Estado = estado; Version = version; _entregas = entregas; _vistaEntregas = _entregas.AsReadOnly();
+        Id = id;
+        ProyectoId = proyectoId;
+        GrupoId = grupoId;
+        Titulo = titulo;
+        Descripcion = descripcion;
+        FechaRealizacion = fechaRealizacion;
+        ObservacionesGenerales = observacionesGenerales;
+        Estado = estado;
+        Version = version;
+        _entregas = entregas;
+        _vistaEntregas = _entregas.AsReadOnly();
+        CampoFormativo = campoFormativo;
+        GradosObjetivo = gradosObjetivo;
     }
 
     public ActividadId Id { get; }
@@ -29,34 +49,130 @@ public sealed class ActividadProyecto
     public EstadoActividad Estado { get; private set; }
     public int Version { get; }
     public IReadOnlyList<EntregaActividad> Entregas => _vistaEntregas;
+    public CampoFormativoNem CampoFormativo { get; private set; }
+    public IReadOnlyList<GradoPrimaria> GradosObjetivo { get; private set; }
 
-    public static ActividadProyecto Crear(ProyectoId proyectoId, GrupoId grupoId, string titulo,
-        string? descripcion, DateOnly fechaRealizacion, string? observacionesGenerales,
-        DateOnly inicioProyecto, DateOnly terminoProyecto, IReadOnlyCollection<EstudianteId> estudiantes)
+    public static ActividadProyecto Crear(
+        ProyectoId proyectoId,
+        GrupoId grupoId,
+        string titulo,
+        string? descripcion,
+        DateOnly fechaRealizacion,
+        string? observacionesGenerales,
+        DateOnly inicioProyecto,
+        DateOnly terminoProyecto,
+        IReadOnlyCollection<EstudianteId> estudiantes) =>
+        Crear(
+            proyectoId,
+            grupoId,
+            titulo,
+            descripcion,
+            fechaRealizacion,
+            observacionesGenerales,
+            inicioProyecto,
+            terminoProyecto,
+            estudiantes,
+            CampoFormativoNem.NoEspecificado,
+            []);
+
+    public static ActividadProyecto Crear(
+        ProyectoId proyectoId,
+        GrupoId grupoId,
+        string titulo,
+        string? descripcion,
+        DateOnly fechaRealizacion,
+        string? observacionesGenerales,
+        DateOnly inicioProyecto,
+        DateOnly terminoProyecto,
+        IReadOnlyCollection<EstudianteId> estudiantes,
+        CampoFormativoNem campoFormativo,
+        IEnumerable<GradoPrimaria>? gradosObjetivo)
     {
         ArgumentNullException.ThrowIfNull(estudiantes);
-        var datos = ValidarDatos(proyectoId, grupoId, titulo, descripcion, fechaRealizacion,
-            observacionesGenerales, inicioProyecto, terminoProyecto);
+        var datos = ValidarDatos(
+            proyectoId,
+            grupoId,
+            titulo,
+            descripcion,
+            fechaRealizacion,
+            observacionesGenerales,
+            inicioProyecto,
+            terminoProyecto);
         var ids = ValidarIdentidades(estudiantes);
-        return new(ActividadId.Crear(), proyectoId, grupoId, datos.Titulo, datos.Descripcion,
-            fechaRealizacion, datos.Observaciones, EstadoActividad.Activa, 1,
+        var planeacion = ValidarPlaneacion(campoFormativo, gradosObjetivo);
+        return new(
+            ActividadId.Crear(),
+            proyectoId,
+            grupoId,
+            datos.Titulo,
+            datos.Descripcion,
+            fechaRealizacion,
+            datos.Observaciones,
+            EstadoActividad.Activa,
+            1,
             ids.Select(id => new EntregaActividad(
                 id,
                 EstadoEntregaActividad.Pendiente,
                 NivelLogro.Pendiente,
-                string.Empty)).ToList());
+                string.Empty)).ToList(),
+            planeacion.Campo,
+            planeacion.Grados);
     }
 
-    public static ActividadProyecto Rehidratar(ActividadId id, ProyectoId proyectoId, GrupoId grupoId,
-        string titulo, string? descripcion, DateOnly fechaRealizacion, string? observacionesGenerales,
-        EstadoActividad estado, int version, IReadOnlyCollection<DatosEntregaActividadRehidratada> entregas)
+    public static ActividadProyecto Rehidratar(
+        ActividadId id,
+        ProyectoId proyectoId,
+        GrupoId grupoId,
+        string titulo,
+        string? descripcion,
+        DateOnly fechaRealizacion,
+        string? observacionesGenerales,
+        EstadoActividad estado,
+        int version,
+        IReadOnlyCollection<DatosEntregaActividadRehidratada> entregas) =>
+        Rehidratar(
+            id,
+            proyectoId,
+            grupoId,
+            titulo,
+            descripcion,
+            fechaRealizacion,
+            observacionesGenerales,
+            estado,
+            version,
+            entregas,
+            CampoFormativoNem.NoEspecificado,
+            []);
+
+    public static ActividadProyecto Rehidratar(
+        ActividadId id,
+        ProyectoId proyectoId,
+        GrupoId grupoId,
+        string titulo,
+        string? descripcion,
+        DateOnly fechaRealizacion,
+        string? observacionesGenerales,
+        EstadoActividad estado,
+        int version,
+        IReadOnlyCollection<DatosEntregaActividadRehidratada> entregas,
+        CampoFormativoNem campoFormativo,
+        IEnumerable<GradoPrimaria>? gradosObjetivo)
     {
         if (id == default) throw new DomainValidationException("La identidad de la actividad no puede estar vacía.");
         ArgumentNullException.ThrowIfNull(entregas);
         if (!Enum.IsDefined(estado)) throw new DomainValidationException("El estado de la actividad no es válido.");
         if (version <= 0) throw new DomainValidationException("La versión de la actividad debe ser positiva.");
-        var datos = ValidarDatos(proyectoId, grupoId, titulo, descripcion, fechaRealizacion,
-            observacionesGenerales, DateOnly.MinValue, DateOnly.MaxValue, true);
+        var datos = ValidarDatos(
+            proyectoId,
+            grupoId,
+            titulo,
+            descripcion,
+            fechaRealizacion,
+            observacionesGenerales,
+            DateOnly.MinValue,
+            DateOnly.MaxValue,
+            true);
+        var planeacion = ValidarPlaneacion(campoFormativo, gradosObjetivo);
         var ids = new HashSet<EstudianteId>();
         var registros = new List<EntregaActividad>();
         foreach (var entrega in entregas)
@@ -72,23 +188,71 @@ public sealed class ActividadProyecto
                 entrega.NivelLogro,
                 ValidarObservacion(entrega.Observacion)));
         }
-        return new(id, proyectoId, grupoId, datos.Titulo, datos.Descripcion, fechaRealizacion,
-            datos.Observaciones, estado, version, registros);
+        return new(
+            id,
+            proyectoId,
+            grupoId,
+            datos.Titulo,
+            datos.Descripcion,
+            fechaRealizacion,
+            datos.Observaciones,
+            estado,
+            version,
+            registros,
+            planeacion.Campo,
+            planeacion.Grados);
     }
 
-    public void Actualizar(string titulo, string? descripcion, DateOnly fechaRealizacion,
-        string? observacionesGenerales, DateOnly inicioProyecto, DateOnly terminoProyecto)
+    public void Actualizar(
+        string titulo,
+        string? descripcion,
+        DateOnly fechaRealizacion,
+        string? observacionesGenerales,
+        DateOnly inicioProyecto,
+        DateOnly terminoProyecto) =>
+        Actualizar(
+            titulo,
+            descripcion,
+            fechaRealizacion,
+            observacionesGenerales,
+            inicioProyecto,
+            terminoProyecto,
+            CampoFormativo,
+            GradosObjetivo);
+
+    public void Actualizar(
+        string titulo,
+        string? descripcion,
+        DateOnly fechaRealizacion,
+        string? observacionesGenerales,
+        DateOnly inicioProyecto,
+        DateOnly terminoProyecto,
+        CampoFormativoNem campoFormativo,
+        IEnumerable<GradoPrimaria>? gradosObjetivo)
     {
         AsegurarEditable();
-        var datos = ValidarDatos(ProyectoId, GrupoId, titulo, descripcion, fechaRealizacion,
-            observacionesGenerales, inicioProyecto, terminoProyecto);
-        Titulo = datos.Titulo; Descripcion = datos.Descripcion;
-        FechaRealizacion = fechaRealizacion; ObservacionesGenerales = datos.Observaciones;
+        var datos = ValidarDatos(
+            ProyectoId,
+            GrupoId,
+            titulo,
+            descripcion,
+            fechaRealizacion,
+            observacionesGenerales,
+            inicioProyecto,
+            terminoProyecto);
+        var planeacion = ValidarPlaneacion(campoFormativo, gradosObjetivo);
+        Titulo = datos.Titulo;
+        Descripcion = datos.Descripcion;
+        FechaRealizacion = fechaRealizacion;
+        ObservacionesGenerales = datos.Observaciones;
+        CampoFormativo = planeacion.Campo;
+        GradosObjetivo = planeacion.Grados;
     }
 
     public void ActualizarEntregas(IReadOnlyCollection<DatosEntregaActividadRehidratada> entregas)
     {
-        AsegurarEditable(); ArgumentNullException.ThrowIfNull(entregas);
+        AsegurarEditable();
+        ArgumentNullException.ThrowIfNull(entregas);
         var snapshot = entregas.ToArray();
         if (snapshot.Length != _entregas.Count || snapshot.Select(x => x.EstudianteId).Distinct().Count() != snapshot.Length
             || snapshot.Select(x => x.EstudianteId).ToHashSet().SetEquals(_entregas.Select(x => x.EstudianteId)) == false)
@@ -115,7 +279,11 @@ public sealed class ActividadProyecto
         }
     }
 
-    public void Anular() { AsegurarEditable(); Estado = EstadoActividad.Anulada; }
+    public void Anular()
+    {
+        AsegurarEditable();
+        Estado = EstadoActividad.Anulada;
+    }
 
     private void AsegurarEditable()
     {
@@ -123,8 +291,15 @@ public sealed class ActividadProyecto
     }
 
     private static (string Titulo, string Descripcion, string Observaciones) ValidarDatos(
-        ProyectoId proyectoId, GrupoId grupoId, string titulo, string? descripcion,
-        DateOnly fecha, string? observaciones, DateOnly inicio, DateOnly termino, bool exigirNormalizados = false)
+        ProyectoId proyectoId,
+        GrupoId grupoId,
+        string titulo,
+        string? descripcion,
+        DateOnly fecha,
+        string? observaciones,
+        DateOnly inicio,
+        DateOnly termino,
+        bool exigirNormalizados = false)
     {
         if (proyectoId == default || grupoId == default) throw new DomainValidationException("Las identidades de pertenencia son obligatorias.");
         var tituloV = NormalizadorNombreVisible.NormalizarYValidar(titulo, MaximoTitulo, "El título de la actividad");
@@ -136,6 +311,18 @@ public sealed class ActividadProyecto
         return (tituloV, descripcionV, observacionesV);
     }
 
+    private static (CampoFormativoNem Campo, IReadOnlyList<GradoPrimaria> Grados) ValidarPlaneacion(
+        CampoFormativoNem campoFormativo,
+        IEnumerable<GradoPrimaria>? gradosObjetivo)
+    {
+        if (!CatalogoPlaneacionNem.EsCampoValido(campoFormativo))
+        {
+            throw new DomainValidationException("El campo formativo NEM de la actividad no es válido.");
+        }
+
+        return (campoFormativo, CatalogoPlaneacionNem.NormalizarGradosObjetivo(gradosObjetivo));
+    }
+
     private static EstudianteId[] ValidarIdentidades(IEnumerable<EstudianteId> estudiantes)
     {
         var ids = estudiantes.ToArray();
@@ -144,7 +331,8 @@ public sealed class ActividadProyecto
         return ids;
     }
 
-    private static string ValidarObservacion(string? valor) => ValidarTexto(valor, MaximoObservacionEntrega, "La observación de entrega");
+    private static string ValidarObservacion(string? valor) =>
+        ValidarTexto(valor, MaximoObservacionEntrega, "La observación de entrega");
 
     private static string ValidarTexto(string? valor, int maximo, string campo)
     {
