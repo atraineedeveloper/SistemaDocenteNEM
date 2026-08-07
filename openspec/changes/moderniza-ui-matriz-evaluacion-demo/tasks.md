@@ -29,7 +29,7 @@
 
 - [x] Eliminar selector de actividad.
 - [x] Crear modelo visual de matriz estudiante × actividad.
-- [x] Generar columnas dinámicas A01/A02/... con tooltip nombre+fecha.
+- [x] Generar columnas dinámicas con código estable derivado de `ActividadId` y tooltip nombre+fecha.
 - [x] Congelar Núm. y Estudiante.
 - [x] Representar padrones históricos con celdas no aplicables `—`.
 - [x] Seleccionar actividad implícitamente por columna/celda actual.
