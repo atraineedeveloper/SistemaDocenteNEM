@@ -24,7 +24,8 @@
         <StackPanel Margin="0,0,0,16">
             <TextBlock Text="EVALUACIÓN FORMATIVA" Foreground="{DynamicResource PrimaryBrush}" FontSize="12" FontWeight="SemiBold"/>
             <TextBlock Text="Registro pedagógico de actividades" Style="{StaticResource Heading1}" FontSize="28" Margin="0,3,0,3"/>
-            <TextBlock Text="Compara el avance del grupo a través de todas las actividades del proyecto." Foreground="{DynamicResource TextMutedBrush}"/>
+            <TextBlock Text="Registra primero el estado de entrega y, cuando corresponda, el nivel de logro de cada actividad."
+                       Foreground="{DynamicResource TextMutedBrush}" TextWrapping="Wrap"/>
         </StackPanel>
 
         <Border Grid.Row="1" Style="{StaticResource ContentCard}" Margin="0,0,0,14" Padding="14">
@@ -51,28 +52,28 @@
             </Border>
             <WrapPanel Grid.Column="1" VerticalAlignment="Center">
                 <Border Background="{DynamicResource SectionBackgroundBrush}" CornerRadius="8" Padding="10,7" Margin="0,0,6,0"><TextBlock><Run Text="Total "/><Run Text="{Binding Total, Mode=OneWay}" FontWeight="Bold"/></TextBlock></Border>
-                <Border Background="{DynamicResource SectionBackgroundBrush}" CornerRadius="8" Padding="10,7" Margin="0,0,6,0"><TextBlock><Run Text="Pend. "/><Run Text="{Binding Pendientes, Mode=OneWay}" FontWeight="Bold"/></TextBlock></Border>
-                <Border Background="{DynamicResource SuccessBackgroundBrush}" CornerRadius="8" Padding="10,7" Margin="0,0,6,0"><TextBlock Foreground="{DynamicResource SuccessBrush}"><Run Text="Domina "/><Run Text="{Binding Domina, Mode=OneWay}" FontWeight="Bold"/></TextBlock></Border>
-                <Border Background="{DynamicResource InfoBackgroundBrush}" CornerRadius="8" Padding="10,7" Margin="0,0,6,0"><TextBlock Foreground="{DynamicResource InfoBrush}"><Run Text="Suficiente "/><Run Text="{Binding Suficiente, Mode=OneWay}" FontWeight="Bold"/></TextBlock></Border>
-                <Border Background="{DynamicResource WarningBackgroundBrush}" CornerRadius="8" Padding="10,7" Margin="0,0,6,0"><TextBlock Foreground="{DynamicResource WarningBrush}"><Run Text="En proceso "/><Run Text="{Binding EnProceso, Mode=OneWay}" FontWeight="Bold"/></TextBlock></Border>
-                <Border Background="{DynamicResource ErrorBackgroundBrush}" CornerRadius="8" Padding="10,7"><TextBlock Foreground="{DynamicResource ErrorBrush}"><Run Text="Apoyo/NE "/><Run Text="{Binding RequiereApoyo, Mode=OneWay}" FontWeight="Bold"/><Run Text="/"/><Run Text="{Binding NoEntrego, Mode=OneWay}" FontWeight="Bold"/></TextBlock></Border>
+                <Border Background="{DynamicResource WarningBackgroundBrush}" CornerRadius="8" Padding="10,7" Margin="0,0,6,0"><TextBlock Foreground="{DynamicResource WarningBrush}"><Run Text="Pend. entrega "/><Run Text="{Binding PendientesEntrega, Mode=OneWay}" FontWeight="Bold"/></TextBlock></Border>
+                <Border Background="{DynamicResource SuccessBackgroundBrush}" CornerRadius="8" Padding="10,7" Margin="0,0,6,0"><TextBlock Foreground="{DynamicResource SuccessBrush}"><Run Text="Entregadas "/><Run Text="{Binding Entregadas, Mode=OneWay}" FontWeight="Bold"/></TextBlock></Border>
+                <Border Background="{DynamicResource DisabledBackgroundBrush}" CornerRadius="8" Padding="10,7" Margin="0,0,6,0"><TextBlock Foreground="{DynamicResource TextMutedBrush}"><Run Text="No entregadas "/><Run Text="{Binding NoEntregadas, Mode=OneWay}" FontWeight="Bold"/></TextBlock></Border>
+                <Border Background="{DynamicResource InfoBackgroundBrush}" CornerRadius="8" Padding="10,7" Margin="0,0,6,0"><TextBlock Foreground="{DynamicResource InfoBrush}"><Run Text="Por evaluar "/><Run Text="{Binding PendientesEvaluacion, Mode=OneWay}" FontWeight="Bold"/></TextBlock></Border>
+                <Border Background="{DynamicResource ErrorBackgroundBrush}" CornerRadius="8" Padding="10,7"><TextBlock Foreground="{DynamicResource ErrorBrush}"><Run Text="Requiere apoyo "/><Run Text="{Binding RequiereApoyo, Mode=OneWay}" FontWeight="Bold"/></TextBlock></Border>
             </WrapPanel>
         </Grid>
 
         <Border Grid.Row="3" Style="{StaticResource ContentCard}" Margin="0,0,0,14" Padding="12">
             <Grid>
-                <Grid.ColumnDefinitions><ColumnDefinition Width="360"/><ColumnDefinition Width="16"/><ColumnDefinition Width="250"/><ColumnDefinition Width="*"/></Grid.ColumnDefinitions>
+                <Grid.ColumnDefinitions><ColumnDefinition Width="360"/><ColumnDefinition Width="16"/><ColumnDefinition Width="270"/><ColumnDefinition Width="*"/></Grid.ColumnDefinitions>
                 <TextBox Grid.Column="0" Margin="0" Padding="10,8"
                          Text="{Binding BusquedaEstudiante, UpdateSourceTrigger=PropertyChanged}"
                          ToolTip="Buscar estudiante por nombre o número de lista"
                          AutomationProperties.Name="Buscar estudiante en evaluación" TabIndex="401"/>
                 <StackPanel Grid.Column="2" Orientation="Horizontal" VerticalAlignment="Center">
                     <TextBlock Text="Mostrar" Foreground="{DynamicResource TextMutedBrush}" VerticalAlignment="Center" Margin="0,0,8,0"/>
-                    <ComboBox Width="180" Margin="0" ItemsSource="{Binding FiltrosEntrega}" SelectedItem="{Binding FiltroEntrega}"
-                              AutomationProperties.Name="Filtrar estudiantes por nivel de logro" TabIndex="402"/>
+                    <ComboBox Width="200" Margin="0" ItemsSource="{Binding FiltrosEntrega}" SelectedItem="{Binding FiltroEntrega}"
+                              AutomationProperties.Name="Filtrar estudiantes por estado de entrega o nivel de logro" TabIndex="402"/>
                 </StackPanel>
                 <TextBlock Grid.Column="3" HorizontalAlignment="Right" VerticalAlignment="Center" Foreground="{DynamicResource TextMutedBrush}"
-                           Text="D/S/E/R/N/P para evaluar · Enter para observación"/>
+                           Text="D/S/E/R = logro · T/N/P = entrega · Enter/F2 = editar"/>
             </Grid>
         </Border>
 
@@ -116,13 +117,17 @@
                 <StackPanel DockPanel.Dock="Left" Orientation="Horizontal">
                     <Menu Background="Transparent" VerticalAlignment="Center">
                         <MenuItem Header="👥  Marcar a todo el grupo ▾" FontWeight="SemiBold" Padding="10,7">
-                            <MenuItem Header="Domina (D)" Command="{Binding MarcarTodosDominaCommand}"/>
-                            <MenuItem Header="Suficiente (S)" Command="{Binding MarcarTodosSuficienteCommand}"/>
-                            <MenuItem Header="En proceso (E)" Command="{Binding MarcarTodosEnProcesoCommand}"/>
-                            <MenuItem Header="Requiere apoyo (R)" Command="{Binding MarcarTodosRequiereApoyoCommand}"/>
-                            <MenuItem Header="No entregó (N)" Command="{Binding MarcarTodosNoEntregoCommand}"/>
-                            <Separator/>
-                            <MenuItem Header="Pendiente (P)" Command="{Binding MarcarTodosPendienteCommand}"/>
+                            <MenuItem Header="Estado de entrega">
+                                <MenuItem Header="Entregada, pendiente de evaluar (T)" Command="{Binding MarcarTodosEntregadaCommand}"/>
+                                <MenuItem Header="No entregada (N)" Command="{Binding MarcarTodosNoEntregadaCommand}"/>
+                                <MenuItem Header="Pendiente de entrega (P)" Command="{Binding MarcarTodosPendienteEntregaCommand}"/>
+                            </MenuItem>
+                            <MenuItem Header="Nivel de logro">
+                                <MenuItem Header="Domina (D)" Command="{Binding MarcarTodosDominaCommand}"/>
+                                <MenuItem Header="Suficiente (S)" Command="{Binding MarcarTodosSuficienteCommand}"/>
+                                <MenuItem Header="En proceso (E)" Command="{Binding MarcarTodosEnProcesoCommand}"/>
+                                <MenuItem Header="Requiere apoyo (R)" Command="{Binding MarcarTodosRequiereApoyoCommand}"/>
+                            </MenuItem>
                         </MenuItem>
                     </Menu>
                     <TextBlock VerticalAlignment="Center" Foreground="{DynamicResource TextMutedBrush}" Margin="14,0,0,0"
