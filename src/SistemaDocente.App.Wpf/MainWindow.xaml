@@ -5,7 +5,7 @@
         xmlns:controls="clr-namespace:SistemaDocente.App.Wpf.Controls"
         xmlns:views="clr-namespace:SistemaDocente.App.Wpf.Views"
         xml:lang="es-MX"
-        Title="{Binding TituloVentana}" Height="780" Width="1280" MinHeight="640" MinWidth="1040"
+        Title="{Binding TituloVentana}" Height="800" Width="1320" MinHeight="680" MinWidth="1120"
         WindowStartupLocation="CenterScreen" Closing="OnClosing">
     <Grid Background="{DynamicResource WindowBackgroundBrush}">
         <Grid.RowDefinitions>
@@ -13,10 +13,8 @@
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
 
-        <!-- Encabezado global: hereda el MainWindowViewModel completo. -->
         <controls:MainNavigationHeader Grid.Row="0"/>
 
-        <!-- Área de módulos: DataContext y Visibility se anclan explícitamente al shell raíz. -->
         <Grid Grid.Row="1">
             <views:GrupoView
                 DataContext="{Binding DataContext.Grupo, ElementName=RootWindow}"
@@ -36,10 +34,9 @@
                 Visibility="{Binding DataContext.MostrarEvaluacion, ElementName=RootWindow, Converter={StaticResource BoolToVisibility}}"/>
         </Grid>
 
-        <!-- Toast de notificaciones (overlay global) -->
         <Border x:Name="ToastBanner" Grid.Row="0" Grid.RowSpan="2"
                 VerticalAlignment="Top" HorizontalAlignment="Right"
-                Margin="0,72,20,0" Padding="16,12"
+                Margin="0,84,20,0" Padding="16,12"
                 CornerRadius="8" MinWidth="260" MaxWidth="360"
                 Visibility="Collapsed" Panel.ZIndex="9999"
                 BorderThickness="1"
@@ -56,7 +53,6 @@
             </DockPanel>
         </Border>
 
-        <!-- Indicador global de progreso -->
         <ProgressBar Grid.Row="1" Height="4" IsIndeterminate="True"
                      VerticalAlignment="Top"
                      Visibility="{Binding EstaOcupado, Converter={StaticResource BoolToVisibility}}"
