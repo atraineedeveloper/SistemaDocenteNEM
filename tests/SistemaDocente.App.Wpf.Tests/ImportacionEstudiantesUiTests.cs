@@ -11,15 +11,18 @@ public sealed class ImportacionEstudiantesUiTests
         ObtenerRaiz(), rutaRelativa.Replace('/', Path.DirectorySeparatorChar)));
 
     [Fact]
-    public void GrupoExponeImportacionYShellEntregaViewModel()
+    public void GrupoExponeImportacionYShellEntregaViewModelDeFormaExplicita()
     {
         var grupo = Leer("src/SistemaDocente.App.Wpf/Views/GrupoView.xaml");
         var main = Leer("src/SistemaDocente.App.Wpf/MainWindow.xaml");
+        var mainCodeBehind = Leer("src/SistemaDocente.App.Wpf/MainWindow.xaml.cs");
         var codigoGrupo = Leer("src/SistemaDocente.App.Wpf/Views/GrupoView.xaml.cs");
 
         Assert.Contains("Importar alumnos…", grupo, StringComparison.Ordinal);
         Assert.Contains("OnImportarAlumnosClic", grupo, StringComparison.Ordinal);
-        Assert.Contains("Importacion=\"{Binding ImportacionEstudiantes, ElementName=RootWindow}\"", main, StringComparison.Ordinal);
+        Assert.Contains("x:Name=\"GrupoModule\"", main, StringComparison.Ordinal);
+        Assert.DoesNotContain("Importacion=\"{Binding ImportacionEstudiantes, ElementName=RootWindow}\"", main, StringComparison.Ordinal);
+        Assert.Contains("GrupoModule.Importacion = importacionEstudiantes;", mainCodeBehind, StringComparison.Ordinal);
         Assert.Contains("new ImportacionEstudiantesWindow(importacion)", codigoGrupo, StringComparison.Ordinal);
     }
 
