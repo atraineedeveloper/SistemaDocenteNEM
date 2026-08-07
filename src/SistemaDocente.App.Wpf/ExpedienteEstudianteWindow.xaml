@@ -4,200 +4,456 @@
         xmlns:controls="clr-namespace:SistemaDocente.App.Wpf.Controls"
         xmlns:prop="clr-namespace:SistemaDocente.App.Wpf.Properties"
         xml:lang="es-MX"
-        Title="{x:Static prop:Resources.ExpedienteTitle}" Height="680" Width="840" MinHeight="560" MinWidth="680"
-        WindowStartupLocation="CenterOwner" ShowInTaskbar="False">
-    <Grid Background="{DynamicResource SectionBackgroundBrush}" Margin="{DynamicResource MarginXXXLarge}">
+        Title="{x:Static prop:Resources.ExpedienteTitle}"
+        Height="760" Width="980" MinHeight="620" MinWidth="780"
+        WindowStartupLocation="CenterOwner" ShowInTaskbar="False"
+        ResizeMode="CanResizeWithGrip"
+        Background="{DynamicResource WindowBackgroundBrush}">
+
+    <Window.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="Styles/PopupStyles.xaml"/>
+            </ResourceDictionary.MergedDictionaries>
+        </ResourceDictionary>
+    </Window.Resources>
+
+    <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
 
-        <!-- Cabecera del Alumno -->
-        <Border Margin="0,0,0,14" DataContext="{Binding Expediente}" Background="White" BorderBrush="#E2E8F0" BorderThickness="1" CornerRadius="10" Padding="16,12">
+        <Border Grid.Row="0" Style="{StaticResource PopupHeader}" DataContext="{Binding Expediente}">
             <Grid>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*"/>
                     <ColumnDefinition Width="Auto"/>
                 </Grid.ColumnDefinitions>
-                <StackPanel Grid.Column="0">
-                    <StackPanel Orientation="Horizontal" Margin="0,0,0,4">
-                        <TextBlock Text="{Binding NumeroLista, StringFormat=#{0}}" FontSize="20" FontWeight="Bold" Foreground="#0F172A" Margin="0,0,8,0"/>
-                        <TextBlock Text="{Binding NombreEstudiante}" FontSize="20" FontWeight="Bold" Foreground="#0F172A"/>
+
+                <StackPanel>
+                    <TextBlock Text="EXPEDIENTE PEDAGÓGICO" Style="{StaticResource PopupEyebrow}"/>
+                    <StackPanel Orientation="Horizontal" Margin="0,4,0,4">
+                        <TextBlock Text="{Binding NumeroLista, StringFormat=#{0}}"
+                                   Style="{StaticResource PopupTitle}"
+                                   Margin="0,0,10,0"/>
+                        <TextBlock Text="{Binding NombreEstudiante}" Style="{StaticResource PopupTitle}"/>
                     </StackPanel>
-                    <WrapPanel Margin="0,2,0,0">
-                        <TextBlock Text="{Binding Genero, StringFormat=Género: {0}}" Foreground="#475569" FontSize="13" Margin="0,0,16,4"/>
-                        <TextBlock Text="{Binding Edad, StringFormat=Edad: {0} años}" Foreground="#475569" FontSize="13" Margin="0,0,16,4"/>
-                        <TextBlock Text="{Binding FechaNacimiento, StringFormat=Nacimiento: {0:dd/MM/yyyy}}" Foreground="#475569" FontSize="13" Margin="0,0,16,4"/>
-                        <TextBlock Text="{Binding FechaIngreso, StringFormat=Ingreso: {0:dd/MM/yyyy}}" Foreground="#475569" FontSize="13" Margin="0,0,16,4"/>
+                    <WrapPanel>
+                        <TextBlock Text="{Binding Genero, StringFormat=Género: {0}}"
+                                   Style="{StaticResource PopupSubtitle}" Margin="0,0,18,4"/>
+                        <TextBlock Text="{Binding Edad, StringFormat=Edad: {0} años}"
+                                   Style="{StaticResource PopupSubtitle}" Margin="0,0,18,4"/>
+                        <TextBlock Text="{Binding FechaNacimiento, StringFormat=Nacimiento: {0:dd/MM/yyyy}}"
+                                   Style="{StaticResource PopupSubtitle}" Margin="0,0,18,4"/>
+                        <TextBlock Text="{Binding FechaIngreso, StringFormat=Ingreso: {0:dd/MM/yyyy}}"
+                                   Style="{StaticResource PopupSubtitle}" Margin="0,0,18,4"/>
                     </WrapPanel>
-                    <TextBlock Text="{Binding ObservacionesAlumno, StringFormat=Observaciones: {0}}" Foreground="#64748B" FontSize="12" FontStyle="Italic" TextWrapping="Wrap" Margin="0,2,0,0"/>
+                    <TextBlock Text="{Binding ObservacionesAlumno, StringFormat=Observaciones: {0}}"
+                               Style="{StaticResource PopupSubtitle}"
+                               FontStyle="Italic"
+                               TextWrapping="Wrap"
+                               Margin="0,2,0,0"/>
                 </StackPanel>
-                <Border Grid.Column="1" CornerRadius="12" Padding="12,6" VerticalAlignment="Center" Background="#E2E8F0" Margin="12,0,0,0">
-                    <TextBlock Text="{Binding Asistencia.PorcentajeAsistencia, StringFormat=Asistencia: {0:F1}%}" FontWeight="Bold" Foreground="#1E293B"/>
+
+                <Border Grid.Column="1"
+                        Style="{StaticResource PopupInfoPill}"
+                        VerticalAlignment="Center"
+                        Margin="20,0,0,0">
+                    <StackPanel>
+                        <TextBlock Text="Asistencia" Foreground="{DynamicResource InfoBrush}" FontSize="11"/>
+                        <TextBlock Text="{Binding Asistencia.PorcentajeAsistencia, StringFormat={}{0:F1}%}"
+                                   Foreground="{DynamicResource InfoBrush}"
+                                   FontSize="18"
+                                   FontWeight="Bold"
+                                   HorizontalAlignment="Center"/>
+                    </StackPanel>
                 </Border>
             </Grid>
         </Border>
 
-        <!-- Contenido por Pestañas -->
-        <TabControl Grid.Row="1" Background="White" BorderBrush="#CBD5E1" Margin="0,0,0,10">
-            <!-- Pestaña 1: Resumen y Alertas Pedagógicas -->
-            <TabItem Header="Resumen Pedagógico">
-                <ScrollViewer VerticalScrollBarVisibility="Auto" Padding="16">
-                    <StackPanel DataContext="{Binding Expediente}">
-                        <TextBlock Text="Alertas Pedagógicas Formativas" FontSize="16" FontWeight="Bold" Foreground="#1E293B" Margin="0,0,0,8"/>
-                        <Grid Margin="0,0,0,16">
-                            <ListBox ItemsSource="{Binding AlertasPedagogicas}" BorderThickness="0">
-                                <ListBox.ItemTemplate>
-                                    <DataTemplate>
-                                        <Border Background="#FEF3C7" BorderBrush="#F59E0B" BorderThickness="1" CornerRadius="6" Padding="10,6" Margin="0,3">
-                                            <TextBlock Text="{Binding Mensaje}" Foreground="#92400E" FontWeight="SemiBold" TextWrapping="Wrap"/>
-                                        </Border>
-                                    </DataTemplate>
-                                </ListBox.ItemTemplate>
-                            </ListBox>
-                            <controls:EmptyState Icon="⚠️" Title="Sin alertas pedagógicas" Message="No se han registrado alertas formativas para este estudiante." Visibility="{Binding AlertasPedagogicas.Count, Converter={StaticResource CountToVisibility}}"/>
+        <Grid Grid.Row="1" Margin="24,18,24,16">
+            <TabControl Style="{StaticResource PopupTabControl}"
+                        ItemContainerStyle="{StaticResource PopupTabItem}"
+                        Background="Transparent">
+
+                <TabItem Header="Resumen pedagógico">
+                    <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+                        <StackPanel Margin="0,16,0,0" DataContext="{Binding Expediente}">
+                            <Border Style="{StaticResource PopupCard}" Margin="0,0,0,16">
+                                <StackPanel>
+                                    <TextBlock Text="Alertas pedagógicas formativas" Style="{StaticResource PopupSectionTitle}"/>
+                                    <TextBlock Text="Señales para orientar el seguimiento docente; no representan diagnósticos clínicos."
+                                               Style="{StaticResource PopupSubtitle}" Margin="0,0,0,10"/>
+                                    <Grid MinHeight="80">
+                                        <ListBox ItemsSource="{Binding AlertasPedagogicas}"
+                                                 BorderThickness="0"
+                                                 Background="Transparent"
+                                                 HorizontalContentAlignment="Stretch">
+                                            <ListBox.ItemTemplate>
+                                                <DataTemplate>
+                                                    <Border Style="{StaticResource AlertWarningBanner}" Margin="0,3">
+                                                        <StackPanel Orientation="Horizontal">
+                                                            <TextBlock Text="⚠" Foreground="{DynamicResource WarningBrush}" Margin="0,0,8,0"/>
+                                                            <TextBlock Text="{Binding Mensaje}"
+                                                                       Foreground="{DynamicResource WarningBrush}"
+                                                                       FontWeight="SemiBold"
+                                                                       TextWrapping="Wrap"/>
+                                                        </StackPanel>
+                                                    </Border>
+                                                </DataTemplate>
+                                            </ListBox.ItemTemplate>
+                                        </ListBox>
+                                        <controls:EmptyState Icon="✓"
+                                                             Title="Sin alertas pedagógicas"
+                                                             Message="No se han registrado alertas formativas para este estudiante."
+                                                             Visibility="{Binding AlertasPedagogicas.Count, Converter={StaticResource CountToVisibility}}"/>
+                                    </Grid>
+                                </StackPanel>
+                            </Border>
+
+                            <Border Style="{StaticResource PopupCard}">
+                                <StackPanel>
+                                    <TextBlock Text="Historial de actividades evaluadas" Style="{StaticResource PopupSectionTitle}"/>
+                                    <TextBlock Text="Consulta el proyecto, la actividad, la fecha y el nivel de logro registrado."
+                                               Style="{StaticResource PopupSubtitle}" Margin="0,0,0,10"/>
+                                    <Grid Height="260">
+                                        <DataGrid ItemsSource="{Binding Entregas}"
+                                                  AutoGenerateColumns="False"
+                                                  IsReadOnly="True"
+                                                  HeadersVisibility="Column"
+                                                  GridLinesVisibility="Horizontal"
+                                                  CanUserSortColumns="True"
+                                                  EnableRowVirtualization="True">
+                                            <DataGrid.Columns>
+                                                <DataGridTextColumn Header="Proyecto" Binding="{Binding NombreProyecto}" Width="*"/>
+                                                <DataGridTextColumn Header="Actividad" Binding="{Binding TituloActividad}" Width="*"/>
+                                                <DataGridTextColumn Header="Fecha" Binding="{Binding Fecha, StringFormat=dd/MM/yyyy}" Width="105"/>
+                                                <DataGridTextColumn Header="Nivel de logro" Binding="{Binding NivelLogro}" Width="130"/>
+                                            </DataGrid.Columns>
+                                        </DataGrid>
+                                        <controls:EmptyState Icon="📋"
+                                                             Title="Sin actividades evaluadas"
+                                                             Message="Este estudiante aún no tiene registros de evaluación por actividades."
+                                                             Visibility="{Binding Entregas.Count, Converter={StaticResource CountToVisibility}}"/>
+                                    </Grid>
+                                </StackPanel>
+                            </Border>
+                        </StackPanel>
+                    </ScrollViewer>
+                </TabItem>
+
+                <TabItem Header="Fortalezas y dificultades">
+                    <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+                        <Grid Margin="0,16,0,0">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="16"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+
+                            <Border Grid.Column="0" Style="{StaticResource PopupCard}">
+                                <StackPanel>
+                                    <TextBlock Text="Fortalezas" Style="{StaticResource PopupSectionTitle}" Foreground="{DynamicResource SuccessBrush}"/>
+                                    <TextBlock Text="Capacidades, avances o recursos que conviene seguir potenciando."
+                                               Style="{StaticResource PopupSubtitle}" Margin="0,0,0,12"/>
+
+                                    <Grid>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*"/>
+                                            <ColumnDefinition Width="Auto"/>
+                                        </Grid.ColumnDefinitions>
+                                        <controls:FormField Header="Nueva fortaleza">
+                                            <TextBox Text="{Binding NuevaFortaleza, UpdateSourceTrigger=PropertyChanged}"
+                                                     MinHeight="38"
+                                                     TabIndex="109"
+                                                     AutomationProperties.Name="Nueva fortaleza pedagógica"/>
+                                        </controls:FormField>
+                                        <Button Grid.Column="1"
+                                                Content="Agregar"
+                                                Command="{Binding AgregarFortalezaCommand}"
+                                                VerticalAlignment="Center"
+                                                Margin="12,18,0,10"
+                                                TabIndex="110"
+                                                AutomationProperties.Name="Agregar fortaleza"/>
+                                    </Grid>
+
+                                    <Grid Height="300">
+                                        <ListBox ItemsSource="{Binding Expediente.Fortalezas}"
+                                                 DisplayMemberPath="Contenido"
+                                                 BorderBrush="{DynamicResource BorderLightBrush}"
+                                                 BorderThickness="1"
+                                                 Background="{DynamicResource CardBackgroundBrush}"/>
+                                        <controls:EmptyState Icon="＋"
+                                                             Title="Sin fortalezas registradas"
+                                                             Message="Registra fortalezas pedagógicas observadas."
+                                                             Visibility="{Binding Expediente.Fortalezas.Count, Converter={StaticResource CountToVisibility}}"/>
+                                    </Grid>
+                                </StackPanel>
+                            </Border>
+
+                            <Border Grid.Column="2" Style="{StaticResource PopupCard}">
+                                <StackPanel>
+                                    <TextBlock Text="Dificultades" Style="{StaticResource PopupSectionTitle}" Foreground="{DynamicResource ErrorBrush}"/>
+                                    <TextBlock Text="Barreras o dificultades observables que requieren seguimiento pedagógico."
+                                               Style="{StaticResource PopupSubtitle}" Margin="0,0,0,12"/>
+
+                                    <Grid>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*"/>
+                                            <ColumnDefinition Width="Auto"/>
+                                        </Grid.ColumnDefinitions>
+                                        <controls:FormField Header="Nueva dificultad">
+                                            <TextBox Text="{Binding NuevaDificultad, UpdateSourceTrigger=PropertyChanged}"
+                                                     MinHeight="38"
+                                                     TabIndex="119"
+                                                     AutomationProperties.Name="Nueva dificultad pedagógica"/>
+                                        </controls:FormField>
+                                        <Button Grid.Column="1"
+                                                Content="Agregar"
+                                                Command="{Binding AgregarDificultadCommand}"
+                                                VerticalAlignment="Center"
+                                                Margin="12,18,0,10"
+                                                TabIndex="120"
+                                                AutomationProperties.Name="Agregar dificultad"/>
+                                    </Grid>
+
+                                    <Grid Height="300">
+                                        <ListBox ItemsSource="{Binding Expediente.Dificultades}"
+                                                 DisplayMemberPath="Contenido"
+                                                 BorderBrush="{DynamicResource BorderLightBrush}"
+                                                 BorderThickness="1"
+                                                 Background="{DynamicResource CardBackgroundBrush}"/>
+                                        <controls:EmptyState Icon="＋"
+                                                             Title="Sin dificultades registradas"
+                                                             Message="Registra dificultades pedagógicas identificadas."
+                                                             Visibility="{Binding Expediente.Dificultades.Count, Converter={StaticResource CountToVisibility}}"/>
+                                    </Grid>
+                                </StackPanel>
+                            </Border>
                         </Grid>
+                    </ScrollViewer>
+                </TabItem>
 
-                        <TextBlock Text="Historial de Entregas por Proyectos" FontSize="16" FontWeight="Bold" Foreground="#1E293B" Margin="0,8,0,8"/>
-                        <Grid Height="210">
-                            <DataGrid ItemsSource="{Binding Entregas}" AutoGenerateColumns="False" IsReadOnly="True" HeadersVisibility="Column" GridLinesVisibility="Horizontal" CanUserSortColumns="True">
-                                <DataGrid.Columns>
-                                    <DataGridTextColumn Header="Proyecto" Binding="{Binding NombreProyecto}" Width="*"/>
-                                    <DataGridTextColumn Header="Actividad" Binding="{Binding TituloActividad}" Width="*"/>
-                                    <DataGridTextColumn Header="Fecha" Binding="{Binding Fecha, StringFormat=dd/MM/yyyy}" Width="100"/>
-                                    <DataGridTextColumn Header="Nivel de logro" Binding="{Binding NivelLogro}" Width="120"/>
-                                </DataGrid.Columns>
-                            </DataGrid>
-                            <controls:EmptyState Icon="📤" Title="Sin entregas registradas" Message="Este estudiante aún no tiene entregas de proyectos." Visibility="{Binding Entregas.Count, Converter={StaticResource CountToVisibility}}"/>
+                <TabItem Header="Apoyos y observaciones">
+                    <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+                        <Grid Margin="0,16,0,0">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="16"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+
+                            <Border Grid.Column="0" Style="{StaticResource PopupCard}">
+                                <StackPanel>
+                                    <TextBlock Text="Apoyos aplicados" Style="{StaticResource PopupSectionTitle}" Foreground="{DynamicResource InfoBrush}"/>
+                                    <TextBlock Text="Estrategias o apoyos pedagógicos que ya se han puesto en práctica."
+                                               Style="{StaticResource PopupSubtitle}" Margin="0,0,0,12"/>
+
+                                    <Grid>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*"/>
+                                            <ColumnDefinition Width="Auto"/>
+                                        </Grid.ColumnDefinitions>
+                                        <controls:FormField Header="Nuevo apoyo aplicado">
+                                            <TextBox Text="{Binding NuevoApoyo, UpdateSourceTrigger=PropertyChanged}"
+                                                     MinHeight="38"
+                                                     TabIndex="129"
+                                                     AutomationProperties.Name="Nuevo apoyo pedagógico aplicado"/>
+                                        </controls:FormField>
+                                        <Button Grid.Column="1"
+                                                Content="Agregar"
+                                                Command="{Binding AgregarApoyoCommand}"
+                                                VerticalAlignment="Center"
+                                                Margin="12,18,0,10"
+                                                TabIndex="130"
+                                                AutomationProperties.Name="Agregar apoyo aplicado"/>
+                                    </Grid>
+
+                                    <Grid Height="300">
+                                        <ListBox ItemsSource="{Binding Expediente.ApoyosAplicados}"
+                                                 DisplayMemberPath="Contenido"
+                                                 BorderBrush="{DynamicResource BorderLightBrush}"
+                                                 BorderThickness="1"
+                                                 Background="{DynamicResource CardBackgroundBrush}"/>
+                                        <controls:EmptyState Icon="＋"
+                                                             Title="Sin apoyos aplicados"
+                                                             Message="Registra los apoyos pedagógicos brindados al estudiante."
+                                                             Visibility="{Binding Expediente.ApoyosAplicados.Count, Converter={StaticResource CountToVisibility}}"/>
+                                    </Grid>
+                                </StackPanel>
+                            </Border>
+
+                            <Border Grid.Column="2" Style="{StaticResource PopupCard}">
+                                <StackPanel>
+                                    <TextBlock Text="Observaciones cronológicas" Style="{StaticResource PopupSectionTitle}"/>
+                                    <TextBlock Text="Notas breves ordenadas por fecha para conservar el seguimiento."
+                                               Style="{StaticResource PopupSubtitle}" Margin="0,0,0,12"/>
+
+                                    <Grid>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*"/>
+                                            <ColumnDefinition Width="Auto"/>
+                                        </Grid.ColumnDefinitions>
+                                        <controls:FormField Header="Nueva observación">
+                                            <TextBox Text="{Binding NuevaObservacion, UpdateSourceTrigger=PropertyChanged}"
+                                                     MinHeight="38"
+                                                     TabIndex="139"
+                                                     AutomationProperties.Name="Nueva observación cronológica"/>
+                                        </controls:FormField>
+                                        <Button Grid.Column="1"
+                                                Content="Agregar"
+                                                Command="{Binding AgregarObservacionCommand}"
+                                                VerticalAlignment="Center"
+                                                Margin="12,18,0,10"
+                                                TabIndex="140"
+                                                AutomationProperties.Name="Agregar observación cronológica"/>
+                                    </Grid>
+
+                                    <Grid Height="300">
+                                        <ListBox ItemsSource="{Binding Expediente.ObservacionesCronologicas}"
+                                                 BorderBrush="{DynamicResource BorderLightBrush}"
+                                                 BorderThickness="1"
+                                                 Background="{DynamicResource CardBackgroundBrush}"
+                                                 HorizontalContentAlignment="Stretch">
+                                            <ListBox.ItemTemplate>
+                                                <DataTemplate>
+                                                    <StackPanel Margin="8,6">
+                                                        <TextBlock Text="{Binding FechaHoraRegistro, StringFormat=dd/MM/yyyy HH:mm}"
+                                                                   Style="{StaticResource PopupSubtitle}"/>
+                                                        <TextBlock Text="{Binding Contenido}"
+                                                                   Foreground="{DynamicResource TextPrimaryBrush}"
+                                                                   TextWrapping="Wrap"
+                                                                   FontWeight="Medium"
+                                                                   Margin="0,3,0,0"/>
+                                                    </StackPanel>
+                                                </DataTemplate>
+                                            </ListBox.ItemTemplate>
+                                        </ListBox>
+                                        <controls:EmptyState Icon="＋"
+                                                             Title="Sin observaciones"
+                                                             Message="Registra observaciones cronológicas del seguimiento."
+                                                             Visibility="{Binding Expediente.ObservacionesCronologicas.Count, Converter={StaticResource CountToVisibility}}"/>
+                                    </Grid>
+                                </StackPanel>
+                            </Border>
                         </Grid>
-                    </StackPanel>
-                </ScrollViewer>
-            </TabItem>
+                    </ScrollViewer>
+                </TabItem>
 
-            <!-- Pestaña 2: Fortalezas y Dificultades -->
-            <TabItem Header="Fortalezas y Dificultades">
-                <Grid Margin="16">
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="*"/>
-                        <ColumnDefinition Width="16"/>
-                        <ColumnDefinition Width="*"/>
-                    </Grid.ColumnDefinitions>
+                <TabItem Header="Acuerdos con tutores">
+                    <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+                        <StackPanel Margin="0,16,0,0">
+                            <Border Style="{StaticResource PopupCard}" Margin="0,0,0,16">
+                                <StackPanel>
+                                    <TextBlock Text="Registrar acuerdo o compromiso familiar" Style="{StaticResource PopupSectionTitle}"/>
+                                    <TextBlock Text="Documenta el motivo, el acuerdo y una fecha de seguimiento cuando sea necesaria."
+                                               Style="{StaticResource PopupSubtitle}" Margin="0,0,0,14"/>
 
-                    <StackPanel Grid.Column="0">
-                        <TextBlock Text="Fortalezas" FontSize="16" FontWeight="Bold" Foreground="#065F46" Margin="0,0,0,6"/>
-                        <DockPanel Margin="0,0,0,8">
-                            <Button DockPanel.Dock="Right" Content="+ Agregar" Command="{Binding AgregarFortalezaCommand}" TabIndex="110" AutomationProperties.Name="Agregar fortaleza"/>
-                            <TextBox Text="{Binding NuevaFortaleza, UpdateSourceTrigger=PropertyChanged}" ToolTip="Escriba una fortaleza pedagógica..." TabIndex="109" AutomationProperties.Name="Nueva fortaleza pedagógica"/>
-                        </DockPanel>
-                        <Grid Height="300">
-                            <ListBox ItemsSource="{Binding Expediente.Fortalezas}" DisplayMemberPath="Contenido"/>
-                            <controls:EmptyState Icon="💪" Title="Sin fortalezas" Message="Registra las fortalezas pedagógicas observadas." Visibility="{Binding Expediente.Fortalezas.Count, Converter={StaticResource CountToVisibility}}"/>
-                        </Grid>
-                    </StackPanel>
+                                    <controls:FormField Header="Motivo de la reunión *">
+                                        <TextBox Text="{Binding MotivoAcuerdo, UpdateSourceTrigger=PropertyChanged}"
+                                                 MinHeight="38"
+                                                 TabIndex="150"
+                                                 AutomationProperties.Name="Motivo de la reunión con tutores"/>
+                                    </controls:FormField>
 
-                    <StackPanel Grid.Column="2">
-                        <TextBlock Text="Dificultades" FontSize="16" FontWeight="Bold" Foreground="#991B1B" Margin="0,0,0,6"/>
-                        <DockPanel Margin="0,0,0,8">
-                            <Button DockPanel.Dock="Right" Content="+ Agregar" Command="{Binding AgregarDificultadCommand}" TabIndex="120" AutomationProperties.Name="Agregar dificultad"/>
-                            <TextBox Text="{Binding NuevaDificultad, UpdateSourceTrigger=PropertyChanged}" ToolTip="Escriba una dificultad pedagógica..." TabIndex="119" AutomationProperties.Name="Nueva dificultad pedagógica"/>
-                        </DockPanel>
-                        <Grid Height="300">
-                            <ListBox ItemsSource="{Binding Expediente.Dificultades}" DisplayMemberPath="Contenido"/>
-                            <controls:EmptyState Icon="🎯" Title="Sin dificultades" Message="Registra las dificultades pedagógicas identificadas." Visibility="{Binding Expediente.Dificultades.Count, Converter={StaticResource CountToVisibility}}"/>
-                        </Grid>
-                    </StackPanel>
-                </Grid>
-            </TabItem>
+                                    <controls:FormField Header="Acuerdo o compromiso convenido *">
+                                        <TextBox Text="{Binding AcuerdoConvenido, UpdateSourceTrigger=PropertyChanged}"
+                                                 AcceptsReturn="True"
+                                                 MinHeight="90"
+                                                 TextWrapping="Wrap"
+                                                 VerticalScrollBarVisibility="Auto"
+                                                 VerticalContentAlignment="Top"
+                                                 TabIndex="151"
+                                                 AutomationProperties.Name="Acuerdo o compromiso convenido"/>
+                                    </controls:FormField>
 
-            <!-- Pestaña 3: Apoyos y Observaciones -->
-            <TabItem Header="Apoyos y Observaciones">
-                <Grid Margin="16">
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="*"/>
-                        <ColumnDefinition Width="16"/>
-                        <ColumnDefinition Width="*"/>
-                    </Grid.ColumnDefinitions>
+                                    <controls:FormField Header="Fecha de seguimiento opcional">
+                                        <DatePicker SelectedDate="{Binding FechaSeguimientoAcuerdo, UpdateSourceTrigger=PropertyChanged}"
+                                                    Style="{StaticResource PopupDatePicker}"
+                                                    TabIndex="152"
+                                                    AutomationProperties.Name="Fecha de seguimiento del acuerdo"/>
+                                    </controls:FormField>
 
-                    <StackPanel Grid.Column="0">
-                        <TextBlock Text="Apoyos Aplicados" FontSize="16" FontWeight="Bold" Foreground="#1E3A8A" Margin="0,0,0,6"/>
-                        <DockPanel Margin="0,0,0,8">
-                            <Button DockPanel.Dock="Right" Content="+ Agregar" Command="{Binding AgregarApoyoCommand}" TabIndex="130" AutomationProperties.Name="Agregar apoyo aplicado"/>
-                            <TextBox Text="{Binding NuevoApoyo, UpdateSourceTrigger=PropertyChanged}" ToolTip="Escriba un apoyo pedagógico aplicado..." TabIndex="129" AutomationProperties.Name="Nuevo apoyo pedagógico aplicado"/>
-                        </DockPanel>
-                        <Grid Height="300">
-                            <ListBox ItemsSource="{Binding Expediente.ApoyosAplicados}" DisplayMemberPath="Contenido"/>
-                            <controls:EmptyState Icon="🤝" Title="Sin apoyos aplicados" Message="Registra los apoyos pedagógicos brindados al estudiante." Visibility="{Binding Expediente.ApoyosAplicados.Count, Converter={StaticResource CountToVisibility}}"/>
-                        </Grid>
-                    </StackPanel>
+                                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                                        <Button Style="{StaticResource PrimaryButton}"
+                                                Content="Registrar acuerdo"
+                                                Command="{Binding AgregarAcuerdoCommand}"
+                                                TabIndex="153"
+                                                AutomationProperties.Name="Registrar acuerdo con tutores"/>
+                                    </StackPanel>
+                                </StackPanel>
+                            </Border>
 
-                    <StackPanel Grid.Column="2">
-                        <TextBlock Text="Observaciones Cronológicas" FontSize="16" FontWeight="Bold" Foreground="#374151" Margin="0,0,0,6"/>
-                        <DockPanel Margin="0,0,0,8">
-                            <Button DockPanel.Dock="Right" Content="+ Agregar" Command="{Binding AgregarObservacionCommand}" TabIndex="140" AutomationProperties.Name="Agregar observación cronológica"/>
-                            <TextBox Text="{Binding NuevaObservacion, UpdateSourceTrigger=PropertyChanged}" ToolTip="Escriba una observación cronológica..." TabIndex="139" AutomationProperties.Name="Nueva observación cronológica"/>
-                        </DockPanel>
-                        <Grid Height="300">
-                            <ListBox ItemsSource="{Binding Expediente.ObservacionesCronologicas}">
-                                <ListBox.ItemTemplate>
-                                    <DataTemplate>
-                                        <StackPanel Margin="2">
-                                            <TextBlock Text="{Binding FechaHoraRegistro, StringFormat=dd/MM/yyyy HH:mm}" FontSize="11" Foreground="#64748B"/>
-                                            <TextBlock Text="{Binding Contenido}" TextWrapping="Wrap" FontWeight="SemiBold"/>
-                                        </StackPanel>
-                                    </DataTemplate>
-                                </ListBox.ItemTemplate>
-                            </ListBox>
-                            <controls:EmptyState Icon="📝" Title="Sin observaciones" Message="Registra observaciones cronológicas del seguimiento." Visibility="{Binding Expediente.ObservacionesCronologicas.Count, Converter={StaticResource CountToVisibility}}"/>
-                        </Grid>
-                    </StackPanel>
-                </Grid>
-            </TabItem>
+                            <Border Style="{StaticResource PopupCard}">
+                                <StackPanel>
+                                    <TextBlock Text="Histórico de acuerdos" Style="{StaticResource PopupSectionTitle}"/>
+                                    <TextBlock Text="Compromisos familiares registrados para consulta y seguimiento."
+                                               Style="{StaticResource PopupSubtitle}" Margin="0,0,0,10"/>
 
-            <!-- Pestaña 4: Acuerdos con Tutores -->
-            <TabItem Header="Acuerdos con Tutores">
-                <ScrollViewer VerticalScrollBarVisibility="Auto" Padding="16">
-                    <StackPanel>
-                        <TextBlock Text="Registrar Acuerdo o Compromiso Familiar" FontSize="16" FontWeight="Bold" Foreground="#1E293B" Margin="0,0,0,8"/>
-                        <TextBlock Text="Motivo de la reunión" FontWeight="SemiBold"/>
-                        <TextBox Text="{Binding MotivoAcuerdo, UpdateSourceTrigger=PropertyChanged}" TabIndex="150" AutomationProperties.Name="Motivo de la reunión con tutores"/>
+                                    <Grid Height="230">
+                                        <ListBox ItemsSource="{Binding Expediente.AcuerdosTutores}"
+                                                 BorderThickness="0"
+                                                 Background="Transparent"
+                                                 HorizontalContentAlignment="Stretch">
+                                            <ListBox.ItemTemplate>
+                                                <DataTemplate>
+                                                    <Border Background="{DynamicResource SectionBackgroundBrush}"
+                                                            BorderBrush="{DynamicResource BorderLightBrush}"
+                                                            BorderThickness="1"
+                                                            CornerRadius="{DynamicResource CornerRadiusMedium}"
+                                                            Padding="12"
+                                                            Margin="0,4">
+                                                        <StackPanel>
+                                                            <Grid>
+                                                                <Grid.ColumnDefinitions>
+                                                                    <ColumnDefinition Width="*"/>
+                                                                    <ColumnDefinition Width="Auto"/>
+                                                                </Grid.ColumnDefinitions>
+                                                                <TextBlock Text="{Binding Motivo}"
+                                                                           Foreground="{DynamicResource TextPrimaryBrush}"
+                                                                           FontWeight="SemiBold"/>
+                                                                <TextBlock Grid.Column="1"
+                                                                           Text="{Binding FechaReunion, StringFormat=Fecha: {0:dd/MM/yyyy}}"
+                                                                           Style="{StaticResource PopupSubtitle}"
+                                                                           Margin="16,0,0,0"/>
+                                                            </Grid>
+                                                            <TextBlock Text="{Binding AcuerdoConvenido}"
+                                                                       Foreground="{DynamicResource TextSecondaryBrush}"
+                                                                       TextWrapping="Wrap"
+                                                                       Margin="0,6,0,0"/>
+                                                        </StackPanel>
+                                                    </Border>
+                                                </DataTemplate>
+                                            </ListBox.ItemTemplate>
+                                        </ListBox>
+                                        <controls:EmptyState Icon="＋"
+                                                             Title="Sin acuerdos registrados"
+                                                             Message="Registra acuerdos o compromisos familiares."
+                                                             Visibility="{Binding Expediente.AcuerdosTutores.Count, Converter={StaticResource CountToVisibility}}"/>
+                                    </Grid>
+                                </StackPanel>
+                            </Border>
+                        </StackPanel>
+                    </ScrollViewer>
+                </TabItem>
+            </TabControl>
+        </Grid>
 
-                        <TextBlock Text="Acuerdo o compromiso convenido" FontWeight="SemiBold"/>
-                        <TextBox Text="{Binding AcuerdoConvenido, UpdateSourceTrigger=PropertyChanged}" AcceptsReturn="True" Height="50" TextWrapping="Wrap" TabIndex="151" AutomationProperties.Name="Acuerdo o compromiso convenido"/>
-
-                        <TextBlock Text="Fecha de seguimiento opcional" FontWeight="SemiBold"/>
-                        <DatePicker SelectedDate="{Binding FechaSeguimientoAcuerdo, UpdateSourceTrigger=PropertyChanged}" Margin="0,0,0,8" TabIndex="152" AutomationProperties.Name="Fecha de seguimiento del acuerdo"/>
-
-                        <WrapPanel Margin="0,4,0,12" HorizontalAlignment="Right">
-                            <Button Content="+ Registrar Acuerdo" Command="{Binding AgregarAcuerdoCommand}" TabIndex="153" AutomationProperties.Name="Registrar acuerdo con tutores"/>
-                        </WrapPanel>
-
-                        <TextBlock Text="Histórico de Acuerdos Registrados" FontSize="16" FontWeight="Bold" Foreground="#1E293B" Margin="0,8,0,8"/>
-                        <Grid Height="180">
-                            <ListBox ItemsSource="{Binding Expediente.AcuerdosTutores}">
-                                <ListBox.ItemTemplate>
-                                    <DataTemplate>
-                                        <Border Background="#F1F5F9" CornerRadius="6" Padding="8" Margin="0,4">
-                                            <StackPanel>
-                                                <DockPanel>
-                                                    <TextBlock DockPanel.Dock="Left" Text="{Binding Motivo}" FontWeight="Bold" Foreground="#0F172A"/>
-                                                    <TextBlock DockPanel.Dock="Right" Text="{Binding FechaReunion, StringFormat=Fecha: {0:dd/MM/yyyy}}" Foreground="#64748B" FontSize="12"/>
-                                                </DockPanel>
-                                                <TextBlock Text="{Binding AcuerdoConvenido}" TextWrapping="Wrap" Margin="0,4,0,0"/>
-                                            </StackPanel>
-                                        </Border>
-                                    </DataTemplate>
-                                </ListBox.ItemTemplate>
-                            </ListBox>
-                            <controls:EmptyState Icon="🤝" Title="Sin acuerdos registrados" Message="Registra acuerdos o compromisos familiares." Visibility="{Binding Expediente.AcuerdosTutores.Count, Converter={StaticResource CountToVisibility}}"/>
-                        </Grid>
-                    </StackPanel>
-                </ScrollViewer>
-            </TabItem>
-        </TabControl>
-
-        <DockPanel Grid.Row="2">
-            <Button DockPanel.Dock="Right" Content="Cerrar" Click="OnCerrarClic" IsCancel="True" TabIndex="900" AutomationProperties.Name="Cerrar expediente del estudiante"/>
-        </DockPanel>
+        <Border Grid.Row="2" Style="{StaticResource PopupFooter}">
+            <Grid>
+                <TextBlock Text="Expediente de seguimiento pedagógico"
+                           Style="{StaticResource PopupSubtitle}"
+                           VerticalAlignment="Center"/>
+                <Button HorizontalAlignment="Right"
+                        Content="Cerrar expediente"
+                        Click="OnCerrarClic"
+                        IsCancel="True"
+                        MinWidth="130"
+                        TabIndex="900"
+                        AutomationProperties.Name="Cerrar expediente del estudiante"/>
+            </Grid>
+        </Border>
     </Grid>
 </Window>
