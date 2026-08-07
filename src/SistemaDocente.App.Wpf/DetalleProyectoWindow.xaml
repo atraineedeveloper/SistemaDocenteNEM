@@ -5,7 +5,7 @@
         xmlns:prop="clr-namespace:SistemaDocente.App.Wpf.Properties"
         xml:lang="es-MX"
         Title="{x:Static prop:Resources.DetalleProyectoTitle}"
-        Height="720" Width="820" MinHeight="600" MinWidth="700"
+        Height="760" Width="860" MinHeight="620" MinWidth="720"
         WindowStartupLocation="CenterOwner" ShowInTaskbar="False"
         ResizeMode="CanResizeWithGrip"
         Background="{DynamicResource WindowBackgroundBrush}">
@@ -62,7 +62,7 @@
                 <Border Style="{StaticResource PopupCard}" Margin="0,0,0,16">
                     <StackPanel>
                         <TextBlock Text="Datos del proyecto" Style="{StaticResource PopupSectionTitle}"/>
-                        <TextBlock Text="Mantén una descripción breve y un periodo coherente con la intención didáctica."
+                        <TextBlock Text="Mantén una descripción breve, define la metodología NEM y delimita los grados a los que se dirige."
                                    Style="{StaticResource PopupSubtitle}" Margin="0,0,0,14"/>
 
                         <controls:FormField Header="{x:Static prop:Resources.NombreProyecto}">
@@ -83,6 +83,42 @@
                                      AutomationProperties.Name="Descripción del proyecto"/>
                         </controls:FormField>
 
+                        <controls:FormField Header="Metodología NEM *">
+                            <ComboBox ItemsSource="{Binding MetodologiasProyecto}"
+                                      DisplayMemberPath="Texto"
+                                      SelectedValuePath="Valor"
+                                      SelectedValue="{Binding MetodologiaProyecto, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                      MinHeight="38"
+                                      TabIndex="12"
+                                      AutomationProperties.Name="Metodología NEM del proyecto"/>
+                        </controls:FormField>
+
+                        <controls:FormField Header="Grados objetivo *">
+                            <StackPanel>
+                                <ItemsControl ItemsSource="{Binding GradosProyecto}"
+                                              AutomationProperties.Name="Grados objetivo del proyecto">
+                                    <ItemsControl.ItemsPanel>
+                                        <ItemsPanelTemplate>
+                                            <WrapPanel/>
+                                        </ItemsPanelTemplate>
+                                    </ItemsControl.ItemsPanel>
+                                    <ItemsControl.ItemTemplate>
+                                        <DataTemplate>
+                                            <CheckBox Content="{Binding Texto}"
+                                                      IsChecked="{Binding Seleccionado, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                                      Margin="0,0,18,8"
+                                                      MinWidth="52"
+                                                      AutomationProperties.Name="{Binding Texto}"/>
+                                        </DataTemplate>
+                                    </ItemsControl.ItemTemplate>
+                                </ItemsControl>
+                                <TextBlock Text="En un grupo unigrado el grado se preselecciona; en multigrado puedes elegir uno o varios grados atendidos."
+                                           Style="{StaticResource PopupSubtitle}"
+                                           TextWrapping="Wrap"
+                                           Margin="0,2,0,0"/>
+                            </StackPanel>
+                        </controls:FormField>
+
                         <Grid>
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="*"/>
@@ -93,14 +129,14 @@
                             <controls:FormField Grid.Column="0" Header="{x:Static prop:Resources.FechaInicio}">
                                 <DatePicker SelectedDate="{Binding FechaInicio, Mode=TwoWay}"
                                             Style="{StaticResource PopupDatePicker}"
-                                            TabIndex="12"
+                                            TabIndex="13"
                                             AutomationProperties.Name="Fecha de inicio del proyecto"/>
                             </controls:FormField>
 
                             <controls:FormField Grid.Column="2" Header="{x:Static prop:Resources.FechaTermino}">
                                 <DatePicker SelectedDate="{Binding FechaTermino, Mode=TwoWay}"
                                             Style="{StaticResource PopupDatePicker}"
-                                            TabIndex="13"
+                                            TabIndex="14"
                                             AutomationProperties.Name="Fecha de término del proyecto"/>
                             </controls:FormField>
                         </Grid>
@@ -123,7 +159,7 @@
                                      VerticalScrollBarVisibility="Auto"
                                      VerticalContentAlignment="Top"
                                      TextWrapping="Wrap"
-                                     TabIndex="14"
+                                     TabIndex="15"
                                      AutomationProperties.Name="Observaciones del proyecto"/>
                         </controls:FormField>
 
