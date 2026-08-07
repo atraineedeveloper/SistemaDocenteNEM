@@ -18,12 +18,14 @@
     <Color x:Key="HoverBackgroundColor">#3A1C26</Color>
     <Color x:Key="PressedBackgroundColor">#4A2530</Color>
     <Color x:Key="DisabledBackgroundColor">#2B121B</Color>
+    <Color x:Key="HeaderIconBackgroundColor">#26000000</Color>
     <SolidColorBrush x:Key="WindowBackgroundBrush" Color="{StaticResource WindowBackgroundColor}"/>
     <SolidColorBrush x:Key="CardBackgroundBrush" Color="{StaticResource CardBackgroundColor}"/>
     <SolidColorBrush x:Key="SectionBackgroundBrush" Color="{StaticResource SectionBackgroundColor}"/>
     <SolidColorBrush x:Key="HoverBackgroundBrush" Color="{StaticResource HoverBackgroundColor}"/>
     <SolidColorBrush x:Key="PressedBackgroundBrush" Color="{StaticResource PressedBackgroundColor}"/>
     <SolidColorBrush x:Key="DisabledBackgroundBrush" Color="{StaticResource DisabledBackgroundColor}"/>
+    <SolidColorBrush x:Key="HeaderIconBackgroundBrush" Color="{StaticResource HeaderIconBackgroundColor}"/>
 
     <!-- Texto -->
     <Color x:Key="TextPrimaryColor">#FCE8EC</Color>
