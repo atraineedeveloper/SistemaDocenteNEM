@@ -3,6 +3,10 @@ using SistemaDocente.Core;
 
 namespace SistemaDocente.Presentation;
 
+public sealed record OpcionEtapaCognoscitiva(
+    EtapaDesarrolloCognoscitivo Valor,
+    string Texto);
+
 public sealed class ConfiguracionGrupoViewModel : ViewModelBase
 {
     private readonly GestionContextoGrupoCasosUso _casosUso;
@@ -32,8 +36,14 @@ public sealed class ConfiguracionGrupoViewModel : ViewModelBase
 
     public RelayCommand GuardarCommand { get; }
 
-    public IReadOnlyList<EtapaDesarrolloCognoscitivo> EtapasCognoscitivas { get; } =
-        Enum.GetValues<EtapaDesarrolloCognoscitivo>();
+    public IReadOnlyList<OpcionEtapaCognoscitiva> EtapasCognoscitivas { get; } =
+    [
+        new(EtapaDesarrolloCognoscitivo.NoEspecificada, "No especificada"),
+        new(EtapaDesarrolloCognoscitivo.Sensoriomotora, "Sensoriomotora"),
+        new(EtapaDesarrolloCognoscitivo.Preoperacional, "Preoperacional"),
+        new(EtapaDesarrolloCognoscitivo.OperacionesConcretas, "Operaciones concretas"),
+        new(EtapaDesarrolloCognoscitivo.OperacionesFormales, "Operaciones formales"),
+    ];
 
     public string CicloEscolar { get => _cicloEscolar; set => SetProperty(ref _cicloEscolar, value); }
     public string NombreEscuela { get => _nombreEscuela; set => SetProperty(ref _nombreEscuela, value); }
@@ -46,12 +56,24 @@ public sealed class ConfiguracionGrupoViewModel : ViewModelBase
     public string Turno { get => _turno; set => SetProperty(ref _turno, value); }
     public EtapaDesarrolloCognoscitivo EtapaCognoscitiva { get => _etapaCognoscitiva; set => SetProperty(ref _etapaCognoscitiva, value); }
     public string DocenteResponsable { get => _docenteResponsable; set => SetProperty(ref _docenteResponsable, value); }
-    public DateOnly? ResponsableDesde { get => _responsableDesde; set => SetProperty(ref _responsableDesde, value); }
-    public DateOnly? ResponsableHasta { get => _responsableHasta; set => SetProperty(ref _responsableHasta, value); }
+    public DateOnly? ResponsableDesde { get => _responsableDesde; set { if (SetProperty(ref _responsableDesde, value)) OnPropertyChanged(nameof(ResponsableDesdeFecha)); } }
+    public DateOnly? ResponsableHasta { get => _responsableHasta; set { if (SetProperty(ref _responsableHasta, value)) OnPropertyChanged(nameof(ResponsableHastaFecha)); } }
     public string HoraEntrada { get => _horaEntrada; set => SetProperty(ref _horaEntrada, value); }
     public string HoraSalida { get => _horaSalida; set => SetProperty(ref _horaSalida, value); }
     public string Mensaje { get => _mensaje; private set => SetProperty(ref _mensaje, value); }
     public bool GuardadoCorrectamente { get; private set; }
+
+    public DateTime? ResponsableDesdeFecha
+    {
+        get => ResponsableDesde is { } fecha ? fecha.ToDateTime(TimeOnly.MinValue) : null;
+        set => ResponsableDesde = value is { } fecha ? DateOnly.FromDateTime(fecha) : null;
+    }
+
+    public DateTime? ResponsableHastaFecha
+    {
+        get => ResponsableHasta is { } fecha ? fecha.ToDateTime(TimeOnly.MinValue) : null;
+        set => ResponsableHasta = value is { } fecha ? DateOnly.FromDateTime(fecha) : null;
+    }
 
     public void Inicializar(GrupoId grupoId)
     {
@@ -74,6 +96,8 @@ public sealed class ConfiguracionGrupoViewModel : ViewModelBase
         HoraSalida = contexto.HoraSalida?.ToString("HH:mm") ?? string.Empty;
         Mensaje = string.Empty;
         GuardadoCorrectamente = false;
+        OnPropertyChanged(nameof(ResponsableDesdeFecha));
+        OnPropertyChanged(nameof(ResponsableHastaFecha));
         GuardarCommand.NotifyCanExecuteChanged();
     }
 
