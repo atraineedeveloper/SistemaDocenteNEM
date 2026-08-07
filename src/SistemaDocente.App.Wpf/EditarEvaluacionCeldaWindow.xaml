@@ -3,13 +3,14 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xml:lang="es-MX"
         Title="Editar evaluación"
-        Width="520" Height="410" MinWidth="480" MinHeight="380"
+        Width="540" Height="500" MinWidth="500" MinHeight="460"
         ResizeMode="CanResizeWithGrip"
         WindowStartupLocation="CenterOwner"
         ShowInTaskbar="False"
         Background="{DynamicResource WindowBackgroundBrush}">
     <Grid Margin="24">
         <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
@@ -19,31 +20,47 @@
         <StackPanel Margin="0,0,0,18">
             <TextBlock x:Name="ActividadText" Foreground="{DynamicResource PrimaryBrush}" FontSize="12" FontWeight="SemiBold"/>
             <TextBlock x:Name="EstudianteText" Style="{StaticResource Heading2}" FontSize="20" Margin="0,4,0,2"/>
-            <TextBlock Text="La edición se conserva localmente hasta que guardes los cambios del proyecto." Foreground="{DynamicResource TextMutedBrush}" TextWrapping="Wrap"/>
+            <TextBlock Text="Entrega y nivel de logro se registran por separado. Los cambios se guardan con el proyecto."
+                       Foreground="{DynamicResource TextMutedBrush}" TextWrapping="Wrap"/>
         </StackPanel>
 
         <StackPanel Grid.Row="1" Margin="0,0,0,14">
+            <TextBlock Text="Estado de entrega" Style="{StaticResource FormLabel}"/>
+            <ComboBox ItemsSource="{Binding OpcionesEstadoEntrega}"
+                      DisplayMemberPath="Texto"
+                      SelectedValuePath="Estado"
+                      SelectedValue="{Binding EstadoEntrega, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                      AutomationProperties.Name="Estado de entrega"
+                      TabIndex="1"/>
+            <TextBlock Text="Una entrega puede registrarse primero y evaluarse después."
+                       Style="{StaticResource Caption}" Margin="0,5,0,0"/>
+        </StackPanel>
+
+        <StackPanel Grid.Row="2" Margin="0,0,0,14">
             <TextBlock Text="Nivel de logro" Style="{StaticResource FormLabel}"/>
             <ComboBox ItemsSource="{Binding OpcionesNivel}"
                       DisplayMemberPath="Texto"
                       SelectedValuePath="Nivel"
                       SelectedValue="{Binding NivelLogro, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                      IsEnabled="{Binding PuedeEvaluarLogro}"
                       AutomationProperties.Name="Nivel de logro"
-                      TabIndex="1"/>
+                      TabIndex="2"/>
+            <TextBlock Text="El nivel sólo se habilita cuando la actividad está marcada como entregada."
+                       Style="{StaticResource Caption}" Margin="0,5,0,0"/>
         </StackPanel>
 
-        <StackPanel Grid.Row="2">
+        <StackPanel Grid.Row="3">
             <TextBlock Text="Observación" Style="{StaticResource FormLabel}"/>
             <TextBox Text="{Binding Observacion, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                      AcceptsReturn="True" TextWrapping="Wrap" VerticalScrollBarVisibility="Auto"
-                     MaxLength="500" MinHeight="150" VerticalContentAlignment="Top"
-                     AutomationProperties.Name="Observación de la evaluación" TabIndex="2"/>
+                     MaxLength="500" MinHeight="130" VerticalContentAlignment="Top"
+                     AutomationProperties.Name="Observación de la evaluación" TabIndex="3"/>
             <TextBlock Text="Máximo 500 caracteres. Registra observaciones breves y pedagógicas." Style="{StaticResource Caption}" Margin="0,5,0,0"/>
         </StackPanel>
 
-        <StackPanel Grid.Row="3" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,18,0,0">
-            <Button Content="Cancelar" IsCancel="True" Click="OnCancelar" TabIndex="3"/>
-            <Button Style="{StaticResource PrimaryButton}" Content="Aceptar" IsDefault="True" Click="OnAceptar" TabIndex="4"/>
+        <StackPanel Grid.Row="4" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,18,0,0">
+            <Button Content="Cancelar" IsCancel="True" Click="OnCancelar" TabIndex="4"/>
+            <Button Style="{StaticResource PrimaryButton}" Content="Aplicar a la matriz" IsDefault="True" Click="OnAceptar" TabIndex="5"/>
         </StackPanel>
     </Grid>
 </Window>
