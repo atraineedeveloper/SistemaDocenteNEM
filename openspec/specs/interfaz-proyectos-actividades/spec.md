@@ -2,41 +2,41 @@
 
 ## Purpose
 
-Define la separación entre planeación de proyectos/actividades y la superficie operativa de Evaluación, usando ventanas dedicadas para edición compleja y una matriz para el seguimiento del grupo.
+Define the separation between project/activity planning and the operational Evaluation surface, using dedicated windows for complex editing and a matrix for group follow-up.
 
 ## Requirements
 
-### Requirement: Navegación separada de Proyectos y Evaluación
-El sistema SHALL mantener Proyectos y Evaluación como módulos principales separados dentro de la navegación global. Proyectos SHALL concentrar planeación y acceso a detalles; Evaluación SHALL concentrar el seguimiento matricial del proyecto seleccionado.
+### Requirement: Separate Projects and Evaluation navigation
+The system SHALL keep Projects and Evaluation as separate main modules in global navigation. Projects SHALL focus on planning and access to details; Evaluation SHALL focus on matrix follow-up for the selected project.
 
-#### Scenario: Abrir módulo Evaluación
-- **WHEN** el usuario selecciona `Evaluación` en la navegación principal
-- **THEN** el sistema muestra la matriz de evaluación del grupo y permite seleccionar el proyecto didáctico
+#### Scenario: Open Evaluation module
+- **WHEN** the user selects `Evaluación` in the main navigation
+- **THEN** the system shows the group evaluation matrix and allows a teaching project to be selected
 
-### Requirement: Detalle de proyecto en ventana dedicada
-El módulo Proyectos SHALL permitir abrir `DetalleProyectoWindow` para editar datos del proyecto y gestionar el acceso a sus actividades sin convertir la vista principal en un master-detail obligatorio.
+### Requirement: Project detail in a dedicated window
+The Projects module SHALL allow `DetalleProyectoWindow` to be opened to edit project data and manage access to activities without turning the main view into a mandatory master-detail layout.
 
-#### Scenario: Apertura de detalle de proyecto
-- **WHEN** el usuario abre un proyecto desde la lista principal
-- **THEN** el sistema muestra `DetalleProyectoWindow` con la información y acciones correspondientes al proyecto seleccionado
+#### Scenario: Open project detail
+- **WHEN** the user opens a project from the main list
+- **THEN** the system shows `DetalleProyectoWindow` with the information and actions for the selected project
 
-### Requirement: Detalle de actividad en ventana dedicada
-La edición compleja de una actividad SHALL realizarse en `DetalleActividadWindow`, conservando la actividad como unidad de guardado de su padrón histórico.
+### Requirement: Activity detail in a dedicated window
+Complex activity editing SHALL take place in `DetalleActividadWindow`, preserving the activity as the save unit for its historical roster.
 
-#### Scenario: Apertura de actividad
-- **WHEN** el usuario abre una actividad existente o crea una nueva desde el detalle del proyecto
-- **THEN** el sistema muestra `DetalleActividadWindow` para editar sus datos
+#### Scenario: Open an activity
+- **WHEN** the user opens an existing activity or creates a new one from project detail
+- **THEN** the system shows `DetalleActividadWindow` for editing its data
 
-### Requirement: Evaluación matricial sin selector independiente de actividad
-Evaluación SHALL representar estudiantes en filas y actividades en columnas. La columna de la celda actual SHALL definir la actividad de contexto para métricas y acciones masivas, sin reintroducir un selector independiente de actividad.
+### Requirement: Matrix evaluation without an independent activity selector
+Evaluation SHALL represent students in rows and activities in columns. The current cell's column SHALL define the activity context for metrics and bulk actions, without reintroducing an independent activity selector.
 
-#### Scenario: Cambiar de actividad mediante la matriz
-- **WHEN** el usuario mueve la celda actual a otra columna de actividad
-- **THEN** las métricas y acciones de Evaluación usan esa actividad como contexto
+#### Scenario: Change activity through the matrix
+- **WHEN** the user moves the current cell to another activity column
+- **THEN** Evaluation metrics and actions use that activity as context
 
-### Requirement: Padrón histórico preservado
-La interfaz SHALL respetar el padrón histórico de cada actividad y SHALL mostrar como no aplicable una celda correspondiente a un estudiante que todavía no pertenecía a esa actividad.
+### Requirement: Preserve historical roster
+The interface SHALL respect each activity's historical roster and SHALL display a cell as not applicable when the student did not yet belong to that activity.
 
-#### Scenario: Estudiante incorporado posteriormente
-- **WHEN** un estudiante fue dado de alta después de una actividad anterior
-- **THEN** la matriz muestra `—` para esa actividad previa y no permite editar la celda
+#### Scenario: Student admitted later
+- **WHEN** a student joined after an earlier activity
+- **THEN** the matrix shows `—` for that earlier activity and does not allow the cell to be edited
