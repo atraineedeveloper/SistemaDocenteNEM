@@ -13,9 +13,9 @@ La solución usa .NET 10. Los proyectos productivos portables usan `net10.0`; la
 | `SistemaDocente.Core` | Modelo de dominio, identidades, invariantes y excepciones. Contiene grupo/estudiantes, asistencia, proyectos didácticos, actividades, entregas/niveles de logro y elementos del expediente pedagógico. |
 | `SistemaDocente.Application` | Casos de uso, puertos de persistencia, snapshots y coordinación entre agregados. Gestiona grupo, asistencia, proyectos/actividades, evaluación y expediente. |
 | `SistemaDocente.Data` | Adaptadores SQLite, inicialización/migración de esquema, consultas y persistencia transaccional. Traduce errores técnicos en la frontera de infraestructura. |
-| `SistemaDocente.Presentation` | MVVM portable: ViewModels, comandos, modelos visuales, confirmaciones y estado editable. No depende de WPF, Data ni SQLite. |
+| `SistemaDocente.Presentation` | MVVM portable: ViewModels, comandos, modelos visuales, confirmaciones, estado editable y fronteras de módulo como `ModuloAsistenciaViewModel`. No depende de WPF, Data ni SQLite. |
 | `SistemaDocente.Reporting` | Frontera reservada para reportes. Sigue separado del resto de la interfaz. |
-| `SistemaDocente.App.Wpf` | Shell WPF (`MainWindow`) que sólo ensambla vistas y feedback global; presentaciones de módulos en `Views/` (Grupo, Asistencia, Proyectos, Evaluación); encabezado de navegación global en `Controls/`; ventanas dedicadas; temas; recursos visuales; servicios WPF; notificaciones; raíz de composición. |
+| `SistemaDocente.App.Wpf` | Shell WPF (`MainWindow`) que sólo ensambla vistas y feedback global; presentaciones de módulos en `Views/`; encabezado de navegación global en `Controls/`; ventanas dedicadas; temas; recursos visuales; servicios WPF; notificaciones; raíz de composición. |
 
 Los proyectos de pruebas existentes son:
 
@@ -120,6 +120,18 @@ Principios vigentes:
 
 Presentation usa MVVM propio y portable. Los ViewModels gestionan selección, edición, filtros, confirmaciones, cambios pendientes y comandos sin conocer WPF.
 
+Asistencia dispone de una frontera explícita de módulo:
+
+```text
+ModuloAsistenciaViewModel
+├── Diaria  → GestionAsistenciaViewModel
+├── Mensual → GestionAsistenciaMensualViewModel
+├── MostrarDiaria / MostrarMensual
+└── comandos de cambio de vista
+```
+
+`AsistenciaView` consume esta frontera en lugar del `MainWindowViewModel` completo. `MainWindowViewModel` sigue coordinando la navegación global y conserva aliases de compatibilidad hacia los dos ViewModels de asistencia.
+
 `App.xaml.cs` es la raíz de composición. Allí se crean actualmente, entre otros:
 
 - persistencia de grupos;
@@ -144,16 +156,20 @@ La aplicación registra errores no controlados en un log local de diagnóstico y
 - Proyectos;
 - Evaluación.
 
-El encabezado global contiene branding, selector de grupo, navegación, selector de tema e indicador del módulo activo. El toast y el progreso global permanecen en el shell.
+El encabezado global contiene branding, selector de grupo, navegación, selector de tema e indicador del módulo activo. El toast y el progreso global permanecen en el shell y consumen recursos semánticos del tema vigente.
 
 ### Vistas principales especializadas
 
-Cada módulo es responsable exclusivo de su presentación en un `UserControl` de `Views/`, con su propio `DataContext` por binding. Se usa una superficie amplia dentro de la vista correspondiente para tareas que necesitan panorama o mucho espacio, por ejemplo:
+Cada módulo es responsable de su propia presentación en un `UserControl` de `Views/`, con una frontera de datos explícita por binding:
 
-- lista de estudiantes (`GrupoView`);
-- asistencia mensual (`AsistenciaView`);
-- lista de proyectos (`ProyectosView`);
-- evaluación de alumnos (`EvaluacionView`).
+- `GrupoView` → `GestionGrupoViewModel`;
+- `AsistenciaView` → `ModuloAsistenciaViewModel`;
+- `ProyectosView` → `GestionProyectosViewModel`;
+- `EvaluacionView` → `EvaluacionActividadesViewModel`.
+
+Se usa una superficie amplia para tareas que necesitan panorama o mucho espacio, por ejemplo lista de estudiantes, asistencia mensual, lista de proyectos y evaluación de alumnos.
+
+`GrupoView` recibe el ViewModel de Expediente mediante una propiedad de dependencia; no necesita conocer la clase concreta `MainWindow` para resolver el ViewModel raíz.
 
 ### Ventanas dedicadas
 
@@ -170,15 +186,11 @@ La regla arquitectónica de UI es ahora:
 
 Se elige entre lista principal, ventana dedicada o pantalla especializada según la tarea real del usuario. Master-detail queda como patrón opcional, no obligatorio.
 
-### Diseño y temas
+### Diseño, temas y recursos dinámicos
 
-La interfaz dispone de un sistema de diseño centralizado basado en recursos WPF, incluyendo `DesignTokens.xaml`, y soporta temas:
+La interfaz dispone de un sistema de diseño centralizado basado en recursos WPF, incluyendo `DesignTokens.xaml`, y soporta temas Claro, Oscuro y Alto contraste.
 
-- Claro;
-- Oscuro;
-- Alto contraste.
-
-Los recursos visuales deben consumirse mediante recursos compartidos en lugar de colores y estilos repetidos por ventana.
+Las vistas extraídas y el shell no deben fijar colores semánticos con hexadecimales. Deben usar `DynamicResource` o resolver brushes semánticos del tema actual. Cuando un elemento se genera en code-behind —por ejemplo las columnas mensuales de asistencia— la vista reconstruye sus estilos al cambiar `ThemeService.ThemeChanged`.
 
 La aplicación usa `xml:lang="es-MX"`, recursos localizables en partes de la UI y propiedades de automatización/accesibilidad en controles relevantes.
 
@@ -187,6 +199,14 @@ Las reglas de interfaz vigentes se documentan en:
 ```text
 docs/UI-GUIDELINES.md
 ```
+
+### Ciclo de vida de eventos WPF
+
+Los `UserControl` que escuchan `PropertyChanged` o eventos estáticos mantienen suscripciones idempotentes y las liberan en `Unloaded`. Esto evita dobles invocaciones y referencias retenidas cuando una vista se desmonta o cambia su `DataContext`.
+
+### Virtualización
+
+Los `DataGrid` que representan listas operativas controlan su propio scroll. No deben envolverse en un `ScrollViewer` exterior que les entregue altura no acotada y degrade la virtualización. La lista principal de estudiantes de `GrupoView` usa una fila `*` y mantiene virtualización de filas/columnas.
 
 ## Flujos principales
 
@@ -197,6 +217,8 @@ La UI delega al ViewModel; Presentation delega a Application; Application modifi
 ### Asistencia mensual
 
 Application proyecta únicamente días lectivos visibles, reúne matrícula activa e historial y devuelve snapshots inmutables. Presentation mantiene cambios por fecha. Guardar un día confirma sólo esa fecha; guardar varias fechas ejecuta operaciones diarias secuenciales y no afirma atomicidad mensual.
+
+Los atajos P/F/R/J, Enter, Home/End y PageUp/PageDown sólo se procesan cuando el foco pertenece a `GrillaMensual`; los controles de texto quedan excluidos. Ctrl+S se mantiene como atajo del módulo mediante `InputBindings`.
 
 ### Proyectos y actividades
 
@@ -216,7 +238,7 @@ Desde Grupo se abre la ventana de expediente del alumno. Application consolida a
 - **Application:** casos de uso con dobles de puertos, snapshots y conflictos.
 - **Data:** pruebas contra SQLite temporal real, migraciones, restricciones, rollback y reapertura.
 - **Presentation:** ViewModels y comandos sin WPF ni SQLite.
-- **App.Wpf:** composición, bindings/patrones verificables y límites del code-behind.
+- **App.Wpf:** composición, bindings/patrones verificables, frontera de módulos, recursos semánticos, teclado contextual y límites del code-behind.
 - **Prueba manual:** apertura real de ventanas, redimensionamiento, foco, teclado, temas y experiencia visual.
 - **Auditoría independiente:** revisión de arquitectura, persistencia, UX y regresiones antes de cerrar cambios relevantes.
 
@@ -251,6 +273,8 @@ Siguen existiendo líneas de evolución como reportes, respaldos, importación/e
 - La composición es manual.
 - No se introducen ORM, repositorios genéricos ni framework de navegación sin una decisión explícita.
 - Master-detail no es una regla de UI; se usa sólo cuando mejora realmente la tarea.
-- `MainWindow` actúa como shell visual: sólo ensambla el encabezado de navegación, las vistas de módulos (`Views/`) y el feedback global; cada módulo es responsable exclusivo de su propia presentación.
+- `MainWindow` actúa como shell visual y cada módulo recibe una frontera de presentación explícita.
+- Asistencia usa `ModuloAsistenciaViewModel` para no acoplar su vista al ViewModel raíz.
 - Las tareas complejas pueden usar ventanas dedicadas y las tareas intensivas usan superficies principales amplias.
 - Los estilos y colores nuevos deben integrarse al sistema de diseño compartido.
+- Las suscripciones WPF de larga vida deben ser idempotentes y liberarse con el ciclo de vida visual.

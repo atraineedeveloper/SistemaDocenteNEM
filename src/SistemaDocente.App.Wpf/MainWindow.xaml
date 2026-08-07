@@ -1,28 +1,39 @@
 <Window x:Class="SistemaDocente.App.Wpf.MainWindow"
+        x:Name="RootWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:controls="clr-namespace:SistemaDocente.App.Wpf.Controls"
         xmlns:views="clr-namespace:SistemaDocente.App.Wpf.Views"
-        xmlns:prop="clr-namespace:SistemaDocente.App.Wpf.Properties"
         xml:lang="es-MX"
-        Title="{Binding TituloVentana}" Height="740" Width="1060" MinHeight="600" MinWidth="860"
+        Title="{Binding TituloVentana}" Height="780" Width="1280" MinHeight="640" MinWidth="1040"
         WindowStartupLocation="CenterScreen" Closing="OnClosing">
     <Grid Background="{DynamicResource WindowBackgroundBrush}">
-        <Grid.RowDefinitions><RowDefinition Height="Auto"/><RowDefinition Height="*"/></Grid.RowDefinitions>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
 
-        <!-- ══ ENCABEZADO GLOBAL: branding + selector de grupo + navegación + tema ══ -->
+        <!-- Encabezado global: hereda el MainWindowViewModel completo. -->
         <controls:MainNavigationHeader Grid.Row="0"/>
 
-        <!-- ══ ÁREA DE MÓDULOS: MainWindow sólo ensambla vistas ══ -->
+        <!-- Área de módulos: DataContext y Visibility se anclan explícitamente al shell raíz. -->
         <Grid Grid.Row="1">
-            <views:GrupoView DataContext="{Binding Grupo}"
-                             Visibility="{Binding MostrarGrupo, Converter={StaticResource BoolToVisibility}}"/>
+            <views:GrupoView
+                DataContext="{Binding DataContext.Grupo, ElementName=RootWindow}"
+                Expediente="{Binding DataContext.Expediente, ElementName=RootWindow}"
+                Visibility="{Binding DataContext.MostrarGrupo, ElementName=RootWindow, Converter={StaticResource BoolToVisibility}}"/>
+
             <views:AsistenciaView
-                             Visibility="{Binding MostrarAsistencia, Converter={StaticResource BoolToVisibility}}"/>
-            <views:ProyectosView DataContext="{Binding Proyectos}"
-                                Visibility="{Binding MostrarProyectos, Converter={StaticResource BoolToVisibility}}"/>
-            <views:EvaluacionView DataContext="{Binding Evaluacion}"
-                                  Visibility="{Binding MostrarEvaluacion, Converter={StaticResource BoolToVisibility}}"/>
+                DataContext="{Binding DataContext.ModuloAsistencia, ElementName=RootWindow}"
+                Visibility="{Binding DataContext.MostrarAsistencia, ElementName=RootWindow, Converter={StaticResource BoolToVisibility}}"/>
+
+            <views:ProyectosView
+                DataContext="{Binding DataContext.Proyectos, ElementName=RootWindow}"
+                Visibility="{Binding DataContext.MostrarProyectos, ElementName=RootWindow, Converter={StaticResource BoolToVisibility}}"/>
+
+            <views:EvaluacionView
+                DataContext="{Binding DataContext.Evaluacion, ElementName=RootWindow}"
+                Visibility="{Binding DataContext.MostrarEvaluacion, ElementName=RootWindow, Converter={StaticResource BoolToVisibility}}"/>
         </Grid>
 
         <!-- Toast de notificaciones (overlay global) -->

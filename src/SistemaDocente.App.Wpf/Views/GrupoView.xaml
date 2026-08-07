@@ -9,109 +9,150 @@
              Background="{DynamicResource WindowBackgroundBrush}"
              PreviewKeyDown="OnPreviewKeyDown"
              xml:lang="es-MX">
-    <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
-        <Grid Margin="{DynamicResource MarginXXXLarge}">
-            <Grid x:Name="GrupoBienvenidaPanel" Visibility="{Binding MostrarBienvenida, Converter={StaticResource BoolToVisibility}}">
-                <Grid.RowDefinitions><RowDefinition Height="*"/><RowDefinition Height="Auto"/><RowDefinition Height="*"/></Grid.RowDefinitions>
-                <Border Grid.Row="1" MaxWidth="620" Padding="36" Background="{DynamicResource CardBackgroundBrush}" CornerRadius="10">
-                    <StackPanel>
-                        <TextBlock Text="Bienvenido a Sistema Docente Local" Style="{StaticResource Heading1}" Foreground="{DynamicResource TextPrimaryBrush}" FontWeight="SemiBold"/>
-                        <TextBlock Margin="0,10,0,22" Foreground="{DynamicResource TextSecondaryBrush}" TextWrapping="Wrap" Text="Comienza escribiendo el nombre del grupo que administras."/>
-                        <controls:FormField Header="Nombre del grupo">
-                            <TextBox TabIndex="10" Text="{Binding NombreNuevoGrupo, UpdateSourceTrigger=PropertyChanged}">
-                                <TextBox.InputBindings><KeyBinding Key="Enter" Command="{Binding CrearGrupoCommand}"/></TextBox.InputBindings>
-                            </TextBox>
-                        </controls:FormField>
-                        <TextBlock Foreground="{DynamicResource ErrorBrush}" TextWrapping="Wrap" Text="{Binding MensajeEdicion}" Margin="0,4,0,0"/>
-                        <WrapPanel Margin="0,6,0,0"><Button TabIndex="11" Content="Crear grupo" IsDefault="True" Command="{Binding CrearGrupoCommand}"/><Button TabIndex="12" Content="Olvidar referencia" Command="{Binding OlvidarReferenciaCommand}"/></WrapPanel>
-                    </StackPanel>
-                </Border>
-            </Grid>
-            <Grid Visibility="{Binding MostrarGestion, Converter={StaticResource BoolToVisibility}}">
-                <Grid.RowDefinitions><RowDefinition Height="Auto"/><RowDefinition Height="*"/><RowDefinition Height="Auto"/><RowDefinition Height="Auto"/></Grid.RowDefinitions>
+    <Grid Margin="{DynamicResource MarginXXXLarge}">
+        <!-- Bienvenida: centrada, sin envolver la gestión normal en un ScrollViewer externo. -->
+        <Grid x:Name="GrupoBienvenidaPanel" Visibility="{Binding MostrarBienvenida, Converter={StaticResource BoolToVisibility}}">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>
+            <Border Grid.Row="1" MaxWidth="620" Padding="36" Background="{DynamicResource CardBackgroundBrush}" CornerRadius="10">
+                <StackPanel>
+                    <TextBlock Text="Bienvenido a Sistema Docente Local" Style="{StaticResource Heading1}" Foreground="{DynamicResource TextPrimaryBrush}" FontWeight="SemiBold"/>
+                    <TextBlock Margin="0,10,0,22" Foreground="{DynamicResource TextSecondaryBrush}" TextWrapping="Wrap" Text="Comienza escribiendo el nombre del grupo que administras."/>
+                    <controls:FormField Header="Nombre del grupo">
+                        <TextBox TabIndex="10" Text="{Binding NombreNuevoGrupo, UpdateSourceTrigger=PropertyChanged}">
+                            <TextBox.InputBindings>
+                                <KeyBinding Key="Enter" Command="{Binding CrearGrupoCommand}"/>
+                            </TextBox.InputBindings>
+                        </TextBox>
+                    </controls:FormField>
+                    <TextBlock Foreground="{DynamicResource ErrorBrush}" TextWrapping="Wrap" Text="{Binding MensajeEdicion}" Margin="0,4,0,0"/>
+                    <WrapPanel Margin="0,6,0,0">
+                        <Button TabIndex="11" Content="Crear grupo" IsDefault="True" Command="{Binding CrearGrupoCommand}"/>
+                        <Button TabIndex="12" Content="Olvidar referencia" Command="{Binding OlvidarReferenciaCommand}"/>
+                    </WrapPanel>
+                </StackPanel>
+            </Border>
+        </Grid>
 
-                <!-- Encabezado de la vista de grupo -->
-                <DockPanel Margin="0,0,0,14">
-                    <StackPanel DockPanel.Dock="Left">
-                        <TextBlock Text="Lista de Estudiantes" Style="{StaticResource SectionSubtitle}"/>
-                        <TextBlock Text="{Binding NombreGrupo}" Foreground="{DynamicResource TextPrimaryBrush}" FontSize="26" FontWeight="Bold"/>
-                    </StackPanel>
-                    <Button DockPanel.Dock="Right" HorizontalAlignment="Right" VerticalAlignment="Bottom"
-                            TabIndex="20" Content="✏️ Cambiar nombre" Command="{Binding AbrirCambioNombreCommand}"/>
+        <!-- Gestión normal: Grid con fila * para que DataGrid controle su propio scroll y virtualización. -->
+        <Grid Visibility="{Binding MostrarGestion, Converter={StaticResource BoolToVisibility}}">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
+
+            <DockPanel Margin="0,0,0,14">
+                <StackPanel DockPanel.Dock="Left">
+                    <TextBlock Text="Lista de Estudiantes" Style="{StaticResource SectionSubtitle}"/>
+                    <TextBlock Text="{Binding NombreGrupo}" Foreground="{DynamicResource TextPrimaryBrush}" FontSize="26" FontWeight="Bold"/>
+                </StackPanel>
+                <Button DockPanel.Dock="Right" HorizontalAlignment="Right" VerticalAlignment="Bottom"
+                        TabIndex="20" Content="✏️ Cambiar nombre" Command="{Binding AbrirCambioNombreCommand}"/>
+            </DockPanel>
+
+            <Grid Grid.Row="1">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
+                <DockPanel Grid.Row="0" Margin="0,0,0,8">
+                    <TextBlock Text="Buscar:" VerticalAlignment="Center" Margin="0,0,6,0" Foreground="{DynamicResource TextSecondaryBrush}"/>
+                    <TextBox Width="260" HorizontalAlignment="Left" TabIndex="25"
+                             AutomationProperties.Name="Buscar estudiante por nombre o número de lista"
+                             ToolTip="Filtra por nombre o número de lista"
+                             Text="{Binding FiltroBusqueda, UpdateSourceTrigger=PropertyChanged}"/>
                 </DockPanel>
 
-                <!-- DataGrid de estudiantes con virtualización -->
-                <Grid Grid.Row="1">
-                    <Grid.RowDefinitions><RowDefinition Height="Auto"/><RowDefinition Height="*"/></Grid.RowDefinitions>
-                    <DockPanel Grid.Row="0" Margin="0,0,0,8"><TextBlock Text="Buscar:" VerticalAlignment="Center" Margin="0,0,6,0" Foreground="{DynamicResource TextSecondaryBrush}"/><TextBox Width="260" HorizontalAlignment="Left" TabIndex="25" AutomationProperties.Name="Buscar estudiante por nombre o numero de lista" ToolTip="Filtra por nombre o numero de lista" Text="{Binding FiltroBusqueda, UpdateSourceTrigger=PropertyChanged}"/></DockPanel>
-                    <DataGrid Grid.Row="1" ItemsSource="{Binding EstudiantesFiltrados}" SelectedItem="{Binding EstudianteSeleccionado}"
-                              AutoGenerateColumns="False" IsReadOnly="True" CanUserSortColumns="True"
-                              SelectionMode="Single" SelectionUnit="FullRow" TabIndex="30"
-                              HeadersVisibility="Column" GridLinesVisibility="Horizontal" RowHeaderWidth="0"
-                              FontSize="14" MinHeight="220"
-                              EnableRowVirtualization="True" EnableColumnVirtualization="True"
-                              VirtualizingStackPanel.IsVirtualizing="True">
-                        <DataGrid.RowStyle><Style TargetType="DataGridRow"><Style.Triggers><DataTrigger Binding="{Binding EstaActivo}" Value="False"><Setter Property="Foreground" Value="#475467"/><Setter Property="Background" Value="#F2F4F7"/><Setter Property="FontStyle" Value="Italic"/></DataTrigger></Style.Triggers></Style></DataGrid.RowStyle>
-                        <DataGrid.ContextMenu>
-                            <ContextMenu>
-                                <MenuItem Header="📁 Ver Expediente" Click="OnVerExpedienteEstudianteClic"/>
-                                <MenuItem Header="✏️ Editar estudiante" Command="{Binding AbrirEditarEstudianteCommand}"/>
-                                <Separator/>
-                                <MenuItem Header="🚫 Desactivar" Command="{Binding DesactivarEstudianteCommand}"/>
-                                <MenuItem Header="🔄 Reactivar" Command="{Binding ReactivarEstudianteCommand}"/>
-                            </ContextMenu>
-                        </DataGrid.ContextMenu>
-                        <DataGrid.Columns>
-                            <DataGridTextColumn Header="Núm." Binding="{Binding NumeroLista}" Width="65"/>
-                            <DataGridTextColumn Header="Nombre del Estudiante" Binding="{Binding Nombre}" Width="*"/>
-                            <DataGridTextColumn Header="Género" Binding="{Binding GeneroTexto}" Width="115"/>
-                            <DataGridTextColumn Header="Edad" Binding="{Binding Edad}" Width="65"/>
-                            <DataGridTextColumn Header="Estado" Binding="{Binding Estado}" Width="110"/>
-                        </DataGrid.Columns>
-                    </DataGrid>
-                    <controls:EmptyState Icon="👥" Title="Aún no hay estudiantes" Message="Agrega el primer estudiante al grupo para comenzar." ActionText="Agregar estudiante" ActionCommand="{Binding AbrirAgregarEstudianteCommand}" Visibility="{Binding Estudiantes.Count, Converter={StaticResource CountToVisibility}}"/>
-                </Grid>
+                <DataGrid Grid.Row="1" ItemsSource="{Binding EstudiantesFiltrados}" SelectedItem="{Binding EstudianteSeleccionado}"
+                          AutoGenerateColumns="False" IsReadOnly="True" CanUserSortColumns="True"
+                          SelectionMode="Single" SelectionUnit="FullRow" TabIndex="30"
+                          HeadersVisibility="Column" GridLinesVisibility="Horizontal" RowHeaderWidth="0"
+                          FontSize="14" MinHeight="220"
+                          EnableRowVirtualization="True" EnableColumnVirtualization="True"
+                          VirtualizingStackPanel.IsVirtualizing="True"
+                          ScrollViewer.CanContentScroll="True"
+                          AutomationProperties.Name="Lista de estudiantes">
+                    <DataGrid.RowStyle>
+                        <Style TargetType="DataGridRow">
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding EstaActivo}" Value="False">
+                                    <Setter Property="Foreground" Value="{DynamicResource TextMutedBrush}"/>
+                                    <Setter Property="Background" Value="{DynamicResource DisabledBackgroundBrush}"/>
+                                    <Setter Property="FontStyle" Value="Italic"/>
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </DataGrid.RowStyle>
+                    <DataGrid.ContextMenu>
+                        <ContextMenu>
+                            <MenuItem Header="📁 Ver Expediente" Click="OnVerExpedienteEstudianteClic"/>
+                            <MenuItem Header="✏️ Editar estudiante" Command="{Binding AbrirEditarEstudianteCommand}"/>
+                            <Separator/>
+                            <MenuItem Header="🚫 Desactivar" Command="{Binding DesactivarEstudianteCommand}"/>
+                            <MenuItem Header="🔄 Reactivar" Command="{Binding ReactivarEstudianteCommand}"/>
+                        </ContextMenu>
+                    </DataGrid.ContextMenu>
+                    <DataGrid.Columns>
+                        <DataGridTextColumn Header="Núm." Binding="{Binding NumeroLista}" Width="65"/>
+                        <DataGridTextColumn Header="Nombre del Estudiante" Binding="{Binding Nombre}" Width="*"/>
+                        <DataGridTextColumn Header="Género" Binding="{Binding GeneroTexto}" Width="115"/>
+                        <DataGridTextColumn Header="Edad" Binding="{Binding Edad}" Width="65"/>
+                        <DataGridTextColumn Header="Estado" Binding="{Binding Estado}" Width="110"/>
+                    </DataGrid.Columns>
+                </DataGrid>
 
-                <!-- Barra de herramientas con acciones individuales y masivas -->
-                <WrapPanel Grid.Row="2" Margin="0,12,0,6">
-                    <Button TabIndex="40" Content="📁 Ver Expediente" Click="OnVerExpedienteEstudianteClic"/>
-                    <Button TabIndex="41" Content="➕ Agregar estudiante" Command="{Binding AbrirAgregarEstudianteCommand}"/>
-                    <Button TabIndex="42" Content="✏️ Editar estudiante" Command="{Binding AbrirEditarEstudianteCommand}"/>
-
-                    <!-- Separador visual -->
-                    <Border Width="1" Height="22" Background="{DynamicResource BorderDefaultBrush}" Margin="6,0" VerticalAlignment="Center"/>
-
-                    <!-- Menú de acciones masivas -->
-                    <Menu Background="Transparent" VerticalAlignment="Center">
-                        <MenuItem Padding="12,7" Cursor="Hand">
-                            <MenuItem.Header>
-                                <StackPanel Orientation="Horizontal">
-                                    <TextBlock Text="⚙️" Style="{StaticResource SectionSubtitle}" Margin="0,0,5,0" VerticalAlignment="Center"/>
-                                    <TextBlock Text="Acciones masivas ▾" FontWeight="SemiBold" Style="{StaticResource SectionSubtitle}" Foreground="{DynamicResource TextSecondaryBrush}" VerticalAlignment="Center"/>
-                                </StackPanel>
-                            </MenuItem.Header>
-                            <MenuItem Header="🚫 Desactivar seleccionado" Command="{Binding DesactivarEstudianteCommand}"/>
-                            <MenuItem Header="🔄 Reactivar seleccionado" Command="{Binding ReactivarEstudianteCommand}"/>
-                        </MenuItem>
-                    </Menu>
-                </WrapPanel>
-                <!-- Editor: Cambiar nombre del grupo -->
-                <Border x:Name="GrupoEditorPanel" Grid.Row="3" Style="{StaticResource ContentCard}" Visibility="{Binding MostrarEditorGrupo, Converter={StaticResource BoolToVisibility}}">
-                    <StackPanel>
-                        <TextBlock Text="Cambiar nombre del grupo" Style="{StaticResource Heading2}" Margin="0,0,0,12"/>
-                        <controls:FormField Header="Nuevo nombre">
-                            <TextBox TabIndex="50" Text="{Binding NombreEdicionGrupo, UpdateSourceTrigger=PropertyChanged}">
-                                <TextBox.InputBindings><KeyBinding Key="Enter" Command="{Binding GuardarNombreGrupoCommand}"/><KeyBinding Key="Escape" Command="{Binding CancelarEdicionCommand}"/></TextBox.InputBindings>
-                            </TextBox>
-                        </controls:FormField>
-                        <TextBlock Foreground="{DynamicResource ErrorBrush}" Text="{Binding MensajeEdicion}" Margin="0,4,0,4"/>
-                        <WrapPanel Margin="0,6,0,0">
-                            <Button Style="{StaticResource PrimaryButton}" TabIndex="51" Content="💾 Guardar nombre" Command="{Binding GuardarNombreGrupoCommand}"/>
-                            <Button TabIndex="52" Content="Cancelar" Command="{Binding CancelarEdicionCommand}"/>
-                        </WrapPanel>
-                    </StackPanel>
-                </Border>
+                <controls:EmptyState Icon="👥" Title="Aún no hay estudiantes"
+                                     Message="Agrega el primer estudiante al grupo para comenzar."
+                                     ActionText="Agregar estudiante"
+                                     ActionCommand="{Binding AbrirAgregarEstudianteCommand}"
+                                     Visibility="{Binding Estudiantes.Count, Converter={StaticResource CountToVisibility}}"/>
             </Grid>
+
+            <WrapPanel Grid.Row="2" Margin="0,12,0,6">
+                <Button TabIndex="40" Content="📁 Ver Expediente" Click="OnVerExpedienteEstudianteClic"/>
+                <Button TabIndex="41" Content="➕ Agregar estudiante" Command="{Binding AbrirAgregarEstudianteCommand}"/>
+                <Button TabIndex="42" Content="✏️ Editar estudiante" Command="{Binding AbrirEditarEstudianteCommand}"/>
+
+                <Border Width="1" Height="22" Background="{DynamicResource BorderDefaultBrush}" Margin="6,0" VerticalAlignment="Center"/>
+
+                <Menu Background="Transparent" VerticalAlignment="Center">
+                    <MenuItem Padding="12,7" Cursor="Hand">
+                        <MenuItem.Header>
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock Text="⚙️" Style="{StaticResource SectionSubtitle}" Margin="0,0,5,0" VerticalAlignment="Center"/>
+                                <TextBlock Text="Acciones masivas ▾" FontWeight="SemiBold" Style="{StaticResource SectionSubtitle}" Foreground="{DynamicResource TextSecondaryBrush}" VerticalAlignment="Center"/>
+                            </StackPanel>
+                        </MenuItem.Header>
+                        <MenuItem Header="🚫 Desactivar seleccionado" Command="{Binding DesactivarEstudianteCommand}"/>
+                        <MenuItem Header="🔄 Reactivar seleccionado" Command="{Binding ReactivarEstudianteCommand}"/>
+                    </MenuItem>
+                </Menu>
+            </WrapPanel>
+
+            <Border x:Name="GrupoEditorPanel" Grid.Row="3" Style="{StaticResource ContentCard}"
+                    Visibility="{Binding MostrarEditorGrupo, Converter={StaticResource BoolToVisibility}}">
+                <StackPanel>
+                    <TextBlock Text="Cambiar nombre del grupo" Style="{StaticResource Heading2}" Margin="0,0,0,12"/>
+                    <controls:FormField Header="Nuevo nombre">
+                        <TextBox TabIndex="50" Text="{Binding NombreEdicionGrupo, UpdateSourceTrigger=PropertyChanged}">
+                            <TextBox.InputBindings>
+                                <KeyBinding Key="Enter" Command="{Binding GuardarNombreGrupoCommand}"/>
+                                <KeyBinding Key="Escape" Command="{Binding CancelarEdicionCommand}"/>
+                            </TextBox.InputBindings>
+                        </TextBox>
+                    </controls:FormField>
+                    <TextBlock Foreground="{DynamicResource ErrorBrush}" Text="{Binding MensajeEdicion}" Margin="0,4,0,4"/>
+                    <WrapPanel Margin="0,6,0,0">
+                        <Button Style="{StaticResource PrimaryButton}" TabIndex="51" Content="💾 Guardar nombre" Command="{Binding GuardarNombreGrupoCommand}"/>
+                        <Button TabIndex="52" Content="Cancelar" Command="{Binding CancelarEdicionCommand}"/>
+                    </WrapPanel>
+                </StackPanel>
+            </Border>
         </Grid>
-    </ScrollViewer>
+    </Grid>
 </UserControl>

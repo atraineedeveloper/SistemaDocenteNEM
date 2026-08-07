@@ -8,7 +8,16 @@
              Background="{DynamicResource WindowBackgroundBrush}"
              xml:lang="es-MX">
     <Grid Margin="{DynamicResource MarginXXXLarge}">
-        <Grid.Style><Style TargetType="Grid"><Setter Property="IsEnabled" Value="True"/><Style.Triggers><DataTrigger Binding="{Binding EstaOcupado}" Value="True"><Setter Property="IsEnabled" Value="False"/></DataTrigger></Style.Triggers></Style></Grid.Style>
+        <Grid.Style>
+            <Style TargetType="Grid">
+                <Setter Property="IsEnabled" Value="True"/>
+                <Style.Triggers>
+                    <DataTrigger Binding="{Binding EstaOcupado}" Value="True">
+                        <Setter Property="IsEnabled" Value="False"/>
+                    </DataTrigger>
+                </Style.Triggers>
+            </Style>
+        </Grid.Style>
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
@@ -17,7 +26,6 @@
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
 
-        <!-- ENCABEZADO PRINCIPAL -->
         <DockPanel Margin="0,0,0,16">
             <StackPanel DockPanel.Dock="Left" VerticalAlignment="Center">
                 <TextBlock Text="Evaluación de Desempeño NEM" Foreground="{DynamicResource TextMutedBrush}" Style="{StaticResource SectionSubtitle}" FontWeight="Medium"/>
@@ -25,7 +33,6 @@
             </StackPanel>
         </DockPanel>
 
-        <!-- TARJETA DE SELECCIÓN DE PROYECTO Y ACTIVIDAD -->
         <Border Grid.Row="1" Background="{DynamicResource CardBackgroundBrush}" CornerRadius="8" Padding="16" Margin="0,0,0,14" BorderBrush="{DynamicResource BorderLightBrush}" BorderThickness="1">
             <Grid>
                 <Grid.ColumnDefinitions>
@@ -46,7 +53,6 @@
             </Grid>
         </Border>
 
-        <!-- BARRA DE BÚSQUEDA Y TARJETAS MÉTRICAS DE NIVEL NEM -->
         <DockPanel Grid.Row="2" Margin="0,0,0,14">
             <StackPanel DockPanel.Dock="Left" Orientation="Horizontal" VerticalAlignment="Center">
                 <TextBox Width="200" Text="{Binding BusquedaEstudiante, UpdateSourceTrigger=PropertyChanged}" ToolTip="Buscar estudiante..." TabIndex="402" AutomationProperties.Name="Buscar estudiante en evaluación"/>
@@ -59,12 +65,11 @@
                 <Border Background="{DynamicResource InfoBackgroundBrush}" CornerRadius="6" Padding="10,6" Margin="4,0"><TextBlock Foreground="{DynamicResource InfoBrush}" FontWeight="SemiBold"><Run Text="Suficiente: "/><Run Text="{Binding Suficiente, Mode=OneWay}"/></TextBlock></Border>
                 <Border Background="{DynamicResource WarningBackgroundBrush}" CornerRadius="6" Padding="10,6" Margin="4,0"><TextBlock Foreground="{DynamicResource WarningBrush}" FontWeight="SemiBold"><Run Text="En proceso: "/><Run Text="{Binding EnProceso, Mode=OneWay}"/></TextBlock></Border>
                 <Border Background="{DynamicResource ErrorBackgroundBrush}" CornerRadius="6" Padding="10,6" Margin="4,0"><TextBlock Foreground="{DynamicResource ErrorBrush}" FontWeight="SemiBold"><Run Text="Req. apoyo: "/><Run Text="{Binding RequiereApoyo, Mode=OneWay}"/></TextBlock></Border>
-                <Border Background="{DynamicResource HoverBackgroundBrush}" CornerRadius="6" Padding="10,6" Margin="4,0"><TextBlock Foreground="{DynamicResource TextMutedBrush}" FontWeight="SemiBold"><Run Text="No entregó: "/><Run Text="{Binding NoEntrego, Mode=OneWay}"/></TextBlock></Border>
+                <Border Background="{DynamicResource DisabledBackgroundBrush}" CornerRadius="6" Padding="10,6" Margin="4,0"><TextBlock Foreground="{DynamicResource TextMutedBrush}" FontWeight="SemiBold"><Run Text="No entregó: "/><Run Text="{Binding NoEntrego, Mode=OneWay}"/></TextBlock></Border>
             </WrapPanel>
         </DockPanel>
 
-        <!-- DATAGRID DE ENTREGAS Y EVALUACIÓN DE ACTIVIDADES -->
-        <DataGrid x:Name="GrillaEntregasEvaluacion" Grid.Row="3" ItemsSource="{Binding EntregasVisibles}" SelectedItem="{Binding EntregaSeleccionada, Mode=TwoWay}" AutoGenerateColumns="False" CanUserAddRows="False" RowHeaderWidth="0" EnableRowVirtualization="True" PreviewKeyDown="OnGrillaEntregasEvaluacionPreviewKeyDown">
+        <DataGrid x:Name="GrillaEntregasEvaluacion" Grid.Row="3" ItemsSource="{Binding EntregasVisibles}" SelectedItem="{Binding EntregaSeleccionada, Mode=TwoWay}" AutoGenerateColumns="False" CanUserAddRows="False" RowHeaderWidth="0" EnableRowVirtualization="True" PreviewKeyDown="OnGrillaEntregasEvaluacionPreviewKeyDown" AutomationProperties.Name="Evaluación por estudiante">
             <DataGrid.ContextMenu>
                 <ContextMenu>
                     <MenuItem Header="🌟 Domina (D) — Alumno seleccionado" Command="{Binding MarcarDominaCommand}"/>
@@ -89,24 +94,24 @@
                             <Setter Property="Padding" Value="6,2"/>
                             <Style.Triggers>
                                 <DataTrigger Binding="{Binding EtiquetaNivel}" Value="D">
-                                    <Setter Property="Foreground" Value="#027A48"/>
-                                    <Setter Property="Background" Value="#ECFDF3"/>
+                                    <Setter Property="Foreground" Value="{DynamicResource SuccessBrush}"/>
+                                    <Setter Property="Background" Value="{DynamicResource SuccessBackgroundBrush}"/>
                                 </DataTrigger>
                                 <DataTrigger Binding="{Binding EtiquetaNivel}" Value="S">
-                                    <Setter Property="Foreground" Value="#175CD3"/>
-                                    <Setter Property="Background" Value="#EFF8FF"/>
+                                    <Setter Property="Foreground" Value="{DynamicResource InfoBrush}"/>
+                                    <Setter Property="Background" Value="{DynamicResource InfoBackgroundBrush}"/>
                                 </DataTrigger>
                                 <DataTrigger Binding="{Binding EtiquetaNivel}" Value="EP">
-                                    <Setter Property="Foreground" Value="#B54708"/>
-                                    <Setter Property="Background" Value="#FFFAEB"/>
+                                    <Setter Property="Foreground" Value="{DynamicResource WarningBrush}"/>
+                                    <Setter Property="Background" Value="{DynamicResource WarningBackgroundBrush}"/>
                                 </DataTrigger>
                                 <DataTrigger Binding="{Binding EtiquetaNivel}" Value="RA">
-                                    <Setter Property="Foreground" Value="#B42318"/>
-                                    <Setter Property="Background" Value="#FEF3F2"/>
+                                    <Setter Property="Foreground" Value="{DynamicResource ErrorBrush}"/>
+                                    <Setter Property="Background" Value="{DynamicResource ErrorBackgroundBrush}"/>
                                 </DataTrigger>
                                 <DataTrigger Binding="{Binding EtiquetaNivel}" Value="NE">
-                                    <Setter Property="Foreground" Value="#475467"/>
-                                    <Setter Property="Background" Value="#F2F4F7"/>
+                                    <Setter Property="Foreground" Value="{DynamicResource TextMutedBrush}"/>
+                                    <Setter Property="Background" Value="{DynamicResource DisabledBackgroundBrush}"/>
                                 </DataTrigger>
                             </Style.Triggers>
                         </Style>
@@ -116,7 +121,6 @@
             </DataGrid.Columns>
         </DataGrid>
 
-        <!-- BOTONERA DE CAPTURA RÁPIDA Y ACCIÓN PRIMARIA -->
         <DockPanel Grid.Row="4" Margin="0,14,0,0">
             <WrapPanel DockPanel.Dock="Left" VerticalAlignment="Center">
                 <TextBlock Text="Calificar alumno:" VerticalAlignment="Center" Foreground="{DynamicResource TextSecondaryBrush}" FontWeight="SemiBold" Margin="0,0,6,0"/>
@@ -144,6 +148,8 @@
                 <Button Style="{StaticResource PrimaryButton}" Content="Guardar cambios (Ctrl+S)" Command="{Binding GuardarActividadCommand}" TabIndex="417" IsDefault="True"/>
             </WrapPanel>
         </DockPanel>
-        <Grid.InputBindings><KeyBinding Modifiers="Control" Key="S" Command="{Binding GuardarActividadCommand}"/></Grid.InputBindings>
+        <Grid.InputBindings>
+            <KeyBinding Modifiers="Control" Key="S" Command="{Binding GuardarActividadCommand}"/>
+        </Grid.InputBindings>
     </Grid>
 </UserControl>

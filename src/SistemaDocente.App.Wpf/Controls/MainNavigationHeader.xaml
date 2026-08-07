@@ -4,51 +4,51 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              mc:Ignorable="d"
-             d:DesignHeight="64" d:DesignWidth="1060"
+             d:DesignHeight="64" d:DesignWidth="1100"
              Background="{DynamicResource PrimaryBrush}"
              Visibility="{Binding MostrarNavegacion, Converter={StaticResource BoolToVisibility}}"
              xml:lang="es-MX">
     <Grid Margin="20,0">
         <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="Auto"/>   <!-- Branding -->
-            <ColumnDefinition Width="*"/>      <!-- Spacer -->
-            <ColumnDefinition Width="Auto"/>   <!-- Grupo selector -->
-            <ColumnDefinition Width="Auto"/>   <!-- Nav tabs -->
-            <ColumnDefinition Width="Auto"/>   <!-- Tema -->
+            <ColumnDefinition Width="Auto"/>
+            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="Auto"/>
+            <ColumnDefinition Width="Auto"/>
+            <ColumnDefinition Width="Auto"/>
         </Grid.ColumnDefinitions>
 
-        <!-- Columna 0: Branding -->
+        <!-- Branding -->
         <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center" Margin="0,10">
-            <Border Background="#FFFFFF22" CornerRadius="8" Padding="9,7" Margin="0,0,12,0">
+            <Border Background="{DynamicResource HeaderIconBackgroundBrush}" CornerRadius="8" Padding="9,7" Margin="0,0,12,0">
                 <TextBlock Text="📚" Style="{StaticResource Heading2}" VerticalAlignment="Center"/>
             </Border>
             <StackPanel VerticalAlignment="Center">
                 <TextBlock Text="Sistema Docente Local" Foreground="{DynamicResource TextOnPrimaryBrush}" Style="{StaticResource Heading3}" FontWeight="Bold"/>
-                <TextBlock Text="Gestión de Aula" Foreground="{DynamicResource TextOnDarkBrush}" Style="{StaticResource Caption}"/>
+                <TextBlock Text="Gestión de Aula" Foreground="{DynamicResource TextOnPrimaryBrush}" Style="{StaticResource Caption}"/>
             </StackPanel>
         </StackPanel>
 
-        <!-- Columna 2: Selector de grupo -->
+        <!-- Selector de grupo -->
         <StackPanel Grid.Column="2" Orientation="Horizontal" VerticalAlignment="Center"
                     DataContext="{Binding Grupo}" Margin="0,10,16,10">
-            <TextBlock Text="Grupo:" Foreground="{DynamicResource TextOnDarkBrush}" VerticalAlignment="Center" Margin="0,0,8,0" Style="{StaticResource Caption}"/>
-            <ComboBox Width="175" VerticalAlignment="Center" Margin="0,0,8,0" TabIndex="1"
+            <TextBlock Text="Grupo:" Foreground="{DynamicResource TextOnPrimaryBrush}" VerticalAlignment="Center" Margin="0,0,8,0" Style="{StaticResource Caption}"/>
+            <ComboBox Width="150" MinWidth="120" VerticalAlignment="Center" Margin="0,0,8,0" TabIndex="1"
                       ItemsSource="{Binding GruposDisponibles}"
                       SelectedItem="{Binding GrupoSeleccionadoCombo, Mode=TwoWay}"
                       DisplayMemberPath="NombreGrupo"
                       AutomationProperties.Name="Selector de grupo"/>
-            <Button Style="{StaticResource HeaderButton}" Content="Nuevo" Command="{Binding AbrirNuevoGrupoCommand}" MinWidth="75" TabIndex="2"/>
+            <Button Style="{StaticResource HeaderButton}" Content="Nuevo" Command="{Binding AbrirNuevoGrupoCommand}" MinWidth="70" TabIndex="2" AutomationProperties.Name="Crear nuevo grupo"/>
         </StackPanel>
 
-        <!-- Columna 3: Pestañas de navegación con indicador activo -->
+        <!-- Navegación principal -->
         <StackPanel Grid.Column="3" Orientation="Horizontal" VerticalAlignment="Stretch">
-            <Button x:Name="NavBtnGrupo" Style="{StaticResource NavTabButton}" Content="🏫 Grupo" Command="{Binding IrAGrupoCommand}" TabIndex="3" AutomationProperties.Name="Navegar a Grupo"/>
-            <Button x:Name="NavBtnAsistencia" Style="{StaticResource NavTabButton}" Content="📋 Asistencia" Command="{Binding IrAAsistenciaCommand}" TabIndex="4" AutomationProperties.Name="Navegar a Asistencia"/>
-            <Button x:Name="NavBtnProyectos" Style="{StaticResource NavTabButton}" Content="📁 Proyectos" Command="{Binding IrAProyectosCommand}" TabIndex="5" AutomationProperties.Name="Navegar a Proyectos"/>
-            <Button x:Name="NavBtnEvaluacion" Style="{StaticResource NavTabButton}" Content="⭐ Evaluación" Command="{Binding IrAEvaluacionCommand}" TabIndex="6" AutomationProperties.Name="Navegar a Evaluación"/>
+            <Button x:Name="NavBtnGrupo" Style="{StaticResource NavTabButton}" Foreground="{DynamicResource TextOnPrimaryBrush}" Content="🏫 Grupo" Command="{Binding IrAGrupoCommand}" TabIndex="3" AutomationProperties.Name="Navegar a Grupo"/>
+            <Button x:Name="NavBtnAsistencia" Style="{StaticResource NavTabButton}" Foreground="{DynamicResource TextOnPrimaryBrush}" Content="📋 Asistencia" Command="{Binding IrAAsistenciaCommand}" TabIndex="4" AutomationProperties.Name="Navegar a Asistencia"/>
+            <Button x:Name="NavBtnProyectos" Style="{StaticResource NavTabButton}" Foreground="{DynamicResource TextOnPrimaryBrush}" Content="📁 Proyectos" Command="{Binding IrAProyectosCommand}" TabIndex="5" AutomationProperties.Name="Navegar a Proyectos"/>
+            <Button x:Name="NavBtnEvaluacion" Style="{StaticResource NavTabButton}" Foreground="{DynamicResource TextOnPrimaryBrush}" Content="⭐ Evaluación" Command="{Binding IrAEvaluacionCommand}" TabIndex="6" AutomationProperties.Name="Navegar a Evaluación"/>
         </StackPanel>
 
-        <!-- Columna 4: Selector de tema -->
+        <!-- Selector de tema -->
         <Menu Grid.Column="4" VerticalAlignment="Center" Margin="8,0,0,0" Background="Transparent">
             <MenuItem Header="🎨 Tema" Foreground="{DynamicResource TextOnPrimaryBrush}" TabIndex="7" AutomationProperties.Name="Seleccionar tema">
                 <MenuItem Header="Claro" Click="TemaClaro_Click" AutomationProperties.Name="Tema claro"/>
