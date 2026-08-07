@@ -1,38 +1,74 @@
 # Design: Refactor MainWindow a vistas WPF
 
 ## Contexto
-`MainWindow` concentra el shell y la presentación de los cuatro módulos. Esto aumenta el tamaño del XAML/code-behind y el riesgo de regresiones cruzadas. El refactor aísla la presentación de cada módulo en `UserControl` sin cambiar el modelo de composición manual ni el `MainWindowViewModel`.
+`MainWindow` concentraba el shell y la presentación de los cuatro módulos. Esto aumentaba el tamaño del XAML/code-behind y el riesgo de regresiones cruzadas. El refactor aísla la presentación de cada módulo en `UserControl`, mantiene composición manual y evita introducir un framework de navegación.
 
 ## Decisiones
 
-### DataContext por binding, sin Service Locator
-Cada `UserControl` recibe su `DataContext` directamente desde `MainWindow.xaml` mediante binding simple (p. ej. `DataContext="{Binding Grupo}"`). La visibilidad de cada vista se liga a la propiedad `MostrarX` del `MainWindowViewModel` existente, sin modificar el ViewModel. No se introducen bindings `DataContext.DataContext...`.
+### DataContext por frontera de módulo, sin Service Locator
+Cada `UserControl` recibe un `DataContext` explícito desde `MainWindow.xaml` mediante binding simple.
+
+- `GrupoView` → `GestionGrupoViewModel`.
+- `AsistenciaView` → `ModuloAsistenciaViewModel`.
+- `ProyectosView` → `GestionProyectosViewModel`.
+- `EvaluacionView` → `EvaluacionActividadesViewModel`.
+
+`ModuloAsistenciaViewModel` agrupa la presentación diaria y mensual y el cambio entre ambas vistas. De esta forma `AsistenciaView` no depende del `MainWindowViewModel` completo. `MainWindowViewModel` conserva aliases de compatibilidad para `Asistencia` y `AsistenciaMensual` y coordina la navegación global.
+
+No se introducen bindings `DataContext.DataContext...`, Service Locator ni contenedor de DI.
 
 ### Shell puro
-`MainWindow` sólo conoce: ventana, encabezado (`MainNavigationHeader`), las cuatro vistas (toggleadas por visibilidad), toast global y progreso global. No contiene DataGrid ni handlers de módulos.
+`MainWindow` sólo conoce: ventana, encabezado (`MainNavigationHeader`), las cuatro vistas, toast global y progreso global. No contiene DataGrid ni handlers de módulos.
 
 ### Code-behind orientado al shell y a la vista
-Los handlers contextuales se mueven a la vista dueña del comportamiento:
-- `GrupoView`: apertura de `EditorEstudianteWindow`/`ExpedienteEstudianteWindow`, foco inicial, Escape de edición.
-- `AsistenciaView`: columnas mensuales, P/F/R/J, selector compacto, Ctrl+S y PageUp/Down (sólo vista mensual).
+Los handlers contextuales viven en la vista dueña del comportamiento:
+
+- `GrupoView`: apertura de `EditorEstudianteWindow`/`ExpedienteEstudianteWindow`, foco inicial y Escape de edición.
+- `AsistenciaView`: columnas mensuales, P/F/R/J, selector compacto, Ctrl+S, PageUp/Down y navegación contextual.
 - `ProyectosView`: apertura de `DetalleProyectoWindow`.
-- `EvaluacionView`: atajos D/S/E/R/N/P (sólo con foco en la grilla, nunca en `TextBoxBase`).
-- `MainNavigationHeader`: indicador de pestaña activa y selección de tema.
+- `EvaluacionView`: atajos D/S/E/R/N/P sólo con foco real en la grilla y nunca en `TextBoxBase`.
+- `MainNavigationHeader`: indicador de módulo activo y selección de tema.
 
-El code-behind puede abrir ventanas, manipular foco y procesar routed events; no contiene reglas de dominio, SQL ni acceso a agregados.
+El code-behind puede abrir ventanas, manipular foco y procesar routed events; no contiene reglas de dominio, SQL ni acceso directo a persistencia.
 
-### Coordinación entre módulos
-`GrupoView` resuelve `Expediente` desde el `MainWindowViewModel` vía `Window.GetWindow(this)`, manteniendo la apertura de la ventana dedicada como comportamiento puramente WPF (Owner = ventana propietaria).
+### Coordinación de expediente sin acoplar Grupo al shell concreto
+`GrupoView` recibe `GestionExpedienteViewModel` mediante una `DependencyProperty` enlazada desde `MainWindow`. La vista puede abrir `ExpedienteEstudianteWindow` usando `Window.GetWindow(this)` como Owner sin conocer la clase concreta `MainWindow` ni resolver el ViewModel raíz.
+
+### Suscripciones con ciclo de vida explícito
+Los controles que escuchan `PropertyChanged` o eventos estáticos mantienen una referencia al objeto suscrito, evitan altas duplicadas y liberan la suscripción en `Unloaded`.
+
+Esto aplica especialmente a:
+
+- `MainNavigationHeader` → `MainWindowViewModel.PropertyChanged`;
+- `GrupoView` → `GestionGrupoViewModel.PropertyChanged`;
+- `AsistenciaView` → `GestionAsistenciaMensualViewModel.PropertyChanged` y `ThemeService.ThemeChanged`.
 
 ### Recursos y temas
-No se duplican diccionarios. Las vistas consumen `DynamicResource` de `App.xaml`/`Themes`, por lo que el cambio de tema desde `MainNavigationHeader` (vía `ThemeService`) actualiza automáticamente todas las vistas y ventanas abiertas.
+No se duplican diccionarios. Las vistas consumen recursos semánticos de `DesignTokens.xaml` y de los temas Light/Dark/HighContrast.
+
+Los elementos generados en code-behind —como las columnas dinámicas de asistencia— resuelven los brushes semánticos actuales y se reconstruyen al recibir `ThemeService.ThemeChanged`. No se mantienen colores físicos hardcodeados en las vistas extraídas ni en el shell.
+
+### Virtualización de listas
+El `DataGrid` principal de Grupo mantiene una fila `*` dentro de un `Grid` y controla su propio scroll. No se envuelve la gestión normal en un `ScrollViewer` externo, para evitar medición infinita y conservar la virtualización de filas.
+
+### Teclado contextual
+Los atajos de una sola letra y PageUp/PageDown sólo se procesan cuando el foco pertenece al componente operativo correspondiente.
+
+- Asistencia mensual: P/F/R/J, Enter, Home/End y PageUp/PageDown se restringen a `GrillaMensual`.
+- Evaluación: D/S/E/R/N/P se restringen a `GrillaEntregasEvaluacion`.
+- `TextBoxBase` queda excluido.
+- Ctrl+S se conserva como atajo del módulo mediante `InputBindings`.
 
 ## Alternativas consideradas
-- **Frame/NavigationService:** descartado; el requisito prohíbe frameworks de navegación y la visibilidad por binding ya funciona.
+- **Frame/NavigationService:** descartado; la visibilidad por binding ya resuelve la navegación actual y no se necesita framework adicional.
 - **Extraer todo a una librería de controles separada:** fuera de alcance; se mantiene dentro de `SistemaDocente.App.Wpf`.
-- **Mover el encabezado inline:** se extrae a `MainNavigationHeader` porque agrupa branding+navegación+tema y reduce el shell.
+- **Master-detail de tres zonas:** descartado como regla; las tareas complejas siguen en ventanas dedicadas.
+- **Pasar todo `MainWindowViewModel` a AsistenciaView:** descartado tras auditoría porque rompe el aislamiento conceptual del módulo.
 
 ## Riesgos y mitigaciones
-- **Bindings rotos al mover DataContext:** mitigado manteniendo exactamente las mismas expresiones de binding por módulo y verificando con build + smoke test STA.
-- **Atajos que interceptan escritura:** `AsistenciaView` y `EvaluacionView` verifican `Keyboard.FocusedElement is TextBoxBase` antes de actuar.
-- **Pérdida de columnas dinámicas:** `AsistenciaView` se suscribe a `AsistenciaMensual.Dias` y reconstruye columnas, igual que antes.
+- **Bindings rotos al mover DataContext:** smoke test STA y pruebas estructurales verifican la composición.
+- **Atajos que interceptan escritura:** validación de foco y `TextBoxBase` antes de ejecutar comandos.
+- **Pérdida de columnas dinámicas al cambiar de tema:** reconstrucción de columnas ante `ThemeService.ThemeChanged`.
+- **Fugas por eventos:** suscripciones idempotentes y liberación en `Unloaded`.
+- **Pérdida de virtualización:** `DataGrid` de Grupo permanece fuera de `ScrollViewer` exterior.
+- **Regresiones visuales:** la validación manual de temas, redimensionamiento, scroll y ventanas dedicadas permanece obligatoria antes de cerrar el cambio.
