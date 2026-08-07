@@ -68,9 +68,10 @@
                 <ColumnDefinition Width="Auto"/>
             </Grid.ColumnDefinitions>
 
-            <!-- Branding -->
             <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center" Margin="0,9">
-                <Border Width="48" Height="48" Background="{DynamicResource PrimaryBrush}" CornerRadius="10" Margin="0,0,12,0">
+                <Border Width="48" Height="48" Background="{DynamicResource PrimaryBrush}"
+                        BorderBrush="{DynamicResource HeaderIconBackgroundBrush}" BorderThickness="1"
+                        CornerRadius="10" Margin="0,0,12,0">
                     <TextBlock Text="📚" FontSize="23" HorizontalAlignment="Center" VerticalAlignment="Center"/>
                 </Border>
                 <StackPanel VerticalAlignment="Center">
@@ -87,7 +88,6 @@
                 </StackPanel>
             </StackPanel>
 
-            <!-- Selector de grupo -->
             <StackPanel Grid.Column="2" Orientation="Horizontal" VerticalAlignment="Center"
                         DataContext="{Binding Grupo}" Margin="16,9,12,9">
                 <TextBlock Text="Grupo" Foreground="{DynamicResource TextMutedBrush}" VerticalAlignment="Center" Margin="0,0,7,0" Style="{StaticResource Caption}"/>
@@ -100,7 +100,6 @@
                         MinWidth="82" TabIndex="2" AutomationProperties.Name="Crear nuevo grupo"/>
             </StackPanel>
 
-            <!-- Navegación principal -->
             <StackPanel Grid.Column="3" Orientation="Horizontal" VerticalAlignment="Stretch">
                 <Button x:Name="NavBtnGrupo" Style="{StaticResource ModernHeaderNavButton}" Content="👥  Grupo" Command="{Binding IrAGrupoCommand}" TabIndex="3" AutomationProperties.Name="Navegar a Grupo"/>
                 <Button x:Name="NavBtnAsistencia" Style="{StaticResource ModernHeaderNavButton}" Content="✓  Asistencia" Command="{Binding IrAAsistenciaCommand}" TabIndex="4" AutomationProperties.Name="Navegar a Asistencia"/>
@@ -108,7 +107,6 @@
                 <Button x:Name="NavBtnEvaluacion" Style="{StaticResource ModernHeaderNavButton}" Content="☆  Evaluación" Command="{Binding IrAEvaluacionCommand}" TabIndex="6" AutomationProperties.Name="Navegar a Evaluación"/>
             </StackPanel>
 
-            <!-- Selector de tema -->
             <Menu Grid.Column="4" VerticalAlignment="Center" Margin="6,0,0,0" Background="Transparent">
                 <MenuItem Header="☼  Tema" Foreground="{DynamicResource TextSecondaryBrush}" FontWeight="SemiBold"
                           Padding="10,8" TabIndex="7" AutomationProperties.Name="Seleccionar tema">
