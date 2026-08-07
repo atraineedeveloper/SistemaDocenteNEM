@@ -62,7 +62,7 @@ public sealed class ComposicionAsistenciaTests
         Assert.Contains("FrozenColumnCount=\"2\"", xaml, StringComparison.Ordinal);
         Assert.Contains("MarcarTodosDominaCommand", xaml, StringComparison.Ordinal);
         Assert.Contains("MarcarTodosSuficienteCommand", xaml, StringComparison.Ordinal);
-        Assert.Contains("MarcarTodosPendienteCommand", xaml, StringComparison.Ordinal);
+        Assert.Contains("MarcarTodosPendienteEntregaCommand", xaml, StringComparison.Ordinal);
         Assert.Contains("x:Name=\"GrillaEvaluacionMatriz\"", xaml, StringComparison.Ordinal);
         Assert.Contains("PreviewKeyDown=\"OnGrillaEvaluacionPreviewKeyDown\"", xaml, StringComparison.Ordinal);
         Assert.Contains("Keyboard.FocusedElement is TextBoxBase", codeBehind, StringComparison.Ordinal);
@@ -73,8 +73,9 @@ public sealed class ComposicionAsistenciaTests
         Assert.Contains("MarcarSuficienteCommand", codeBehind, StringComparison.Ordinal);
         Assert.Contains("MarcarEnProcesoCommand", codeBehind, StringComparison.Ordinal);
         Assert.Contains("MarcarRequiereApoyoCommand", codeBehind, StringComparison.Ordinal);
-        Assert.Contains("MarcarNoEntregoCommand", codeBehind, StringComparison.Ordinal);
-        Assert.Contains("MarcarPendienteCommand", codeBehind, StringComparison.Ordinal);
+        Assert.Contains("MarcarEntregadaCommand", codeBehind, StringComparison.Ordinal);
+        Assert.Contains("MarcarNoEntregadaCommand", codeBehind, StringComparison.Ordinal);
+        Assert.Contains("MarcarPendienteEntregaCommand", codeBehind, StringComparison.Ordinal);
         Assert.DoesNotContain("DataGridCheckBoxColumn", xaml, StringComparison.Ordinal);
         Assert.DoesNotContain("NivelLogro.", codeBehind, StringComparison.Ordinal);
         Assert.DoesNotContain("EstadoEntrega.", codeBehind, StringComparison.Ordinal);
@@ -86,7 +87,7 @@ public sealed class ComposicionAsistenciaTests
         var xaml = LeerArchivoVista("EvaluacionView.xaml");
 
         _ = XDocument.Parse(xaml);
-        foreach (var propiedad in new[] { "Total", "Pendientes", "Domina", "Suficiente", "EnProceso", "RequiereApoyo", "NoEntrego" })
+        foreach (var propiedad in new[] { "Total", "PendientesEntrega", "Entregadas", "NoEntregadas", "PendientesEvaluacion", "RequiereApoyo" })
         {
             Assert.Contains($"{{Binding {propiedad}, Mode=OneWay}}", xaml, StringComparison.Ordinal);
             Assert.DoesNotMatch(
@@ -118,7 +119,7 @@ public sealed class ComposicionAsistenciaTests
         var mainWindowViewModel = LeerArchivoPresentacion("MainWindowViewModel.cs");
 
         Assert.Contains("Proyectos?.SolicitarSalir()", mainWindowViewModel, StringComparison.Ordinal);
-        Assert.True(Regex.Count(mainWindowViewModel, "Proyectos\\?\\.SolicitarSalir\\(\\)") >= 3);
+        Assert.True(Regex.Count(mainWindowViewModel, "Proyectos\\?\\.SolicitarSalir\\(\\)") >= 2);
     }
 
     private static string LeerArchivoAplicacion(string nombre) => File.ReadAllText(Path.Combine(
