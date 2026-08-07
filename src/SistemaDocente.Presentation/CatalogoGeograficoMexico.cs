@@ -6,7 +6,7 @@ namespace SistemaDocente.Presentation;
 public static class CatalogoGeograficoMexico
 {
     private const string NombreRecurso = "SistemaDocente.Presentation.Data.estados-municipios.json";
-    private static readonly Lazy<IReadOnlyDictionary<string, string[]>> Datos = new(CargarDatos);
+    private static readonly Lazy<Dictionary<string, string[]>> Datos = new(CargarDatos);
 
     public static IReadOnlyList<string> EntidadesFederativas { get; } =
     [
@@ -60,7 +60,7 @@ public static class CatalogoGeograficoMexico
         !string.IsNullOrWhiteSpace(municipio)
         && ObtenerMunicipios(entidadFederativa).Contains(municipio.Trim(), StringComparer.Ordinal);
 
-    private static IReadOnlyDictionary<string, string[]> CargarDatos()
+    private static Dictionary<string, string[]> CargarDatos()
     {
         var ensamblado = Assembly.GetExecutingAssembly();
         using var stream = ensamblado.GetManifestResourceStream(NombreRecurso)
