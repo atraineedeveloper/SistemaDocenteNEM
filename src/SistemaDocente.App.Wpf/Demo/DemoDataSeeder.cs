@@ -265,7 +265,7 @@ internal static class DemoDataSeeder
         {
             0 => (EstadoEntregaActividad.Pendiente, NivelLogro.Pendiente),
             1 => (EstadoEntregaActividad.Entregada, NivelLogro.Pendiente),
-            2 or 3 => (EstadoEntregaActividad.RequiereApoyoCompat(), NivelLogro.RequiereApoyo),
+            2 or 3 => (EstadoEntregaActividad.Entregada, NivelLogro.RequiereApoyo),
             4 => (EstadoEntregaActividad.NoEntregada, NivelLogro.Pendiente),
             5 or 6 or 7 => (EstadoEntregaActividad.Entregada, NivelLogro.EnProceso),
             8 or 9 or 10 or 11 or 12 => (EstadoEntregaActividad.Entregada, NivelLogro.Suficiente),
