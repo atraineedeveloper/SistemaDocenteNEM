@@ -34,14 +34,15 @@ public sealed class ActividadEvaluacionColumnaVisual : ViewModelBase
 
     /// <summary>
     /// Código compacto, estable y puramente visual derivado de la identidad inmutable de la
-    /// actividad. No depende de su posición, fecha o título, por lo que no se renumera si
-    /// otras actividades cambian de orden o se anulan.
+    /// actividad. Usa ocho dígitos hexadecimales del GUID para reducir de forma importante
+    /// el riesgo de colisión sin convertir la identidad técnica completa en ruido visual.
+    /// No depende de posición, fecha o título, por lo que no se renumera.
     /// </summary>
     internal static string CrearCodigoEstable(ActividadId actividadId)
     {
         if (actividadId == default) throw new ArgumentException("La actividad debe tener identidad.", nameof(actividadId));
         var hexadecimal = actividadId.Valor.ToString("N", System.Globalization.CultureInfo.InvariantCulture).ToUpperInvariant();
-        return "A" + hexadecimal[..6];
+        return "A" + hexadecimal[..8];
     }
 
     internal void ActualizarVersion(int version)
