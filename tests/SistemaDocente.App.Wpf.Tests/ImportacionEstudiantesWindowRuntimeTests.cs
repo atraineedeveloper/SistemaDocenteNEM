@@ -28,7 +28,7 @@ public sealed class ImportacionEstudiantesWindowRuntimeTests
         {
             try
             {
-                if (Application.Current is null)
+                if (System.Windows.Application.Current is null)
                 {
                     var app = new App();
                     app.InitializeComponent();
