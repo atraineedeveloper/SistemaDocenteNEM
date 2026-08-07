@@ -3,20 +3,48 @@ using SistemaDocente.Core;
 namespace SistemaDocente.Application;
 
 public sealed record ProyectoResumen(
-    ProyectoId ProyectoId, string Nombre, DateOnly FechaInicio, DateOnly FechaTermino,
-    EstadoProyecto Estado, int NumeroActividades, int Version);
+    ProyectoId ProyectoId,
+    string Nombre,
+    DateOnly FechaInicio,
+    DateOnly FechaTermino,
+    EstadoProyecto Estado,
+    int NumeroActividades,
+    int Version,
+    MetodologiaProyectoNem Metodologia = MetodologiaProyectoNem.NoEspecificada,
+    IReadOnlyList<GradoPrimaria>? GradosObjetivo = null);
 
 public sealed record ProyectoDetalle(
-    ProyectoId ProyectoId, GrupoId GrupoId, string Nombre, string Descripcion,
-    DateOnly FechaInicio, DateOnly FechaTermino, EstadoProyecto Estado,
-    string Observaciones, int NumeroActividades, int Version, bool DuracionAtipica);
+    ProyectoId ProyectoId,
+    GrupoId GrupoId,
+    string Nombre,
+    string Descripcion,
+    DateOnly FechaInicio,
+    DateOnly FechaTermino,
+    EstadoProyecto Estado,
+    string Observaciones,
+    int NumeroActividades,
+    int Version,
+    bool DuracionAtipica,
+    MetodologiaProyectoNem Metodologia = MetodologiaProyectoNem.NoEspecificada,
+    IReadOnlyList<GradoPrimaria>? GradosObjetivo = null);
 
 public sealed record EntradaProyecto(
-    string Nombre, string Descripcion, DateOnly FechaInicio, DateOnly FechaTermino, string Observaciones);
+    string Nombre,
+    string Descripcion,
+    DateOnly FechaInicio,
+    DateOnly FechaTermino,
+    string Observaciones,
+    MetodologiaProyectoNem Metodologia = MetodologiaProyectoNem.NoEspecificada,
+    IReadOnlyCollection<GradoPrimaria>? GradosObjetivo = null);
 
 public sealed record EntregaActividadDetalle(
-    EstudianteId EstudianteId, int NumeroLista, string NombreVisible,
-    bool EstaActivoActualmente, EstadoEntregaActividad EstadoEntrega, NivelLogro NivelLogro, string Observacion)
+    EstudianteId EstudianteId,
+    int NumeroLista,
+    string NombreVisible,
+    bool EstaActivoActualmente,
+    EstadoEntregaActividad EstadoEntrega,
+    NivelLogro NivelLogro,
+    string Observacion)
 {
     public EntregaActividadDetalle(
         EstudianteId estudianteId,
@@ -43,16 +71,42 @@ public sealed record EntregaActividadDetalle(
 }
 
 public sealed record ActividadProyectoResumen(
-    ActividadId ActividadId, ProyectoId ProyectoId, string Titulo, DateOnly FechaRealizacion,
-    EstadoActividad Estado, int Total, int Pendientes, int Domina, int Suficiente,
-    int EnProceso, int RequiereApoyo, int NoEntrego, int Version);
+    ActividadId ActividadId,
+    ProyectoId ProyectoId,
+    string Titulo,
+    DateOnly FechaRealizacion,
+    EstadoActividad Estado,
+    int Total,
+    int Pendientes,
+    int Domina,
+    int Suficiente,
+    int EnProceso,
+    int RequiereApoyo,
+    int NoEntrego,
+    int Version,
+    CampoFormativoNem CampoFormativo = CampoFormativoNem.NoEspecificado,
+    IReadOnlyList<GradoPrimaria>? GradosObjetivo = null);
 
 public sealed record ActividadProyectoDetalle(
-    ActividadId ActividadId, ProyectoId ProyectoId, GrupoId GrupoId, string Titulo,
-    string Descripcion, DateOnly FechaRealizacion, string ObservacionesGenerales,
-    EstadoActividad Estado, IReadOnlyList<EntregaActividadDetalle> Entregas,
-    int Total, int Pendientes, int Domina, int Suficiente, int EnProceso,
-    int RequiereApoyo, int NoEntrego, int Version);
+    ActividadId ActividadId,
+    ProyectoId ProyectoId,
+    GrupoId GrupoId,
+    string Titulo,
+    string Descripcion,
+    DateOnly FechaRealizacion,
+    string ObservacionesGenerales,
+    EstadoActividad Estado,
+    IReadOnlyList<EntregaActividadDetalle> Entregas,
+    int Total,
+    int Pendientes,
+    int Domina,
+    int Suficiente,
+    int EnProceso,
+    int RequiereApoyo,
+    int NoEntrego,
+    int Version,
+    CampoFormativoNem CampoFormativo = CampoFormativoNem.NoEspecificado,
+    IReadOnlyList<GradoPrimaria>? GradosObjetivo = null);
 
 public sealed record EntradaEntregaActividad(
     EstudianteId EstudianteId,
@@ -61,9 +115,9 @@ public sealed record EntradaEntregaActividad(
     string Observacion)
 {
     /// <summary>
-    /// Distingue llamadas nuevas, que expresan el estado de entrega de forma intencional,
-    /// de llamadas legacy que sólo proporcionaban NivelLogro. Permite conservar el estado
-    /// histórico cuando una pantalla antigua edita metadatos sin conocer esta dimensión.
+    /// Distinguishes new calls that intentionally express delivery state from legacy calls
+    /// that only supplied NivelLogro. This preserves historical delivery state when an old
+    /// screen edits metadata without knowing about the separate delivery dimension.
     /// </summary>
     public bool EstadoEntregaEsExplicito { get; private init; } = true;
 
@@ -84,5 +138,10 @@ public sealed record EntradaEntregaActividad(
 }
 
 public sealed record EntradaActividad(
-    string Titulo, string Descripcion, DateOnly FechaRealizacion,
-    string ObservacionesGenerales, IReadOnlyCollection<EntradaEntregaActividad> Entregas);
+    string Titulo,
+    string Descripcion,
+    DateOnly FechaRealizacion,
+    string ObservacionesGenerales,
+    IReadOnlyCollection<EntradaEntregaActividad> Entregas,
+    CampoFormativoNem CampoFormativo = CampoFormativoNem.NoEspecificado,
+    IReadOnlyCollection<GradoPrimaria>? GradosObjetivo = null);
