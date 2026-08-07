@@ -181,6 +181,61 @@ public partial class EvaluacionView : UserControl
         return true;
     }
 
+    private void OnGrillaEvaluacionClick(object sender, MouseButtonEventArgs e)
+    {
+        if (e.OriginalSource is not DependencyObject origen) return;
+        var celda = BuscarAncestro<DataGridCell>(origen);
+        if (celda?.Column is null || celda.Column.DisplayIndex < 2) return;
+
+        GrillaEvaluacionMatriz.CurrentCell = new DataGridCellInfo(celda.DataContext, celda.Column);
+        GrillaEvaluacionMatriz.SelectedCells.Clear();
+        GrillaEvaluacionMatriz.SelectedCells.Add(GrillaEvaluacionMatriz.CurrentCell);
+        if (!SeleccionarCeldaActual()) return;
+
+        MostrarMenuResultadoCompacto(celda);
+        e.Handled = true;
+    }
+
+    private void MostrarMenuResultadoCompacto(FrameworkElement destino)
+    {
+        if (ViewModel is not { } vm
+            || vm.CeldaSeleccionada is not { EsAplicable: true, EsEditable: true })
+        {
+            return;
+        }
+
+        var menu = new ContextMenu
+        {
+            PlacementTarget = destino,
+            Placement = PlacementMode.Bottom,
+        };
+        AgregarComando(menu, "Pendiente (P)", vm.MarcarPendienteEntregaCommand);
+        AgregarComando(menu, "Entregada · evaluar después (T)", vm.MarcarEntregadaCommand);
+        menu.Items.Add(new Separator());
+        AgregarComando(menu, "Domina (D)", vm.MarcarDominaCommand);
+        AgregarComando(menu, "Suficiente (S)", vm.MarcarSuficienteCommand);
+        AgregarComando(menu, "En proceso (E)", vm.MarcarEnProcesoCommand);
+        AgregarComando(menu, "Requiere apoyo (R)", vm.MarcarRequiereApoyoCommand);
+        menu.Items.Add(new Separator());
+        AgregarComando(menu, "No entregó (N)", vm.MarcarNoEntregadaCommand);
+        menu.Items.Add(new Separator());
+
+        var masOpciones = new MenuItem { Header = "Más opciones…" };
+        masOpciones.Click += (_, _) => AbrirEditorCelda();
+        menu.Items.Add(masOpciones);
+        menu.IsOpen = true;
+    }
+
+    private static void AgregarComando(ContextMenu menu, string texto, RelayCommand command)
+    {
+        var opcion = new MenuItem
+        {
+            Header = texto,
+            Command = command,
+        };
+        menu.Items.Add(opcion);
+    }
+
     private void OnGrillaEvaluacionPreviewKeyDown(object sender, KeyEventArgs e)
     {
         if (ViewModel is not { } vm
@@ -256,5 +311,17 @@ public partial class EvaluacionView : UserControl
         GrillaEvaluacionMatriz.CurrentCell = new DataGridCellInfo(siguiente, GrillaEvaluacionMatriz.CurrentColumn);
         GrillaEvaluacionMatriz.ScrollIntoView(siguiente, GrillaEvaluacionMatriz.CurrentColumn);
         SeleccionarCeldaActual();
+    }
+
+    private static T? BuscarAncestro<T>(DependencyObject origen) where T : DependencyObject
+    {
+        DependencyObject? actual = origen;
+        while (actual is not null)
+        {
+            if (actual is T encontrado) return encontrado;
+            actual = VisualTreeHelper.GetParent(actual);
+        }
+
+        return null;
     }
 }

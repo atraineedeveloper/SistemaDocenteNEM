@@ -43,13 +43,16 @@ public sealed class ModernizacionUiEvaluacionDemoTests
         Assert.Contains("Key.N", code, StringComparison.Ordinal);
         Assert.Contains("Key.P", code, StringComparison.Ordinal);
         Assert.Contains("Key.Enter", code, StringComparison.Ordinal);
-        Assert.Contains("T/N/P = entrega", xaml, StringComparison.Ordinal);
+        Assert.Contains("T/N/P = captura rápida", xaml, StringComparison.Ordinal);
         Assert.Contains("MarcarTodosEntregadaCommand", xaml, StringComparison.Ordinal);
         Assert.Contains("MarcarTodosNoEntregadaCommand", xaml, StringComparison.Ordinal);
-        Assert.Contains("Estado de entrega", editor, StringComparison.Ordinal);
-        Assert.Contains("SelectedValue=\"{Binding EstadoEntrega", editor, StringComparison.Ordinal);
-        Assert.Contains("IsEnabled=\"{Binding PuedeEvaluarLogro}\"", editor, StringComparison.Ordinal);
-        Assert.DoesNotContain("No entregó (N)", xaml, StringComparison.Ordinal);
+        Assert.Contains("No entregó (N)", xaml, StringComparison.Ordinal);
+        Assert.Contains("OpcionesResultado", editor, StringComparison.Ordinal);
+        Assert.Contains("SelectedValue=\"{Binding Resultado", editor, StringComparison.Ordinal);
+        Assert.Contains("actualiza automáticamente el estado de entrega", editor, StringComparison.Ordinal);
+        Assert.DoesNotContain("SelectedValue=\"{Binding EstadoEntrega", editor, StringComparison.Ordinal);
+        Assert.DoesNotContain("IsEnabled=\"{Binding PuedeEvaluarLogro}\"", editor, StringComparison.Ordinal);
+        Assert.Contains("Más opciones…", code, StringComparison.Ordinal);
     }
 
     [Fact]

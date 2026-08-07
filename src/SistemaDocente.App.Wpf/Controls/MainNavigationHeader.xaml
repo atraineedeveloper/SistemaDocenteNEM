@@ -69,15 +69,15 @@
             </Grid.ColumnDefinitions>
 
             <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center" Margin="0,9">
-                <Border Width="48" Height="48" Background="{DynamicResource PrimaryBrush}"
+                <Border Width="46" Height="46" Background="{DynamicResource PrimaryBrush}"
                         BorderBrush="{DynamicResource HeaderIconBackgroundBrush}" BorderThickness="1"
-                        CornerRadius="10" Margin="0,0,12,0">
-                    <TextBlock Text="📚" FontSize="23" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        CornerRadius="10" Margin="0,0,11,0">
+                    <TextBlock Text="📚" FontSize="22" HorizontalAlignment="Center" VerticalAlignment="Center"/>
                 </Border>
                 <StackPanel VerticalAlignment="Center">
                     <StackPanel Orientation="Horizontal">
-                        <TextBlock Text="Sistema Docente Local" Foreground="{DynamicResource TextPrimaryBrush}" FontSize="17" FontWeight="Bold"/>
-                        <Border Margin="9,0,0,0" Padding="7,2" CornerRadius="5"
+                        <TextBlock Text="Sistema Docente Local" Foreground="{DynamicResource TextPrimaryBrush}" FontSize="16" FontWeight="Bold"/>
+                        <Border Margin="8,0,0,0" Padding="7,2" CornerRadius="5"
                                 Background="{DynamicResource WarningBackgroundBrush}"
                                 BorderBrush="{DynamicResource WarningBorderBrush}" BorderThickness="1"
                                 Visibility="{Binding ModoDemostracion, Converter={StaticResource BoolToVisibility}}">
@@ -88,17 +88,30 @@
                 </StackPanel>
             </StackPanel>
 
-            <StackPanel Grid.Column="2" Orientation="Horizontal" VerticalAlignment="Center"
-                        DataContext="{Binding Grupo}" Margin="12,9,8,9">
-                <TextBlock Text="Grupo" Foreground="{DynamicResource TextMutedBrush}" VerticalAlignment="Center" Margin="0,0,7,0" Style="{StaticResource Caption}"/>
-                <ComboBox Width="170" MinWidth="145" VerticalAlignment="Center" Margin="0,0,6,0" TabIndex="1"
-                          ItemsSource="{Binding GruposDisponibles}"
-                          SelectedItem="{Binding GrupoSeleccionadoCombo, Mode=TwoWay}"
-                          DisplayMemberPath="NombreGrupo"
-                          AutomationProperties.Name="Selector de grupo"/>
-                <Button Style="{StaticResource PrimaryButton}" Content="＋ Nuevo" Command="{Binding AbrirNuevoGrupoCommand}"
-                        MinWidth="76" TabIndex="2" AutomationProperties.Name="Crear nuevo grupo"/>
-            </StackPanel>
+            <Menu Grid.Column="2" VerticalAlignment="Center" Margin="14,0,8,0" Background="Transparent">
+                <MenuItem x:Name="GrupoContextMenu"
+                          Padding="8,5"
+                          AutomationProperties.Name="Cambiar contexto de grupo">
+                    <MenuItem.Header>
+                        <Border Background="{DynamicResource SectionBackgroundBrush}"
+                                BorderBrush="{DynamicResource BorderLightBrush}"
+                                BorderThickness="1"
+                                CornerRadius="9"
+                                Padding="10,6">
+                            <StackPanel Orientation="Horizontal">
+                                <Border Width="32" Height="32" CornerRadius="8" Background="{DynamicResource HoverBackgroundBrush}" Margin="0,0,9,0">
+                                    <TextBlock Text="👥" FontSize="15" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                </Border>
+                                <StackPanel MinWidth="120" MaxWidth="180" VerticalAlignment="Center">
+                                    <TextBlock Text="{Binding Grupo.NombreGrupo}" Foreground="{DynamicResource TextPrimaryBrush}" FontWeight="SemiBold" TextTrimming="CharacterEllipsis"/>
+                                    <TextBlock Text="Cambiar grupo" Foreground="{DynamicResource TextMutedBrush}" FontSize="10"/>
+                                </StackPanel>
+                                <TextBlock Text="⌄" Foreground="{DynamicResource TextMutedBrush}" FontSize="14" Margin="7,0,0,0" VerticalAlignment="Center"/>
+                            </StackPanel>
+                        </Border>
+                    </MenuItem.Header>
+                </MenuItem>
+            </Menu>
 
             <StackPanel Grid.Column="3" Orientation="Horizontal" VerticalAlignment="Stretch">
                 <Button x:Name="NavBtnGrupo" Style="{StaticResource ModernHeaderNavButton}" Content="👥  Grupo" Command="{Binding IrAGrupoCommand}" TabIndex="3" AutomationProperties.Name="Navegar a Grupo"/>
