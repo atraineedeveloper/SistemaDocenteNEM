@@ -1,63 +1,126 @@
 <UserControl x:Class="SistemaDocente.App.Wpf.Views.ProyectosView"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:converters="clr-namespace:SistemaDocente.App.Wpf.Converters"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              mc:Ignorable="d"
-             d:DesignHeight="600" d:DesignWidth="1000"
+             d:DesignHeight="700" d:DesignWidth="1200"
              Background="{DynamicResource WindowBackgroundBrush}"
              xml:lang="es-MX">
-    <Grid Margin="{DynamicResource MarginXXXLarge}">
+    <UserControl.Resources>
+        <converters:CollectionMetricConverter x:Key="CollectionMetric"/>
+    </UserControl.Resources>
+
+    <Grid Margin="24">
         <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
 
-        <DockPanel Margin="0,0,0,16">
-            <StackPanel DockPanel.Dock="Left" VerticalAlignment="Center">
-                <TextBlock Text="Planeación Didáctica" Foreground="{DynamicResource TextMutedBrush}" Style="{StaticResource SectionSubtitle}" FontWeight="Medium"/>
-                <TextBlock Text="Proyectos Didácticos" Foreground="{DynamicResource TextPrimaryBrush}" FontSize="26" FontWeight="Bold"/>
+        <!-- Encabezado -->
+        <Grid Margin="0,0,0,18">
+            <Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
+            <StackPanel>
+                <TextBlock Text="PLANEACIÓN DIDÁCTICA" Foreground="{DynamicResource PrimaryBrush}" FontSize="12" FontWeight="SemiBold"/>
+                <TextBlock Text="Proyectos didácticos" Style="{StaticResource Heading1}" FontSize="28" Margin="0,3,0,3"/>
+                <TextBlock Text="Organiza proyectos, actividades y seguimiento del grupo." Foreground="{DynamicResource TextMutedBrush}"/>
             </StackPanel>
-            <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" VerticalAlignment="Center">
-                <Button Style="{StaticResource PrimaryButton}" Content="+ Nuevo Proyecto" Command="{Binding NuevoProyectoCommand}" TabIndex="300" AutomationProperties.Name="Crear nuevo proyecto"/>
-            </StackPanel>
-        </DockPanel>
+            <Button Grid.Column="1" Style="{StaticResource PrimaryButton}" Content="＋  Nuevo proyecto"
+                    Command="{Binding NuevoProyectoCommand}" VerticalAlignment="Top" TabIndex="300"
+                    AutomationProperties.Name="Crear nuevo proyecto"/>
+        </Grid>
 
-        <DockPanel Grid.Row="1" Margin="0,0,0,14">
-            <Border DockPanel.Dock="Left" Background="{DynamicResource CardBackgroundBrush}" CornerRadius="8" Padding="12,8" BorderBrush="{DynamicResource BorderLightBrush}" BorderThickness="1">
-                <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                    <TextBlock Text="Filtrar por estado: " Foreground="{DynamicResource TextPrimaryBrush}" VerticalAlignment="Center" FontWeight="SemiBold" Margin="0,0,8,0"/>
-                    <ComboBox Width="180" ItemsSource="{Binding FiltrosProyecto}" SelectedItem="{Binding FiltroProyecto}" TabIndex="301" AutomationProperties.Name="Filtrar proyectos por estado"/>
-                </StackPanel>
+        <!-- Métricas -->
+        <WrapPanel Grid.Row="1" Margin="0,0,0,14">
+            <Border Style="{StaticResource ContentCard}" Width="180" Margin="0,0,10,0">
+                <StackPanel><TextBlock Text="Proyectos" Style="{StaticResource Caption}"/><TextBlock Text="{Binding ProyectosVisibles, Converter={StaticResource CollectionMetric}}" Style="{StaticResource Heading2}" Foreground="{DynamicResource PrimaryBrush}"/></StackPanel>
             </Border>
-        </DockPanel>
+            <Border Style="{StaticResource ContentCard}" Width="180" Margin="0,0,10,0">
+                <StackPanel><TextBlock Text="En curso" Style="{StaticResource Caption}"/><TextBlock Text="{Binding ProyectosVisibles, Converter={StaticResource CollectionMetric}, ConverterParameter=EnCurso}" Style="{StaticResource Heading2}" Foreground="{DynamicResource SuccessBrush}"/></StackPanel>
+            </Border>
+            <Border Style="{StaticResource ContentCard}" Width="180" Margin="0">
+                <StackPanel><TextBlock Text="Borradores" Style="{StaticResource Caption}"/><TextBlock Text="{Binding ProyectosVisibles, Converter={StaticResource CollectionMetric}, ConverterParameter=Borrador}" Style="{StaticResource Heading2}" Foreground="{DynamicResource WarningBrush}"/></StackPanel>
+            </Border>
+        </WrapPanel>
 
-        <DataGrid x:Name="GrillaProyectosPrincipal" Grid.Row="2" ItemsSource="{Binding ProyectosVisibles}" SelectedItem="{Binding ProyectoSeleccionado}"
-                  AutoGenerateColumns="False" IsReadOnly="True" CanUserSortColumns="True" SelectionMode="Single" SelectionUnit="FullRow"
-                  HeadersVisibility="Column" GridLinesVisibility="Horizontal" RowHeaderWidth="0" FontSize="14" MouseDoubleClick="OnAbrirDetalleProyectoClic"
-                  EnableRowVirtualization="True" EnableColumnVirtualization="True">
-            <DataGrid.ContextMenu>
-                <ContextMenu>
-                    <MenuItem Header="📂 Ver / Editar Detalle del Proyecto" Click="OnAbrirDetalleProyectoClic"/>
-                    <Separator/>
-                    <MenuItem Header="✨ Nuevo Proyecto" Command="{Binding NuevoProyectoCommand}"/>
-                </ContextMenu>
-            </DataGrid.ContextMenu>
-            <DataGrid.Columns>
-                <DataGridTextColumn Header="Nombre del Proyecto" Binding="{Binding Nombre}" Width="2*"/>
-                <DataGridTextColumn Header="Estado" Binding="{Binding Estado}" Width="140"/>
-                <DataGridTextColumn Header="Inicio" Binding="{Binding FechaInicio, StringFormat=dd/MM/yyyy}" Width="110"/>
-                <DataGridTextColumn Header="Término" Binding="{Binding FechaTermino, StringFormat=dd/MM/yyyy}" Width="110"/>
-                <DataGridTextColumn Header="Actividades" Binding="{Binding NumeroActividades}" Width="100"/>
-            </DataGrid.Columns>
-        </DataGrid>
+        <!-- Herramientas -->
+        <Border Grid.Row="2" Style="{StaticResource ContentCard}" Margin="0,0,0,14" Padding="12">
+            <Grid>
+                <Grid.ColumnDefinitions><ColumnDefinition Width="360"/><ColumnDefinition Width="16"/><ColumnDefinition Width="240"/><ColumnDefinition Width="*"/></Grid.ColumnDefinitions>
+                <TextBox x:Name="BusquedaProyectoTextBox" Grid.Column="0" Margin="0" Padding="10,8"
+                         ToolTip="Buscar proyecto por nombre" TextChanged="OnBusquedaProyectoCambiada"
+                         AutomationProperties.Name="Buscar proyecto" TabIndex="301"/>
+                <StackPanel Grid.Column="2" Orientation="Horizontal" VerticalAlignment="Center">
+                    <TextBlock Text="Estado" Foreground="{DynamicResource TextMutedBrush}" VerticalAlignment="Center" Margin="0,0,8,0"/>
+                    <ComboBox Width="170" Margin="0" ItemsSource="{Binding FiltrosProyecto}" SelectedItem="{Binding FiltroProyecto}"
+                              TabIndex="302" AutomationProperties.Name="Filtrar proyectos por estado"/>
+                </StackPanel>
+            </Grid>
+        </Border>
 
-        <DockPanel Grid.Row="3" Margin="0,14,0,0">
-            <WrapPanel DockPanel.Dock="Left">
-                <Button Style="{StaticResource PrimaryButton}" Content="📂 Ver / Editar Detalle del Proyecto" Click="OnAbrirDetalleProyectoClic" TabIndex="302" AutomationProperties.Name="Ver o editar detalle del proyecto seleccionado"/>
-            </WrapPanel>
-        </DockPanel>
+        <!-- Lista -->
+        <Border Grid.Row="3" Background="{DynamicResource CardBackgroundBrush}" BorderBrush="{DynamicResource BorderLightBrush}" BorderThickness="1" CornerRadius="10">
+            <DataGrid x:Name="GrillaProyectosPrincipal" ItemsSource="{Binding ProyectosVisibles}" SelectedItem="{Binding ProyectoSeleccionado}"
+                      AutoGenerateColumns="False" IsReadOnly="True" CanUserSortColumns="True" SelectionMode="Single" SelectionUnit="FullRow"
+                      HeadersVisibility="Column" GridLinesVisibility="Horizontal" RowHeaderWidth="0" FontSize="14" RowHeight="48"
+                      MouseDoubleClick="OnAbrirDetalleProyectoClic" EnableRowVirtualization="True" EnableColumnVirtualization="True"
+                      BorderThickness="0" TabIndex="303" AutomationProperties.Name="Lista de proyectos didácticos">
+                <DataGrid.ContextMenu>
+                    <ContextMenu>
+                        <MenuItem Header="Abrir proyecto" Click="OnAbrirDetalleProyectoClic"/>
+                        <Separator/>
+                        <MenuItem Header="Nuevo proyecto" Command="{Binding NuevoProyectoCommand}"/>
+                    </ContextMenu>
+                </DataGrid.ContextMenu>
+                <DataGrid.Columns>
+                    <DataGridTemplateColumn Header="Proyecto" Width="2*">
+                        <DataGridTemplateColumn.CellTemplate>
+                            <DataTemplate>
+                                <StackPanel Margin="8,0" VerticalAlignment="Center">
+                                    <TextBlock Text="{Binding Nombre}" Foreground="{DynamicResource TextPrimaryBrush}" FontWeight="SemiBold"/>
+                                    <TextBlock Text="{Binding NumeroActividades, StringFormat={}{0} actividades}" Foreground="{DynamicResource TextMutedBrush}" FontSize="11" Margin="0,2,0,0"/>
+                                </StackPanel>
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellTemplate>
+                    </DataGridTemplateColumn>
+                    <DataGridTemplateColumn Header="Estado" Width="130">
+                        <DataGridTemplateColumn.CellTemplate>
+                            <DataTemplate>
+                                <Border x:Name="EstadoProyectoPill" Background="{DynamicResource SectionBackgroundBrush}" CornerRadius="8" Padding="9,4" HorizontalAlignment="Center">
+                                    <TextBlock x:Name="EstadoProyectoTexto" Text="{Binding Estado}" Foreground="{DynamicResource TextSecondaryBrush}" FontWeight="SemiBold" FontSize="12"/>
+                                </Border>
+                                <DataTemplate.Triggers>
+                                    <DataTrigger Binding="{Binding Estado}" Value="EnCurso">
+                                        <Setter TargetName="EstadoProyectoPill" Property="Background" Value="{DynamicResource SuccessBackgroundBrush}"/>
+                                        <Setter TargetName="EstadoProyectoTexto" Property="Foreground" Value="{DynamicResource SuccessBrush}"/>
+                                    </DataTrigger>
+                                    <DataTrigger Binding="{Binding Estado}" Value="Borrador">
+                                        <Setter TargetName="EstadoProyectoPill" Property="Background" Value="{DynamicResource WarningBackgroundBrush}"/>
+                                        <Setter TargetName="EstadoProyectoTexto" Property="Foreground" Value="{DynamicResource WarningBrush}"/>
+                                    </DataTrigger>
+                                </DataTemplate.Triggers>
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellTemplate>
+                    </DataGridTemplateColumn>
+                    <DataGridTextColumn Header="Inicio" Binding="{Binding FechaInicio, StringFormat=dd MMM yyyy}" Width="130"/>
+                    <DataGridTextColumn Header="Término" Binding="{Binding FechaTermino, StringFormat=dd MMM yyyy}" Width="130"/>
+                    <DataGridTextColumn Header="Actividades" Binding="{Binding NumeroActividades}" Width="100"/>
+                </DataGrid.Columns>
+            </DataGrid>
+        </Border>
+
+        <!-- Acciones -->
+        <Border Grid.Row="4" Style="{StaticResource ContentCard}" Margin="0,14,0,0" Padding="12">
+            <DockPanel>
+                <Button DockPanel.Dock="Left" Style="{StaticResource PrimaryButton}" Content="▱  Abrir proyecto"
+                        Click="OnAbrirDetalleProyectoClic" TabIndex="304" AutomationProperties.Name="Abrir proyecto seleccionado"/>
+                <TextBlock DockPanel.Dock="Right" VerticalAlignment="Center" Foreground="{DynamicResource TextMutedBrush}"
+                           Text="Doble clic sobre un proyecto para abrir su detalle."/>
+            </DockPanel>
+        </Border>
     </Grid>
 </UserControl>

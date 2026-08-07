@@ -31,12 +31,12 @@ public sealed class ComposicionAsistenciaTests
 
         Assert.Contains("DatePicker", xaml, StringComparison.Ordinal);
         Assert.Contains("DataGrid", xaml, StringComparison.Ordinal);
-        Assert.Contains("Falta justificada", xaml, StringComparison.Ordinal);
+        Assert.Contains("Justificadas", xaml, StringComparison.Ordinal);
         Assert.Contains("Marcar todos presentes", xaml, StringComparison.Ordinal);
         Assert.Contains("Modifiers=\"Control\" Key=\"S\"", xaml, StringComparison.Ordinal);
         Assert.Contains("FrozenColumnCount=\"2\"", xaml, StringComparison.Ordinal);
         Assert.Contains("GrillaMensual", xaml, StringComparison.Ordinal);
-        Assert.Contains("Guardar cambios (Ctrl+S)", xaml, StringComparison.Ordinal);
+        Assert.Contains("Guardar cambios  (Ctrl+S)", xaml, StringComparison.Ordinal);
         Assert.DoesNotContain("No lectivo", xaml, StringComparison.Ordinal);
         Assert.DoesNotContain("No lectivo", codeBehind, StringComparison.Ordinal);
         Assert.Contains("EsCierreSemana", codeBehind, StringComparison.Ordinal);
@@ -51,38 +51,31 @@ public sealed class ComposicionAsistenciaTests
     }
 
     [Fact]
-    public void EvaluacionViewConservaBindingsYAtajosDeEvaluacion()
+    public void EvaluacionViewConservaMatrizBindingsYAtajosContextuales()
     {
         var xaml = LeerArchivoVista("EvaluacionView.xaml");
         var codeBehind = LeerArchivoVista("EvaluacionView.xaml.cs");
 
         Assert.Contains("ProyectosVisibles", LeerArchivoVista("ProyectosView.xaml"), StringComparison.Ordinal);
-        Assert.Contains("EntregasVisibles", xaml, StringComparison.Ordinal);
-        // Los botones rápidos (D Domina / S Suficiente / P Pendiente) fueron eliminados porque
-        // duplicaban el menú contextual. Las acciones de calificación viven en el ContextMenu.
-        Assert.DoesNotContain("D Domina", xaml, StringComparison.Ordinal);
-        Assert.DoesNotContain("S Suficiente", xaml, StringComparison.Ordinal);
-        Assert.DoesNotContain("P Pendiente", xaml, StringComparison.Ordinal);
-        // El menú contextual sí debe conservar las opciones de calificación.
-        Assert.Contains("MarcarDominaCommand", xaml, StringComparison.Ordinal);
-        Assert.Contains("MarcarSuficienteCommand", xaml, StringComparison.Ordinal);
-        Assert.Contains("MarcarPendienteCommand", xaml, StringComparison.Ordinal);
-        // La columna de checkbox debe estar eliminada.
-        Assert.DoesNotContain("DataGridCheckBoxColumn", xaml, StringComparison.Ordinal);
-        // El estado vacío debe existir.
-        Assert.Contains("Selecciona una actividad para comenzar", xaml, StringComparison.Ordinal);
-        // El menú de grupo a todos debe estar presente.
+        Assert.Contains("FilasVisibles", xaml, StringComparison.Ordinal);
+        Assert.Contains("ContextoActividadSeleccionada", xaml, StringComparison.Ordinal);
+        Assert.Contains("FrozenColumnCount=\"2\"", xaml, StringComparison.Ordinal);
         Assert.Contains("MarcarTodosDominaCommand", xaml, StringComparison.Ordinal);
-        Assert.Contains("x:Name=\"GrillaEntregasEvaluacion\"", xaml, StringComparison.Ordinal);
-        Assert.Contains("PreviewKeyDown=\"OnGrillaEntregasEvaluacionPreviewKeyDown\"", xaml, StringComparison.Ordinal);
+        Assert.Contains("MarcarTodosSuficienteCommand", xaml, StringComparison.Ordinal);
+        Assert.Contains("MarcarTodosPendienteCommand", xaml, StringComparison.Ordinal);
+        Assert.Contains("x:Name=\"GrillaEvaluacionMatriz\"", xaml, StringComparison.Ordinal);
+        Assert.Contains("PreviewKeyDown=\"OnGrillaEvaluacionPreviewKeyDown\"", xaml, StringComparison.Ordinal);
         Assert.Contains("Keyboard.FocusedElement is TextBoxBase", codeBehind, StringComparison.Ordinal);
-        Assert.Contains("GrillaEntregasEvaluacion.IsAncestorOf(foco)", codeBehind, StringComparison.Ordinal);
+        Assert.Contains("GrillaEvaluacionMatriz.IsAncestorOf(foco)", codeBehind, StringComparison.Ordinal);
+        Assert.Contains("Celdas[{indice}].EtiquetaNivel", codeBehind, StringComparison.Ordinal);
+        Assert.Contains("ToolTip = actividad.DescripcionAccesible", codeBehind, StringComparison.Ordinal);
         Assert.Contains("MarcarDominaCommand", codeBehind, StringComparison.Ordinal);
         Assert.Contains("MarcarSuficienteCommand", codeBehind, StringComparison.Ordinal);
         Assert.Contains("MarcarEnProcesoCommand", codeBehind, StringComparison.Ordinal);
         Assert.Contains("MarcarRequiereApoyoCommand", codeBehind, StringComparison.Ordinal);
         Assert.Contains("MarcarNoEntregoCommand", codeBehind, StringComparison.Ordinal);
         Assert.Contains("MarcarPendienteCommand", codeBehind, StringComparison.Ordinal);
+        Assert.DoesNotContain("DataGridCheckBoxColumn", xaml, StringComparison.Ordinal);
         Assert.DoesNotContain("NivelLogro.", codeBehind, StringComparison.Ordinal);
         Assert.DoesNotContain("EstadoEntrega.", codeBehind, StringComparison.Ordinal);
     }
@@ -109,14 +102,14 @@ public sealed class ComposicionAsistenciaTests
         var asistenciaXaml = LeerArchivoVista("AsistenciaView.xaml");
         var evaluacionXaml = LeerArchivoVista("EvaluacionView.xaml");
 
-        // MainWindow ya no registra PreviewKeyDown global ni KeyBindings de módulos.
         Assert.DoesNotContain("PreviewKeyDown=\"", mainWindowXaml, StringComparison.Ordinal);
         Assert.DoesNotMatch("<KeyBinding\\s+Key=\"[ENPDS]\"", mainWindowXaml);
-        // Los atajos contextuales viven en las vistas correspondientes.
         Assert.Contains("Modifiers=\"Control\" Key=\"S\"", asistenciaXaml, StringComparison.Ordinal);
         Assert.Contains("Modifiers=\"Control\" Key=\"S\"", evaluacionXaml, StringComparison.Ordinal);
         Assert.Contains("OnGrillaMensualPreviewKeyDown", asistenciaXaml, StringComparison.Ordinal);
+        Assert.Contains("OnGrillaEvaluacionPreviewKeyDown", evaluacionXaml, StringComparison.Ordinal);
         Assert.Contains("Keyboard.FocusedElement is TextBoxBase", LeerArchivoVista("AsistenciaView.xaml.cs"), StringComparison.Ordinal);
+        Assert.Contains("Keyboard.FocusedElement is TextBoxBase", LeerArchivoVista("EvaluacionView.xaml.cs"), StringComparison.Ordinal);
     }
 
     [Fact]

@@ -6,58 +6,123 @@ namespace SistemaDocente.Presentation.Tests;
 public sealed class EvaluacionActividadesViewModelTests
 {
     [Fact]
-    public void InicializarCargaProyectosYActividades()
+    public void InicializarConstruyeMatrizConIdentificadoresEstablesYPadronesHistoricos()
     {
         var vm = Crear(out var gestion);
+
         vm.Inicializar(gestion.GrupoId);
 
         Assert.Single(vm.Proyectos);
-        Assert.Single(vm.Actividades);
-        Assert.NotNull(vm.ProyectoSeleccionado);
+        Assert.Equal(3, vm.Actividades.Count);
+        var codigos = vm.ColumnasActividades.Select(x => x.Codigo).ToArray();
+        Assert.Equal(3, codigos.Distinct(StringComparer.Ordinal).Count());
+        Assert.All(codigos, codigo => Assert.Matches("^A[0-9A-F]{8}$", codigo));
+        Assert.Equal(4, vm.Filas.Count);
         Assert.NotNull(vm.ActividadSeleccionada);
-        Assert.Equal(3, vm.Entregas.Count);
+        Assert.Equal(codigos[0], vm.ActividadColumnaSeleccionada?.Codigo);
+
+        vm.Inicializar(gestion.GrupoId);
+        Assert.Equal(codigos, vm.ColumnasActividades.Select(x => x.Codigo));
+
+        var estudianteTardio = vm.Filas.Single(x => x.NumeroLista == 4);
+        Assert.False(estudianteTardio.Celdas[0].EsAplicable);
+        Assert.False(estudianteTardio.Celdas[1].EsAplicable);
+        Assert.True(estudianteTardio.Celdas[2].EsAplicable);
+        Assert.Equal("—", estudianteTardio.Celdas[0].EtiquetaNivel);
     }
 
     [Fact]
-    public void MarcarNivelAsignaYDetectaCambios()
+    public void AtajoModificaSoloCeldaSeleccionada()
     {
         var vm = Crear(out var gestion);
         vm.Inicializar(gestion.GrupoId);
+        var fila = vm.Filas[0];
 
+        vm.SeleccionarCelda(fila, 1);
         vm.MarcarDominaCommand.Execute(null);
 
-        Assert.Equal(3, vm.Domina);
+        Assert.Equal(NivelLogro.Pendiente, fila.Celdas[0].NivelLogro);
+        Assert.Equal(NivelLogro.Domina, fila.Celdas[1].NivelLogro);
+        Assert.Equal(NivelLogro.Pendiente, fila.Celdas[2].NivelLogro);
         Assert.True(vm.TieneCambios);
-        Assert.True(vm.GuardarActividadCommand.CanExecute(null));
-
-        vm.GuardarActividadCommand.Execute(null);
-
-        Assert.False(vm.TieneCambios);
-        Assert.Equal(1, gestion.EntregasGuardadas);
+        Assert.True(vm.GuardarCambiosCommand.CanExecute(null));
     }
 
     [Fact]
-    public void FiltrosEntregaFiltranPorNivelCorrectamente()
+    public void AccionMasivaAfectaSoloActividadSeleccionadaYRespetaNoAplicables()
     {
         var vm = Crear(out var gestion);
         vm.Inicializar(gestion.GrupoId);
 
-        vm.Entregas[0].NivelLogro = NivelLogro.Domina;
-        vm.Entregas[1].NivelLogro = NivelLogro.RequiereApoyo;
-        vm.Entregas[2].NivelLogro = NivelLogro.NoEntrego;
+        vm.SeleccionarCelda(vm.Filas[0], 0);
+        vm.MarcarTodosSuficienteCommand.Execute(null);
 
-        vm.FiltroEntrega = FiltroEntrega.Domina;
-        Assert.Single(vm.EntregasVisibles);
-        Assert.Equal(NivelLogro.Domina, vm.EntregasVisibles[0].NivelLogro);
-
-        vm.FiltroEntrega = FiltroEntrega.SoloIncidencias;
-        Assert.Equal(2, vm.EntregasVisibles.Count);
+        Assert.All(vm.Filas.Take(3), fila => Assert.Equal(NivelLogro.Suficiente, fila.Celdas[0].NivelLogro));
+        Assert.False(vm.Filas[3].Celdas[0].EsAplicable);
+        Assert.All(vm.Filas.Take(3), fila => Assert.Equal(NivelLogro.Pendiente, fila.Celdas[1].NivelLogro));
     }
 
-    private static EvaluacionActividadesViewModel Crear(out GestionDoble gestion, IDialogoCambiosPendientes? dialogo = null)
+    [Fact]
+    public void GuardarCambiosPersisteCadaActividadModificadaPorSeparado()
+    {
+        var vm = Crear(out var gestion);
+        vm.Inicializar(gestion.GrupoId);
+
+        vm.SeleccionarCelda(vm.Filas[0], 0);
+        vm.MarcarDominaCommand.Execute(null);
+        vm.SeleccionarCelda(vm.Filas[1], 1);
+        vm.MarcarSuficienteCommand.Execute(null);
+
+        vm.GuardarCambiosCommand.Execute(null);
+
+        Assert.Equal(2, gestion.EntregasGuardadas);
+        Assert.False(vm.TieneCambios);
+        Assert.False(vm.GuardarCambiosCommand.CanExecute(null));
+    }
+
+    [Fact]
+    public void FiltroDeNivelUsaLaActividadSeleccionada()
+    {
+        var vm = Crear(out var gestion);
+        vm.Inicializar(gestion.GrupoId);
+
+        vm.SeleccionarCelda(vm.Filas[1], 0);
+        vm.MarcarRequiereApoyoCommand.Execute(null);
+        vm.FiltroEntrega = FiltroEntrega.RequiereApoyo;
+
+        var visible = Assert.Single(vm.FilasVisibles);
+        Assert.Equal(2, visible.NumeroLista);
+
+        vm.SeleccionarActividad(1);
+        Assert.Empty(vm.FilasVisibles);
+    }
+
+    [Fact]
+    public void DescartarRestauraTodasLasActividadesModificadas()
+    {
+        var vm = Crear(out var gestion);
+        vm.Inicializar(gestion.GrupoId);
+        vm.SeleccionarCelda(vm.Filas[0], 0);
+        vm.MarcarDominaCommand.Execute(null);
+        vm.SeleccionarCelda(vm.Filas[1], 2);
+        vm.MarcarNoEntregoCommand.Execute(null);
+
+        vm.DescartarCambiosCommand.Execute(null);
+
+        Assert.False(vm.TieneCambios);
+        Assert.Equal(NivelLogro.Pendiente, vm.Filas[0].Celdas[0].NivelLogro);
+        Assert.Equal(NivelLogro.Pendiente, vm.Filas[1].Celdas[2].NivelLogro);
+    }
+
+    private static EvaluacionActividadesViewModel Crear(
+        out GestionDoble gestion,
+        IDialogoCambiosPendientes? dialogo = null)
     {
         gestion = new GestionDoble();
-        return new EvaluacionActividadesViewModel(gestion, dialogo ?? new Dialogo(DecisionCambiosPendientes.Cancelar), new MensajesDoble());
+        return new EvaluacionActividadesViewModel(
+            gestion,
+            dialogo ?? new Dialogo(DecisionCambiosPendientes.Cancelar),
+            new MensajesDoble());
     }
 
     private sealed class MensajesDoble : IServicioMensajes
@@ -77,24 +142,30 @@ public sealed class EvaluacionActividadesViewModelTests
         private readonly List<ProyectoDetalle> _proyectos = [];
         private readonly List<ActividadProyectoDetalle> _actividades = [];
         private readonly Guid _proyecto1 = Guid.NewGuid();
-        private readonly Guid _actividad1 = Guid.NewGuid();
+        private readonly EstudianteId[] _estudiantes = Enumerable.Range(1, 4)
+            .Select(n => EstudianteId.DesdeGuid(GuidUtility(n))).ToArray();
 
         internal GestionDoble()
         {
             GrupoId = GrupoId.DesdeGuid(Guid.NewGuid());
-            var entregas = Enumerable.Range(1, 3)
-                .Select(n => new EntregaActividadDetalle(EstudianteId.DesdeGuid(GuidUtility(n)), n, $"Estudiante {n}", true, NivelLogro.Pendiente, ""))
-                .ToArray();
+            _proyectos.Add(new ProyectoDetalle(
+                ProyectoId.DesdeGuid(_proyecto1), GrupoId, "Proyecto 1", "",
+                new DateOnly(2026, 1, 1), new DateOnly(2026, 1, 31),
+                EstadoProyecto.EnCurso, "", 3, 1, false));
 
-            _proyectos.Add(new ProyectoDetalle(ProyectoId.DesdeGuid(_proyecto1), GrupoId, "Proyecto 1", "", new DateOnly(2026, 1, 1), new DateOnly(2026, 1, 31), EstadoProyecto.EnCurso, "", 1, 1, false));
-            _actividades.Add(new ActividadProyectoDetalle(ActividadId.DesdeGuid(_actividad1), ProyectoId.DesdeGuid(_proyecto1), GrupoId, "Actividad 1", "", new DateOnly(2026, 1, 10), "", EstadoActividad.Activa, entregas, 3, 3, 0, 0, 0, 0, 0, 1));
+            _actividades.Add(CrearActividad(1, new DateOnly(2026, 1, 8), [1, 2, 3]));
+            _actividades.Add(CrearActividad(2, new DateOnly(2026, 1, 15), [1, 2, 3]));
+            _actividades.Add(CrearActividad(3, new DateOnly(2026, 1, 22), [1, 2, 3, 4]));
         }
 
         internal GrupoId GrupoId { get; }
         internal int EntregasGuardadas { get; private set; }
 
         public IReadOnlyList<ProyectoResumen> ListarProyectos(GrupoId grupoId) =>
-            _proyectos.Where(x => x.GrupoId == grupoId).Select(x => new ProyectoResumen(x.ProyectoId, x.Nombre, x.FechaInicio, x.FechaTermino, x.Estado, x.NumeroActividades, x.Version)).ToArray();
+            _proyectos.Where(x => x.GrupoId == grupoId)
+                .Select(x => new ProyectoResumen(
+                    x.ProyectoId, x.Nombre, x.FechaInicio, x.FechaTermino,
+                    x.Estado, x.NumeroActividades, x.Version)).ToArray();
 
         public ProyectoDetalle ObtenerProyecto(ProyectoId id) => _proyectos.First(x => x.ProyectoId == id);
         public ProyectoDetalle CrearProyecto(GrupoId grupoId, EntradaProyecto datos) => throw new NotImplementedException();
@@ -104,31 +175,69 @@ public sealed class EvaluacionActividadesViewModelTests
         public void EliminarProyecto(ProyectoId id, int version) => throw new NotImplementedException();
 
         public IReadOnlyList<ActividadProyectoResumen> ListarActividades(ProyectoId proyectoId) =>
-            _actividades.Where(x => x.ProyectoId == proyectoId).Select(x => new ActividadProyectoResumen(x.ActividadId, x.ProyectoId, x.Titulo, x.FechaRealizacion, x.Estado, x.Total, x.Pendientes, x.Domina, x.Suficiente, x.EnProceso, x.RequiereApoyo, x.NoEntrego, x.Version)).ToArray();
+            _actividades.Where(x => x.ProyectoId == proyectoId)
+                .OrderBy(x => x.FechaRealizacion)
+                .Select(Resumir).ToArray();
 
-        public ActividadProyectoDetalle PrepararActividad(ProyectoId proyectoId, string titulo, string descripcion, DateOnly fecha, string observaciones) => throw new NotImplementedException();
+        public ActividadProyectoDetalle PrepararActividad(
+            ProyectoId proyectoId, string titulo, string descripcion, DateOnly fecha, string observaciones) =>
+            throw new NotImplementedException();
         public ActividadProyectoDetalle CrearActividad(ProyectoId proyectoId, EntradaActividad datos) => throw new NotImplementedException();
         public ActividadProyectoDetalle ObtenerActividad(ActividadId id) => _actividades.First(x => x.ActividadId == id);
         public ActividadProyectoDetalle ActualizarActividad(ActividadId id, int version, EntradaActividad entrada) => throw new NotImplementedException();
 
-        public ActividadProyectoDetalle GuardarEntregas(ActividadId id, int version, IReadOnlyCollection<EntradaEntregaActividad> entregas)
+        public ActividadProyectoDetalle GuardarEntregas(
+            ActividadId id,
+            int version,
+            IReadOnlyCollection<EntradaEntregaActividad> entregas)
         {
             EntregasGuardadas++;
-            var act = _actividades.First(x => x.ActividadId == id);
-            var nuevasEntregas = act.Entregas.Select(x =>
+            var actividad = _actividades.First(x => x.ActividadId == id);
+            Assert.Equal(actividad.Version, version);
+            var nuevas = actividad.Entregas.Select(x =>
             {
-                var nueva = entregas.First(e => e.EstudianteId == x.EstudianteId);
-                return new EntregaActividadDetalle(x.EstudianteId, x.NumeroLista, x.NombreVisible, x.EstaActivoActualmente, nueva.NivelLogro, nueva.Observacion);
+                var entrada = entregas.Single(e => e.EstudianteId == x.EstudianteId);
+                return new EntregaActividadDetalle(
+                    x.EstudianteId, x.NumeroLista, x.NombreVisible, x.EstaActivoActualmente,
+                    entrada.NivelLogro, entrada.Observacion);
             }).ToArray();
-            var domina = nuevasEntregas.Count(x => x.NivelLogro == NivelLogro.Domina);
-            var pend = nuevasEntregas.Count(x => x.NivelLogro == NivelLogro.Pendiente);
-            var actualizada = new ActividadProyectoDetalle(act.ActividadId, act.ProyectoId, act.GrupoId, act.Titulo, act.Descripcion, act.FechaRealizacion, act.ObservacionesGenerales, act.Estado, nuevasEntregas, nuevasEntregas.Length, pend, domina, 0, 0, 0, 0, act.Version + 1);
-            _actividades[_actividades.IndexOf(act)] = actualizada;
+
+            var actualizada = new ActividadProyectoDetalle(
+                actividad.ActividadId, actividad.ProyectoId, actividad.GrupoId,
+                actividad.Titulo, actividad.Descripcion, actividad.FechaRealizacion,
+                actividad.ObservacionesGenerales, actividad.Estado, nuevas,
+                nuevas.Length,
+                nuevas.Count(x => x.NivelLogro == NivelLogro.Pendiente),
+                nuevas.Count(x => x.NivelLogro == NivelLogro.Domina),
+                nuevas.Count(x => x.NivelLogro == NivelLogro.Suficiente),
+                nuevas.Count(x => x.NivelLogro == NivelLogro.EnProceso),
+                nuevas.Count(x => x.NivelLogro == NivelLogro.RequiereApoyo),
+                nuevas.Count(x => x.NivelLogro == NivelLogro.NoEntrego),
+                actividad.Version + 1);
+            _actividades[_actividades.IndexOf(actividad)] = actualizada;
             return actualizada;
         }
 
         public ActividadProyectoDetalle AnularActividad(ActividadId id, int version) => throw new NotImplementedException();
         public void EliminarActividad(ActividadId id, int version) => throw new NotImplementedException();
+
+        private ActividadProyectoDetalle CrearActividad(int numero, DateOnly fecha, int[] numerosLista)
+        {
+            var actividadId = ActividadId.DesdeGuid(GuidUtility(100 + numero));
+            var entregas = numerosLista.Select(n => new EntregaActividadDetalle(
+                _estudiantes[n - 1], n, $"Estudiante {n}", true,
+                NivelLogro.Pendiente, string.Empty)).ToArray();
+            return new ActividadProyectoDetalle(
+                actividadId, ProyectoId.DesdeGuid(_proyecto1), GrupoId,
+                $"Actividad {numero}", "", fecha, "", EstadoActividad.Activa,
+                entregas, entregas.Length, entregas.Length, 0, 0, 0, 0, 0, 1);
+        }
+
+        private static ActividadProyectoResumen Resumir(ActividadProyectoDetalle actividad) => new(
+            actividad.ActividadId, actividad.ProyectoId, actividad.Titulo, actividad.FechaRealizacion,
+            actividad.Estado, actividad.Total, actividad.Pendientes, actividad.Domina,
+            actividad.Suficiente, actividad.EnProceso, actividad.RequiereApoyo,
+            actividad.NoEntrego, actividad.Version);
 
         private static Guid GuidUtility(int numero)
         {

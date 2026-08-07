@@ -12,7 +12,8 @@ public sealed class MainWindowViewModel : ViewModelBase
         GestionAsistenciaMensualViewModel asistenciaMensual,
         GestionProyectosViewModel? proyectos = null,
         EvaluacionActividadesViewModel? evaluacion = null,
-        GestionExpedienteViewModel? expediente = null)
+        GestionExpedienteViewModel? expediente = null,
+        bool modoDemostracion = false)
     {
         ArgumentNullException.ThrowIfNull(grupo);
         ArgumentNullException.ThrowIfNull(asistencia);
@@ -23,6 +24,7 @@ public sealed class MainWindowViewModel : ViewModelBase
         Proyectos = proyectos;
         Evaluacion = evaluacion;
         Expediente = expediente;
+        ModoDemostracion = modoDemostracion;
 
         IrAGrupoCommand = new RelayCommand(IrAGrupo, () => (MostrarAsistencia || MostrarProyectos || MostrarEvaluacion) && !Asistencia.EstaOcupado);
         IrAAsistenciaCommand = new RelayCommand(IrAAsistencia, () => !MostrarAsistencia && Grupo.GrupoIdActual is not null);
@@ -39,6 +41,7 @@ public sealed class MainWindowViewModel : ViewModelBase
                 IrAProyectosCommand.NotifyCanExecuteChanged();
                 IrAEvaluacionCommand.NotifyCanExecuteChanged();
                 OnPropertyChanged(nameof(MostrarNavegacion));
+                OnPropertyChanged(nameof(TituloVentana));
             }
 
             if (args.PropertyName == nameof(GestionGrupoViewModel.EstaOcupado))
@@ -122,6 +125,7 @@ public sealed class MainWindowViewModel : ViewModelBase
     public GestionProyectosViewModel? Proyectos { get; }
     public EvaluacionActividadesViewModel? Evaluacion { get; }
     public GestionExpedienteViewModel? Expediente { get; }
+    public bool ModoDemostracion { get; }
 
     public RelayCommand IrAGrupoCommand { get; }
     public RelayCommand IrAAsistenciaCommand { get; }
@@ -199,12 +203,12 @@ public sealed class MainWindowViewModel : ViewModelBase
     {
         get
         {
-            var titulo = "Sistema Docente Local";
+            var titulo = ModoDemostracion ? "Sistema Docente Local · DEMO" : "Sistema Docente Local";
             if (!string.IsNullOrWhiteSpace(Grupo.NombreGrupo)) titulo += " - " + Grupo.NombreGrupo;
             if (MostrarAsistenciaDiaria) titulo += " - Asistencia diaria";
             else if (MostrarAsistenciaMensual) titulo += " - Asistencia mensual";
             else if (MostrarProyectos) titulo += " - Proyectos";
-            else if (MostrarEvaluacion) titulo += " - Evaluacion";
+            else if (MostrarEvaluacion) titulo += " - Evaluación";
             else if (MostrarGrupo) titulo += " - Grupo";
             return titulo;
         }

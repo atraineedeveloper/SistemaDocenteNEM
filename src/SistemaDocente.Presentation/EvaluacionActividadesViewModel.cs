@@ -10,13 +10,13 @@ public sealed class EvaluacionActividadesViewModel : ViewModelBase
     private readonly IServicioMensajes _mensajes;
     private GrupoId? _grupoId;
     private ProyectoResumen? _proyecto;
-    private ActividadProyectoResumen? _actividad;
-    private ActividadProyectoDetalle? _actividadConfirmada;
     private IReadOnlyList<ProyectoResumen> _proyectos = [];
     private IReadOnlyList<ActividadProyectoResumen> _actividades = [];
-    private IReadOnlyList<EntregaActividadVisual> _entregas = [];
-    private IReadOnlyList<EntregaActividadVisual> _entregasVisibles = [];
-    private EntregaActividadVisual? _entregaSeleccionada;
+    private IReadOnlyList<ActividadEvaluacionColumnaVisual> _columnasActividades = [];
+    private IReadOnlyList<EvaluacionEstudianteFilaVisual> _filas = [];
+    private IReadOnlyList<EvaluacionEstudianteFilaVisual> _filasVisibles = [];
+    private EvaluacionCeldaVisual? _celdaSeleccionada;
+    private int _indiceActividadSeleccionada = -1;
     private bool _estaOcupado;
     private FiltroEntrega _filtroEntrega;
     private string _busquedaEstudiante = string.Empty;
@@ -30,37 +30,28 @@ public sealed class EvaluacionActividadesViewModel : ViewModelBase
         _dialogo = dialogo ?? throw new ArgumentNullException(nameof(dialogo));
         _mensajes = mensajes ?? throw new ArgumentNullException(nameof(mensajes));
 
-        GuardarActividadCommand = new RelayCommand(
-            GuardarActividad,
-            () => PuedeEditar && TieneCambios);
-        DescartarActividadCommand = new RelayCommand(
-            DescartarActividad,
-            () => TieneCambios && !EstaOcupado);
-        MarcarDominaCommand = new RelayCommand(
-            () => Marcar(NivelLogro.Domina), () => PuedeEditar);
-        MarcarSuficienteCommand = new RelayCommand(
-            () => Marcar(NivelLogro.Suficiente), () => PuedeEditar);
-        MarcarEnProcesoCommand = new RelayCommand(
-            () => Marcar(NivelLogro.EnProceso), () => PuedeEditar);
-        MarcarRequiereApoyoCommand = new RelayCommand(
-            () => Marcar(NivelLogro.RequiereApoyo), () => PuedeEditar);
-        MarcarNoEntregoCommand = new RelayCommand(
-            () => Marcar(NivelLogro.NoEntrego), () => PuedeEditar);
-        MarcarPendienteCommand = new RelayCommand(
-            () => Marcar(NivelLogro.Pendiente), () => PuedeEditar);
+        GuardarCambiosCommand = new RelayCommand(GuardarCambios, () => TieneCambios && !EstaOcupado);
+        DescartarCambiosCommand = new RelayCommand(DescartarCambios, () => TieneCambios && !EstaOcupado);
+        GuardarActividadCommand = GuardarCambiosCommand;
+        DescartarActividadCommand = DescartarCambiosCommand;
 
-        MarcarTodosDominaCommand = new RelayCommand(
-            () => MarcarTodos(NivelLogro.Domina), () => PuedeEditar);
-        MarcarTodosSuficienteCommand = new RelayCommand(
-            () => MarcarTodos(NivelLogro.Suficiente), () => PuedeEditar);
-        MarcarTodosEnProcesoCommand = new RelayCommand(
-            () => MarcarTodos(NivelLogro.EnProceso), () => PuedeEditar);
-        MarcarTodosRequiereApoyoCommand = new RelayCommand(
-            () => MarcarTodos(NivelLogro.RequiereApoyo), () => PuedeEditar);
-        MarcarTodosNoEntregoCommand = new RelayCommand(
-            () => MarcarTodos(NivelLogro.NoEntrego), () => PuedeEditar);
+        MarcarDominaCommand = new RelayCommand(() => Marcar(NivelLogro.Domina), () => PuedeEditarCelda);
+        MarcarSuficienteCommand = new RelayCommand(() => Marcar(NivelLogro.Suficiente), () => PuedeEditarCelda);
+        MarcarEnProcesoCommand = new RelayCommand(() => Marcar(NivelLogro.EnProceso), () => PuedeEditarCelda);
+        MarcarRequiereApoyoCommand = new RelayCommand(() => Marcar(NivelLogro.RequiereApoyo), () => PuedeEditarCelda);
+        MarcarNoEntregoCommand = new RelayCommand(() => Marcar(NivelLogro.NoEntrego), () => PuedeEditarCelda);
+        MarcarPendienteCommand = new RelayCommand(() => Marcar(NivelLogro.Pendiente), () => PuedeEditarCelda);
+
+        MarcarTodosDominaCommand = CrearComandoMasivo(NivelLogro.Domina);
+        MarcarTodosSuficienteCommand = CrearComandoMasivo(NivelLogro.Suficiente);
+        MarcarTodosEnProcesoCommand = CrearComandoMasivo(NivelLogro.EnProceso);
+        MarcarTodosRequiereApoyoCommand = CrearComandoMasivo(NivelLogro.RequiereApoyo);
+        MarcarTodosNoEntregoCommand = CrearComandoMasivo(NivelLogro.NoEntrego);
+        MarcarTodosPendienteCommand = CrearComandoMasivo(NivelLogro.Pendiente);
     }
 
+    public RelayCommand GuardarCambiosCommand { get; }
+    public RelayCommand DescartarCambiosCommand { get; }
     public RelayCommand GuardarActividadCommand { get; }
     public RelayCommand DescartarActividadCommand { get; }
     public RelayCommand MarcarDominaCommand { get; }
@@ -74,12 +65,7 @@ public sealed class EvaluacionActividadesViewModel : ViewModelBase
     public RelayCommand MarcarTodosEnProcesoCommand { get; }
     public RelayCommand MarcarTodosRequiereApoyoCommand { get; }
     public RelayCommand MarcarTodosNoEntregoCommand { get; }
-
-    public EntregaActividadVisual? EntregaSeleccionada
-    {
-        get => _entregaSeleccionada;
-        set => SetProperty(ref _entregaSeleccionada, value);
-    }
+    public RelayCommand MarcarTodosPendienteCommand { get; }
 
     public IReadOnlyList<FiltroEntrega> FiltrosEntrega { get; } = Enum.GetValues<FiltroEntrega>();
 
@@ -95,16 +81,22 @@ public sealed class EvaluacionActividadesViewModel : ViewModelBase
         private set => SetProperty(ref _actividades, value);
     }
 
-    public IReadOnlyList<EntregaActividadVisual> Entregas
+    public IReadOnlyList<ActividadEvaluacionColumnaVisual> ColumnasActividades
     {
-        get => _entregas;
-        private set => SetProperty(ref _entregas, value);
+        get => _columnasActividades;
+        private set => SetProperty(ref _columnasActividades, value);
     }
 
-    public IReadOnlyList<EntregaActividadVisual> EntregasVisibles
+    public IReadOnlyList<EvaluacionEstudianteFilaVisual> Filas
     {
-        get => _entregasVisibles;
-        private set => SetProperty(ref _entregasVisibles, value);
+        get => _filas;
+        private set => SetProperty(ref _filas, value);
+    }
+
+    public IReadOnlyList<EvaluacionEstudianteFilaVisual> FilasVisibles
+    {
+        get => _filasVisibles;
+        private set => SetProperty(ref _filasVisibles, value);
     }
 
     public ProyectoResumen? ProyectoSeleccionado
@@ -121,65 +113,89 @@ public sealed class EvaluacionActividadesViewModel : ViewModelBase
 
             _proyecto = value;
             OnPropertyChanged();
-            LimpiarActividad();
-            CargarActividades();
+            CargarMatriz();
         }
     }
 
-    public ActividadProyectoResumen? ActividadSeleccionada
-    {
-        get => _actividad;
-        set
-        {
-            if (value == _actividad) return;
-            if (!ConfirmarPendientes())
-            {
-                OnPropertyChanged();
-                return;
-            }
+    /// <summary>
+    /// Compatibilidad de lectura: la actividad seleccionada se deriva de la columna actual,
+    /// ya no de un selector independiente.
+    /// </summary>
+    public ActividadProyectoResumen? ActividadSeleccionada =>
+        _indiceActividadSeleccionada >= 0 && _indiceActividadSeleccionada < Actividades.Count
+            ? Actividades[_indiceActividadSeleccionada]
+            : null;
 
-            _actividad = value;
-            OnPropertyChanged();
-            CargarActividad();
+    public ActividadEvaluacionColumnaVisual? ActividadColumnaSeleccionada =>
+        _indiceActividadSeleccionada >= 0 && _indiceActividadSeleccionada < ColumnasActividades.Count
+            ? ColumnasActividades[_indiceActividadSeleccionada]
+            : null;
+
+    public string ContextoActividadSeleccionada => ActividadColumnaSeleccionada is { } actividad
+        ? $"{actividad.Codigo} · {actividad.Titulo} · {actividad.FechaTexto}"
+        : "Selecciona una celda de actividad para comenzar.";
+
+    public EvaluacionCeldaVisual? CeldaSeleccionada
+    {
+        get => _celdaSeleccionada;
+        private set
+        {
+            if (SetProperty(ref _celdaSeleccionada, value))
+            {
+                OnPropertyChanged(nameof(PuedeEditarCelda));
+                NotificarComandos();
+            }
         }
     }
 
     public FiltroEntrega FiltroEntrega
     {
         get => _filtroEntrega;
-        set { if (SetProperty(ref _filtroEntrega, value)) AplicarFiltros(); }
+        set
+        {
+            if (SetProperty(ref _filtroEntrega, value)) AplicarFiltros();
+        }
     }
 
     public string BusquedaEstudiante
     {
         get => _busquedaEstudiante;
-        set { if (SetProperty(ref _busquedaEstudiante, value)) AplicarFiltros(); }
+        set
+        {
+            if (SetProperty(ref _busquedaEstudiante, value)) AplicarFiltros();
+        }
     }
 
     public bool EstaOcupado
     {
         get => _estaOcupado;
-        private set { if (SetProperty(ref _estaOcupado, value)) NotificarComandos(); }
+        private set
+        {
+            if (SetProperty(ref _estaOcupado, value))
+            {
+                OnPropertyChanged(nameof(PuedeEditarActividadSeleccionada));
+                OnPropertyChanged(nameof(PuedeEditarCelda));
+                NotificarComandos();
+            }
+        }
     }
 
-    public bool PuedeEditar => !EstaOcupado
+    public bool PuedeEditarActividadSeleccionada => !EstaOcupado
         && ProyectoSeleccionado?.Estado != EstadoProyecto.Finalizado
-        && ActividadSeleccionada?.Estado == EstadoActividad.Activa;
+        && ActividadColumnaSeleccionada?.Estado == EstadoActividad.Activa;
 
-    public bool TieneCambios => _actividadConfirmada is not null
-        && Entregas.Any(fila =>
-        {
-            var confirmada = _actividadConfirmada.Entregas.Single(x => x.EstudianteId == fila.EstudianteId);
-            return confirmada.NivelLogro != fila.NivelLogro || confirmada.Observacion != fila.Observacion;
-        });
+    public bool PuedeEditarCelda => PuedeEditarActividadSeleccionada
+        && CeldaSeleccionada?.EsEditable == true;
 
-    public int Total => Entregas.Count;
-    public int Pendientes => Entregas.Count(x => x.NivelLogro == NivelLogro.Pendiente);
-    public int Domina => Entregas.Count(x => x.NivelLogro == NivelLogro.Domina);
-    public int Suficiente => Entregas.Count(x => x.NivelLogro == NivelLogro.Suficiente);
-    public int EnProceso => Entregas.Count(x => x.NivelLogro == NivelLogro.EnProceso);
-    public int RequiereApoyo => Entregas.Count(x => x.NivelLogro == NivelLogro.RequiereApoyo);
-    public int NoEntrego => Entregas.Count(x => x.NivelLogro == NivelLogro.NoEntrego);
+    public bool TieneCambios => Filas.Any(fila => fila.Celdas.Any(celda => celda.TieneCambios));
+
+    public int Total => CeldasActividadSeleccionada().Length;
+    public int Pendientes => Contar(NivelLogro.Pendiente);
+    public int Domina => Contar(NivelLogro.Domina);
+    public int Suficiente => Contar(NivelLogro.Suficiente);
+    public int EnProceso => Contar(NivelLogro.EnProceso);
+    public int RequiereApoyo => Contar(NivelLogro.RequiereApoyo);
+    public int NoEntrego => Contar(NivelLogro.NoEntrego);
 
     public void Inicializar(GrupoId grupoId)
     {
@@ -190,132 +206,258 @@ public sealed class EvaluacionActividadesViewModel : ViewModelBase
 
     public bool SolicitarSalir() => ConfirmarPendientes();
 
+    public void SeleccionarCelda(EvaluacionEstudianteFilaVisual fila, int indiceActividad)
+    {
+        ArgumentNullException.ThrowIfNull(fila);
+        if (indiceActividad < 0 || indiceActividad >= ColumnasActividades.Count
+            || indiceActividad >= fila.Celdas.Count)
+        {
+            return;
+        }
+
+        if (_indiceActividadSeleccionada != indiceActividad)
+        {
+            _indiceActividadSeleccionada = indiceActividad;
+            NotificarContextoActividad();
+            AplicarFiltros();
+        }
+
+        CeldaSeleccionada = fila.Celdas[indiceActividad];
+    }
+
+    public void SeleccionarActividad(int indiceActividad)
+    {
+        if (indiceActividad < 0 || indiceActividad >= ColumnasActividades.Count
+            || _indiceActividadSeleccionada == indiceActividad)
+        {
+            return;
+        }
+
+        _indiceActividadSeleccionada = indiceActividad;
+        CeldaSeleccionada = null;
+        NotificarContextoActividad();
+        AplicarFiltros();
+    }
+
+    private RelayCommand CrearComandoMasivo(NivelLogro nivel) =>
+        new(() => MarcarTodos(nivel), () => PuedeEditarActividadSeleccionada);
+
     private void RecargarProyectos()
     {
         if (_grupoId is null) return;
         var proyectos = EjecutarResultado(() => _gestion.ListarProyectos(_grupoId.Value));
         if (proyectos is null) return;
+
         Proyectos = proyectos;
         if (_proyecto is not null)
         {
             _proyecto = proyectos.FirstOrDefault(x => x.ProyectoId == _proyecto.ProyectoId);
             OnPropertyChanged(nameof(ProyectoSeleccionado));
         }
+
         if (_proyecto is null && Proyectos.Count > 0)
         {
-            ProyectoSeleccionado = Proyectos[0];
+            _proyecto = Proyectos[0];
+            OnPropertyChanged(nameof(ProyectoSeleccionado));
         }
+
+        CargarMatriz();
     }
 
-    private void CargarActividades()
+    private void CargarMatriz()
     {
-        if (_proyecto is null)
-        {
-            Actividades = [];
-            return;
-        }
+        LimpiarMatriz();
+        if (_proyecto is null) return;
 
-        var actividades = EjecutarResultado(() => _gestion.ListarActividades(_proyecto.ProyectoId));
-        if (actividades is null) return;
-        Actividades = actividades;
-        if (Actividades.Count > 0)
+        var carga = EjecutarResultado(() =>
         {
-            ActividadSeleccionada = Actividades[0];
-        }
-    }
+            var resumenes = _gestion.ListarActividades(_proyecto.ProyectoId);
+            var detalles = resumenes.Select(x => _gestion.ObtenerActividad(x.ActividadId)).ToArray();
+            return new CargaMatriz(resumenes, detalles);
+        });
+        if (carga is null) return;
 
-    private void CargarActividad()
-    {
-        if (_actividad is null)
-        {
-            _actividadConfirmada = null;
-            Entregas = [];
-            AplicarFiltros();
-            NotificarEdicion();
-            return;
-        }
+        Actividades = carga.Resumenes;
+        ColumnasActividades = carga.Detalles
+            .Select((detalle, indice) => new ActividadEvaluacionColumnaVisual(
+                detalle.ActividadId,
+                $"A{indice + 1:D2}",
+                detalle.Titulo,
+                detalle.FechaRealizacion,
+                detalle.Estado,
+                detalle.Version))
+            .ToArray();
 
-        var detalle = EjecutarResultado(() => _gestion.ObtenerActividad(_actividad.ActividadId));
-        if (detalle is not null)
-        {
-            AplicarActividad(detalle);
-        }
-    }
+        var estudiantes = carga.Detalles
+            .SelectMany(x => x.Entregas)
+            .GroupBy(x => x.EstudianteId)
+            .Select(grupo => grupo.First())
+            .OrderBy(x => x.NumeroLista)
+            .ThenBy(x => x.NombreVisible, StringComparer.CurrentCulture)
+            .ThenBy(x => x.EstudianteId.Valor)
+            .ToArray();
 
-    private void AplicarActividad(ActividadProyectoDetalle detalle)
-    {
-        _actividadConfirmada = detalle;
-        Entregas = detalle.Entregas.Select(x => new EntregaActividadVisual(x)).ToArray();
-        foreach (var fila in Entregas)
+        var filas = new List<EvaluacionEstudianteFilaVisual>(estudiantes.Length);
+        foreach (var estudiante in estudiantes)
         {
-            fila.PropertyChanged += (_, _) =>
+            var celdas = new EvaluacionCeldaVisual[carga.Detalles.Count];
+            for (var indice = 0; indice < carga.Detalles.Count; indice++)
             {
-                AplicarFiltros();
-                NotificarEdicion();
-            };
+                var detalle = carga.Detalles[indice];
+                var entrega = detalle.Entregas.FirstOrDefault(x => x.EstudianteId == estudiante.EstudianteId);
+                var esAplicable = entrega is not null;
+                var esEditable = _proyecto.Estado != EstadoProyecto.Finalizado
+                    && detalle.Estado == EstadoActividad.Activa;
+                celdas[indice] = new EvaluacionCeldaVisual(
+                    detalle.ActividadId,
+                    estudiante.EstudianteId,
+                    esAplicable,
+                    esEditable,
+                    entrega?.NivelLogro ?? NivelLogro.Pendiente,
+                    entrega?.Observacion ?? string.Empty);
+                celdas[indice].PropertyChanged += (_, _) => OnCeldaModificada();
+            }
+
+            filas.Add(new EvaluacionEstudianteFilaVisual(
+                estudiante.EstudianteId,
+                estudiante.NumeroLista,
+                estudiante.NombreVisible,
+                estudiante.EstaActivoActualmente,
+                celdas));
         }
 
+        Filas = filas;
+        _indiceActividadSeleccionada = ColumnasActividades.Count > 0 ? 0 : -1;
+        CeldaSeleccionada = null;
+        NotificarContextoActividad();
         AplicarFiltros();
         NotificarEdicion();
     }
 
-    private void GuardarActividad() => IntentarGuardarActividad();
-
-    private bool IntentarGuardarActividad()
+    private void LimpiarMatriz()
     {
-        if (_actividad is null || _actividadConfirmada is null) return false;
-        ActividadProyectoDetalle? guardada = null;
-        var entradas = Entregas.Select(x =>
-            new EntradaEntregaActividad(x.EstudianteId, x.NivelLogro, x.Observacion)).ToArray();
-        var entrada = new EntradaActividad(
-            _actividadConfirmada.Titulo, _actividadConfirmada.Descripcion,
-            _actividadConfirmada.FechaRealizacion, _actividadConfirmada.ObservacionesGenerales, entradas);
-
-        var correcto = Ejecutar(() => guardada = _gestion.GuardarEntregas(
-            _actividad.ActividadId, _actividad.Version, entradas));
-
-        if (!correcto || guardada is null) return false;
-
-        _actividad = Resumir(guardada);
-        OnPropertyChanged(nameof(ActividadSeleccionada));
-        AplicarActividad(guardada);
-        if (_proyecto is not null)
-        {
-            _actividades = _gestion.ListarActividades(_proyecto.ProyectoId);
-            OnPropertyChanged(nameof(Actividades));
-        }
-
-        return true;
-    }
-
-    private void DescartarActividad()
-    {
-        if (_actividadConfirmada is not null) AplicarActividad(_actividadConfirmada);
+        Actividades = [];
+        ColumnasActividades = [];
+        Filas = [];
+        FilasVisibles = [];
+        _indiceActividadSeleccionada = -1;
+        CeldaSeleccionada = null;
+        NotificarContextoActividad();
+        NotificarEdicion();
     }
 
     private void Marcar(NivelLogro nivel)
     {
-        var marcados = Entregas.Where(x => x.Seleccionada).ToArray();
-        if (marcados.Length > 0)
-        {
-            foreach (var fila in marcados) fila.NivelLogro = nivel;
-        }
-        else if (EntregaSeleccionada is not null)
-        {
-            EntregaSeleccionada.NivelLogro = nivel;
-        }
-        else
-        {
-            foreach (var fila in EntregasVisibles) fila.NivelLogro = nivel;
-        }
-
-        AplicarFiltros();
-        NotificarEdicion();
+        if (CeldaSeleccionada?.EsEditable != true) return;
+        CeldaSeleccionada.NivelLogro = nivel;
     }
 
     private void MarcarTodos(NivelLogro nivel)
     {
-        foreach (var fila in EntregasVisibles) fila.NivelLogro = nivel;
+        var indice = _indiceActividadSeleccionada;
+        if (!PuedeEditarActividadSeleccionada || indice < 0) return;
+
+        foreach (var fila in Filas)
+        {
+            var celda = fila.Celdas[indice];
+            if (celda.EsEditable) celda.NivelLogro = nivel;
+        }
+
+        NotificarEdicion();
+    }
+
+    private void GuardarCambios() => IntentarGuardarCambios();
+
+    private bool IntentarGuardarCambios()
+    {
+        if (!TieneCambios) return true;
+        if (EstaOcupado) return false;
+
+        EstaOcupado = true;
+        try
+        {
+            for (var indice = 0; indice < ColumnasActividades.Count; indice++)
+            {
+                var hayCambios = Filas.Select(x => x.Celdas[indice])
+                    .Any(x => x.EsAplicable && x.TieneCambios);
+                if (!hayCambios) continue;
+
+                var columna = ColumnasActividades[indice];
+                var entradas = Filas
+                    .Select(x => x.Celdas[indice])
+                    .Where(x => x.EsAplicable)
+                    .Select(x => new EntradaEntregaActividad(x.EstudianteId, x.NivelLogro, x.Observacion))
+                    .ToArray();
+
+                ActividadProyectoDetalle guardada;
+                try
+                {
+                    guardada = _gestion.GuardarEntregas(columna.ActividadId, columna.Version, entradas);
+                }
+                catch (ConflictoConcurrenciaException)
+                {
+                    _mensajes.MostrarError($"{columna.Codigo} cambió desde la última lectura. Las actividades guardadas antes de este punto se conservaron.");
+                    return false;
+                }
+                catch (DomainValidationException exception)
+                {
+                    _mensajes.MostrarError(exception.Message);
+                    return false;
+                }
+                catch (DomainConflictException exception)
+                {
+                    _mensajes.MostrarError(exception.Message);
+                    return false;
+                }
+                catch (ErrorPersistenciaAplicacionException)
+                {
+                    _mensajes.MostrarError($"No fue posible guardar {columna.Codigo}. Las actividades guardadas antes de este punto se conservaron.");
+                    return false;
+                }
+
+                ConfirmarActividadGuardada(indice, guardada);
+            }
+
+            return true;
+        }
+        finally
+        {
+            EstaOcupado = false;
+            AplicarFiltros();
+            NotificarEdicion();
+        }
+    }
+
+    private void ConfirmarActividadGuardada(int indice, ActividadProyectoDetalle guardada)
+    {
+        ColumnasActividades[indice].ActualizarVersion(guardada.Version);
+        var porEstudiante = guardada.Entregas.ToDictionary(x => x.EstudianteId);
+
+        foreach (var fila in Filas)
+        {
+            var celda = fila.Celdas[indice];
+            if (!celda.EsAplicable) continue;
+            if (!porEstudiante.TryGetValue(fila.EstudianteId, out var entrega))
+                throw new DomainConflictException("El padrón guardado de la actividad no coincide con la matriz.");
+            celda.Confirmar(entrega.NivelLogro, entrega.Observacion);
+        }
+
+        var resumenes = Actividades.ToArray();
+        if (indice < resumenes.Length)
+        {
+            resumenes[indice] = Resumir(guardada);
+            Actividades = resumenes;
+        }
+        OnPropertyChanged(nameof(ActividadSeleccionada));
+    }
+
+    private void DescartarCambios()
+    {
+        foreach (var celda in Filas.SelectMany(x => x.Celdas))
+        {
+            if (celda.TieneCambios) celda.Restaurar();
+        }
+
         AplicarFiltros();
         NotificarEdicion();
     }
@@ -323,65 +465,69 @@ public sealed class EvaluacionActividadesViewModel : ViewModelBase
     private bool ConfirmarPendientes()
     {
         if (!TieneCambios) return true;
-        return _dialogo.ConfirmarCambiosPendientes("la evaluación de la actividad") switch
+        return _dialogo.ConfirmarCambiosPendientes("las evaluaciones del proyecto") switch
         {
-            DecisionCambiosPendientes.Guardar => IntentarGuardarActividad(),
-            DecisionCambiosPendientes.Descartar => DescartarActividadPendiente(),
+            DecisionCambiosPendientes.Guardar => IntentarGuardarCambios(),
+            DecisionCambiosPendientes.Descartar => DescartarPendientes(),
             _ => false,
         };
     }
 
-    private bool DescartarActividadPendiente()
+    private bool DescartarPendientes()
     {
-        DescartarActividad();
+        DescartarCambios();
         return true;
     }
 
-    private void LimpiarActividad()
+    private void OnCeldaModificada()
     {
-        _actividad = null;
-        _actividadConfirmada = null;
-        _actividades = [];
-        Entregas = [];
-        OnPropertyChanged(nameof(ActividadSeleccionada));
-        OnPropertyChanged(nameof(Actividades));
         AplicarFiltros();
         NotificarEdicion();
     }
 
     private void AplicarFiltros()
     {
-        EntregasVisibles = Entregas.Where(x =>
+        var indice = _indiceActividadSeleccionada;
+        FilasVisibles = Filas.Where(fila =>
         {
             var coincideBusqueda = string.IsNullOrWhiteSpace(BusquedaEstudiante)
-                || x.Nombre.Contains(BusquedaEstudiante, StringComparison.CurrentCultureIgnoreCase)
-                || x.NumeroLista.ToString(System.Globalization.CultureInfo.InvariantCulture).Contains(BusquedaEstudiante, StringComparison.Ordinal);
-
+                || fila.Nombre.Contains(BusquedaEstudiante, StringComparison.CurrentCultureIgnoreCase)
+                || fila.NumeroLista.ToString(System.Globalization.CultureInfo.InvariantCulture)
+                    .Contains(BusquedaEstudiante, StringComparison.Ordinal);
             if (!coincideBusqueda) return false;
 
+            if (FiltroEntrega == FiltroEntrega.SoloActivos) return fila.EstaActivoActualmente;
+            if (FiltroEntrega is FiltroEntrega.Todos or FiltroEntrega.ActivosEInactivosHistoricos) return true;
+            if (indice < 0 || indice >= fila.Celdas.Count) return false;
+
+            var celda = fila.Celdas[indice];
+            if (!celda.EsAplicable) return false;
             return FiltroEntrega switch
             {
-                FiltroEntrega.Pendientes => x.NivelLogro == NivelLogro.Pendiente,
-                FiltroEntrega.Domina => x.NivelLogro == NivelLogro.Domina,
-                FiltroEntrega.Suficiente => x.NivelLogro == NivelLogro.Suficiente,
-                FiltroEntrega.EnProceso => x.NivelLogro == NivelLogro.EnProceso,
-                FiltroEntrega.RequiereApoyo => x.NivelLogro == NivelLogro.RequiereApoyo,
-                FiltroEntrega.NoEntrego => x.NivelLogro == NivelLogro.NoEntrego,
-                FiltroEntrega.SoloIncidencias => x.NivelLogro == NivelLogro.Pendiente
-                    || x.NivelLogro == NivelLogro.RequiereApoyo || x.NivelLogro == NivelLogro.NoEntrego,
-                FiltroEntrega.SoloActivos => x.EstaActivoActualmente,
+                FiltroEntrega.Pendientes => celda.NivelLogro == NivelLogro.Pendiente,
+                FiltroEntrega.Domina => celda.NivelLogro == NivelLogro.Domina,
+                FiltroEntrega.Suficiente => celda.NivelLogro == NivelLogro.Suficiente,
+                FiltroEntrega.EnProceso => celda.NivelLogro == NivelLogro.EnProceso,
+                FiltroEntrega.RequiereApoyo => celda.NivelLogro == NivelLogro.RequiereApoyo,
+                FiltroEntrega.NoEntrego => celda.NivelLogro == NivelLogro.NoEntrego,
+                FiltroEntrega.SoloIncidencias => celda.NivelLogro is NivelLogro.Pendiente
+                    or NivelLogro.RequiereApoyo or NivelLogro.NoEntrego,
                 _ => true,
             };
         }).ToArray();
 
-        OnPropertyChanged(nameof(Total));
-        OnPropertyChanged(nameof(Pendientes));
-        OnPropertyChanged(nameof(Domina));
-        OnPropertyChanged(nameof(Suficiente));
-        OnPropertyChanged(nameof(EnProceso));
-        OnPropertyChanged(nameof(RequiereApoyo));
-        OnPropertyChanged(nameof(NoEntrego));
+        NotificarEstadisticas();
     }
+
+    private EvaluacionCeldaVisual[] CeldasActividadSeleccionada()
+    {
+        var indice = _indiceActividadSeleccionada;
+        if (indice < 0 || indice >= ColumnasActividades.Count) return [];
+        return Filas.Select(x => x.Celdas[indice]).Where(x => x.EsAplicable).ToArray();
+    }
+
+    private int Contar(NivelLogro nivel) =>
+        CeldasActividadSeleccionada().Count(x => x.NivelLogro == nivel);
 
     private bool Ejecutar(Action accion)
     {
@@ -394,7 +540,7 @@ public sealed class EvaluacionActividadesViewModel : ViewModelBase
         }
         catch (ConflictoConcurrenciaException)
         {
-            _mensajes.MostrarError("Los datos cambiaron. Recarga antes de guardar.");
+            _mensajes.MostrarError("Los datos cambiaron. Recarga antes de continuar.");
         }
         catch (DomainValidationException exception)
         {
@@ -406,7 +552,7 @@ public sealed class EvaluacionActividadesViewModel : ViewModelBase
         }
         catch (ErrorPersistenciaAplicacionException)
         {
-            _mensajes.MostrarError("No fue posible guardar la evaluación. Intenta nuevamente.");
+            _mensajes.MostrarError("No fue posible cargar la evaluación. Intenta nuevamente.");
         }
         finally
         {
@@ -423,10 +569,34 @@ public sealed class EvaluacionActividadesViewModel : ViewModelBase
         return valor;
     }
 
+    private void NotificarContextoActividad()
+    {
+        OnPropertyChanged(nameof(ActividadSeleccionada));
+        OnPropertyChanged(nameof(ActividadColumnaSeleccionada));
+        OnPropertyChanged(nameof(ContextoActividadSeleccionada));
+        OnPropertyChanged(nameof(PuedeEditarActividadSeleccionada));
+        OnPropertyChanged(nameof(PuedeEditarCelda));
+        NotificarEstadisticas();
+        NotificarComandos();
+    }
+
+    private void NotificarEstadisticas()
+    {
+        OnPropertyChanged(nameof(Total));
+        OnPropertyChanged(nameof(Pendientes));
+        OnPropertyChanged(nameof(Domina));
+        OnPropertyChanged(nameof(Suficiente));
+        OnPropertyChanged(nameof(EnProceso));
+        OnPropertyChanged(nameof(RequiereApoyo));
+        OnPropertyChanged(nameof(NoEntrego));
+    }
+
     private void NotificarEdicion()
     {
         OnPropertyChanged(nameof(TieneCambios));
-        OnPropertyChanged(nameof(PuedeEditar));
+        OnPropertyChanged(nameof(PuedeEditarActividadSeleccionada));
+        OnPropertyChanged(nameof(PuedeEditarCelda));
+        NotificarEstadisticas();
         NotificarComandos();
     }
 
@@ -434,9 +604,11 @@ public sealed class EvaluacionActividadesViewModel : ViewModelBase
     {
         foreach (var comando in new[]
         {
-            GuardarActividadCommand, DescartarActividadCommand, MarcarDominaCommand,
-            MarcarSuficienteCommand, MarcarEnProcesoCommand, MarcarRequiereApoyoCommand,
-            MarcarNoEntregoCommand, MarcarPendienteCommand,
+            GuardarCambiosCommand, DescartarCambiosCommand,
+            MarcarDominaCommand, MarcarSuficienteCommand, MarcarEnProcesoCommand,
+            MarcarRequiereApoyoCommand, MarcarNoEntregoCommand, MarcarPendienteCommand,
+            MarcarTodosDominaCommand, MarcarTodosSuficienteCommand, MarcarTodosEnProcesoCommand,
+            MarcarTodosRequiereApoyoCommand, MarcarTodosNoEntregoCommand, MarcarTodosPendienteCommand,
         })
         {
             comando.NotifyCanExecuteChanged();
@@ -444,8 +616,21 @@ public sealed class EvaluacionActividadesViewModel : ViewModelBase
     }
 
     private static ActividadProyectoResumen Resumir(ActividadProyectoDetalle actividad) => new(
-        actividad.ActividadId, actividad.ProyectoId, actividad.Titulo, actividad.FechaRealizacion,
-        actividad.Estado, actividad.Total, actividad.Pendientes, actividad.Domina,
-        actividad.Suficiente, actividad.EnProceso, actividad.RequiereApoyo,
-        actividad.NoEntrego, actividad.Version);
+        actividad.ActividadId,
+        actividad.ProyectoId,
+        actividad.Titulo,
+        actividad.FechaRealizacion,
+        actividad.Estado,
+        actividad.Total,
+        actividad.Pendientes,
+        actividad.Domina,
+        actividad.Suficiente,
+        actividad.EnProceso,
+        actividad.RequiereApoyo,
+        actividad.NoEntrego,
+        actividad.Version);
+
+    private sealed record CargaMatriz(
+        IReadOnlyList<ActividadProyectoResumen> Resumenes,
+        IReadOnlyList<ActividadProyectoDetalle> Detalles);
 }
