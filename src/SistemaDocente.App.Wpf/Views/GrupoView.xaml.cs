@@ -141,6 +141,16 @@ public partial class GrupoView : UserControl
             return;
         }
 
+        if (Configuracion is not null && grupo.GrupoIdActual is { } grupoId)
+        {
+            Configuracion.Inicializar(grupoId);
+            grupo.ConfigurarGradosDisponibles(Configuracion.ObtenerGradosConfigurados());
+        }
+        else
+        {
+            grupo.ConfigurarGradosDisponibles(null);
+        }
+
         var ventana = new EditorEstudianteWindow(grupo)
         {
             Owner = Window.GetWindow(this),
