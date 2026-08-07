@@ -10,9 +10,9 @@
              xml:lang="es-MX">
     <UserControl.Resources>
         <Style x:Key="ModernHeaderNavButton" TargetType="Button">
-            <Setter Property="Padding" Value="15,22,15,18"/>
-            <Setter Property="Margin" Value="2,0"/>
-            <Setter Property="MinWidth" Value="96"/>
+            <Setter Property="Padding" Value="11,22,11,18"/>
+            <Setter Property="Margin" Value="1,0"/>
+            <Setter Property="MinWidth" Value="84"/>
             <Setter Property="Cursor" Value="Hand"/>
             <Setter Property="Background" Value="Transparent"/>
             <Setter Property="Foreground" Value="{DynamicResource TextSecondaryBrush}"/>
@@ -89,15 +89,15 @@
             </StackPanel>
 
             <StackPanel Grid.Column="2" Orientation="Horizontal" VerticalAlignment="Center"
-                        DataContext="{Binding Grupo}" Margin="16,9,12,9">
+                        DataContext="{Binding Grupo}" Margin="12,9,8,9">
                 <TextBlock Text="Grupo" Foreground="{DynamicResource TextMutedBrush}" VerticalAlignment="Center" Margin="0,0,7,0" Style="{StaticResource Caption}"/>
-                <ComboBox Width="190" MinWidth="160" VerticalAlignment="Center" Margin="0,0,8,0" TabIndex="1"
+                <ComboBox Width="170" MinWidth="145" VerticalAlignment="Center" Margin="0,0,6,0" TabIndex="1"
                           ItemsSource="{Binding GruposDisponibles}"
                           SelectedItem="{Binding GrupoSeleccionadoCombo, Mode=TwoWay}"
                           DisplayMemberPath="NombreGrupo"
                           AutomationProperties.Name="Selector de grupo"/>
                 <Button Style="{StaticResource PrimaryButton}" Content="＋ Nuevo" Command="{Binding AbrirNuevoGrupoCommand}"
-                        MinWidth="82" TabIndex="2" AutomationProperties.Name="Crear nuevo grupo"/>
+                        MinWidth="76" TabIndex="2" AutomationProperties.Name="Crear nuevo grupo"/>
             </StackPanel>
 
             <StackPanel Grid.Column="3" Orientation="Horizontal" VerticalAlignment="Stretch">
@@ -105,11 +105,12 @@
                 <Button x:Name="NavBtnAsistencia" Style="{StaticResource ModernHeaderNavButton}" Content="✓  Asistencia" Command="{Binding IrAAsistenciaCommand}" TabIndex="4" AutomationProperties.Name="Navegar a Asistencia"/>
                 <Button x:Name="NavBtnProyectos" Style="{StaticResource ModernHeaderNavButton}" Content="▱  Proyectos" Command="{Binding IrAProyectosCommand}" TabIndex="5" AutomationProperties.Name="Navegar a Proyectos"/>
                 <Button x:Name="NavBtnEvaluacion" Style="{StaticResource ModernHeaderNavButton}" Content="☆  Evaluación" Command="{Binding IrAEvaluacionCommand}" TabIndex="6" AutomationProperties.Name="Navegar a Evaluación"/>
+                <Button x:Name="NavBtnReportes" Style="{StaticResource ModernHeaderNavButton}" Content="▤  Reportes" Command="{Binding IrAReportesCommand}" TabIndex="7" AutomationProperties.Name="Navegar a Reportes"/>
             </StackPanel>
 
-            <Menu Grid.Column="4" VerticalAlignment="Center" Margin="6,0,0,0" Background="Transparent">
+            <Menu Grid.Column="4" VerticalAlignment="Center" Margin="4,0,0,0" Background="Transparent">
                 <MenuItem Header="☼  Tema" Foreground="{DynamicResource TextSecondaryBrush}" FontWeight="SemiBold"
-                          Padding="10,8" TabIndex="7" AutomationProperties.Name="Seleccionar tema">
+                          Padding="8,8" TabIndex="8" AutomationProperties.Name="Seleccionar tema">
                     <MenuItem Header="Claro" Click="TemaClaro_Click" AutomationProperties.Name="Tema claro"/>
                     <MenuItem Header="Oscuro" Click="TemaOscuro_Click" AutomationProperties.Name="Tema oscuro"/>
                     <MenuItem Header="Alto contraste" Click="TemaAltoContraste_Click" AutomationProperties.Name="Tema alto contraste"/>
