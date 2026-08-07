@@ -100,7 +100,7 @@ public sealed class GestionProyectosViewModel : ViewModelBase
                 && !string.IsNullOrWhiteSpace(TituloActividad)
                 && TieneCambiosActividad
                 && CatalogoPlaneacionNem.EsCampoEspecifico(CampoFormativoActividad)
-                && GradosActividadSeleccionados.Count > 0);
+                && (!_nuevaActividad || GradosActividadSeleccionados.Count > 0));
         DescartarActividadCommand = new RelayCommand(
             DescartarActividad,
             () => TieneCambiosActividad && !EstaOcupado);
@@ -364,6 +364,7 @@ public sealed class GestionProyectosViewModel : ViewModelBase
     {
         if (_grupoId is not null && _grupoId != grupoId && !ConfirmarPendientes()) return;
         _grupoId = grupoId;
+        OnPropertyChanged(nameof(GrupoIdActual));
         RecargarProyectos();
     }
 
@@ -547,7 +548,7 @@ public sealed class GestionProyectosViewModel : ViewModelBase
 
     private void NuevaActividad()
     {
-        if (_proyecto is null || !ConfirmarPendientesActividad()) return;
+        if (_proyecto is null || !ConfirmarPendientesActividad() || !ConfirmarPendientesProyecto()) return;
         var detalle = EjecutarResultado(() =>
             _gestion.PrepararActividad(_proyecto.ProyectoId, "Nueva actividad", "", FechaInicio, ""));
         if (detalle is not null)
@@ -614,7 +615,7 @@ public sealed class GestionProyectosViewModel : ViewModelBase
         }
 
         var grados = GradosActividadSeleccionados;
-        if (grados.Count == 0)
+        if (_nuevaActividad && grados.Count == 0)
         {
             _mensajes.MostrarError("Selecciona al menos un grado objetivo para la actividad.");
             return false;
