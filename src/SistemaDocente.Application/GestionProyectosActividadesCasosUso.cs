@@ -280,7 +280,8 @@ public sealed class GestionProyectosActividadesCasosUso
                 estudiante.EstaActivo,
                 x.EstadoEntrega,
                 x.NivelLogro,
-                x.Observacion);
+                x.Observacion,
+                estudiante.Grado);
         }).OrderBy(x => x.NumeroLista)
             .ThenBy(x => x.NombreVisible, StringComparer.Ordinal)
             .ThenBy(x => x.EstudianteId.Valor)
