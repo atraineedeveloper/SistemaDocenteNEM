@@ -91,7 +91,7 @@ public sealed class EvaluacionCeldaVisual : ViewModelBase
     internal EstudianteId EstudianteId { get; }
     public bool EsAplicable { get; }
     public bool EsEditable { get; }
-    public IReadOnlyList<OpcionNivelLogroVisual> OpcionesNivel => Opciones;
+    public IReadOnlyList<OpcionNivelLogroVisual> OpcionesNivel { get; } = Opciones;
 
     public NivelLogro NivelLogro
     {
