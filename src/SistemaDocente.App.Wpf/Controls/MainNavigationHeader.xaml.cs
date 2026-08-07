@@ -62,7 +62,8 @@ public partial class MainNavigationHeader : UserControl
             or nameof(MainWindowViewModel.MostrarAsistenciaDiaria)
             or nameof(MainWindowViewModel.MostrarAsistenciaMensual)
             or nameof(MainWindowViewModel.MostrarProyectos)
-            or nameof(MainWindowViewModel.MostrarEvaluacion))
+            or nameof(MainWindowViewModel.MostrarEvaluacion)
+            or nameof(MainWindowViewModel.MostrarReportes))
         {
             ActualizarPestañaActiva();
         }
@@ -76,6 +77,7 @@ public partial class MainNavigationHeader : UserControl
         NavBtnAsistencia.Tag = vm.MostrarAsistenciaDiaria || vm.MostrarAsistenciaMensual ? "activo" : string.Empty;
         NavBtnProyectos.Tag = vm.MostrarProyectos ? "activo" : string.Empty;
         NavBtnEvaluacion.Tag = vm.MostrarEvaluacion ? "activo" : string.Empty;
+        NavBtnReportes.Tag = vm.MostrarReportes ? "activo" : string.Empty;
     }
 
     private void TemaClaro_Click(object sender, RoutedEventArgs e) =>
