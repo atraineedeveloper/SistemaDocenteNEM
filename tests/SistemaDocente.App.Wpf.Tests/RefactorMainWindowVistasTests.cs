@@ -1,4 +1,5 @@
 using System.IO;
+using System.Text.RegularExpressions;
 using System.Threading;
 using System.Windows;
 
@@ -27,6 +28,9 @@ public sealed class RefactorMainWindowVistasTests
     private static string LeerControl(string nombre) => File.ReadAllText(Path.Combine(
         ObtenerRaiz(), "src", "SistemaDocente.App.Wpf", "Controls", nombre));
 
+    private static string LeerPresentacion(string nombre) => File.ReadAllText(Path.Combine(
+        ObtenerRaiz(), "src", "SistemaDocente.Presentation", nombre));
+
     [Fact]
     public void MainWindowEnsamblaVistasSeparadas()
     {
@@ -49,6 +53,88 @@ public sealed class RefactorMainWindowVistasTests
         Assert.DoesNotContain("GrillaEntregasEvaluacion", xaml, StringComparison.Ordinal);
         Assert.DoesNotContain("<DataGrid.Columns>", xaml, StringComparison.Ordinal);
         Assert.DoesNotContain("EstudiantesFiltrados", xaml, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void AsistenciaUsaFronteraPropiaDeModulo()
+    {
+        var mainWindow = LeerAplicacion("MainWindow.xaml");
+        var codeBehind = LeerVista("AsistenciaView.xaml.cs");
+        var modulo = LeerPresentacion("ModuloAsistenciaViewModel.cs");
+
+        Assert.Contains("views:AsistenciaView DataContext=\"{Binding ModuloAsistencia}\"", mainWindow, StringComparison.Ordinal);
+        Assert.Contains(nameof(ModuloAsistenciaViewModel), codeBehind, StringComparison.Ordinal);
+        Assert.DoesNotContain(nameof(MainWindowViewModel), codeBehind, StringComparison.Ordinal);
+        Assert.Contains("GestionAsistenciaViewModel Diaria", modulo, StringComparison.Ordinal);
+        Assert.Contains("GestionAsistenciaMensualViewModel Mensual", modulo, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void GrupoViewRecibeExpedienteSinConocerMainWindowConcreto()
+    {
+        var mainWindow = LeerAplicacion("MainWindow.xaml");
+        var grupoCs = LeerVista("GrupoView.xaml.cs");
+
+        Assert.Contains("Expediente=\"{Binding Expediente}\"", mainWindow, StringComparison.Ordinal);
+        Assert.Contains("DependencyProperty.Register", grupoCs, StringComparison.Ordinal);
+        Assert.DoesNotContain("is MainWindow", grupoCs, StringComparison.Ordinal);
+        Assert.DoesNotContain("MainWindowViewModel", grupoCs, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void GrupoViewMantieneDataGridFueraDeScrollViewerExterior()
+    {
+        var grupoXaml = LeerVista("GrupoView.xaml");
+
+        Assert.DoesNotContain("<ScrollViewer", grupoXaml, StringComparison.Ordinal);
+        Assert.Contains("Height=\"*\"", grupoXaml, StringComparison.Ordinal);
+        Assert.Contains("ScrollViewer.CanContentScroll=\"True\"", grupoXaml, StringComparison.Ordinal);
+        Assert.Contains("EnableRowVirtualization=\"True\"", grupoXaml, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void EncabezadoGestionaSuscripcionDeFormaIdempotente()
+    {
+        var codeBehind = LeerControl("MainNavigationHeader.xaml.cs");
+
+        Assert.Contains("_viewModelSuscrito", codeBehind, StringComparison.Ordinal);
+        Assert.Contains("ReferenceEquals(_viewModelSuscrito, nuevo)", codeBehind, StringComparison.Ordinal);
+        Assert.Contains("Unloaded += OnUnloaded", codeBehind, StringComparison.Ordinal);
+        Assert.Contains("PropertyChanged -= OnViewModelPropertyChanged", codeBehind, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void PageUpYPageDownSonContextualesALaGrillaMensual()
+    {
+        var xaml = LeerVista("AsistenciaView.xaml");
+        var codeBehind = LeerVista("AsistenciaView.xaml.cs");
+
+        Assert.DoesNotContain("PreviewKeyDown=\"OnPreviewKeyDown\"", xaml, StringComparison.Ordinal);
+        Assert.Contains("PreviewKeyDown=\"OnGrillaMensualPreviewKeyDown\"", xaml, StringComparison.Ordinal);
+        Assert.Contains("Key.PageUp", codeBehind, StringComparison.Ordinal);
+        Assert.Contains("Key.PageDown", codeBehind, StringComparison.Ordinal);
+        Assert.Contains("GrillaMensual.IsAncestorOf(foco)", codeBehind, StringComparison.Ordinal);
+        Assert.Contains("Keyboard.FocusedElement is TextBoxBase", codeBehind, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void VistasExtraidasNoHardcodeanColoresSemanticos()
+    {
+        var archivos = new[]
+        {
+            LeerAplicacion("MainWindow.xaml"), LeerAplicacion("MainWindow.xaml.cs"),
+            LeerVista("GrupoView.xaml"), LeerVista("GrupoView.xaml.cs"),
+            LeerVista("AsistenciaView.xaml"), LeerVista("AsistenciaView.xaml.cs"),
+            LeerVista("ProyectosView.xaml"), LeerVista("ProyectosView.xaml.cs"),
+            LeerVista("EvaluacionView.xaml"), LeerVista("EvaluacionView.xaml.cs"),
+            LeerControl("MainNavigationHeader.xaml"), LeerControl("MainNavigationHeader.xaml.cs"),
+        };
+
+        var patronColor = new Regex("#[0-9A-Fa-f]{6,8}", RegexOptions.CultureInvariant);
+        foreach (var archivo in archivos)
+        {
+            Assert.DoesNotMatch(patronColor, archivo);
+        }
     }
 
     [Fact]
@@ -103,6 +189,7 @@ public sealed class RefactorMainWindowVistasTests
         Assert.Contains("Oscuro", header, StringComparison.Ordinal);
         Assert.Contains("Alto contraste", header, StringComparison.Ordinal);
         Assert.Contains("ThemeService.ApplyTheme", codeBehind, StringComparison.Ordinal);
+        Assert.Contains("HeaderIconBackgroundBrush", header, StringComparison.Ordinal);
     }
 
     [Fact]
@@ -133,8 +220,7 @@ public sealed class RefactorMainWindowVistasTests
     }
 
     /// <summary>
-    /// Smoke test STA: construye MainWindow, fuerza InitializeComponent,
-    /// realiza Measure/Arrange y verifica que no haya excepciones de bindings.
+    /// Smoke test STA: construye MainWindow, fuerza InitializeComponent y layout.
     /// No afirma validez visual automática.
     /// </summary>
     [Fact]
@@ -145,10 +231,6 @@ public sealed class RefactorMainWindowVistasTests
         {
             try
             {
-                // Los recursos de App.xaml (converters, estilos, tokens y temas)
-                // sólo están disponibles cuando existe una instancia de Application
-                // con InitializeComponent cargado. En pruebas no hay App en ejecución,
-                // por lo que se carga explícitamente sin invocar Run().
                 if (System.Windows.Application.Current is null)
                 {
                     var app = new App();
@@ -157,8 +239,8 @@ public sealed class RefactorMainWindowVistasTests
 
                 var viewModel = ConstruirViewModel();
                 var ventana = new MainWindow(viewModel);
-                ventana.Measure(new System.Windows.Size(1060, 740));
-                ventana.Arrange(new System.Windows.Rect(0, 0, 1060, 740));
+                ventana.Measure(new System.Windows.Size(1280, 780));
+                ventana.Arrange(new System.Windows.Rect(0, 0, 1280, 780));
                 ventana.UpdateLayout();
             }
             catch (Exception ex)
