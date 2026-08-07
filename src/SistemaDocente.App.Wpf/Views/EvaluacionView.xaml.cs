@@ -7,14 +7,13 @@ using System.Windows.Input;
 using System.Windows.Media;
 
 using SistemaDocente.App.Wpf.Services;
-using SistemaDocente.Core;
 using SistemaDocente.Presentation;
 
 namespace SistemaDocente.App.Wpf.Views;
 
 /// <summary>
 /// Matriz de evaluación estudiante × actividad. Las dos primeras columnas permanecen
-/// congeladas y las actividades se generan dinámicamente con identificadores A01, A02…
+/// congeladas y las actividades se generan dinámicamente con códigos visuales estables.
 /// </summary>
 public partial class EvaluacionView : UserControl
 {
@@ -126,11 +125,11 @@ public partial class EvaluacionView : UserControl
         estilo.Setters.Add(new Setter(Control.VerticalContentAlignmentProperty, VerticalAlignment.Stretch));
         estilo.Setters.Add(new Setter(Control.BorderBrushProperty, ObtenerBrush("BorderLightBrush")));
 
-        AgregarEstado(estilo, indice, NivelLogro.Domina, "SuccessBackgroundBrush", "SuccessBrush");
-        AgregarEstado(estilo, indice, NivelLogro.Suficiente, "InfoBackgroundBrush", "InfoBrush");
-        AgregarEstado(estilo, indice, NivelLogro.EnProceso, "WarningBackgroundBrush", "WarningBrush");
-        AgregarEstado(estilo, indice, NivelLogro.RequiereApoyo, "ErrorBackgroundBrush", "ErrorBrush");
-        AgregarEstado(estilo, indice, NivelLogro.NoEntrego, "DisabledBackgroundBrush", "TextMutedBrush");
+        AgregarEstado(estilo, indice, "D", "SuccessBackgroundBrush", "SuccessBrush");
+        AgregarEstado(estilo, indice, "S", "InfoBackgroundBrush", "InfoBrush");
+        AgregarEstado(estilo, indice, "E", "WarningBackgroundBrush", "WarningBrush");
+        AgregarEstado(estilo, indice, "R", "ErrorBackgroundBrush", "ErrorBrush");
+        AgregarEstado(estilo, indice, "N", "DisabledBackgroundBrush", "TextMutedBrush");
 
         var noAplicable = new DataTrigger
         {
@@ -146,14 +145,14 @@ public partial class EvaluacionView : UserControl
     private static void AgregarEstado(
         Style estilo,
         int indice,
-        NivelLogro nivel,
+        string etiqueta,
         string fondoKey,
         string frenteKey)
     {
         var trigger = new DataTrigger
         {
-            Binding = new Binding($"Celdas[{indice}].NivelLogro"),
-            Value = nivel,
+            Binding = new Binding($"Celdas[{indice}].EtiquetaNivel"),
+            Value = etiqueta,
         };
         trigger.Setters.Add(new Setter(Control.BackgroundProperty, ObtenerBrush(fondoKey)));
         trigger.Setters.Add(new Setter(Control.ForegroundProperty, ObtenerBrush(frenteKey)));
