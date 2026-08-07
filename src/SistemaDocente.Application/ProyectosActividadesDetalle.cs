@@ -44,7 +44,8 @@ public sealed record EntregaActividadDetalle(
     bool EstaActivoActualmente,
     EstadoEntregaActividad EstadoEntrega,
     NivelLogro NivelLogro,
-    string Observacion)
+    string Observacion,
+    GradoPrimaria Grado = GradoPrimaria.NoEspecificado)
 {
     public EntregaActividadDetalle(
         EstudianteId estudianteId,
@@ -65,7 +66,8 @@ public sealed record EntregaActividadDetalle(
                 _ => EstadoEntregaActividad.Entregada,
             },
             nivelLogro == NivelLogro.NoEntrego ? NivelLogro.Pendiente : nivelLogro,
-            observacion)
+            observacion,
+            GradoPrimaria.NoEspecificado)
     {
     }
 }
