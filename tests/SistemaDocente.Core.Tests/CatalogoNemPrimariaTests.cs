@@ -20,7 +20,7 @@ public sealed class CatalogoNemPrimariaTests
     public void GrupoMultigradoPuedeAbarcarVariasFases()
     {
         var contexto = ContextoGrupo.Crear(
-            GrupoId.Crear(),
+            GrupoId.DesdeGuid(Guid.NewGuid()),
             grado: "valor legacy ignorado",
             gradosAtendidos: [GradoPrimaria.Segundo, GradoPrimaria.Tercero]);
 
