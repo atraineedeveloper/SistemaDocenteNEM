@@ -39,6 +39,7 @@ public sealed class GestionReportesViewModel : ViewModelBase
     public RelayCommand MostrarIndividualCommand { get; }
     public RelayCommand MostrarGrupalCommand { get; }
     public RelayCommand RefrescarCommand { get; }
+    public GrupoId? GrupoIdActual => _grupoId;
 
     public IReadOnlyList<EstudianteReporteVisual> Estudiantes
     {
@@ -93,6 +94,7 @@ public sealed class GestionReportesViewModel : ViewModelBase
     public void Inicializar(GrupoId grupoId)
     {
         _grupoId = grupoId;
+        OnPropertyChanged(nameof(GrupoIdActual));
         var estudiantes = _grupos.ObtenerTodosLosEstudiantes(grupoId)
             .OrderBy(x => x.NumeroLista)
             .ThenBy(x => x.NombreVisible, StringComparer.Ordinal)
