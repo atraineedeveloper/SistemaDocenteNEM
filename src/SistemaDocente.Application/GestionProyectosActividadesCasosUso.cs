@@ -186,7 +186,27 @@ public sealed class GestionProyectosActividadesCasosUso
 
     private static DatosEntregaActividadRehidratada[] MapearValidandoHistorico(ActividadProyecto actividad,
         IReadOnlyCollection<EntradaEntregaActividad> entregas)
-    { ValidarEntradas(entregas, actividad.Entregas.Select(x => x.EstudianteId).ToHashSet()); return Mapear(entregas); }
+    {
+        ValidarEntradas(entregas, actividad.Entregas.Select(x => x.EstudianteId).ToHashSet());
+        var existentes = actividad.Entregas.ToDictionary(x => x.EstudianteId);
+        return entregas.Select(x =>
+        {
+            var estado = x.EstadoEntrega;
+            if (!x.EstadoEntregaEsExplicito
+                && estado == EstadoEntregaActividad.Pendiente
+                && x.NivelLogro == NivelLogro.Pendiente
+                && existentes.TryGetValue(x.EstudianteId, out var existente))
+            {
+                estado = existente.EstadoEntrega;
+            }
+
+            return new DatosEntregaActividadRehidratada(
+                x.EstudianteId,
+                estado,
+                x.NivelLogro,
+                x.Observacion);
+        }).ToArray();
+    }
 
     private static void ValidarEntradas(IReadOnlyCollection<EntradaEntregaActividad> entradas, HashSet<EstudianteId> esperados)
     {
