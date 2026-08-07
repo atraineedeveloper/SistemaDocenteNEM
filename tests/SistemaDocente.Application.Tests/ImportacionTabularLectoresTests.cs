@@ -1,7 +1,9 @@
 using System.Globalization;
 using System.Text;
+
 using DocumentFormat.OpenXml.Packaging;
 using DocumentFormat.OpenXml.Spreadsheet;
+
 using SistemaDocente.Application;
 using SistemaDocente.Interchange;
 
@@ -72,7 +74,7 @@ public sealed class ImportacionTabularLectoresTests
             var documento = new LectorXlsxTabular().Leer(ruta);
 
             Assert.Equal(2, documento.Hojas.Count);
-            var alumnos = Assert.Single(documento.Hojas.Where(hoja => hoja.Nombre == "Alumnos"));
+            var alumnos = Assert.Single(documento.Hojas, hoja => hoja.Nombre == "Alumnos");
             var fila = Assert.Single(alumnos.Filas);
 
             Assert.Equal(2, fila.NumeroOrigen);
