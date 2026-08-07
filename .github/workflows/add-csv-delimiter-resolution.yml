@@ -1,0 +1,90 @@
+name: Add CSV delimiter resolution to import ViewModel
+
+on:
+  push:
+    branches:
+      - feature/student-import-xlsx-csv
+
+permissions:
+  contents: write
+
+jobs:
+  update:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+        with:
+          ref: feature/student-import-xlsx-csv
+      - name: Update Presentation and remove temporary workflow
+        shell: bash
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          path = Path('src/SistemaDocente.Presentation/ImportacionEstudiantesViewModel.cs')
+          text = path.read_text(encoding='utf-8')
+
+          old = '''public sealed record OpcionCampoImportacion(\n    CampoImportacionEstudiante Campo,\n    string Etiqueta);\n'''
+          new = old + '''\npublic sealed record OpcionDelimitadorCsv(\n    char Delimitador,\n    string Etiqueta);\n'''
+          if old not in text: raise SystemExit('option record marker missing')
+          text = text.replace(old, new, 1)
+
+          marker = '    private readonly ILectorImportacionTabular _lector;\n'
+          insert = '''    private static readonly IReadOnlyList<OpcionDelimitadorCsv> OpcionesDelimitadoresCsvInternas =\n    [\n        new(',', "Coma (, )"),\n        new(';', "Punto y coma (;)"),\n        new('\\t', "Tabulador"),\n    ];\n\n'''
+          if marker not in text: raise SystemExit('reader field marker missing')
+          text = text.replace(marker, insert + marker, 1)
+
+          old = '''    private readonly IReadOnlyList<OpcionCampoImportacion> _opcionesCampos = OpcionesCamposInternas;\n    private readonly ObservableCollection<ColumnaImportacionVisual> _columnas = [];\n'''
+          new = '''    private readonly IReadOnlyList<OpcionCampoImportacion> _opcionesCampos = OpcionesCamposInternas;\n    private readonly IReadOnlyList<OpcionDelimitadorCsv> _opcionesDelimitadoresCsv = OpcionesDelimitadoresCsvInternas;\n    private readonly ObservableCollection<ColumnaImportacionVisual> _columnas = [];\n'''
+          if old not in text: raise SystemExit('options field marker missing')
+          text = text.replace(old, new, 1)
+
+          old = '''    private bool _soloProblemas;\n    private string _mensaje = string.Empty;\n    private string _nombreArchivo = string.Empty;\n'''
+          new = '''    private bool _soloProblemas;\n    private bool _requiereDelimitadorCsv;\n    private OpcionDelimitadorCsv? _delimitadorCsvSeleccionado;\n    private string _rutaArchivoPendiente = string.Empty;\n    private string _mensaje = string.Empty;\n    private string _nombreArchivo = string.Empty;\n'''
+          if old not in text: raise SystemExit('state field marker missing')
+          text = text.replace(old, new, 1)
+
+          old = '''        AlternarExclusionCommand = new RelayCommand(AlternarExclusion, () => FilaSeleccionada is not null);\n        AutorizarDuplicadoCommand = new RelayCommand(AutorizarDuplicado, PuedeAutorizarDuplicado);\n'''
+          new = old + '''        ReintentarCsvCommand = new RelayCommand(ReintentarCsv, PuedeReintentarCsv);\n'''
+          if old not in text: raise SystemExit('command constructor marker missing')
+          text = text.replace(old, new, 1)
+
+          old = '''    public RelayCommand AutorizarDuplicadoCommand { get; }\n\n    public IReadOnlyList<OpcionCampoImportacion> OpcionesCampos => _opcionesCampos;\n'''
+          new = '''    public RelayCommand AutorizarDuplicadoCommand { get; }\n\n    public RelayCommand ReintentarCsvCommand { get; }\n\n    public IReadOnlyList<OpcionCampoImportacion> OpcionesCampos => _opcionesCampos;\n\n    public IReadOnlyList<OpcionDelimitadorCsv> OpcionesDelimitadoresCsv => _opcionesDelimitadoresCsv;\n'''
+          if old not in text: raise SystemExit('command property marker missing')
+          text = text.replace(old, new, 1)
+
+          marker = '''    public string NombreArchivo\n    {\n'''
+          props = '''    public bool RequiereDelimitadorCsv\n    {\n        get => _requiereDelimitadorCsv;\n        private set\n        {\n            if (SetProperty(ref _requiereDelimitadorCsv, value))\n            {\n                ReintentarCsvCommand.NotifyCanExecuteChanged();\n            }\n        }\n    }\n\n    public OpcionDelimitadorCsv? DelimitadorCsvSeleccionado\n    {\n        get => _delimitadorCsvSeleccionado;\n        set\n        {\n            if (SetProperty(ref _delimitadorCsvSeleccionado, value))\n            {\n                ReintentarCsvCommand.NotifyCanExecuteChanged();\n            }\n        }\n    }\n\n'''
+          if marker not in text: raise SystemExit('name property marker missing')
+          text = text.replace(marker, props + marker, 1)
+
+          old = '''        NombreArchivo = string.Empty;\n        Mensaje = string.Empty;\n        Importados = 0;\n'''
+          new = '''        NombreArchivo = string.Empty;\n        Mensaje = string.Empty;\n        _rutaArchivoPendiente = string.Empty;\n        RequiereDelimitadorCsv = false;\n        DelimitadorCsvSeleccionado = null;\n        Importados = 0;\n'''
+          if old not in text: raise SystemExit('initialize marker missing')
+          text = text.replace(old, new, 1)
+
+          start = text.index('    public bool CargarArchivo(string rutaArchivo)\n')
+          end = text.index('    private void CrearColumnas()\n', start)
+          replacement = '''    public bool CargarArchivo(string rutaArchivo)\n    {\n        if (_grupoId is null)\n        {\n            Mensaje = "Selecciona un grupo antes de importar alumnos.";\n            return false;\n        }\n\n        _rutaArchivoPendiente = rutaArchivo;\n        DelimitadorCsvSeleccionado = null;\n\n        try\n        {\n            AplicarDocumento(_lector.Leer(rutaArchivo));\n            return true;\n        }\n        catch (ImportacionTabularException exception)\n        {\n            RequiereDelimitadorCsv =\n                exception.Codigo == "csv-delimiter-ambiguous" &&\n                _lector is ILectorImportacionCsvConfigurable;\n            Mensaje = exception.Message;\n            return false;\n        }\n        catch (Exception exception) when (exception is IOException or UnauthorizedAccessException)\n        {\n            RequiereDelimitadorCsv = false;\n            Mensaje = exception.Message;\n            return false;\n        }\n    }\n\n    private void ReintentarCsv()\n    {\n        if (_lector is not ILectorImportacionCsvConfigurable lectorCsv ||\n            DelimitadorCsvSeleccionado is not { } opcion ||\n            string.IsNullOrWhiteSpace(_rutaArchivoPendiente))\n        {\n            return;\n        }\n\n        try\n        {\n            AplicarDocumento(lectorCsv.LeerCsv(_rutaArchivoPendiente, opcion.Delimitador));\n        }\n        catch (ImportacionTabularException exception)\n        {\n            Mensaje = exception.Message;\n        }\n    }\n\n    private void AplicarDocumento(DocumentoTabular documento)\n    {\n        _documento = documento;\n        NombreArchivo = documento.NombreArchivo;\n        OnPropertyChanged(nameof(Hojas));\n        HojaSeleccionada = documento.Hojas.Count > 0\n            ? documento.Hojas[0]\n            : null;\n        RequiereDelimitadorCsv = false;\n        Mensaje = string.Empty;\n        Paso = PasoImportacionEstudiantes.Columnas;\n    }\n\n'''
+          text = text[:start] + replacement + text[end:]
+
+          old = '''    private bool PuedeAutorizarDuplicado() =>\n        FilaSeleccionada is { Estado: EstadoFilaImportacion.RequiereRevision } fila &&\n        fila.ResumenProblemas.Contains("coincid", StringComparison.OrdinalIgnoreCase);\n\n    private void NotificarConteos()\n'''
+          new = '''    private bool PuedeAutorizarDuplicado() =>\n        FilaSeleccionada is { Estado: EstadoFilaImportacion.RequiereRevision } fila &&\n        fila.ResumenProblemas.Contains("coincid", StringComparison.OrdinalIgnoreCase);\n\n    private bool PuedeReintentarCsv() =>\n        RequiereDelimitadorCsv &&\n        DelimitadorCsvSeleccionado is not null &&\n        _lector is ILectorImportacionCsvConfigurable &&\n        !string.IsNullOrWhiteSpace(_rutaArchivoPendiente);\n\n    private void NotificarConteos()\n'''
+          if old not in text: raise SystemExit('can execute marker missing')
+          text = text.replace(old, new, 1)
+
+          old = '''        AutorizarDuplicadoCommand.NotifyCanExecuteChanged();\n    }\n'''
+          new = '''        AutorizarDuplicadoCommand.NotifyCanExecuteChanged();\n        ReintentarCsvCommand.NotifyCanExecuteChanged();\n    }\n'''
+          if old not in text: raise SystemExit('notify marker missing')
+          text = text.replace(old, new, 1)
+
+          path.write_text(text, encoding='utf-8')
+          PY
+          git rm .github/workflows/add-csv-delimiter-resolution.yml
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add src/SistemaDocente.Presentation/ImportacionEstudiantesViewModel.cs
+          git commit -m "feat: support explicit CSV delimiter retry in import wizard"
+          git push origin HEAD:feature/student-import-xlsx-csv
