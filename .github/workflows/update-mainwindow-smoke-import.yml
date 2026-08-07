@@ -1,0 +1,44 @@
+name: Update MainWindow import smoke fixture
+
+on:
+  push:
+    branches:
+      - feature/student-import-xlsx-csv
+
+permissions:
+  contents: write
+
+jobs:
+  update-test:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+        with:
+          ref: feature/student-import-xlsx-csv
+      - name: Update smoke fixture and remove temporary workflow
+        shell: bash
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          path = Path('tests/SistemaDocente.App.Wpf.Tests/RefactorMainWindowVistasTests.cs')
+          text = path.read_text(encoding='utf-8')
+          old = 'var ventana = new MainWindow(viewModel, ConstruirConfiguracionGrupo());'
+          new = 'var ventana = new MainWindow(viewModel, ConstruirConfiguracionGrupo(), ConstruirImportacionEstudiantes());'
+          if old not in text:
+              raise SystemExit('MainWindow smoke constructor pattern not found')
+          text = text.replace(old, new, 1)
+          marker = '    private static MainWindowViewModel ConstruirViewModel()\n'
+          helper = '''    private static ImportacionEstudiantesViewModel ConstruirImportacionEstudiantes()\n    {\n        var directorio = Path.Combine(Path.GetTempPath(), "SistemaDocenteNEM-ImportSmoke-" + Guid.NewGuid().ToString("N"));\n        Directory.CreateDirectory(directorio);\n        var baseSqlite = Path.Combine(directorio, "sistema-docente.db");\n        var grupos = new PersistenciaGrupoSqlite(baseSqlite);\n        var contextos = new PersistenciaContextoGrupoSqlite(baseSqlite);\n        return new ImportacionEstudiantesViewModel(\n            new SistemaDocente.Interchange.LectorImportacionTabular(),\n            new ImportacionEstudiantesCasosUso(grupos, contextos));\n    }\n\n'''
+          if marker not in text:
+              raise SystemExit('ViewModel helper marker not found')
+          text = text.replace(marker, helper + marker, 1)
+          path.write_text(text, encoding='utf-8')
+          PY
+          git rm .github/workflows/update-mainwindow-smoke-import.yml
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add tests/SistemaDocente.App.Wpf.Tests/RefactorMainWindowVistasTests.cs
+          git commit -m "test: wire import view model into MainWindow smoke fixture"
+          git push origin HEAD:feature/student-import-xlsx-csv
