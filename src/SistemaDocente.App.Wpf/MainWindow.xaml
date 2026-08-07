@@ -32,6 +32,11 @@
             <views:EvaluacionView
                 DataContext="{Binding DataContext.Evaluacion, ElementName=RootWindow}"
                 Visibility="{Binding DataContext.MostrarEvaluacion, ElementName=RootWindow, Converter={StaticResource BoolToVisibility}}"/>
+
+            <views:ReportesView
+                DataContext="{Binding DataContext.Reportes, ElementName=RootWindow}"
+                Configuracion="{Binding ConfiguracionGrupo, ElementName=RootWindow}"
+                Visibility="{Binding DataContext.MostrarReportes, ElementName=RootWindow, Converter={StaticResource BoolToVisibility}}"/>
         </Grid>
 
         <Border x:Name="ToastBanner" Grid.Row="0" Grid.RowSpan="2"
