@@ -99,7 +99,7 @@ The system SHALL use semantic typography styles such as `Heading1`, `Heading2`, 
 - **THEN** it uses the shared form-label style
 
 ### Requirement: FLUENT_ICONS
-Functional iconography SHOULD use stable vector paths or appropriate Fluent/Segoe icon glyphs instead of emoji where emoji rendering would be inconsistent, and functional icons SHALL have an accessible name when necessary.
+The system SHALL use stable vector paths or appropriate Fluent/Segoe icon glyphs instead of emoji for functional iconography, and functional icons SHALL have an accessible name when necessary.
 
 #### Scenario: Stable action icon
 - **WHEN** a critical action requires iconography
@@ -176,7 +176,7 @@ Lists and grids SHALL communicate meaningful empty states rather than leaving an
 - **THEN** the activity area presents an explanatory empty state
 
 ### Requirement: NOTIFICATION_SERVICE
-The system SHOULD centralize transient success/warning/error notifications in a consistent notification service/pattern that is accessible to assistive technology.
+The system SHALL centralize transient success/warning/error notifications in a consistent notification service/pattern that is accessible to assistive technology.
 
 #### Scenario: Success notification
 - **WHEN** an operation benefits from explicit success feedback
@@ -202,7 +202,7 @@ The UI SHALL show a clear busy/progress indication when a ViewModel reports an o
 - **THEN** the busy indicator disappears and normal interaction is restored
 
 ### Requirement: CUSTOM_DIALOGS
-Destructive confirmations and important application messages SHOULD use product-consistent dialogs when the native `MessageBox` would provide insufficient styling, context or action clarity.
+The system SHALL use product-consistent dialogs for destructive confirmations and important application messages when the native `MessageBox` would provide insufficient styling, context or action clarity.
 
 #### Scenario: Destructive confirmation
 - **WHEN** a destructive action requires confirmation
@@ -235,7 +235,7 @@ The system SHALL support at least Light, Dark and High Contrast visual themes th
 - **THEN** the application provides readable, distinguishable semantic states
 
 ### Requirement: LOCALIZED_RESOURCES
-User-visible strings SHOULD be structured so localization can be introduced without rewriting workflow logic. Strings that require reuse or future localization SHOULD live in resources instead of being duplicated across code.
+The system SHALL structure user-visible strings so localization can be introduced without rewriting workflow logic. Strings that require reuse or future localization SHALL live in resources instead of being duplicated across code.
 
 #### Scenario: Shared static text
 - **WHEN** a shared user-visible phrase is reused across surfaces
@@ -279,18 +279,18 @@ The student roster SHALL provide search/filtering by relevant identifiers such a
 - **THEN** the interface communicates that no matches were found
 
 ### Requirement: DYNAMIC_TITLE
-The main-window title SHOULD provide useful current context such as active group or Demo state when doing so improves orientation.
+The main window SHALL provide useful current context in its title, such as the active group or Demo state, to improve orientation.
 
 #### Scenario: Active-group title
 - **WHEN** a group is active
-- **THEN** the window title may include that group context
+- **THEN** the window title includes useful active-group context
 
 #### Scenario: Evaluation context
 - **WHEN** the user works in Evaluation
 - **THEN** the title/context still makes the active application/group understandable
 
 ### Requirement: BREADCRUMB_DIALOGS
-Nested workflows MAY use breadcrumbs when they materially improve orientation; breadcrumb navigation SHALL NOT be introduced when a dedicated-window title and parent context are clearer or safer.
+Nested workflows SHALL communicate parent context and provide breadcrumb-style navigation when it materially improves orientation; such navigation SHALL NOT be introduced when a dedicated-window title and parent context are clearer or safer.
 
 #### Scenario: Activity detail context
 - **WHEN** an activity detail window needs parent-project context
