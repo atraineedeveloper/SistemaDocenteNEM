@@ -1,0 +1,312 @@
+<UserControl x:Class="SistemaDocente.App.Wpf.Views.ReportesView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xml:lang="es-MX">
+    <UserControl.Resources>
+        <Style x:Key="ReportModeButton" TargetType="Button" BasedOn="{StaticResource {x:Type Button}}">
+            <Setter Property="MinWidth" Value="118"/>
+            <Setter Property="Margin" Value="0,0,8,0"/>
+        </Style>
+        <Style x:Key="ReportMetricValue" TargetType="TextBlock">
+            <Setter Property="FontSize" Value="22"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="Foreground" Value="{DynamicResource TextPrimaryBrush}"/>
+        </Style>
+        <Style x:Key="ReportMetricLabel" TargetType="TextBlock">
+            <Setter Property="FontSize" Value="12"/>
+            <Setter Property="Foreground" Value="{DynamicResource TextMutedBrush}"/>
+            <Setter Property="Margin" Value="0,0,0,4"/>
+        </Style>
+    </UserControl.Resources>
+
+    <Grid Background="{DynamicResource WindowBackgroundBrush}" Margin="24,20">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <Grid Grid.Row="0" Margin="0,0,0,16">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+            <StackPanel>
+                <TextBlock Text="REPORTES" Foreground="{DynamicResource PrimaryBrush}" FontSize="12" FontWeight="SemiBold"/>
+                <TextBlock Text="Análisis y seguimiento" Style="{StaticResource Heading1}" Margin="0,3,0,3"/>
+                <TextBlock Text="Consulta el avance individual y el panorama del grupo con los registros ya capturados."
+                           Foreground="{DynamicResource TextMutedBrush}" TextWrapping="Wrap"/>
+            </StackPanel>
+            <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Top">
+                <Button Content="↻  Actualizar" Command="{Binding RefrescarCommand}" MinWidth="105"/>
+                <Button Content="⚙  Configurar grupo" Click="OnConfigurarGrupoClic" MinWidth="140"
+                        AutomationProperties.Name="Abrir configuración del grupo"/>
+            </StackPanel>
+        </Grid>
+
+        <Border Grid.Row="1" Style="{StaticResource ContentCard}" Margin="0,0,0,16" Padding="16,12">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+                <StackPanel Orientation="Horizontal">
+                    <Button Content="Individual" Command="{Binding MostrarIndividualCommand}">
+                        <Button.Style>
+                            <Style TargetType="Button" BasedOn="{StaticResource ReportModeButton}">
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding MostrarIndividualActivo}" Value="True">
+                                        <Setter Property="Background" Value="{DynamicResource PrimaryBrush}"/>
+                                        <Setter Property="Foreground" Value="{DynamicResource TextOnPrimaryBrush}"/>
+                                        <Setter Property="BorderBrush" Value="{DynamicResource PrimaryBrush}"/>
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </Button.Style>
+                    </Button>
+                    <Button Content="Grupal" Command="{Binding MostrarGrupalCommand}">
+                        <Button.Style>
+                            <Style TargetType="Button" BasedOn="{StaticResource ReportModeButton}">
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding MostrarGrupalActivo}" Value="True">
+                                        <Setter Property="Background" Value="{DynamicResource PrimaryBrush}"/>
+                                        <Setter Property="Foreground" Value="{DynamicResource TextOnPrimaryBrush}"/>
+                                        <Setter Property="BorderBrush" Value="{DynamicResource PrimaryBrush}"/>
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </Button.Style>
+                    </Button>
+                </StackPanel>
+
+                <StackPanel Grid.Column="2" Orientation="Horizontal" VerticalAlignment="Center"
+                            Visibility="{Binding MostrarIndividualActivo, Converter={StaticResource BoolToVisibility}}">
+                    <TextBlock Text="Estudiante" Style="{StaticResource FormLabel}" VerticalAlignment="Center" Margin="0,0,8,0"/>
+                    <ComboBox Width="300" MinHeight="38"
+                              ItemsSource="{Binding Estudiantes}"
+                              SelectedItem="{Binding EstudianteSeleccionado, Mode=TwoWay}"
+                              DisplayMemberPath="Descripcion"
+                              AutomationProperties.Name="Seleccionar estudiante para reporte"/>
+                </StackPanel>
+            </Grid>
+        </Border>
+
+        <Grid Grid.Row="2">
+            <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled"
+                          Visibility="{Binding MostrarIndividualActivo, Converter={StaticResource BoolToVisibility}}">
+                <StackPanel DataContext="{Binding ReporteIndividual}">
+                    <Border Style="{StaticResource ContentCard}" Margin="0,0,0,16">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+                            <StackPanel>
+                                <TextBlock Text="{Binding Nombre}" Style="{StaticResource Heading2}"/>
+                                <TextBlock Foreground="{DynamicResource TextMutedBrush}">
+                                    <Run Text="Núm. "/><Run Text="{Binding NumeroLista, Mode=OneWay}"/>
+                                    <Run Text=" · "/><Run Text="{Binding Genero, Mode=OneWay}"/>
+                                    <Run Text=" · "/><Run Text="{Binding Contexto.Grado, Mode=OneWay}"/><Run Text=" "/><Run Text="{Binding Contexto.Grupo, Mode=OneWay}"/>
+                                </TextBlock>
+                                <TextBlock Foreground="{DynamicResource TextMutedBrush}" Margin="0,4,0,0">
+                                    <Run Text="{Binding Contexto.NombreEscuela, Mode=OneWay}"/>
+                                    <Run Text=" · Ciclo "/><Run Text="{Binding Contexto.CicloEscolar, Mode=OneWay}"/>
+                                </TextBlock>
+                            </StackPanel>
+                            <Border Grid.Column="1" Background="{DynamicResource SuccessBackgroundBrush}"
+                                    BorderBrush="{DynamicResource SuccessBorderBrush}" BorderThickness="1"
+                                    CornerRadius="12" Padding="12,6" VerticalAlignment="Center">
+                                <TextBlock Text="Activo" Foreground="{DynamicResource SuccessBrush}" FontWeight="SemiBold"/>
+                            </Border>
+                        </Grid>
+                    </Border>
+
+                    <Grid Margin="0,0,0,16">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/><ColumnDefinition Width="12"/>
+                            <ColumnDefinition Width="*"/><ColumnDefinition Width="12"/>
+                            <ColumnDefinition Width="*"/><ColumnDefinition Width="12"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <Border Grid.Column="0" Style="{StaticResource ContentCard}" Margin="0">
+                            <StackPanel><TextBlock Text="Asistencia" Style="{StaticResource ReportMetricLabel}"/>
+                                <TextBlock Style="{StaticResource ReportMetricValue}" Text="{Binding PorcentajeAsistencia, StringFormat={}{0:F1}%, TargetNullValue=—}"/></StackPanel>
+                        </Border>
+                        <Border Grid.Column="2" Style="{StaticResource ContentCard}" Margin="0">
+                            <StackPanel><TextBlock Text="Cumplimiento" Style="{StaticResource ReportMetricLabel}"/>
+                                <TextBlock Style="{StaticResource ReportMetricValue}" Text="{Binding Cumplimiento.PorcentajeCumplimiento, StringFormat={}{0:F1}%, TargetNullValue=—}"/></StackPanel>
+                        </Border>
+                        <Border Grid.Column="4" Style="{StaticResource ContentCard}" Margin="0">
+                            <StackPanel><TextBlock Text="No entregadas" Style="{StaticResource ReportMetricLabel}"/>
+                                <TextBlock Style="{StaticResource ReportMetricValue}" Text="{Binding Cumplimiento.NoEntregadas, Mode=OneWay}"/></StackPanel>
+                        </Border>
+                        <Border Grid.Column="6" Style="{StaticResource ContentCard}" Margin="0">
+                            <StackPanel><TextBlock Text="Pendientes de registro" Style="{StaticResource ReportMetricLabel}"/>
+                                <TextBlock Style="{StaticResource ReportMetricValue}" Text="{Binding Cumplimiento.Pendientes, Mode=OneWay}"/></StackPanel>
+                        </Border>
+                    </Grid>
+
+                    <Grid Margin="0,0,0,16">
+                        <Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="16"/><ColumnDefinition Width="*"/></Grid.ColumnDefinitions>
+                        <Border Grid.Column="0" Style="{StaticResource ContentCard}" Margin="0">
+                            <StackPanel>
+                                <TextBlock Text="Asistencia mensual" Style="{StaticResource Heading3}" Margin="0,0,0,10"/>
+                                <DataGrid ItemsSource="{Binding AsistenciaMensual}" AutoGenerateColumns="False" IsReadOnly="True"
+                                          CanUserAddRows="False" HeadersVisibility="Column" MaxHeight="230">
+                                    <DataGrid.Columns>
+                                        <DataGridTextColumn Header="Año" Binding="{Binding Anio}" Width="70"/>
+                                        <DataGridTextColumn Header="Mes" Binding="{Binding Mes}" Width="70"/>
+                                        <DataGridTextColumn Header="Días" Binding="{Binding Dias}" Width="60"/>
+                                        <DataGridTextColumn Header="%" Binding="{Binding Porcentaje, StringFormat={}{0:F1}%}" Width="*"/>
+                                    </DataGrid.Columns>
+                                </DataGrid>
+                            </StackPanel>
+                        </Border>
+                        <Border Grid.Column="2" Style="{StaticResource ContentCard}" Margin="0">
+                            <StackPanel>
+                                <TextBlock Text="Evaluación formativa" Style="{StaticResource Heading3}" Margin="0,0,0,12"/>
+                                <Grid>
+                                    <Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="Auto"/><RowDefinition Height="Auto"/><RowDefinition Height="Auto"/><RowDefinition Height="Auto"/><RowDefinition Height="Auto"/>
+                                    </Grid.RowDefinitions>
+                                    <TextBlock Grid.Row="0" Text="Domina"/><TextBlock Grid.Row="0" Grid.Column="1" Text="{Binding Logro.Domina}" FontWeight="SemiBold"/>
+                                    <TextBlock Grid.Row="1" Text="Suficiente" Margin="0,7,0,0"/><TextBlock Grid.Row="1" Grid.Column="1" Text="{Binding Logro.Suficiente}" Margin="0,7,0,0" FontWeight="SemiBold"/>
+                                    <TextBlock Grid.Row="2" Text="En proceso" Margin="0,7,0,0"/><TextBlock Grid.Row="2" Grid.Column="1" Text="{Binding Logro.EnProceso}" Margin="0,7,0,0" FontWeight="SemiBold"/>
+                                    <TextBlock Grid.Row="3" Text="Requiere apoyo" Margin="0,7,0,0"/><TextBlock Grid.Row="3" Grid.Column="1" Text="{Binding Logro.RequiereApoyo}" Margin="0,7,0,0" FontWeight="SemiBold"/>
+                                    <TextBlock Grid.Row="4" Text="Entregadas por evaluar" Margin="0,7,0,0"/><TextBlock Grid.Row="4" Grid.Column="1" Text="{Binding Logro.Pendientes}" Margin="0,7,0,0" FontWeight="SemiBold"/>
+                                </Grid>
+                            </StackPanel>
+                        </Border>
+                    </Grid>
+
+                    <Border Style="{StaticResource ContentCard}" Margin="0,0,0,16">
+                        <StackPanel>
+                            <TextBlock Text="Proyectos y actividades" Style="{StaticResource Heading3}" Margin="0,0,0,10"/>
+                            <DataGrid ItemsSource="{Binding Actividades}" AutoGenerateColumns="False" IsReadOnly="True"
+                                      CanUserAddRows="False" HeadersVisibility="Column" MaxHeight="260">
+                                <DataGrid.Columns>
+                                    <DataGridTextColumn Header="Proyecto" Binding="{Binding Proyecto}" Width="*"/>
+                                    <DataGridTextColumn Header="Actividad" Binding="{Binding Actividad}" Width="*"/>
+                                    <DataGridTextColumn Header="Fecha" Binding="{Binding Fecha, StringFormat=dd/MM/yyyy}" Width="100"/>
+                                    <DataGridTextColumn Header="Entrega" Binding="{Binding EstadoEntrega}" Width="105"/>
+                                    <DataGridTextColumn Header="Nivel" Binding="{Binding NivelLogro}" Width="120"/>
+                                </DataGrid.Columns>
+                            </DataGrid>
+                        </StackPanel>
+                    </Border>
+
+                    <Grid Margin="0,0,0,16">
+                        <Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="16"/><ColumnDefinition Width="*"/></Grid.ColumnDefinitions>
+                        <Border Grid.Column="0" Style="{StaticResource ContentCard}" Margin="0">
+                            <StackPanel><TextBlock Text="Fortalezas" Style="{StaticResource Heading3}" Margin="0,0,0,8"/>
+                                <ItemsControl ItemsSource="{Binding Fortalezas}"><ItemsControl.ItemTemplate><DataTemplate><TextBlock Text="{Binding StringFormat=• {0}}" TextWrapping="Wrap" Margin="0,3"/></DataTemplate></ItemsControl.ItemTemplate></ItemsControl></StackPanel>
+                        </Border>
+                        <Border Grid.Column="2" Style="{StaticResource ContentCard}" Margin="0">
+                            <StackPanel><TextBlock Text="Aspectos a fortalecer" Style="{StaticResource Heading3}" Margin="0,0,0,8"/>
+                                <ItemsControl ItemsSource="{Binding Dificultades}"><ItemsControl.ItemTemplate><DataTemplate><TextBlock Text="{Binding StringFormat=• {0}}" TextWrapping="Wrap" Margin="0,3"/></DataTemplate></ItemsControl.ItemTemplate></ItemsControl></StackPanel>
+                        </Border>
+                    </Grid>
+
+                    <Grid Margin="0,0,0,16">
+                        <Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="16"/><ColumnDefinition Width="*"/></Grid.ColumnDefinitions>
+                        <Border Grid.Column="0" Style="{StaticResource ContentCard}" Margin="0">
+                            <StackPanel><TextBlock Text="Apoyos aplicados" Style="{StaticResource Heading3}" Margin="0,0,0,8"/>
+                                <ItemsControl ItemsSource="{Binding Apoyos}"><ItemsControl.ItemTemplate><DataTemplate><TextBlock Text="{Binding StringFormat=• {0}}" TextWrapping="Wrap" Margin="0,3"/></DataTemplate></ItemsControl.ItemTemplate></ItemsControl></StackPanel>
+                        </Border>
+                        <Border Grid.Column="2" Style="{StaticResource ContentCard}" Margin="0">
+                            <StackPanel><TextBlock Text="Acuerdos con tutores" Style="{StaticResource Heading3}" Margin="0,0,0,8"/>
+                                <ItemsControl ItemsSource="{Binding Acuerdos}"><ItemsControl.ItemTemplate><DataTemplate><TextBlock Text="{Binding StringFormat=• {0}}" TextWrapping="Wrap" Margin="0,3"/></DataTemplate></ItemsControl.ItemTemplate></ItemsControl></StackPanel>
+                        </Border>
+                    </Grid>
+
+                    <Border Style="{StaticResource ContentCard}" Margin="0,0,0,4">
+                        <StackPanel><TextBlock Text="Observaciones recientes" Style="{StaticResource Heading3}" Margin="0,0,0,8"/>
+                            <ItemsControl ItemsSource="{Binding Observaciones}"><ItemsControl.ItemTemplate><DataTemplate><TextBlock Text="{Binding StringFormat=• {0}}" TextWrapping="Wrap" Margin="0,3"/></DataTemplate></ItemsControl.ItemTemplate></ItemsControl></StackPanel>
+                    </Border>
+                </StackPanel>
+            </ScrollViewer>
+
+            <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled"
+                          Visibility="{Binding MostrarGrupalActivo, Converter={StaticResource BoolToVisibility}}">
+                <StackPanel DataContext="{Binding ReporteGrupal}">
+                    <Border Style="{StaticResource ContentCard}" Margin="0,0,0,16">
+                        <StackPanel>
+                            <TextBlock Text="{Binding NombreGrupo}" Style="{StaticResource Heading2}"/>
+                            <TextBlock Foreground="{DynamicResource TextMutedBrush}" Margin="0,4,0,0">
+                                <Run Text="{Binding Contexto.NombreEscuela, Mode=OneWay}"/>
+                                <Run Text=" · Ciclo "/><Run Text="{Binding Contexto.CicloEscolar, Mode=OneWay}"/>
+                                <Run Text=" · "/><Run Text="{Binding Contexto.Grado, Mode=OneWay}"/><Run Text=" "/><Run Text="{Binding Contexto.Grupo, Mode=OneWay}"/>
+                                <Run Text=" · Etapa: "/><Run Text="{Binding Contexto.EtapaCognoscitiva, Mode=OneWay}"/>
+                            </TextBlock>
+                        </StackPanel>
+                    </Border>
+
+                    <Grid Margin="0,0,0,16">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/><ColumnDefinition Width="12"/>
+                            <ColumnDefinition Width="*"/><ColumnDefinition Width="12"/>
+                            <ColumnDefinition Width="*"/><ColumnDefinition Width="12"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <Border Grid.Column="0" Style="{StaticResource ContentCard}" Margin="0"><StackPanel><TextBlock Text="Alumnos activos" Style="{StaticResource ReportMetricLabel}"/><TextBlock Text="{Binding AlumnosActivos}" Style="{StaticResource ReportMetricValue}"/></StackPanel></Border>
+                        <Border Grid.Column="2" Style="{StaticResource ContentCard}" Margin="0"><StackPanel><TextBlock Text="Históricos" Style="{StaticResource ReportMetricLabel}"/><TextBlock Text="{Binding AlumnosHistoricos}" Style="{StaticResource ReportMetricValue}"/></StackPanel></Border>
+                        <Border Grid.Column="4" Style="{StaticResource ContentCard}" Margin="0"><StackPanel><TextBlock Text="Asistencia" Style="{StaticResource ReportMetricLabel}"/><TextBlock Text="{Binding PorcentajeAsistencia, StringFormat={}{0:F1}%, TargetNullValue=—}" Style="{StaticResource ReportMetricValue}"/></StackPanel></Border>
+                        <Border Grid.Column="6" Style="{StaticResource ContentCard}" Margin="0"><StackPanel><TextBlock Text="Cumplimiento" Style="{StaticResource ReportMetricLabel}"/><TextBlock Text="{Binding Cumplimiento.PorcentajeCumplimiento, StringFormat={}{0:F1}%, TargetNullValue=—}" Style="{StaticResource ReportMetricValue}"/></StackPanel></Border>
+                    </Grid>
+
+                    <Grid Margin="0,0,0,16">
+                        <Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="16"/><ColumnDefinition Width="*"/></Grid.ColumnDefinitions>
+                        <Border Grid.Column="0" Style="{StaticResource ContentCard}" Margin="0">
+                            <StackPanel><TextBlock Text="Asistencia mensual del grupo" Style="{StaticResource Heading3}" Margin="0,0,0,10"/>
+                                <DataGrid ItemsSource="{Binding AsistenciaMensual}" AutoGenerateColumns="False" IsReadOnly="True" CanUserAddRows="False" MaxHeight="240">
+                                    <DataGrid.Columns>
+                                        <DataGridTextColumn Header="Año" Binding="{Binding Anio}" Width="70"/>
+                                        <DataGridTextColumn Header="Mes" Binding="{Binding Mes}" Width="70"/>
+                                        <DataGridTextColumn Header="Días-registro" Binding="{Binding Dias}" Width="100"/>
+                                        <DataGridTextColumn Header="%" Binding="{Binding Porcentaje, StringFormat={}{0:F1}%}" Width="*"/>
+                                    </DataGrid.Columns>
+                                </DataGrid>
+                            </StackPanel>
+                        </Border>
+                        <Border Grid.Column="2" Style="{StaticResource ContentCard}" Margin="0">
+                            <StackPanel><TextBlock Text="Distribución de niveles de logro" Style="{StaticResource Heading3}" Margin="0,0,0,12"/>
+                                <Grid>
+                                    <Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
+                                    <Grid.RowDefinitions><RowDefinition/><RowDefinition/><RowDefinition/><RowDefinition/><RowDefinition/></Grid.RowDefinitions>
+                                    <TextBlock Grid.Row="0" Text="Domina"/><TextBlock Grid.Row="0" Grid.Column="1" Text="{Binding Logro.Domina}" FontWeight="SemiBold"/>
+                                    <TextBlock Grid.Row="1" Text="Suficiente" Margin="0,7,0,0"/><TextBlock Grid.Row="1" Grid.Column="1" Text="{Binding Logro.Suficiente}" Margin="0,7,0,0" FontWeight="SemiBold"/>
+                                    <TextBlock Grid.Row="2" Text="En proceso" Margin="0,7,0,0"/><TextBlock Grid.Row="2" Grid.Column="1" Text="{Binding Logro.EnProceso}" Margin="0,7,0,0" FontWeight="SemiBold"/>
+                                    <TextBlock Grid.Row="3" Text="Requiere apoyo" Margin="0,7,0,0"/><TextBlock Grid.Row="3" Grid.Column="1" Text="{Binding Logro.RequiereApoyo}" Margin="0,7,0,0" FontWeight="SemiBold"/>
+                                    <TextBlock Grid.Row="4" Text="Entregadas por evaluar" Margin="0,7,0,0"/><TextBlock Grid.Row="4" Grid.Column="1" Text="{Binding Logro.Pendientes}" Margin="0,7,0,0" FontWeight="SemiBold"/>
+                                </Grid>
+                                <Separator Margin="0,14,0,10"/>
+                                <TextBlock><Run Text="No entregadas: "/><Run Text="{Binding Cumplimiento.NoEntregadas, Mode=OneWay}" FontWeight="SemiBold"/><Run Text=" · Pendientes: "/><Run Text="{Binding Cumplimiento.Pendientes, Mode=OneWay}" FontWeight="SemiBold"/></TextBlock>
+                            </StackPanel>
+                        </Border>
+                    </Grid>
+
+                    <Border Style="{StaticResource ContentCard}" Margin="0,0,0,4">
+                        <StackPanel>
+                            <TextBlock Text="Seguimiento individual" Style="{StaticResource Heading3}" Margin="0,0,0,10"/>
+                            <TextBlock Text="La tabla ayuda a localizar necesidades de seguimiento; no ordena ni clasifica competitivamente a los estudiantes."
+                                       Foreground="{DynamicResource TextMutedBrush}" Margin="0,0,0,10" TextWrapping="Wrap"/>
+                            <DataGrid ItemsSource="{Binding Seguimiento}" AutoGenerateColumns="False" IsReadOnly="True" CanUserAddRows="False" MaxHeight="360">
+                                <DataGrid.Columns>
+                                    <DataGridTextColumn Header="Núm." Binding="{Binding NumeroLista}" Width="65"/>
+                                    <DataGridTextColumn Header="Estudiante" Binding="{Binding Nombre}" Width="*"/>
+                                    <DataGridTextColumn Header="Asistencia" Binding="{Binding PorcentajeAsistencia, StringFormat={}{0:F1}%}" Width="100"/>
+                                    <DataGridTextColumn Header="Entregadas" Binding="{Binding Cumplimiento.Entregadas}" Width="95"/>
+                                    <DataGridTextColumn Header="No entregadas" Binding="{Binding Cumplimiento.NoEntregadas}" Width="105"/>
+                                    <DataGridTextColumn Header="Pendientes" Binding="{Binding Cumplimiento.Pendientes}" Width="90"/>
+                                    <DataGridTextColumn Header="Req. apoyo" Binding="{Binding RequiereApoyo}" Width="90"/>
+                                </DataGrid.Columns>
+                            </DataGrid>
+                        </StackPanel>
+                    </Border>
+                </StackPanel>
+            </ScrollViewer>
+        </Grid>
+    </Grid>
+</UserControl>
