@@ -8,6 +8,7 @@ public sealed class ActividadEvaluacionColumnaVisual : ViewModelBase
 {
     internal ActividadEvaluacionColumnaVisual(
         ActividadId actividadId,
+        string _,
         string titulo,
         DateOnly fechaRealizacion,
         EstadoActividad estado,
