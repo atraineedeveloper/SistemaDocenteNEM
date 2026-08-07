@@ -678,7 +678,7 @@ public sealed class GestionGrupoViewModel : ViewModelBase
             estudiante.EstaActivo,
             estudiante.Grado);
 
-    private static IReadOnlyList<OpcionGradoPrimaria> CrearOpcionesGrado(IEnumerable<GradoPrimaria> grados) =>
+    private static OpcionGradoPrimaria[] CrearOpcionesGrado(IEnumerable<GradoPrimaria> grados) =>
         CatalogoNemPrimaria.NormalizarGrados(grados)
             .Select(grado => new OpcionGradoPrimaria(grado, CatalogoNemPrimaria.FormatearGrado(grado)))
             .ToArray();
