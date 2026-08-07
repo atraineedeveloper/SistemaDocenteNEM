@@ -30,14 +30,8 @@ public sealed class EvaluacionActividadesViewModel : ViewModelBase
         _dialogo = dialogo ?? throw new ArgumentNullException(nameof(dialogo));
         _mensajes = mensajes ?? throw new ArgumentNullException(nameof(mensajes));
 
-        GuardarCambiosCommand = new RelayCommand(
-            GuardarCambios,
-            () => TieneCambios && !EstaOcupado);
-        DescartarCambiosCommand = new RelayCommand(
-            DescartarCambios,
-            () => TieneCambios && !EstaOcupado);
-
-        // Alias deliberados para no romper composición/pruebas que aún usan los nombres históricos.
+        GuardarCambiosCommand = new RelayCommand(GuardarCambios, () => TieneCambios && !EstaOcupado);
+        DescartarCambiosCommand = new RelayCommand(DescartarCambios, () => TieneCambios && !EstaOcupado);
         GuardarActividadCommand = GuardarCambiosCommand;
         DescartarActividadCommand = DescartarCambiosCommand;
 
@@ -124,8 +118,8 @@ public sealed class EvaluacionActividadesViewModel : ViewModelBase
     }
 
     /// <summary>
-    /// Alias de sólo lectura para consumidores previos. La actividad ya no se selecciona
-    /// mediante ComboBox: se deriva de la columna/celda actual de la matriz.
+    /// Compatibilidad de lectura: la actividad seleccionada se deriva de la columna actual,
+    /// ya no de un selector independiente.
     /// </summary>
     public ActividadProyectoResumen? ActividadSeleccionada =>
         _indiceActividadSeleccionada >= 0 && _indiceActividadSeleccionada < Actividades.Count
@@ -233,8 +227,12 @@ public sealed class EvaluacionActividadesViewModel : ViewModelBase
 
     public void SeleccionarActividad(int indiceActividad)
     {
-        if (indiceActividad < 0 || indiceActividad >= ColumnasActividades.Count) return;
-        if (_indiceActividadSeleccionada == indiceActividad) return;
+        if (indiceActividad < 0 || indiceActividad >= ColumnasActividades.Count
+            || _indiceActividadSeleccionada == indiceActividad)
+        {
+            return;
+        }
+
         _indiceActividadSeleccionada = indiceActividad;
         CeldaSeleccionada = null;
         NotificarContextoActividad();
@@ -271,18 +269,16 @@ public sealed class EvaluacionActividadesViewModel : ViewModelBase
         LimpiarMatriz();
         if (_proyecto is null) return;
 
-        var resultado = EjecutarResultado(() =>
+        var carga = EjecutarResultado(() =>
         {
             var resumenes = _gestion.ListarActividades(_proyecto.ProyectoId);
             var detalles = resumenes.Select(x => _gestion.ObtenerActividad(x.ActividadId)).ToArray();
-            return (resumenes, detalles);
+            return new CargaMatriz(resumenes, detalles);
         });
+        if (carga is null) return;
 
-        if (resultado is null) return;
-
-        var (resumenes, detalles) = resultado.Value;
-        Actividades = resumenes;
-        ColumnasActividades = detalles
+        Actividades = carga.Resumenes;
+        ColumnasActividades = carga.Detalles
             .Select((detalle, indice) => new ActividadEvaluacionColumnaVisual(
                 detalle.ActividadId,
                 $"A{indice + 1:D2}",
@@ -292,7 +288,7 @@ public sealed class EvaluacionActividadesViewModel : ViewModelBase
                 detalle.Version))
             .ToArray();
 
-        var estudiantes = detalles
+        var estudiantes = carga.Detalles
             .SelectMany(x => x.Entregas)
             .GroupBy(x => x.EstudianteId)
             .Select(grupo => grupo.First())
@@ -304,10 +300,10 @@ public sealed class EvaluacionActividadesViewModel : ViewModelBase
         var filas = new List<EvaluacionEstudianteFilaVisual>(estudiantes.Length);
         foreach (var estudiante in estudiantes)
         {
-            var celdas = new EvaluacionCeldaVisual[detalles.Length];
-            for (var indice = 0; indice < detalles.Length; indice++)
+            var celdas = new EvaluacionCeldaVisual[carga.Detalles.Count];
+            for (var indice = 0; indice < carga.Detalles.Count; indice++)
             {
-                var detalle = detalles[indice];
+                var detalle = carga.Detalles[indice];
                 var entrega = detalle.Entregas.FirstOrDefault(x => x.EstudianteId == estudiante.EstudianteId);
                 var esAplicable = entrega is not null;
                 var esEditable = _proyecto.Estado != EstadoProyecto.Finalizado
@@ -382,11 +378,9 @@ public sealed class EvaluacionActividadesViewModel : ViewModelBase
         {
             for (var indice = 0; indice < ColumnasActividades.Count; indice++)
             {
-                var modificadas = Filas
-                    .Select(x => x.Celdas[indice])
-                    .Where(x => x.EsAplicable && x.TieneCambios)
-                    .ToArray();
-                if (modificadas.Length == 0) continue;
+                var hayCambios = Filas.Select(x => x.Celdas[indice])
+                    .Any(x => x.EsAplicable && x.TieneCambios);
+                if (!hayCambios) continue;
 
                 var columna = ColumnasActividades[indice];
                 var entradas = Filas
@@ -436,8 +430,7 @@ public sealed class EvaluacionActividadesViewModel : ViewModelBase
 
     private void ConfirmarActividadGuardada(int indice, ActividadProyectoDetalle guardada)
     {
-        var columna = ColumnasActividades[indice];
-        columna.ActualizarVersion(guardada.Version);
+        ColumnasActividades[indice].ActualizarVersion(guardada.Version);
         var porEstudiante = guardada.Entregas.ToDictionary(x => x.EstudianteId);
 
         foreach (var fila in Filas)
@@ -449,9 +442,12 @@ public sealed class EvaluacionActividadesViewModel : ViewModelBase
             celda.Confirmar(entrega.NivelLogro, entrega.Observacion);
         }
 
-        var resumenes = _gestion.ListarActividades(_proyecto!.ProyectoId);
-        _actividades = resumenes;
-        OnPropertyChanged(nameof(Actividades));
+        var resumenes = Actividades.ToArray();
+        if (indice < resumenes.Length)
+        {
+            resumenes[indice] = Resumir(guardada);
+            Actividades = resumenes;
+        }
         OnPropertyChanged(nameof(ActividadSeleccionada));
     }
 
@@ -530,7 +526,8 @@ public sealed class EvaluacionActividadesViewModel : ViewModelBase
         return Filas.Select(x => x.Celdas[indice]).Where(x => x.EsAplicable).ToArray();
     }
 
-    private int Contar(NivelLogro nivel) => CeldasActividadSeleccionada().Count(x => x.NivelLogro == nivel);
+    private int Contar(NivelLogro nivel) =>
+        CeldasActividadSeleccionada().Count(x => x.NivelLogro == nivel);
 
     private bool Ejecutar(Action accion)
     {
@@ -617,4 +614,23 @@ public sealed class EvaluacionActividadesViewModel : ViewModelBase
             comando.NotifyCanExecuteChanged();
         }
     }
+
+    private static ActividadProyectoResumen Resumir(ActividadProyectoDetalle actividad) => new(
+        actividad.ActividadId,
+        actividad.ProyectoId,
+        actividad.Titulo,
+        actividad.FechaRealizacion,
+        actividad.Estado,
+        actividad.Total,
+        actividad.Pendientes,
+        actividad.Domina,
+        actividad.Suficiente,
+        actividad.EnProceso,
+        actividad.RequiereApoyo,
+        actividad.NoEntrego,
+        actividad.Version);
+
+    private sealed record CargaMatriz(
+        IReadOnlyList<ActividadProyectoResumen> Resumenes,
+        IReadOnlyList<ActividadProyectoDetalle> Detalles);
 }
