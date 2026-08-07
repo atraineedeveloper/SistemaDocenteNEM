@@ -254,7 +254,7 @@ public sealed class RefactorMainWindowVistasTests
                 }
 
                 var viewModel = ConstruirViewModel();
-                var ventana = new MainWindow(viewModel, ConstruirConfiguracionGrupo());
+                var ventana = new MainWindow(viewModel, ConstruirConfiguracionGrupo(), ConstruirImportacionEstudiantes());
                 ventana.Measure(new System.Windows.Size(1280, 780));
                 ventana.Arrange(new System.Windows.Rect(0, 0, 1280, 780));
                 ventana.UpdateLayout();
@@ -269,6 +269,18 @@ public sealed class RefactorMainWindowVistasTests
         thread.Join();
 
         Assert.Null(capturada);
+    }
+
+    private static ImportacionEstudiantesViewModel ConstruirImportacionEstudiantes()
+    {
+        var directorio = Path.Combine(Path.GetTempPath(), "SistemaDocenteNEM-ImportSmoke-" + Guid.NewGuid().ToString("N"));
+        Directory.CreateDirectory(directorio);
+        var baseSqlite = Path.Combine(directorio, "sistema-docente.db");
+        var grupos = new PersistenciaGrupoSqlite(baseSqlite);
+        var contextos = new PersistenciaContextoGrupoSqlite(baseSqlite);
+        return new ImportacionEstudiantesViewModel(
+            new SistemaDocente.Interchange.LectorImportacionTabular(),
+            new ImportacionEstudiantesCasosUso(grupos, contextos));
     }
 
     private static MainWindowViewModel ConstruirViewModel()
