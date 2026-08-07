@@ -14,7 +14,8 @@ public sealed record EstudianteDetalle(
     DateOnly? FechaIngreso,
     string Observaciones,
     int NumeroLista,
-    bool EstaActivo)
+    bool EstaActivo,
+    GradoPrimaria Grado = GradoPrimaria.NoEspecificado)
 {
     public EstudianteDetalle(EstudianteId estudianteId, string nombreVisible, int numeroLista, bool estaActivo)
         : this(estudianteId, nombreVisible, "", "", "", null, null, GeneroEstudiante.NoEspecificado, null, "", numeroLista, estaActivo)
