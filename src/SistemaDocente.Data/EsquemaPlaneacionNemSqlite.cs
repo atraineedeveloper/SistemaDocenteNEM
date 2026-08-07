@@ -22,9 +22,12 @@ internal static class EsquemaPlaneacionNemSqlite
                     $"La extensión '{NombreExtension}' tiene una versión no compatible: {version}.");
             }
 
+            // Keep the additive bridge compatible with an older application that may still
+            // create base project/activity rows after this extension was installed.
+            AsegurarMetadatosLegacy(conexion, transaccion);
+
             if (version == 0)
             {
-                MigrarRegistrosLegacy(conexion, transaccion);
                 EstablecerVersion(conexion, transaccion, VersionActual);
             }
 
@@ -100,7 +103,7 @@ internal static class EsquemaPlaneacionNemSqlite
             : Convert.ToInt32(valor, System.Globalization.CultureInfo.InvariantCulture);
     }
 
-    private static void MigrarRegistrosLegacy(
+    private static void AsegurarMetadatosLegacy(
         SqliteConnection conexion,
         SqliteTransaction transaccion)
     {
