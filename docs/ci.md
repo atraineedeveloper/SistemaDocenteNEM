@@ -1,22 +1,22 @@
-# Integración continua
+# Continuous integration
 
-El repositorio usa GitHub Actions mediante `.github/workflows/ci.yml`.
+The repository uses GitHub Actions through `.github/workflows/ci.yml`.
 
-## Plataforma
+## Platform
 
-El job principal se ejecuta en `windows-latest` porque la solución contiene `SistemaDocente.App.Wpf` y pruebas `net10.0-windows`. Un checkout limpio evita que binarios de otra rama contaminen `dotnet test --no-build`.
+The main job runs on `windows-latest` because the solution contains `SistemaDocente.App.Wpf` and `net10.0-windows` tests. A clean checkout prevents binaries from another branch from contaminating `dotnet test --no-build`.
 
-## Herramientas fijadas
+## Pinned tools
 
 - .NET SDK 10 (`10.0.x`);
 - Node.js 24;
 - OpenSpec `1.6.0`.
 
-OpenSpec se fija a una versión concreta para que una nueva publicación del CLI no cambie inesperadamente la validación de un PR existente.
+OpenSpec is pinned to a concrete version so a new CLI release cannot unexpectedly change validation behavior for an existing pull request.
 
-## Validaciones
+## Validation sequence
 
-El workflow ejecuta, en orden:
+The workflow executes, in order:
 
 ```powershell
 dotnet restore SistemaDocente.sln
@@ -27,16 +27,18 @@ openspec validate --all
 git diff --check
 ```
 
-Un fallo detiene el job y deja visible el paso responsable en la pestaña **Actions** y en los checks del pull request.
+A failure stops the job and leaves the responsible step visible in the **Actions** tab and in the pull-request checks.
 
-## Cuándo se ejecuta
+## Triggers
 
-- pull requests dirigidos a `main`;
-- pushes a `main` después de integrar cambios;
-- ejecución manual mediante `workflow_dispatch` para validar una rama que todavía no tenga pull request.
+CI runs for:
 
-No se ejecuta también por cada push a `feature/**` cuando ya existe un PR, para evitar dos jobs idénticos por el mismo commit.
+- pull requests targeting `main`;
+- pushes to `main` after integration;
+- manual `workflow_dispatch` execution when a branch needs validation before it has a pull request.
 
-## Validación local recomendada
+It does not also run for every push to `feature/**` when a pull request already exists, avoiding duplicate jobs for the same commit.
 
-Antes de subir cambios puede ejecutarse la misma secuencia. Si un build falla, no conviene interpretar resultados posteriores de `dotnet test --no-build`, porque podrían existir DLL de pruebas compiladas en una rama anterior. En ese caso se debe corregir primero el build y volver a compilar antes de ejecutar las pruebas sin build.
+## Recommended local validation
+
+Before pushing changes, the same sequence can be executed locally. If a build fails, do not rely on later `dotnet test --no-build` results because test DLLs may have been compiled on a previous branch. Fix and rebuild first, then run tests without build.
