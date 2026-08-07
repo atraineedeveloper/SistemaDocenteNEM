@@ -1,46 +1,54 @@
-# Reportes, configuración del grupo y estado de entrega
+# Reports, group context and delivery semantics
 
-Esta guía resume las decisiones funcionales y técnicas del módulo de Reportes, la configuración contextual del grupo y la separación entre entrega y nivel de logro.
+This guide summarizes the functional and technical decisions around Reports, group context and the separation between delivery state and achievement level.
 
-## 1. Configuración contextual del grupo
+## 1. Group context
 
-La configuración pertenece al grupo, no al estudiante. Se guarda 1:1 por `GrupoId` y puede completarse progresivamente.
+Group configuration belongs to `GrupoId`, not to an individual student. It can be completed progressively and is shared by Group and Reports.
 
-Campos actuales:
+Current structured context includes:
 
-- ciclo escolar;
-- nombre de escuela y CCT;
-- entidad federativa, municipio y localidad;
-- grado, grupo y turno;
-- etapa de desarrollo cognoscitivo grupal de referencia;
-- docente responsable;
-- periodo de responsabilidad;
-- hora de entrada y salida.
+- school year;
+- school name and CCT;
+- federal entity and municipality/alcaldía from the offline Mexico catalog;
+- free-text locality;
+- school organization;
+- one or more served primary grades;
+- group key and shift;
+- teacher responsibility period;
+- entry/exit schedule.
 
-### Etapa de Piaget
+### Grades and NEM phases
 
-La etapa cognoscitiva es una **referencia pedagógica general del grupo**. No debe presentarse ni utilizarse como diagnóstico individual.
+Primary grade is a structured value from first through sixth grade. NEM phase is derived and cannot be edited independently:
 
-Opciones:
+```text
+1.º–2.º → Phase 3
+3.º–4.º → Phase 4
+5.º–6.º → Phase 5
+```
+
+One configured grade derives `Unigrado`; two or more derive `Multigrado`. A multigrade classroom may therefore expose more than one NEM phase.
+
+School organization is a different concept and is selected independently:
 
 - No especificada;
-- Sensoriomotora;
-- Preoperacional;
-- Operaciones concretas;
-- Operaciones formales.
+- Unitaria / unidocente;
+- Bidocente;
+- Tridocente;
+- Tetradocente;
+- Pentadocente;
+- Organización completa.
 
-La misma `ConfiguracionGrupoWindow` se abre desde:
+### Developmental reference
 
-- `GrupoView` → `⚙ Configurar grupo`;
-- `ReportesView` → `⚙ Configurar grupo`.
+Piaget stages are not modeled as NEM catalog values. The current UI no longer asks the teacher to classify the whole group manually. Instead it derives a general pedagogical reference from served grades and explicitly labels the information as non-diagnostic.
 
-Ambas vistas reciben la misma instancia de `ConfiguracionGrupoViewModel` desde `MainWindow`.
+The same `ConfiguracionGrupoWindow` is available from Group and Reports. Both surfaces use the shared `ConfiguracionGrupoViewModel` instance composed by the WPF shell.
 
-## 2. Entrega y nivel de logro
+## 2. Delivery and achievement are separate dimensions
 
-Son dimensiones distintas.
-
-### Estado de entrega
+### Delivery state
 
 ```text
 Pendiente
@@ -48,7 +56,7 @@ Entregada
 NoEntregada
 ```
 
-### Nivel de logro
+### Achievement level
 
 ```text
 Pendiente
@@ -58,203 +66,186 @@ EnProceso
 RequiereApoyo
 ```
 
-`NivelLogro.NoEntrego` permanece sólo para compatibilidad con datos/código legado. Los flujos nuevos no deben producirlo.
+`NivelLogro.NoEntrego` remains only for compatibility with legacy data/code. New workflows must not produce it.
 
-### Combinaciones válidas relevantes
+Relevant valid combinations:
 
-| Estado de entrega | Nivel de logro | Significado |
+| Delivery state | Achievement | Meaning |
 | --- | --- | --- |
-| Pendiente | Pendiente | todavía no se registra si entregó |
-| Entregada | Pendiente | trabajo recibido, todavía no evaluado |
-| Entregada | Domina/Suficiente/EnProceso/RequiereApoyo | trabajo recibido y evaluado |
-| NoEntregada | Pendiente | se registró que no fue entregado |
+| Pendiente | Pendiente | delivery has not been decided yet |
+| Entregada | Pendiente | work was received but has not been evaluated yet |
+| Entregada | Domina/Suficiente/EnProceso/RequiereApoyo | work was received and evaluated |
+| NoEntregada | Pendiente | the work was recorded as not delivered |
 
-Reglas automáticas:
+Automatic rules:
 
-- marcar `NoEntregada` fuerza nivel `Pendiente`;
-- asignar un nivel evaluativo fuerza estado `Entregada`;
-- una no entrega no se convierte en cero ni en nivel cognitivo.
+- `NoEntregada` forces achievement to `Pendiente`;
+- assigning D/S/E/R forces delivery to `Entregada`;
+- non-delivery is never converted into zero or into an achievement level.
 
-## 3. Matriz de Evaluación
+## 3. Evaluation matrix
 
-La vista sigue siendo estudiante × actividad. No existe un selector separado de actividad.
+The main view is student × activity; there is no separate activity selector.
 
-Representación compacta:
+Compact representation:
 
 ```text
-P  pendiente de entrega
-N  no entregada
-✓  entregada, pendiente de evaluación
-D  domina
-S  suficiente
-E  en proceso
-R  requiere apoyo
-—  actividad no aplicable por padrón histórico
+P  pending delivery decision
+N  not delivered
+✓  delivered, awaiting evaluation
+D  Domina
+S  Suficiente
+E  En proceso
+R  Requiere apoyo
+—  activity not applicable to the historical roster
 ```
 
-### Atajos
+### Teacher-facing unified result
 
-Cuando el foco está dentro de la matriz:
+The UI exposes one result instead of requiring the teacher to manipulate delivery state and achievement separately:
 
-| Tecla | Acción |
+| Visible result | Internal delivery | Internal achievement |
+| --- | --- | --- |
+| Pendiente | Pendiente | Pendiente |
+| Entregada · evaluar después | Entregada | Pendiente |
+| Domina | Entregada | Domina |
+| Suficiente | Entregada | Suficiente |
+| En proceso | Entregada | EnProceso |
+| Requiere apoyo | Entregada | RequiereApoyo |
+| No entregó | NoEntregada | Pendiente |
+
+Clicking a cell opens the quick result menu. `Más opciones…` opens the full editor, which uses the same unified result plus the pedagogical observation field.
+
+### Keyboard shortcuts
+
+When focus belongs to the matrix:
+
+| Key | Action |
 | --- | --- |
-| `T` | marcar Entregada y dejar nivel Pendiente |
-| `N` | marcar No entregada |
-| `P` | volver a Pendiente de entrega |
-| `D` | Domina + Entregada |
-| `S` | Suficiente + Entregada |
-| `E` | En proceso + Entregada |
-| `R` | Requiere apoyo + Entregada |
-| `Enter` / `F2` | abrir editor de celda |
-| `Ctrl+S` | guardar cambios |
+| `T` | Delivered, awaiting evaluation |
+| `N` | Not delivered |
+| `P` | Pending delivery decision |
+| `D` | Domina + Delivered |
+| `S` | Suficiente + Delivered |
+| `E` | En proceso + Delivered |
+| `R` | Requiere apoyo + Delivered |
+| `Enter` / `F2` | Open full cell editor |
+| `Ctrl+S` | Save pending changes |
 
-El editor de celda muestra por separado:
+## 4. Filters and metrics
 
-1. Estado de entrega;
-2. Nivel de logro;
-3. Observación.
+The matrix can filter by delivered, not delivered, pending delivery, delivered awaiting evaluation, each D/S/E/R level, incidents and active/historical roster scope.
 
-El nivel sólo se habilita cuando el estado es `Entregada`.
+Selected-activity metrics include applicable total, pending delivery, delivered, not delivered, delivered awaiting evaluation and requires-support counts.
 
-## 4. Filtros y métricas
+## 5. Reports
 
-La matriz puede filtrar por:
+There is one global `Reportes` module with individual and group modes.
 
-- todas;
-- entregadas;
-- no entregadas;
-- pendientes de entrega;
-- entregadas pendientes de evaluación;
-- Domina;
-- Suficiente;
-- En proceso;
-- Requiere apoyo;
-- incidencias;
-- sólo estudiantes activos;
-- activos e inactivos históricos.
+### Individual report
 
-Métricas de actividad seleccionada:
+Includes:
 
-- total aplicable;
-- pendientes de entrega;
-- entregadas;
-- no entregadas;
-- entregadas pendientes de evaluación;
-- requiere apoyo.
+- identity and structured group context;
+- monthly/average attendance;
+- delivery compliance;
+- achievement distribution;
+- applicable projects and activities;
+- strengths;
+- difficulties;
+- supports;
+- observations;
+- tutor/family agreements.
 
-## 5. Reportes
+### Group report
 
-Existe una sola pestaña global `Reportes` con dos modos.
+Includes:
 
-### Individual
+- historical and active enrollment;
+- aggregate attendance;
+- delivery compliance;
+- achievement distribution;
+- monthly evolution;
+- individual follow-up without competitive ranking.
 
-Incluye:
-
-- identidad y contexto del grupo;
-- asistencia mensual/promedio;
-- cumplimiento de entrega;
-- distribución de niveles de logro;
-- proyectos y actividades aplicables;
-- fortalezas;
-- dificultades;
-- apoyos;
-- observaciones;
-- acuerdos con tutores.
-
-### Grupal
-
-Incluye:
-
-- matrícula histórica y activa;
-- asistencia agregada;
-- cumplimiento de entrega;
-- distribución de logro;
-- evolución mensual;
-- seguimiento individual sin ranking competitivo.
-
-### Porcentaje de cumplimiento
+### Delivery compliance
 
 ```text
-Entregadas / (Entregadas + NoEntregadas) × 100
+Delivered / (Delivered + NotDelivered) × 100
 ```
 
-Las pendientes no entran en el denominador. Si todavía no hay entregas decididas, la UI muestra `—` en lugar de 0 %.
+Pending decisions are excluded from the denominator. If no delivery decision exists yet, UI shows `—`, not 0%.
 
-## 6. Persistencia SQLite
+## 6. SQLite compatibility
 
-El esquema base se mantiene en:
+The validated base schema remains:
 
 ```text
 PRAGMA user_version = 6
 ```
 
-La capacidad nueva utiliza una extensión aditiva:
+### Reporting/context/delivery extension
 
 ```text
 esquema_extensiones
-nombre: reportes-contexto-entregas
+name: reportes-contexto-entregas
 version: 1
 ```
 
-Tablas nuevas:
+Tables:
 
 - `configuracion_grupo`;
 - `estados_entrega_actividad`.
 
-La columna histórica `entregas_actividad.estado_entrega` sigue almacenando temporalmente `NivelLogro`. El adaptador hace escritura dual y lectura combinada.
+The historical `entregas_actividad.estado_entrega` column temporarily stores `NivelLogro`; the adapter performs combined reads and compatible writes.
 
-Conversión automática de datos legacy:
+Legacy delivery conversion:
 
 ```text
 NoEntrego       -> NoEntregada + Pendiente
 Pendiente       -> Pendiente + Pendiente
-Domina/Suf/etc. -> Entregada + mismo nivel
+Domina/Suf/etc. -> Entregada + same achievement
 ```
 
-No debe elevarse `user_version` ni reconstruirse la tabla base para esta capacidad sin una nueva decisión arquitectónica explícita.
+### Structured NEM/multigrade extension
 
-## 7. Compatibilidad legacy
+```text
+esquema_extensiones
+name: nem-contexto-multigrado
+version: 1
+```
 
-`EntradaEntregaActividad` distingue entradas nuevas de llamadas antiguas:
+Tables:
 
-- constructor con `EstadoEntregaActividad` → estado explícito;
-- constructor antiguo sólo con `NivelLogro` → entrada legacy.
+- `contexto_nem_grupo`;
+- `grados_grupo`;
+- `grados_estudiante`.
 
-Cuando una edición legacy trae `Pendiente` sin expresar el estado, Application conserva el estado histórico existente. Esto evita que editar título, fecha u observaciones de una actividad borre accidentalmente un estado como `Entregada + Pendiente`.
+The original `configuracion_grupo` table remains a compatibility/reporting projection. Structured saves update it together with the additive extension.
 
-## 8. Modo demo
+Deterministic legacy grade values may be migrated to structured grades; ambiguous text is never guessed.
 
-El modo demo siembra contexto ficticio independiente de producción, incluyendo:
+## 7. Legacy delivery compatibility
 
-- escuela/CCT;
-- grado y grupo;
-- turno;
-- etapa `Operaciones concretas`;
-- docente responsable;
-- horario.
+`EntradaEntregaActividad` distinguishes new calls that intentionally express `EstadoEntregaActividad` from older calls that supplied only `NivelLogro`.
 
-Las rutas de producción y demo siguen totalmente separadas.
+When a legacy edit supplies `Pendiente` without an explicit delivery state, Application preserves the existing historical delivery value. Editing metadata therefore cannot accidentally erase a state such as `Entregada + Pendiente`.
 
-## 9. Validación requerida antes del merge
+## 8. Demo mode
 
-En Windows:
+Demo context is isolated from production and includes a structured fourth-grade group in Tabasco/Centro with morning shift, `Organización completa`, derived Phase 4, teacher responsibility and schedule.
+
+## 9. Validation before merge
+
+Windows CI must pass:
 
 ```powershell
 dotnet restore SistemaDocente.sln
-dot format SistemaDocente.sln --verify-no-changes --no-restore
-dotnet build SistemaDocente.sln --no-restore
-dotnet test SistemaDocente.sln --no-build
+dotnet format SistemaDocente.sln --verify-no-changes --no-restore
+dotnet build SistemaDocente.sln --configuration Release --no-restore
+dotnet test SistemaDocente.sln --configuration Release --no-build
 openspec validate --all
 git diff --check
 ```
 
-Validación manual mínima:
-
-- abrir Configuración desde Grupo y Reportes;
-- guardar/reabrir contexto;
-- marcar `T`, `N`, `P`, `D`, `S`, `E`, `R` en Evaluación;
-- confirmar que `T` conserva `Entregada + Pendiente` después de guardar/reabrir;
-- comprobar que Reportes refleja los cambios;
-- probar Claro/Oscuro/Alto contraste;
-- probar escalado 100/125/150 %;
-- probar demo con `--demo-reset`.
+Manual validation should cover saving/reopening structured group context, unigrade/multigrade derived values, dependent municipality selection, student grade, Evaluation shortcuts/quick menus, Report consistency, Light/Dark/High Contrast and 100/125/150% scaling.

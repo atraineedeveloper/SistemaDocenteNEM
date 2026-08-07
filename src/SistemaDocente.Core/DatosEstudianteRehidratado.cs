@@ -11,7 +11,8 @@ public readonly record struct DatosEstudianteRehidratado(
     DateOnly? FechaIngreso,
     string Observaciones,
     int NumeroLista,
-    bool EstaActivo)
+    bool EstaActivo,
+    GradoPrimaria Grado = GradoPrimaria.NoEspecificado)
 {
     public DatosEstudianteRehidratado(EstudianteId id, string nombreVisible, int numeroLista, bool estaActivo)
         : this(id, nombreVisible, "", "", "", null, GeneroEstudiante.NoEspecificado, null, "", numeroLista, estaActivo)

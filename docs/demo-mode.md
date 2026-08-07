@@ -1,89 +1,95 @@
-# Modo de demostración
+# Demo mode
 
-El modo de demostración permite revisar la interfaz y las funciones del Sistema Docente NEM con un conjunto rico de datos ficticios sin escribir en la base de datos real del docente.
+Demo mode allows the UI and classroom workflows to be reviewed with a rich fictitious dataset without writing to the teacher's production database.
 
-## Ejecutar
+## Run
 
 ```powershell
 dotnet run --project .\src\SistemaDocente.App.Wpf\SistemaDocente.App.Wpf.csproj -- --demo
 ```
 
-La primera ejecución crea los datos de demostración. Las modificaciones hechas durante la sesión se conservan para poder probar edición, guardado e historial.
+The first execution creates Demo data. Changes made during the session are retained so editing, saving and historical behavior can be tested.
 
-## Reiniciar los datos ficticios
+## Reset fictitious data
 
 ```powershell
 dotnet run --project .\src\SistemaDocente.App.Wpf\SistemaDocente.App.Wpf.csproj -- --demo-reset
 ```
 
-`--demo-reset` elimina exclusivamente el almacenamiento de demostración y vuelve a sembrarlo. No puede ejecutar el borrado sobre rutas de producción.
+`--demo-reset` deletes only Demo storage and seeds it again. The reset routine cannot target production paths.
 
-## Aislamiento de almacenamiento
+## Storage isolation
 
-Producción:
+Production:
 
 ```text
 %LOCALAPPDATA%\SistemaDocenteNEM\data\sistema-docente.db
 %LOCALAPPDATA%\SistemaDocenteNEM\data\app-state.json
 ```
 
-Demostración:
+Demo:
 
 ```text
 %LOCALAPPDATA%\SistemaDocenteNEM-Demo\data\sistema-docente.db
 %LOCALAPPDATA%\SistemaDocenteNEM-Demo\data\app-state.json
 ```
 
-El shell muestra un distintivo `DEMO` y el título de la ventana también indica el modo.
+The shell displays a `DEMO` badge and the window title also indicates Demo mode.
 
 ## Dataset
 
-El conjunto ficticio incluye:
+The fictitious dataset includes:
 
-- `4.º A · Demostración` con 30 estudiantes activos actuales, un estudiante histórico inactivo y una alta posterior al inicio de un proyecto;
-- `5.º B · Muestra` para comprobar el selector de grupos;
-- contexto escolar ficticio del grupo principal: ciclo, escuela/CCT, ubicación, grado, turno, docente, horario y etapa `Operaciones concretas`;
-- asistencia de julio y agosto de 2026 con presentes, faltas, retardos y faltas justificadas;
-- un proyecto histórico finalizado;
-- un proyecto en curso con nueve actividades y padrones históricos distintos;
-- un proyecto borrador;
-- estados de entrega variados: Pendiente, Entregada y No entregada;
-- casos de `Entregada + Pendiente de evaluación`;
-- niveles de logro variados sobre entregas: Domina, Suficiente, En proceso y Requiere apoyo;
-- observaciones de evaluación;
-- notas pedagógicas y un acuerdo ficticio con tutor.
+- `4.º A · Demostración` with 30 currently active students, one historical inactive student and one student admitted after a project began;
+- `5.º B · Muestra` for group-switching behavior;
+- fictitious school context for the main group: school year, school/CCT, Tabasco/Centro/Villahermosa, fourth grade, group A, morning shift, teacher and schedule;
+- structured fourth-grade context, derived NEM Phase 4 and `Organización completa` school organization;
+- the general developmental reference derived from fourth grade rather than a manually assigned diagnostic classification;
+- July and August 2026 attendance with present, absent, late and justified-absence examples;
+- one completed historical project;
+- one in-progress project with nine activities and different historical rosters;
+- one draft project;
+- varied delivery states: Pending, Delivered and Not delivered;
+- `Delivered + Pending evaluation` cases;
+- varied achievement levels over delivered work: Domina, Suficiente, En proceso and Requiere apoyo;
+- evaluation observations;
+- pedagogical notes and one fictitious tutor agreement.
 
-Los nombres, observaciones y acuerdos son ficticios y existen exclusivamente para probar la aplicación.
+Names, observations and agreements are fictitious and exist only to test the application.
 
-## Caso clave de la matriz de evaluación
+## Key Evaluation-matrix scenario
 
-Las primeras actividades del proyecto `Periódico mural: voces de nuestra escuela` se crean antes de la incorporación de `Ximena Torres Vidal`. Las actividades posteriores sí la incluyen. Por ello, en Evaluación su fila debe mostrar `—` en las primeras columnas y celdas editables en las posteriores.
+The first activities of `Periódico mural: voces de nuestra escuela` are created before `Ximena Torres Vidal` joins the group. Later activities include her. Evaluation should therefore show `—` in her first columns and editable cells in later columns.
 
-La matriz utiliza:
+The matrix uses:
 
 ```text
-P  pendiente de entrega
-N  no entregada
-✓  entregada, pendiente de evaluación
-D  domina
-S  suficiente
-E  en proceso
-R  requiere apoyo
-—  no aplicable por padrón histórico
+P  pending delivery decision
+N  not delivered
+✓  delivered, awaiting evaluation
+D  Domina
+S  Suficiente
+E  En proceso
+R  Requiere apoyo
+—  not applicable to the historical roster
 ```
 
-Ese escenario permite validar que la matriz respeta el padrón histórico de cada actividad, no agrega estudiantes retroactivamente y conserva por separado entrega y nivel de logro.
+This scenario verifies that the matrix respects each activity's historical roster, does not add students retroactively and keeps delivery separate from achievement.
 
-## Reportes y configuración
+## Reports and group configuration
 
-El grupo principal trae contexto ficticio para que Reportes muestre datos desde el primer arranque. La ventana `Configurar grupo` puede abrirse tanto desde Grupo como desde Reportes.
+The main group ships with fictitious context so Reports has meaningful data from first launch. `Configurar grupo` can be opened from Group and Reports.
 
-Después de cambiar estados en Evaluación y guardar, Reportes debe reflejar:
+The structured configuration should show:
 
-- entregadas;
-- no entregadas;
-- pendientes de entrega;
-- entregadas pendientes de evaluación;
-- distribución de niveles de logro.
+- Tabasco as the federal entity;
+- Centro as a municipality from the dependent offline catalog;
+- fourth grade selected;
+- `Unigrado` derived automatically;
+- `Fase 4` derived automatically;
+- `Organización completa`;
+- a non-diagnostic concrete-operations developmental reference.
 
-Para recuperar el dataset original, ejecutar nuevamente `--demo-reset`.
+After changing Evaluation results and saving, Reports should reflect delivered, not-delivered, pending-delivery, delivered-awaiting-evaluation and achievement-distribution data.
+
+Run `--demo-reset` again to restore the original fictitious dataset.

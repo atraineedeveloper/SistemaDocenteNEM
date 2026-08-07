@@ -98,7 +98,8 @@ public sealed class Grupo
                     datos.FechaIngreso,
                     datos.Observaciones,
                     datos.NumeroLista,
-                    datos.EstaActivo));
+                    datos.EstaActivo,
+                    datos.Grado));
         }
 
         return new Grupo(id, nombreValidado, estudiantesValidados);
@@ -123,7 +124,8 @@ public sealed class Grupo
         DateOnly? fechaNacimiento = null,
         GeneroEstudiante genero = GeneroEstudiante.NoEspecificado,
         DateOnly? fechaIngreso = null,
-        string observaciones = "")
+        string observaciones = "",
+        GradoPrimaria grado = GradoPrimaria.NoEspecificado)
     {
         var nombreNormalizado = ValidarNombreEstudiante(nombreVisible);
         ValidarNumeroLista(numeroLista);
@@ -140,7 +142,8 @@ public sealed class Grupo
             fechaIngreso,
             observaciones,
             numeroLista,
-            true);
+            true,
+            grado);
 
         _estudiantes.Add(estudiante);
 
@@ -156,13 +159,19 @@ public sealed class Grupo
         DateOnly? fechaNacimiento,
         GeneroEstudiante genero,
         DateOnly? fechaIngreso,
-        string observaciones)
+        string observaciones,
+        GradoPrimaria? grado = null)
     {
         var estudiante = ObtenerEstudiante(estudianteId);
         var nombreNormalizado = ValidarNombreEstudiante(nombreVisible);
 
         estudiante.Renombrar(nombreNormalizado);
-        estudiante.ActualizarDatos(primerApellido, segundoApellido, nombres, fechaNacimiento, genero, fechaIngreso, observaciones);
+        estudiante.ActualizarDatos(primerApellido, segundoApellido, nombres, fechaNacimiento, genero, fechaIngreso, observaciones, grado);
+    }
+
+    public void CambiarGradoEstudiante(EstudianteId estudianteId, GradoPrimaria grado)
+    {
+        ObtenerEstudiante(estudianteId).CambiarGrado(grado);
     }
 
     public void RenombrarEstudiante(EstudianteId estudianteId, string nombreVisible)

@@ -1,195 +1,197 @@
 # gestion-grupo-estudiantes Specification
 
 ## Purpose
-Establece el contrato mínimo para representar grupos escolares y estudiantes en Core, con identidad interna, estado reversible y reglas verificables de nombres, números de lista y consulta de estudiantes activos.
+
+Define the minimum Core contract for school groups and students, including internal identity, reversible status and verifiable rules for names, list numbers and active-student queries.
+
 ## Requirements
-### Requirement: Grupo escolar con identidad y nombre visible
-El sistema SHALL representar cada grupo mediante un `GrupoId` opaco y fuertemente tipado, basado en un `Guid`, un nombre visible obligatorio y una colección propia de estudiantes. Al crear un grupo nuevo, Core SHALL generar su identidad y el consumidor MUST NOT proporcionarla. Core SHALL ofrecer una fábrica pública neutral equivalente a `Grupo.Rehidratar` que acepte una identidad existente únicamente para reconstruir un snapshot completo sin generar una identidad nueva. El modelo SHALL NOT incorporar todavía grado, grupo, turno, escuela ni ciclo escolar como datos separados.
 
-#### Scenario: Crear un grupo válido
-- **WHEN** se crea un grupo nuevo con un nombre visible válido mediante `Grupo.Crear`
-- **THEN** Core genera su `GrupoId` sin recibirlo del consumidor y almacena el nombre normalizado
+### Requirement: School group with identity and visible name
+The system SHALL represent each group with an opaque, strongly typed `GrupoId` based on a `Guid`, a required visible name and its own student collection. When a new group is created, Core SHALL generate its identity and the consumer MUST NOT provide it. Core SHALL expose a neutral public factory equivalent to `Grupo.Rehidratar` that accepts an existing identity only to rebuild a complete snapshot without generating a new identity. School context such as served grades, group key, shift, school and school year SHALL remain in `ContextoGrupo` rather than being duplicated as mutable `Grupo` aggregate fields.
 
-#### Scenario: Identidades de grupo distintas
-- **WHEN** se crean dos grupos nuevos válidos
-- **THEN** cada grupo recibe un `GrupoId` distinto y fuertemente tipado
+#### Scenario: Create a valid group
+- **WHEN** a new group is created with a valid visible name through `Grupo.Crear`
+- **THEN** Core generates its `GrupoId` without receiving it from the consumer and stores the normalized name
 
-#### Scenario: Rehidratar un grupo persistido
-- **WHEN** `Grupo.Rehidratar` recibe un `GrupoId` existente y un snapshot válido
-- **THEN** Core conserva la identidad recibida y no genera un `GrupoId` nuevo
+#### Scenario: Distinct group identities
+- **WHEN** two valid new groups are created
+- **THEN** each group receives a distinct strongly typed `GrupoId`
 
-### Requirement: Normalización y validación del nombre del grupo
-El sistema SHALL quitar espacios iniciales y finales del nombre del grupo, SHALL reducir cada secuencia interna de espacios a un solo espacio y SHALL validar el resultado normalizado. El nombre normalizado MUST contener al menos un carácter y MUST tener como máximo 100 caracteres. El sistema SHALL conservar mayúsculas, acentos y signos escritos.
+#### Scenario: Rehydrate a persisted group
+- **WHEN** `Grupo.Rehidratar` receives an existing `GrupoId` and a valid snapshot
+- **THEN** Core preserves the supplied identity and does not generate a new `GrupoId`
 
-#### Scenario: Normalizar espacios del nombre del grupo
-- **WHEN** se crea un grupo con el nombre `  Quinto   “A”  `
-- **THEN** el nombre almacenado es `Quinto “A”`
+### Requirement: Group-name normalization and validation
+The system SHALL trim leading/trailing spaces from the group name, SHALL reduce every internal whitespace sequence to one space and SHALL validate the normalized result. The normalized name MUST contain at least one character and MUST be no longer than 100 characters. The system SHALL preserve case, accents and punctuation entered by the user.
 
-#### Scenario: Aceptar nombre de grupo en el límite
-- **WHEN** el nombre normalizado del grupo tiene exactamente 100 caracteres
-- **THEN** el sistema acepta el nombre
+#### Scenario: Normalize group-name spacing
+- **WHEN** a group is created with `  Quinto   “A”  `
+- **THEN** the stored name is `Quinto “A”`
 
-#### Scenario: Rechazar nombre de grupo demasiado largo
-- **WHEN** el nombre normalizado del grupo tiene 101 caracteres
-- **THEN** el sistema lanza `DomainValidationException` y no crea el grupo
+#### Scenario: Accept group name at the limit
+- **WHEN** the normalized group name contains exactly 100 characters
+- **THEN** the system accepts it
 
-#### Scenario: Rechazar nombre de grupo vacío después de normalizar
-- **WHEN** se intenta crear un grupo con un nombre vacío o compuesto únicamente por espacios
-- **THEN** el sistema lanza `DomainValidationException` y no crea el grupo
+#### Scenario: Reject group name that is too long
+- **WHEN** the normalized group name contains 101 characters
+- **THEN** the system throws `DomainValidationException` and does not create the group
 
-### Requirement: Estudiante con identidad, nombre, número y estado
-El sistema SHALL representar cada estudiante mediante un `EstudianteId` opaco y fuertemente tipado, basado en un `Guid` generado por Core, un único nombre visible, un número de lista y un estado activo o inactivo. El consumidor MUST NOT proporcionar la identidad al agregar un estudiante. El nombre visible MUST NOT utilizarse como identidad y el estudiante SHALL estar activo inicialmente.
+#### Scenario: Reject empty group name after normalization
+- **WHEN** a group is created with an empty or whitespace-only name
+- **THEN** the system throws `DomainValidationException` and does not create the group
 
-#### Scenario: Agregar un estudiante válido
-- **WHEN** se agrega a un grupo un estudiante con nombre y número de lista válidos y disponibles
-- **THEN** Core genera su `EstudianteId`, almacena sus datos y lo registra como activo
+### Requirement: Student with identity, name, list number, status and optional structured primary grade
+The system SHALL represent each student with an opaque, strongly typed `EstudianteId` based on a Core-generated `Guid`, one visible name, a list number, active/inactive status and a structured `GradoPrimaria` value. The consumer MUST NOT provide the identity when adding a student. The visible name MUST NOT be used as identity and a new student SHALL initially be active. `GradoPrimaria.NoEspecificado` MAY be retained for legacy/incomplete data while structured group configuration is being completed.
 
-#### Scenario: Permitir nombres repetidos
-- **WHEN** se agregan al mismo grupo dos estudiantes con el mismo nombre visible válido y números de lista distintos
-- **THEN** el sistema acepta ambos y les asigna identidades distintas
+#### Scenario: Add a valid student
+- **WHEN** a student is added to a group with a valid available name and list number
+- **THEN** Core generates the `EstudianteId`, stores the data and marks the student active
 
-### Requirement: Normalización y validación del nombre del estudiante
-El sistema SHALL quitar espacios iniciales y finales del nombre visible del estudiante, SHALL reducir cada secuencia interna de espacios a un solo espacio y SHALL validar el resultado normalizado. El nombre normalizado MUST contener al menos un carácter y MUST tener como máximo 150 caracteres. El sistema SHALL conservar acentos, mayúsculas, guiones y apóstrofos escritos.
+#### Scenario: Allow duplicate visible names
+- **WHEN** two students with the same valid visible name and different list numbers are added to the same group
+- **THEN** the system accepts both and assigns distinct identities
 
-#### Scenario: Normalizar espacios del nombre del estudiante
-- **WHEN** se agrega o renombra un estudiante usando `  María   José  `
-- **THEN** el nombre almacenado es `María José`
+### Requirement: Student-name normalization and validation
+The system SHALL trim leading/trailing spaces from the student's visible name, SHALL reduce every internal whitespace sequence to one space and SHALL validate the normalized result. The normalized name MUST contain at least one character and MUST be no longer than 150 characters. The system SHALL preserve accents, case, hyphens and apostrophes.
 
-#### Scenario: Conservar caracteres del nombre
-- **WHEN** se usa el nombre válido `Ángel O'Connor-López`
-- **THEN** el sistema conserva sus acentos, mayúsculas, apóstrofo y guion
+#### Scenario: Normalize student-name spacing
+- **WHEN** a student is added or renamed using `  María   José  `
+- **THEN** the stored name is `María José`
 
-#### Scenario: Aceptar nombre de estudiante en el límite
-- **WHEN** el nombre normalizado tiene exactamente 150 caracteres
-- **THEN** el sistema acepta el nombre
+#### Scenario: Preserve name characters
+- **WHEN** the valid name `Ángel O'Connor-López` is used
+- **THEN** the system preserves accents, case, apostrophe and hyphen
 
-#### Scenario: Rechazar nombre de estudiante demasiado largo
-- **WHEN** el nombre normalizado tiene 151 caracteres
-- **THEN** el sistema lanza `DomainValidationException` sin cambiar el estudiante ni el grupo
+#### Scenario: Accept student name at the limit
+- **WHEN** the normalized name contains exactly 150 characters
+- **THEN** the system accepts it
 
-#### Scenario: Rechazar nombre de estudiante vacío después de normalizar
-- **WHEN** se intenta agregar o renombrar un estudiante usando un nombre vacío o compuesto únicamente por espacios
-- **THEN** el sistema lanza `DomainValidationException` sin cambiar el estudiante ni el grupo
+#### Scenario: Reject student name that is too long
+- **WHEN** the normalized name contains 151 characters
+- **THEN** the system throws `DomainValidationException` without changing the student or group
 
-### Requirement: Número de lista positivo sin continuidad obligatoria
-El número de lista SHALL ser un entero mayor que cero. Core SHALL NOT imponer un límite superior ni exigir que los números sean contiguos.
+#### Scenario: Reject empty student name after normalization
+- **WHEN** a student is added or renamed with an empty or whitespace-only name
+- **THEN** the system throws `DomainValidationException` without changing the student or group
 
-#### Scenario: Rechazar cero
-- **WHEN** se intenta agregar un estudiante o cambiar su número de lista a cero
-- **THEN** el sistema lanza `DomainValidationException` sin cambiar el grupo
+### Requirement: Positive list number without required continuity
+The list number SHALL be an integer greater than zero. Core SHALL NOT impose an upper bound or require contiguous numbers.
 
-#### Scenario: Rechazar un número negativo
-- **WHEN** se intenta agregar un estudiante o cambiar su número de lista a un entero negativo
-- **THEN** el sistema lanza `DomainValidationException` sin cambiar el grupo
+#### Scenario: Reject zero
+- **WHEN** a student is added or their list number is changed to zero
+- **THEN** the system throws `DomainValidationException` without changing the group
 
-#### Scenario: Permitir huecos y números grandes
-- **WHEN** un grupo contiene estudiantes activos con números 1 y 1000000
-- **THEN** el sistema acepta ambos sin exigir números intermedios ni aplicar un límite superior adicional
+#### Scenario: Reject a negative number
+- **WHEN** a student is added or their list number is changed to a negative integer
+- **THEN** the system throws `DomainValidationException` without changing the group
 
-### Requirement: Unicidad sólo entre estudiantes activos del mismo grupo
-El sistema SHALL exigir que cada número de lista sea único entre los estudiantes activos de un mismo grupo. El mismo número SHALL poder utilizarse en grupos diferentes y por estudiantes inactivos. Un conflicto SHALL lanzar `DomainConflictException`, SHALL NOT provocar reasignaciones automáticas y SHALL dejar el grupo sin cambios.
+#### Scenario: Allow gaps and large numbers
+- **WHEN** a group contains active students with list numbers 1 and 1000000
+- **THEN** the system accepts both without requiring intermediate numbers or applying an additional upper limit
 
-#### Scenario: Rechazar duplicado entre activos
-- **WHEN** se intenta agregar un estudiante activo o cambiar su número al que ya usa otro estudiante activo del mismo grupo
-- **THEN** el sistema lanza `DomainConflictException` sin agregar, reasignar ni modificar estudiantes
+### Requirement: Uniqueness only among active students in the same group
+The system SHALL require each list number to be unique among active students in the same group. The same number SHALL be usable in different groups and by inactive students. A conflict SHALL throw `DomainConflictException`, SHALL NOT trigger automatic reassignment and SHALL leave the group unchanged.
 
-#### Scenario: Permitir el mismo número en grupos diferentes
-- **WHEN** dos estudiantes pertenecen a grupos distintos y usan el mismo número válido
-- **THEN** el sistema acepta ambos números
+#### Scenario: Reject duplicate among active students
+- **WHEN** an active student is added or changed to a number already used by another active student in the same group
+- **THEN** the system throws `DomainConflictException` without adding, reassigning or modifying students
 
-#### Scenario: Permitir que un activo reutilice el número de un inactivo
-- **WHEN** un estudiante inactivo conserva un número y otro estudiante del mismo grupo se agrega o cambia explícitamente a ese número
-- **THEN** el sistema acepta la operación porque la unicidad se aplica sólo entre activos
+#### Scenario: Allow the same number in different groups
+- **WHEN** two students belong to different groups and use the same valid number
+- **THEN** the system accepts both numbers
 
-### Requirement: Cambio explícito de número de lista
-El sistema SHALL permitir cambiar explícitamente el número de lista de un estudiante activo o inactivo, aplicando la validación y, cuando el estudiante esté activo, la unicidad entre activos. No SHALL cambiar números de otros estudiantes automáticamente.
+#### Scenario: Allow an active student to reuse an inactive student's number
+- **WHEN** an inactive student retains a number and another student in the same group is explicitly added or changed to that number
+- **THEN** the system accepts the operation because uniqueness applies only among active students
 
-#### Scenario: Cambiar el número de un estudiante activo
-- **WHEN** se asigna a un estudiante activo un número válido no usado por otro activo del grupo
-- **THEN** el sistema actualiza únicamente el número de ese estudiante
+### Requirement: Explicit list-number change
+The system SHALL allow the list number of an active or inactive student to be changed explicitly, applying validation and, for an active student, uniqueness among active students. It SHALL NOT change other students' numbers automatically.
 
-#### Scenario: Preparar la reactivación con un cambio explícito
-- **WHEN** un estudiante inactivo tiene un número ocupado por un activo y se le asigna explícitamente otro número válido
-- **THEN** el sistema conserva su estado inactivo y actualiza únicamente su número
+#### Scenario: Change an active student's number
+- **WHEN** an active student is assigned a valid number not used by another active student in the group
+- **THEN** the system updates only that student's number
 
-### Requirement: Estado reversible, idempotente y sin eliminación
-El sistema SHALL permitir desactivar y reactivar estudiantes conservando identidad, nombre y número de lista. Desactivar a un estudiante ya inactivo y reactivar a uno ya activo SHALL ser idempotente. El modelo SHALL NOT incluir eliminación definitiva.
+#### Scenario: Prepare reactivation with an explicit change
+- **WHEN** an inactive student's number is occupied by an active student and another valid number is explicitly assigned
+- **THEN** the system keeps the student inactive and updates only the number
 
-#### Scenario: Desactivar un estudiante activo
-- **WHEN** se desactiva un estudiante activo
-- **THEN** conserva identidad y datos, pasa a inactivo y deja de aparecer en la consulta de activos
+### Requirement: Reversible, idempotent status without permanent deletion
+The system SHALL allow students to be deactivated and reactivated while preserving identity, name and list number. Deactivating an already inactive student and reactivating an already active student SHALL be idempotent. The model SHALL NOT include permanent deletion.
 
-#### Scenario: Desactivar un estudiante ya inactivo
-- **WHEN** se desactiva un estudiante inactivo
-- **THEN** la operación termina correctamente y el estudiante permanece sin cambios
+#### Scenario: Deactivate an active student
+- **WHEN** an active student is deactivated
+- **THEN** identity and data are preserved, the student becomes inactive and no longer appears in the active-student query
 
-#### Scenario: Reactivar un estudiante sin conflicto
-- **WHEN** se reactiva un estudiante inactivo cuyo número no usa otro estudiante activo del grupo
-- **THEN** conserva identidad y datos y pasa a activo
+#### Scenario: Deactivate an already inactive student
+- **WHEN** an inactive student is deactivated
+- **THEN** the operation completes successfully and the student remains unchanged
 
-#### Scenario: Reactivar un estudiante ya activo
-- **WHEN** se reactiva un estudiante activo
-- **THEN** la operación termina correctamente y el estudiante permanece sin cambios
+#### Scenario: Reactivate without conflict
+- **WHEN** an inactive student whose number is not used by another active student is reactivated
+- **THEN** identity and data are preserved and the student becomes active
 
-#### Scenario: Rechazar reactivación con conflicto
-- **WHEN** se intenta reactivar un estudiante cuyo número ya usa otro estudiante activo del grupo
-- **THEN** el sistema lanza `DomainConflictException` y el estudiante permanece inactivo con la misma identidad y los mismos datos
+#### Scenario: Reactivate an already active student
+- **WHEN** an active student is reactivated
+- **THEN** the operation completes successfully and the student remains unchanged
 
-### Requirement: Operaciones atómicas y errores de dominio
-El sistema SHALL lanzar `DomainValidationException` para valores inválidos y `DomainConflictException` para conflictos de invariantes. Toda operación fallida SHALL ser atómica y dejar el grupo, su colección y todos sus estudiantes sin cambios parciales.
+#### Scenario: Reject reactivation with conflict
+- **WHEN** a student is reactivated while their number is already used by another active student in the group
+- **THEN** the system throws `DomainConflictException` and the student remains inactive with the same identity and data
 
-#### Scenario: Atomicidad ante valor inválido
-- **WHEN** una operación recibe cualquier valor inválido después de normalizarlo
-- **THEN** lanza `DomainValidationException` y el estado observable completo del grupo permanece igual
+### Requirement: Atomic operations and domain errors
+The system SHALL throw `DomainValidationException` for invalid values and `DomainConflictException` for invariant conflicts. Every failed operation SHALL be atomic and leave the group, collection and students without partial changes.
 
-#### Scenario: Atomicidad ante conflicto
-- **WHEN** una operación produciría un conflicto con las invariantes del grupo
-- **THEN** lanza `DomainConflictException` y el estado observable completo del grupo permanece igual
+#### Scenario: Atomicity for invalid value
+- **WHEN** an operation receives any invalid value after normalization
+- **THEN** it throws `DomainValidationException` and the complete observable group state remains unchanged
 
-### Requirement: Colecciones de solo lectura y consulta activa ordenada
-El sistema SHALL exponer vistas de solo lectura y MUST NOT devolver una colección mutable que permita eludir las invariantes. La consulta de estudiantes activos SHALL excluir inactivos y SHALL ordenar de forma determinista primero por número de lista ascendente y después por nombre visible.
+#### Scenario: Atomicity for conflict
+- **WHEN** an operation would violate group invariants
+- **THEN** it throws `DomainConflictException` and the complete observable group state remains unchanged
 
-#### Scenario: No exponer una colección mutable
-- **WHEN** un consumidor obtiene una colección de estudiantes del grupo
-- **THEN** no puede agregar, retirar ni sustituir elementos mediante esa colección
+### Requirement: Read-only collections and deterministic active query
+The system SHALL expose read-only views and MUST NOT return a mutable collection that bypasses invariants. The active-student query SHALL exclude inactive students and SHALL sort deterministically by ascending list number and then visible name.
 
-#### Scenario: Consultar activos en orden determinista
-- **WHEN** el grupo contiene estudiantes activos e inactivos agregados en cualquier orden
-- **THEN** la consulta devuelve sólo los activos ordenados por número ascendente y después por nombre visible
+#### Scenario: Do not expose a mutable collection
+- **WHEN** a consumer obtains a group student collection
+- **THEN** the consumer cannot add, remove or replace elements through that collection
 
-### Requirement: Independencia tecnológica de Core
-El modelo de grupo y estudiantes SHALL residir en Core y SHALL funcionar sin referencias a SQLite, repositorios, migraciones, WPF, ViewModels ni otros componentes de interfaz gráfica.
+#### Scenario: Query active students deterministically
+- **WHEN** the group contains active and inactive students added in any order
+- **THEN** the query returns only active students ordered by ascending list number and then visible name
 
-#### Scenario: Probar el modelo de forma aislada
-- **WHEN** se compilan y ejecutan las pruebas unitarias del modelo
-- **THEN** todas las reglas se validan sin inicializar persistencia ni interfaz gráfica
+### Requirement: Core technology independence
+The group/student model SHALL live in Core and SHALL work without references to SQLite, repositories, migrations, WPF, ViewModels or other graphical-interface components.
 
-### Requirement: Identificadores existentes para rehidratación
-Core SHALL proporcionar conversiones públicas y neutrales entre los valores `Guid` persistidos y `GrupoId` o `EstudianteId`, sin referencias a Data o SQLite. Estas conversiones SHALL usarse sólo para representar identidades existentes y MUST NOT cambiar la generación interna utilizada por `Grupo.Crear` y `AgregarEstudiante`.
+#### Scenario: Test the model in isolation
+- **WHEN** model unit tests are compiled and executed
+- **THEN** all rules are validated without initializing persistence or graphical UI
 
-#### Scenario: Reconstruir identificadores tipados
-- **WHEN** Data convierte valores `Guid` existentes mediante las conversiones neutrales de Core
-- **THEN** obtiene `GrupoId` y `EstudianteId` con exactamente los mismos valores sin generar identidades nuevas
+### Requirement: Existing identifiers for rehydration
+Core SHALL provide public neutral conversions between persisted `Guid` values and `GrupoId` / `EstudianteId`, without Data or SQLite references. These conversions SHALL be used only to represent existing identities and MUST NOT change internal generation used by `Grupo.Crear` and `AgregarEstudiante`.
 
-### Requirement: Snapshot neutral de estudiante
-Core SHALL definir un tipo público, inmutable y neutral para proporcionar a la rehidratación el `EstudianteId`, nombre visible, número de lista y estado activo/inactivo de cada estudiante. El tipo MUST NOT referenciar Data, SQLite ni tipos del proveedor.
+#### Scenario: Rebuild typed identifiers
+- **WHEN** Data converts existing `Guid` values through neutral Core conversions
+- **THEN** it obtains `GrupoId` and `EstudianteId` with exactly the same values without generating new identities
 
-#### Scenario: Representar datos persistidos de un estudiante
-- **WHEN** Data prepara un estudiante leído de almacenamiento para rehidratación
-- **THEN** puede expresar todos sus datos mediante el tipo neutral de Core sin perder identidad ni estado
+### Requirement: Neutral student snapshot
+Core SHALL define a public immutable neutral type that supplies rehydration with each student's `EstudianteId`, visible name, list number, active/inactive status and compatible structured profile data. The type MUST NOT reference Data, SQLite or provider types.
 
-### Requirement: Rehidratación atómica del agregado
-`Grupo.Rehidratar` SHALL validar el nombre del grupo y el snapshot completo de estudiantes antes de devolver el agregado. SHALL aplicar las mismas invariantes de nombres, números y unicidad entre activos, conservar identidades y estados, y rechazar cualquier snapshot inválido o contradictorio sin devolver un agregado total o parcialmente reconstruido. La fábrica MUST NOT alterar el comportamiento de `Grupo.Crear` ni `AgregarEstudiante` y MUST NOT usar `InternalsVisibleTo`.
+#### Scenario: Represent persisted student data
+- **WHEN** Data prepares a student read from storage for rehydration
+- **THEN** it can express the complete persisted student data through the neutral Core type without losing identity or status
 
-#### Scenario: Rehidratar estudiantes activos e inactivos
-- **WHEN** la fábrica recibe un snapshot válido con estudiantes activos e inactivos
-- **THEN** devuelve un agregado completo que conserva cada `EstudianteId`, nombre, número y estado
+### Requirement: Atomic aggregate rehydration
+`Grupo.Rehidratar` SHALL validate the group name and complete student snapshot before returning the aggregate. It SHALL apply the same name, list-number and active-uniqueness invariants, preserve identities/status and reject any invalid or contradictory snapshot without returning a partially rebuilt aggregate. The factory MUST NOT alter the behavior of `Grupo.Crear` or `AgregarEstudiante` and MUST NOT use `InternalsVisibleTo`.
 
-#### Scenario: Rechazar nombre manipulado
-- **WHEN** el snapshot contiene un nombre que no cumple las reglas de normalización o longitud de Core
-- **THEN** la fábrica rechaza el snapshot completo sin corregir silenciosamente el nombre ni devolver un agregado parcial
+#### Scenario: Rehydrate active and inactive students
+- **WHEN** the factory receives a valid snapshot with active and inactive students
+- **THEN** it returns a complete aggregate preserving each `EstudianteId`, name, list number and status
 
-#### Scenario: Rechazar número o estado contradictorio
-- **WHEN** el snapshot contiene un número no positivo o números repetidos entre estudiantes activos
-- **THEN** la fábrica rechaza el snapshot completo sin devolver un agregado parcial
+#### Scenario: Reject manipulated name
+- **WHEN** the snapshot contains a name that violates Core normalization or length rules
+- **THEN** the factory rejects the complete snapshot without silently correcting the name or returning a partial aggregate
 
+#### Scenario: Reject invalid number or contradictory state
+- **WHEN** the snapshot contains a non-positive number or duplicate numbers among active students
+- **THEN** the factory rejects the complete snapshot without returning a partial aggregate

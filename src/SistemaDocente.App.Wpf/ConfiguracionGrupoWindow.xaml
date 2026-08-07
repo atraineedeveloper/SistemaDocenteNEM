@@ -3,7 +3,7 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xml:lang="es-MX"
         Title="Configuración del grupo"
-        Width="760" Height="720" MinWidth="680" MinHeight="600"
+        Width="820" Height="790" MinWidth="720" MinHeight="640"
         WindowStartupLocation="CenterOwner" ShowInTaskbar="False">
     <Grid Background="{DynamicResource SectionBackgroundBrush}">
         <Grid.RowDefinitions>
@@ -16,14 +16,14 @@
                 Background="{DynamicResource CardBackgroundBrush}"
                 BorderBrush="{DynamicResource BorderLightBrush}"
                 BorderThickness="0,0,0,1"
-                Padding="20,16">
+                Padding="22,17">
             <StackPanel>
                 <TextBlock Text="CONFIGURACIÓN DEL GRUPO"
                            Foreground="{DynamicResource PrimaryBrush}"
                            FontSize="12" FontWeight="SemiBold"/>
-                <TextBlock Text="Contexto escolar y referencia pedagógica"
+                <TextBlock Text="Contexto escolar, NEM y organización del grupo"
                            Style="{StaticResource Heading2}" Margin="0,3,0,3"/>
-                <TextBlock Text="Estos datos contextualizan los reportes del grupo. La etapa cognoscitiva es una referencia general y no un diagnóstico individual."
+                <TextBlock Text="Selecciona datos estructurados cuando existe un catálogo. La fase NEM y la modalidad del grupo se calculan automáticamente a partir de los grados atendidos."
                            Foreground="{DynamicResource TextMutedBrush}"
                            TextWrapping="Wrap"/>
             </StackPanel>
@@ -33,7 +33,7 @@
             <StackPanel>
                 <Border Style="{StaticResource SectionCard}" Padding="16" Margin="0,0,0,14">
                     <StackPanel>
-                        <TextBlock Text="Contexto escolar" Style="{StaticResource Heading3}" Margin="0,0,0,12"/>
+                        <TextBlock Text="Escuela" Style="{StaticResource Heading3}" Margin="0,0,0,12"/>
                         <Grid>
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="*"/>
@@ -41,6 +41,7 @@
                                 <ColumnDefinition Width="*"/>
                             </Grid.ColumnDefinitions>
                             <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
                                 <RowDefinition Height="Auto"/>
                                 <RowDefinition Height="Auto"/>
                                 <RowDefinition Height="Auto"/>
@@ -60,17 +61,44 @@
                                 <TextBox Text="{Binding Cct, UpdateSourceTrigger=PropertyChanged}"/>
                             </StackPanel>
                             <StackPanel Grid.Row="1" Grid.Column="2" Margin="0,0,0,12">
-                                <TextBlock Text="Entidad federativa" Style="{StaticResource FormLabel}"/>
-                                <TextBox Text="{Binding EntidadFederativa, UpdateSourceTrigger=PropertyChanged}"/>
+                                <TextBlock Text="Organización escolar" Style="{StaticResource FormLabel}"/>
+                                <ComboBox ItemsSource="{Binding OrganizacionesEscolares}"
+                                          DisplayMemberPath="Texto"
+                                          SelectedValuePath="Valor"
+                                          SelectedValue="{Binding OrganizacionEscolar, Mode=TwoWay}"
+                                          AutomationProperties.Name="Organización escolar"/>
                             </StackPanel>
 
-                            <StackPanel Grid.Row="2" Grid.Column="0">
-                                <TextBlock Text="Municipio" Style="{StaticResource FormLabel}"/>
-                                <TextBox Text="{Binding Municipio, UpdateSourceTrigger=PropertyChanged}"/>
+                            <StackPanel Grid.Row="2" Grid.Column="0" Margin="0,0,0,12">
+                                <TextBlock Text="Entidad federativa" Style="{StaticResource FormLabel}"/>
+                                <ComboBox ItemsSource="{Binding EntidadesFederativas}"
+                                          SelectedItem="{Binding EntidadFederativa, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                          IsTextSearchEnabled="True"
+                                          AutomationProperties.Name="Entidad federativa"/>
                             </StackPanel>
-                            <StackPanel Grid.Row="2" Grid.Column="2">
+                            <StackPanel Grid.Row="2" Grid.Column="2" Margin="0,0,0,12">
+                                <TextBlock Text="Municipio / alcaldía" Style="{StaticResource FormLabel}"/>
+                                <ComboBox ItemsSource="{Binding MunicipiosDisponibles}"
+                                          SelectedItem="{Binding Municipio, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                          IsTextSearchEnabled="True"
+                                          AutomationProperties.Name="Municipio o alcaldía"/>
+                            </StackPanel>
+
+                            <StackPanel Grid.Row="3" Grid.Column="0">
                                 <TextBlock Text="Localidad" Style="{StaticResource FormLabel}"/>
-                                <TextBox Text="{Binding Localidad, UpdateSourceTrigger=PropertyChanged}"/>
+                                <TextBox Text="{Binding Localidad, UpdateSourceTrigger=PropertyChanged}"
+                                         AutomationProperties.Name="Localidad"/>
+                                <TextBlock Text="La localidad permanece como texto libre."
+                                           Foreground="{DynamicResource TextMutedBrush}"
+                                           FontSize="11" Margin="0,5,0,0"/>
+                            </StackPanel>
+                            <StackPanel Grid.Row="3" Grid.Column="2">
+                                <TextBlock Text="Turno" Style="{StaticResource FormLabel}"/>
+                                <ComboBox ItemsSource="{Binding TurnosSugeridos}"
+                                          Text="{Binding Turno, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                          IsEditable="True"
+                                          IsTextSearchEnabled="True"
+                                          AutomationProperties.Name="Turno"/>
                             </StackPanel>
                         </Grid>
                     </StackPanel>
@@ -78,42 +106,74 @@
 
                 <Border Style="{StaticResource SectionCard}" Padding="16" Margin="0,0,0,14">
                     <StackPanel>
-                        <TextBlock Text="Datos del grupo" Style="{StaticResource Heading3}" Margin="0,0,0,12"/>
-                        <Grid>
+                        <TextBlock Text="Grupo y grados atendidos" Style="{StaticResource Heading3}" Margin="0,0,0,4"/>
+                        <TextBlock Text="Selecciona uno o varios grados. Dos o más grados convierten el grupo automáticamente en multigrado."
+                                   Foreground="{DynamicResource TextMutedBrush}" TextWrapping="Wrap" Margin="0,0,0,12"/>
+
+                        <Grid Margin="0,0,0,14">
                             <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="*"/>
-                                <ColumnDefinition Width="14"/>
                                 <ColumnDefinition Width="*"/>
                                 <ColumnDefinition Width="14"/>
                                 <ColumnDefinition Width="*"/>
                             </Grid.ColumnDefinitions>
                             <StackPanel Grid.Column="0">
-                                <TextBlock Text="Grado" Style="{StaticResource FormLabel}"/>
-                                <TextBox Text="{Binding Grado, UpdateSourceTrigger=PropertyChanged}"/>
+                                <TextBlock Text="Grados" Style="{StaticResource FormLabel}"/>
+                                <WrapPanel Margin="0,3,0,0">
+                                    <CheckBox Content="1.º" IsChecked="{Binding PrimerGrado}" Margin="0,0,14,8" AutomationProperties.Name="Primer grado"/>
+                                    <CheckBox Content="2.º" IsChecked="{Binding SegundoGrado}" Margin="0,0,14,8" AutomationProperties.Name="Segundo grado"/>
+                                    <CheckBox Content="3.º" IsChecked="{Binding TercerGrado}" Margin="0,0,14,8" AutomationProperties.Name="Tercer grado"/>
+                                    <CheckBox Content="4.º" IsChecked="{Binding CuartoGrado}" Margin="0,0,14,8" AutomationProperties.Name="Cuarto grado"/>
+                                    <CheckBox Content="5.º" IsChecked="{Binding QuintoGrado}" Margin="0,0,14,8" AutomationProperties.Name="Quinto grado"/>
+                                    <CheckBox Content="6.º" IsChecked="{Binding SextoGrado}" Margin="0,0,0,8" AutomationProperties.Name="Sexto grado"/>
+                                </WrapPanel>
                             </StackPanel>
                             <StackPanel Grid.Column="2">
-                                <TextBlock Text="Grupo" Style="{StaticResource FormLabel}"/>
-                                <TextBox Text="{Binding Grupo, UpdateSourceTrigger=PropertyChanged}"/>
+                                <TextBlock Text="Clave del grupo" Style="{StaticResource FormLabel}"/>
+                                <TextBox Text="{Binding Grupo, UpdateSourceTrigger=PropertyChanged}"
+                                         AutomationProperties.Name="Clave del grupo"/>
+                                <TextBlock Text="Ejemplos: A, B, Único."
+                                           Foreground="{DynamicResource TextMutedBrush}"
+                                           FontSize="11" Margin="0,5,0,0"/>
                             </StackPanel>
-                            <StackPanel Grid.Column="4">
-                                <TextBlock Text="Turno" Style="{StaticResource FormLabel}"/>
-                                <TextBox Text="{Binding Turno, UpdateSourceTrigger=PropertyChanged}"/>
-                            </StackPanel>
+                        </Grid>
+
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="10"/>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="10"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <Border Grid.Column="0" Style="{StaticResource SectionCard}" Padding="12">
+                                <StackPanel>
+                                    <TextBlock Text="MODALIDAD" Foreground="{DynamicResource TextMutedBrush}" FontSize="11" FontWeight="SemiBold"/>
+                                    <TextBlock Text="{Binding ModalidadGrupo}" FontSize="16" FontWeight="SemiBold" Margin="0,3,0,0"/>
+                                </StackPanel>
+                            </Border>
+                            <Border Grid.Column="2" Style="{StaticResource SectionCard}" Padding="12">
+                                <StackPanel>
+                                    <TextBlock Text="FASE(S) NEM" Foreground="{DynamicResource TextMutedBrush}" FontSize="11" FontWeight="SemiBold"/>
+                                    <TextBlock Text="{Binding FasesNemTexto}" FontSize="16" FontWeight="SemiBold" Margin="0,3,0,0" TextWrapping="Wrap"/>
+                                </StackPanel>
+                            </Border>
+                            <Border Grid.Column="4" Style="{StaticResource SectionCard}" Padding="12">
+                                <StackPanel>
+                                    <TextBlock Text="GRADOS" Foreground="{DynamicResource TextMutedBrush}" FontSize="11" FontWeight="SemiBold"/>
+                                    <TextBlock Text="{Binding GradosTexto}" FontSize="16" FontWeight="SemiBold" Margin="0,3,0,0" TextWrapping="Wrap"/>
+                                </StackPanel>
+                            </Border>
                         </Grid>
                     </StackPanel>
                 </Border>
 
                 <Border Style="{StaticResource SectionCard}" Padding="16" Margin="0,0,0,14">
                     <StackPanel>
-                        <TextBlock Text="Referencia pedagógica" Style="{StaticResource Heading3}" Margin="0,0,0,8"/>
-                        <TextBlock Text="Etapa de desarrollo cognoscitivo de referencia para el grupo"
-                                   Style="{StaticResource FormLabel}"/>
-                        <ComboBox ItemsSource="{Binding EtapasCognoscitivas}"
-                                  DisplayMemberPath="Texto"
-                                  SelectedValuePath="Valor"
-                                  SelectedValue="{Binding EtapaCognoscitiva, Mode=TwoWay}"
-                                  AutomationProperties.Name="Etapa cognoscitiva de referencia"/>
-                        <TextBlock Text="Úsala sólo como contexto pedagógico general; no clasifica ni diagnostica a estudiantes individuales."
+                        <TextBlock Text="Referencia de desarrollo" Style="{StaticResource Heading3}" Margin="0,0,0,6"/>
+                        <TextBlock Text="{Binding ReferenciaDesarrolloTexto}"
+                                   Foreground="{DynamicResource TextSecondaryBrush}"
+                                   TextWrapping="Wrap"/>
+                        <TextBlock Text="Esta referencia se deriva de los grados atendidos. Es contexto pedagógico general y no clasifica ni diagnostica a estudiantes individuales."
                                    Foreground="{DynamicResource TextMutedBrush}"
                                    FontSize="12" TextWrapping="Wrap" Margin="0,8,0,0"/>
                     </StackPanel>

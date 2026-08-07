@@ -18,13 +18,15 @@ public sealed class Estudiante
         DateOnly? fechaIngreso,
         string observaciones,
         int numeroLista,
-        bool estaActivo)
+        bool estaActivo,
+        GradoPrimaria grado = GradoPrimaria.NoEspecificado)
     {
         if (!string.IsNullOrWhiteSpace(observaciones))
         {
             ValidadorContenidoPedagogico.ValidarTextoPedagogico(observaciones, nameof(observaciones));
         }
 
+        ValidarGrado(grado);
         Id = id;
         PrimerApellido = primerApellido?.Trim() ?? "";
         SegundoApellido = segundoApellido?.Trim() ?? "";
@@ -35,6 +37,7 @@ public sealed class Estudiante
         Observaciones = observaciones?.Trim() ?? "";
         NumeroLista = numeroLista;
         EstaActivo = estaActivo;
+        Grado = grado;
 
         NombreVisible = ConstruirNombreCompleto(nombreVisible, PrimerApellido, SegundoApellido, Nombres);
     }
@@ -61,6 +64,8 @@ public sealed class Estudiante
 
     public bool EstaActivo { get; private set; }
 
+    public GradoPrimaria Grado { get; private set; }
+
     public int? Edad
     {
         get
@@ -80,11 +85,18 @@ public sealed class Estudiante
         DateOnly? fechaNacimiento,
         GeneroEstudiante genero,
         DateOnly? fechaIngreso,
-        string observaciones)
+        string observaciones,
+        GradoPrimaria? grado = null)
     {
         if (!string.IsNullOrWhiteSpace(observaciones))
         {
             ValidadorContenidoPedagogico.ValidarTextoPedagogico(observaciones, nameof(observaciones));
+        }
+
+        if (grado is { } gradoNuevo)
+        {
+            ValidarGrado(gradoNuevo);
+            Grado = gradoNuevo;
         }
 
         PrimerApellido = primerApellido?.Trim() ?? "";
@@ -96,6 +108,12 @@ public sealed class Estudiante
         Observaciones = observaciones?.Trim() ?? "";
 
         NombreVisible = ConstruirNombreCompleto(NombreVisible, PrimerApellido, SegundoApellido, Nombres);
+    }
+
+    internal void CambiarGrado(GradoPrimaria grado)
+    {
+        ValidarGrado(grado);
+        Grado = grado;
     }
 
     internal void Renombrar(string nombreVisible)
@@ -116,6 +134,14 @@ public sealed class Estudiante
     internal void Reactivar()
     {
         EstaActivo = true;
+    }
+
+    private static void ValidarGrado(GradoPrimaria grado)
+    {
+        if (!Enum.IsDefined(grado))
+        {
+            throw new DomainValidationException("El grado de primaria no es válido.");
+        }
     }
 
     private static string ConstruirNombreCompleto(string nombreGenerico, string primerApellido, string segundoApellido, string nombres)

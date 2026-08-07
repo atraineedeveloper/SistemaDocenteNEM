@@ -20,7 +20,8 @@ public sealed class EstudianteVisual
         DateOnly? fechaIngreso,
         string observaciones,
         int numeroLista,
-        bool estaActivo)
+        bool estaActivo,
+        GradoPrimaria grado = GradoPrimaria.NoEspecificado)
     {
         Id = id;
         Nombre = nombre;
@@ -34,6 +35,7 @@ public sealed class EstudianteVisual
         Observaciones = observaciones;
         NumeroLista = numeroLista;
         EstaActivo = estaActivo;
+        Grado = grado;
     }
 
     internal EstudianteId Id { get; }
@@ -57,6 +59,10 @@ public sealed class EstudianteVisual
     public int NumeroLista { get; }
     public bool EstaActivo { get; }
     public string Estado => EstaActivo ? "Activo" : "Inactivo";
+    public GradoPrimaria Grado { get; }
+    public string GradoTexto => CatalogoNemPrimaria.EsGradoReal(Grado)
+        ? CatalogoNemPrimaria.FormatearGrado(Grado)
+        : "—";
 
     /// <summary>
     /// Iniciales puramente visuales para identificar rápidamente una fila sin introducir

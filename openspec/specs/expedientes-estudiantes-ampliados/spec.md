@@ -1,23 +1,25 @@
 # expedientes-estudiantes-ampliados Specification
 
 ## Purpose
-TBD - created by archiving change ampliacion-expediente-estudiantes-y-tipografia. Update Purpose after archive.
+
+Define the structured student profile used by the student record and the WPF typography requirement introduced with the extended-record change.
+
 ## Requirements
-### Requirement: Registro Estructurado del Estudiante
-La entidad estudiante MUST almacenar primer apellido, segundo apellido, nombres, fecha de nacimiento, sexo/género, fecha de ingreso y observaciones pedagógicas particulares.
 
-#### Scenario: Creación de estudiante con datos estructurados
-- **WHEN** un docente registra a un nuevo alumno ingresando sus apellidos, nombres, fecha de nacimiento y género
-- **THEN** el sistema guarda la información desglosada y valida que las observaciones pedagógicas no contengan diagnósticos clínicos.
+### Requirement: Structured student record
+The student entity MUST store first surname, second surname, given names, birth date, sex/gender, admission date and individual pedagogical observations.
 
-#### Scenario: Presentación de edad y datos en el expediente
-- **WHEN** el docente consulta la ficha de expediente de un estudiante
-- **THEN** el sistema calcula la edad actual en años basándose en la fecha de nacimiento y muestra el perfil completo estructurado.
+#### Scenario: Create a student with structured data
+- **WHEN** a teacher registers a new student and enters surnames, given names, birth date and gender
+- **THEN** the system stores the information in structured fields and validates that pedagogical observations do not contain clinical diagnoses.
 
-### Requirement: Tipografía Global Montserrat
-Toda la interfaz visual WPF del sistema MUST emplear la familia tipográfica **Montserrat** (con caída a Segoe UI / sans-serif).
+#### Scenario: Present age and data in the student record
+- **WHEN** the teacher views a student's record
+- **THEN** the system calculates current age in years from the birth date and displays the complete structured profile.
 
-#### Scenario: Aplicación uniforme de tipografía Montserrat
-- **WHEN** el usuario navega por las ventanas y controles de la aplicación WPF
-- **THEN** los controles tipográficos se renderizan utilizando la fuente Montserrat.
+### Requirement: Global Montserrat typography
+The WPF visual interface MUST use the **Montserrat** font family, with Segoe UI / sans-serif fallback.
 
+#### Scenario: Apply Montserrat consistently
+- **WHEN** the user navigates through WPF windows and controls
+- **THEN** typographic controls are rendered using the Montserrat font family.

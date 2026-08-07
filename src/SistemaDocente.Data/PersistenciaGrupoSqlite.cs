@@ -34,6 +34,7 @@ public sealed class PersistenciaGrupoSqlite : IAlmacenamientoGrupos
             CrearDirectorioContenedor();
             using var conexion = AbrirConexion();
             EsquemaSqlite.Inicializar(conexion);
+            EsquemaNemMultigradoSqlite.Inicializar(conexion);
         }
         catch (SchemaIncompatibleException)
         {
@@ -77,6 +78,7 @@ public sealed class PersistenciaGrupoSqlite : IAlmacenamientoGrupos
             {
                 VerificarPertenencia(conexion, transaccion, grupo.Id, estudiante.Id);
                 GuardarEstudiante(conexion, transaccion, grupo.Id, estudiante);
+                GuardarGradoEstudiante(conexion, transaccion, grupo.Id, estudiante);
             }
 
             transaccion.Commit();
@@ -142,6 +144,7 @@ public sealed class PersistenciaGrupoSqlite : IAlmacenamientoGrupos
                 new DataAccessException("No fue posible comprobar la existencia del grupo.", exception));
         }
     }
+
     public IReadOnlyList<Grupo> ListarTodos()
     {
         try
@@ -159,8 +162,8 @@ public sealed class PersistenciaGrupoSqlite : IAlmacenamientoGrupos
             }
             foreach (var id in ids)
             {
-                var g = Cargar(id);
-                if (g is not null) lista.Add(g);
+                var grupo = Cargar(id);
+                if (grupo is not null) lista.Add(grupo);
             }
             return lista;
         }
@@ -362,6 +365,38 @@ public sealed class PersistenciaGrupoSqlite : IAlmacenamientoGrupos
         comando.ExecuteNonQuery();
     }
 
+    private static void GuardarGradoEstudiante(
+        SqliteConnection conexion,
+        SqliteTransaction transaccion,
+        GrupoId grupoId,
+        Estudiante estudiante)
+    {
+        using var comando = conexion.CreateCommand();
+        comando.Transaction = transaccion;
+
+        if (!CatalogoNemPrimaria.EsGradoReal(estudiante.Grado))
+        {
+            comando.CommandText = """
+                DELETE FROM grados_estudiante
+                WHERE grupo_id = $grupoId AND estudiante_id = $estudianteId;
+                """;
+            comando.Parameters.AddWithValue("$grupoId", Formatear(grupoId.Valor));
+            comando.Parameters.AddWithValue("$estudianteId", Formatear(estudiante.Id.Valor));
+            comando.ExecuteNonQuery();
+            return;
+        }
+
+        comando.CommandText = """
+            INSERT INTO grados_estudiante (grupo_id, estudiante_id, grado)
+            VALUES ($grupoId, $estudianteId, $grado)
+            ON CONFLICT(grupo_id, estudiante_id) DO UPDATE SET grado = excluded.grado;
+            """;
+        comando.Parameters.AddWithValue("$grupoId", Formatear(grupoId.Valor));
+        comando.Parameters.AddWithValue("$estudianteId", Formatear(estudiante.Id.Valor));
+        comando.Parameters.AddWithValue("$grado", (int)estudiante.Grado);
+        comando.ExecuteNonQuery();
+    }
+
     private static string? LeerNombreGrupo(SqliteConnection conexion, GrupoId grupoId)
     {
         using var comando = conexion.CreateCommand();
@@ -376,10 +411,14 @@ public sealed class PersistenciaGrupoSqlite : IAlmacenamientoGrupos
     {
         using var comando = conexion.CreateCommand();
         comando.CommandText = """
-            SELECT id, nombre, primer_apellido, segundo_apellido, nombres, fecha_nacimiento, genero, fecha_ingreso, observaciones, numero_lista, activo
-            FROM estudiantes
-            WHERE grupo_id = $grupoId
-            ORDER BY rowid;
+            SELECT e.id, e.nombre, e.primer_apellido, e.segundo_apellido, e.nombres,
+                   e.fecha_nacimiento, e.genero, e.fecha_ingreso, e.observaciones,
+                   e.numero_lista, e.activo, ge.grado
+            FROM estudiantes e
+            LEFT JOIN grados_estudiante ge
+              ON ge.grupo_id = e.grupo_id AND ge.estudiante_id = e.id
+            WHERE e.grupo_id = $grupoId
+            ORDER BY e.rowid;
             """;
         comando.Parameters.AddWithValue("$grupoId", Formatear(grupoId.Valor));
 
@@ -406,7 +445,8 @@ public sealed class PersistenciaGrupoSqlite : IAlmacenamientoGrupos
                     fechaIng,
                     lector.IsDBNull(8) ? "" : lector.GetString(8),
                     lector.GetInt32(9),
-                    lector.GetInt32(10) == 1));
+                    lector.GetInt32(10) == 1,
+                    lector.IsDBNull(11) ? GradoPrimaria.NoEspecificado : (GradoPrimaria)lector.GetInt32(11)));
         }
 
         return estudiantes;

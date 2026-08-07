@@ -97,8 +97,8 @@
                         </Grid.ColumnDefinitions>
                         <TextBlock Text="⌕" FontSize="20" Foreground="{DynamicResource TextMutedBrush}" VerticalAlignment="Center" Margin="0,0,8,0"/>
                         <TextBox Grid.Column="1" BorderThickness="0" Background="Transparent" Margin="0" Padding="4,6"
-                                 TabIndex="25" ToolTip="Buscar por nombre o número de lista"
-                                 AutomationProperties.Name="Buscar estudiante por nombre o número de lista"
+                                 TabIndex="25" ToolTip="Buscar por nombre, número de lista o grado"
+                                 AutomationProperties.Name="Buscar estudiante por nombre, número de lista o grado"
                                  Text="{Binding FiltroBusqueda, UpdateSourceTrigger=PropertyChanged}"/>
                     </Grid>
                 </Border>
@@ -175,6 +175,7 @@
                                     </DataTemplate>
                                 </DataGridTemplateColumn.CellTemplate>
                             </DataGridTemplateColumn>
+                            <DataGridTextColumn Header="Grado" Binding="{Binding GradoTexto}" Width="86"/>
                             <DataGridTemplateColumn Header="Género" Width="150">
                                 <DataGridTemplateColumn.CellTemplate>
                                     <DataTemplate>

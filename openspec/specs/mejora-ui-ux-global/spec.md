@@ -2,407 +2,318 @@
 
 ## Purpose
 
-Establece el contrato de comportamiento para la mejora integral del diseño UI/UX de la aplicación WPF del Sistema Docente NEM, abordando accesibilidad (WCAG 2.1 AA), consistencia del sistema de diseño, validación de formularios, retroalimentación de estados, tematización, internacionalización y pulido de la experiencia de usuario en todas las ventanas y vistas auditadas.
+Define the behavior contract for the WPF application's global UI/UX improvement program, covering accessibility, design-system consistency, form validation, state feedback, theming, localization and overall product polish.
 
 ## Requirements
 
 ### Requirement: FOCUS_VISUAL_GLOBAL
+The system SHALL define a global `FocusVisualStyle` in `App.xaml` that provides a visible, consistent focus indicator for interactive WPF controls.
 
-El sistema SHALL definir un `FocusVisualStyle` global en `App.xaml` que proporcione un indicador de foco visible y coherente para todos los controles interactivos de la aplicación WPF.
+#### Scenario: Visible focus on a button
+- **WHEN** the user reaches a button with `Tab`
+- **THEN** the button displays the global focus indicator
 
-#### Scenario: Foco visible en botón
-
-- **WHEN** el usuario navega hasta un botón mediante la tecla `Tab`
-- **THEN** el botón muestra un indicador de foco claro definido por el estilo global
-
-#### Scenario: Foco visible en campo de texto
-
-- **WHEN** el usuario navega hasta un `TextBox` mediante la tecla `Tab`
-- **THEN** el campo muestra un borde o indicador de foco visible y coherente con el sistema de diseño
+#### Scenario: Visible focus on a text field
+- **WHEN** the user reaches a `TextBox` with `Tab`
+- **THEN** the field displays a visible focus border/indicator consistent with the design system
 
 ### Requirement: CONTRASTE_WCAG_AA
+The system SHALL ensure text and interactive elements meet a minimum 4.5:1 contrast ratio where applicable under WCAG AA guidance, replacing low-contrast colors identified during UX review.
 
-El sistema SHALL garantizar que todo el texto y los elementos interactivos cumplan con un ratio de contraste mínimo de 4.5:1 según WCAG 2.1 AA, reemplazando los colores de bajo contraste identificados en la auditoría.
+#### Scenario: Text on a light background
+- **WHEN** primary text is displayed on a light background
+- **THEN** text/background contrast is at least 4.5:1
 
-#### Scenario: Texto sobre fondo claro
-
-- **WHEN** se muestra texto principal sobre fondo claro en cualquier ventana
-- **THEN** el ratio de contraste entre texto y fondo es al menos 4.5:1
-
-#### Scenario: Estados de asistencia legibles
-
-- **WHEN** se muestran indicadores de asistencia con color de estado
-- **THEN** el texto o icono asociado mantiene un ratio de contraste mínimo de 4.5:1 respecto a su fondo
+#### Scenario: Readable attendance states
+- **WHEN** attendance states use semantic color
+- **THEN** the associated text/icon remains readable with sufficient contrast
 
 ### Requirement: AUTOMATION_PROPERTIES_NAME
+The system SHALL configure `AutomationProperties.Name` for non-textual elements that communicate information or actions, including icons, custom cards/cells, combo boxes and graphic buttons where the visible content is insufficient.
 
-El sistema SHALL configurar `AutomationProperties.Name` en todos los elementos no textuales que transmiten información, incluyendo iconos, tarjetas, celdas personalizadas, `ComboBox` y botones con contenido gráfico.
+#### Scenario: Accessible icon name
+- **WHEN** an icon represents an action or state
+- **THEN** assistive technology can announce its descriptive automation name
 
-#### Scenario: Icono con nombre accesible
-
-- **WHEN** un icono o indicador visual representa una acción o estado
-- **THEN** el lector de pantalla anuncia el `AutomationProperties.Name` asociado
-
-#### Scenario: Tarjeta con nombre accesible
-
-- **WHEN** el usuario navega mediante lector de pantalla sobre una tarjeta de contenido (`ContentCard` / `SectionCard`)
-- **THEN** la tarjeta expone un nombre descriptivo de su contenido o propósito
+#### Scenario: Accessible card name
+- **WHEN** a screen reader reaches a meaningful content card
+- **THEN** the card exposes a descriptive name when necessary
 
 ### Requirement: KEYBOARD_NAVIGATION
+The system SHALL support keyboard operation for principal workflows with logical tab order and shortcuts for frequent actions such as save, cancel, add and close.
 
-El sistema SHALL permitir operar todas las funciones principales mediante teclado, estableciendo una secuencia lógica de `TabIndex` e `IsTabStop`, y proporcionando atajos de teclado para acciones frecuentes como guardar, cancelar, agregar y cerrar.
+#### Scenario: Logical Tab navigation
+- **WHEN** the user repeatedly presses `Tab` in an edit window
+- **THEN** focus moves in logical visual/task order
 
-#### Scenario: Navegación lógica con Tab
+#### Scenario: Save with Enter
+- **WHEN** the user presses `Enter` in a valid form whose default action is Save
+- **THEN** the default save action executes
 
-- **WHEN** el usuario presiona `Tab` repetidamente en una ventana de edición
-- **THEN** el foco se desplaza en orden lógico de arriba hacia abajo y de izquierda a derecha
-
-#### Scenario: Guardar con Enter
-
-- **WHEN** el usuario presiona `Enter` en un formulario de edición válido
-- **THEN** el sistema ejecuta la acción de guardado predeterminada
-
-#### Scenario: Cancelar con Escape
-
-- **WHEN** el usuario presiona `Escape` en un diálogo de edición
-- **THEN** el sistema cancela la operación y cierra el diálogo sin guardar
+#### Scenario: Cancel with Escape
+- **WHEN** the user presses `Escape` in an editable dialog
+- **THEN** the operation is cancelled/dismissed without saving when safe
 
 ### Requirement: LIVE_REGIONS
+The system SHALL mark dynamic user messages such as toasts, edit messages and error banners as polite live regions when appropriate.
 
-El sistema SHALL marcar los mensajes dinámicos (toasts, `MensajeEdicion`, banners de error) como regiones vivas (`AutomationProperties.LiveSetting="Polite"`) para que los lectores de pantalla los anuncien cuando aparecen.
+#### Scenario: Screen reader announces toast
+- **WHEN** a success/error toast appears
+- **THEN** assistive technology announces its message
 
-#### Scenario: Toast anunciado por lector de pantalla
-
-- **WHEN** se muestra un toast de éxito o error
-- **THEN** el lector de pantalla anuncia el contenido del toast
-
-#### Scenario: Mensaje de edición anunciado
-
-- **WHEN** cambia el texto del mensaje contextual de edición
-- **THEN** el lector de pantalla notifica el nuevo mensaje sin robar el foco
-
+#### Scenario: Screen reader announces contextual edit message
+- **WHEN** the contextual edit message changes
+- **THEN** assistive technology announces the new content without stealing focus
 
 ### Requirement: DESIGN_TOKENS
+The system SHALL provide a centralized design-token `ResourceDictionary` for semantic colors, spacing, typography and related reusable visual values.
 
-El sistema SHALL crear un `ResourceDictionary` centralizado de tokens de diseño (colores, espaciado, tipografía, elevación) que sea referenciado globalmente y sirva como única fuente de verdad para los estilos visuales.
+#### Scenario: Reuse a color token
+- **WHEN** a style needs the primary application color
+- **THEN** it references a design token instead of duplicating a hardcoded color
 
-#### Scenario: Token de color reutilizado
-
-- **WHEN** un estilo necesita aplicar el color primario de la aplicación
-- **THEN** el estilo referencia el token de color del `ResourceDictionary` en lugar de un color hardcodeado
-
-#### Scenario: Token de espaciado reutilizado
-
-- **WHEN** un control define márgenes internos o externos
-- **THEN** los valores provienen de los tokens de espaciado definidos en el sistema de diseño
+#### Scenario: Reuse a spacing token
+- **WHEN** a reusable style defines standard spacing
+- **THEN** it uses the design-system spacing value rather than introducing an arbitrary duplicate
 
 ### Requirement: DYNAMIC_RESOURCES
+Theme-sensitive colors and other runtime theme resources SHALL use `DynamicResource` references rather than view-specific hardcoded theme values.
 
-El sistema SHALL migrar todos los colores, tamaños de fuente y espaciados hardcodeados en XAML y code-behind a referencias `DynamicResource` que apunten a los tokens del sistema de diseño.
+#### Scenario: Replace hardcoded theme color
+- **WHEN** a view uses a color that belongs to the design system
+- **THEN** it references a semantic resource
 
-#### Scenario: Color hardcodeado reemplazado
-
-- **WHEN** se inspecciona cualquier archivo XAML de ventanas o controles
-- **THEN** no se encuentran valores de color hardcodeados que deban formar parte del sistema de diseño
-
-#### Scenario: Estilo dinámico en diálogo
-
-- **WHEN** un diálogo modal carga sus recursos
-- **THEN** utiliza `DynamicResource` para obtener colores y espaciados del tema activo sin sobrescribir estilos base locales
+#### Scenario: Dynamic dialog theme
+- **WHEN** a modal dialog loads
+- **THEN** its theme-sensitive resources resolve from the active semantic theme
 
 ### Requirement: SEMANTIC_TYPOGRAPHY
+The system SHALL use semantic typography styles such as `Heading1`, `Heading2`, `Heading3`, `FormLabel`, `Caption` and section-subtitle styles for recurring hierarchy rather than unrelated inline values.
 
-El sistema SHALL unificar todos los tamaños de fuente inline a estilos tipográficos semánticos (`Heading1`, `Heading2`, `Heading3`, `FormLabel`, `Caption`, `SectionSubtitle`) definidos en `App.xaml`.
+#### Scenario: Semantic heading
+- **WHEN** a section title is displayed
+- **THEN** it uses the appropriate semantic heading style
 
-#### Scenario: Encabezado con estilo semántico
-
-- **WHEN** se muestra un título de sección
-- **THEN** aplica el estilo `Heading1` o `Heading2` correspondiente en lugar de un `FontSize` inline
-
-#### Scenario: Etiqueta de formulario con estilo semántico
-
-- **WHEN** se muestra una etiqueta de campo de formulario
-- **THEN** aplica el estilo `FormLabel` definido en el sistema de diseño
+#### Scenario: Semantic form label
+- **WHEN** a field label is displayed
+- **THEN** it uses the shared form-label style
 
 ### Requirement: FLUENT_ICONS
+The system SHALL use stable vector paths or appropriate Fluent/Segoe icon glyphs instead of emoji for functional iconography, and functional icons SHALL have an accessible name when necessary.
 
-El sistema SHALL reemplazar todos los emojis usados como iconos por elementos vectoriales (`Path`) o la fuente Segoe Fluent Icons, acompañados de `AutomationProperties.Name` descriptivo.
+#### Scenario: Stable action icon
+- **WHEN** a critical action requires iconography
+- **THEN** the chosen icon renders consistently on supported Windows environments
 
-#### Scenario: Icono de acción sin emoji
-
-- **WHEN** un botón o indicador requiere un icono
-- **THEN** se representa mediante un `Path` o glifo de icono vectorial, sin emojis
-
-#### Scenario: Icono con accesibilidad
-
-- **WHEN** un lector de pantalla enfoca un icono funcional
-- **THEN** anuncia el nombre descriptivo configurado en `AutomationProperties.Name`
+#### Scenario: Accessible icon
+- **WHEN** assistive technology reaches a functional icon control
+- **THEN** it can announce a descriptive accessible name
 
 ### Requirement: UNIFIED_MARGENS_VENTANA
+Primary windows and dialogs SHALL use a consistent content-spacing system, with 24 logical units as the normal root spacing where the composition allows it.
 
-El sistema SHALL establecer márgenes internos consistentes de 24 unidades en el contenedor raíz de todas las ventanas y diálogos, eliminando márgenes irregulares entre vistas.
+#### Scenario: Consistent main-window spacing
+- **WHEN** a standard page is displayed
+- **THEN** its content follows the shared root-spacing pattern
 
-#### Scenario: Margen consistente en ventana principal
-
-- **WHEN** se muestra la ventana principal
-- **THEN** el contenido principal tiene un margen interno de 24 unidades respecto al borde de la ventana
-
-#### Scenario: Margen consistente en diálogo modal
-
-- **WHEN** se muestra un diálogo modal de detalle
-- **THEN** el contenido del diálogo respeta el margen interno de 24 unidades sin sobrescribir el padding global
+#### Scenario: Consistent modal spacing
+- **WHEN** a dedicated dialog is displayed
+- **THEN** its header/content/footer spacing remains consistent with shared popup patterns
 
 ### Requirement: REUSABLE_COMPONENTS
+The system SHALL reuse components for recurring interface structures, including `FormField`, metric-card patterns and `EmptyState`, rather than duplicating complex XAML unnecessarily.
 
-El sistema SHALL crear `UserControl` reutilizables para elementos de interfaz recurrentes: `FormField` (etiqueta + campo + mensaje de validación), `MetricCard` (tarjeta de métrica) y `EmptyState` (estado vacío).
+#### Scenario: Reusable form field
+- **WHEN** a field requires label/content/validation structure
+- **THEN** `FormField` or an equivalent shared pattern is used where appropriate
 
-#### Scenario: Campo de formulario reutilizable
-
-- **WHEN** se requiere mostrar un campo de entrada con etiqueta y validación
-- **THEN** se utiliza el componente `FormField` en lugar de repetir la estructura XAML
-
-#### Scenario: Estado vacío reutilizable
-
-- **WHEN** una lista o grilla no contiene elementos
+#### Scenario: Reusable empty state
+- **WHEN** a list/grid has no data
+- **THEN** a consistent empty-state component/pattern communicates what the user can do next
 
 ### Requirement: DATA_ERROR_INFO
+Presentation SHALL support property-level validation notification through `INotifyDataErrorInfo` or an equivalent reusable validation mechanism where asynchronous or multi-property validation requires it.
 
-El sistema SHALL implementar `INotifyDataErrorInfo` en el `ViewModelBase` de la capa de presentación para permitir validaciones asíncronas y notificación de errores por propiedad.
+#### Scenario: Validation error
+- **WHEN** an invalid field value is detected through that mechanism
+- **THEN** the ViewModel reports the error for the relevant property
 
-#### Scenario: Validación con error
-
-- **WHEN** el usuario ingresa un valor inválido en un campo obligatorio
-- **THEN** el ViewModel reporta el error mediante `INotifyDataErrorInfo.ErrorsChanged`
-
-#### Scenario: Limpieza de error
-
-- **WHEN** el usuario corrige el valor inválido
-- **THEN** el ViewModel limpia el error y notifica que la propiedad ya no tiene errores
+#### Scenario: Error cleared
+- **WHEN** the user corrects the invalid value
+- **THEN** the ViewModel clears the property error and notifies the UI
 
 ### Requirement: VALIDATION_ERROR_TEMPLATE
+The system SHALL provide a consistent validation-error visual treatment with a distinctive field state and contextual error text where validation is field-specific.
 
-El sistema SHALL definir un `Validation.ErrorTemplate` global que muestre un borde distintivo y un mensaje de error inline junto al campo con error.
+#### Scenario: Field with visual error
+- **WHEN** a ViewModel property reports a validation error
+- **THEN** the corresponding field presents a visible error state
 
-#### Scenario: Campo con error visual
-
-- **WHEN** una propiedad del ViewModel reporta un error de validación
-- **THEN** el campo correspondiente muestra un borde de error y un mensaje inline
-
-#### Scenario: Mensaje de error contextual
-
-- **WHEN** se produce un error de validación
-- **THEN** el mensaje indica claramente qué campo falló y por qué, sin depender de cuadros de diálogo genéricos
+#### Scenario: Contextual error message
+- **WHEN** validation fails
+- **THEN** the message explains which input is invalid and why without relying only on a generic dialog
 
 ### Requirement: DATE_PICKER_FECHAS
+User-facing forms SHALL use `DatePicker` for normal date selection instead of plain free-text date fields where WPF date selection is appropriate.
 
-El sistema SHALL reemplazar los `TextBox` usados para capturar fechas por controles `DatePicker` que ofrezcan selección de fecha y validación integrada.
+#### Scenario: Select a date
+- **WHEN** the user must enter a normal calendar date
+- **THEN** the form provides a localized `DatePicker`
 
-#### Scenario: Selección de fecha
-
-- **WHEN** el usuario necesita ingresar una fecha en un formulario
-- **THEN** el control es un `DatePicker` con formato localizado
-
-#### Scenario: Fecha inválida
-
-- **WHEN** el usuario selecciona o escribe una fecha fuera del rango permitido
-- **THEN** el sistema muestra un error de validación contextual
+#### Scenario: Invalid date
+- **WHEN** a date is outside an allowed range or otherwise invalid
+- **THEN** the form shows contextual validation feedback
 
 ### Requirement: EMPTY_STATES_DATAGRID
+Lists and grids SHALL communicate meaningful empty states rather than leaving an unexplained blank surface.
 
-El sistema SHALL mostrar estados vacíos (`EmptyState`) cuando un `DataGrid` o `ListBox` no contenga elementos, en lugar de dejar la superficie en blanco.
+#### Scenario: Group with no students
+- **WHEN** a group has no registered students
+- **THEN** the student area explains that the first student can be added
 
-#### Scenario: Lista sin estudiantes
-
-- **WHEN** un grupo no tiene estudiantes registrados
-- **THEN** el `DataGrid` muestra el componente `EmptyState` con instrucciones para agregar el primer estudiante
-
-#### Scenario: Proyectos sin actividades
-
-- **WHEN** un proyecto no tiene actividades
-- **THEN** la lista de actividades muestra un estado vacío con mensaje descriptivo
-
+#### Scenario: Project with no activities
+- **WHEN** a project has no activities
+- **THEN** the activity area presents an explanatory empty state
 
 ### Requirement: NOTIFICATION_SERVICE
+The system SHALL centralize transient success/warning/error notifications in a consistent notification service/pattern that is accessible to assistive technology.
 
-El sistema SHALL implementar un `INotificationService` que muestre toasts de éxito, advertencia y error con diseño coherente al sistema de diseño, accesibles mediante `AutomationProperties.LiveSetting`.
+#### Scenario: Success notification
+- **WHEN** an operation benefits from explicit success feedback
+- **THEN** the application presents a quiet, consistent success notification
 
-#### Scenario: Toast de éxito
+#### Scenario: Error notification
+- **WHEN** a recoverable domain/infrastructure error occurs
+- **THEN** the application presents an actionable error message and retry action when applicable
 
-- **WHEN** se completa una operación exitosa (guardar estudiante, crear grupo)
-- **THEN** se muestra un toast verde con icono, mensaje descriptivo y opción de descarte
-
-#### Scenario: Toast de error
-
-- **WHEN** ocurre un error de dominio o infraestructura
-- **THEN** se muestra un toast rojo con mensaje claro y, cuando aplique, acción de reintentar
-
-#### Scenario: Toast accesible
-
-- **WHEN** aparece cualquier toast
-- **THEN** los lectores de pantalla anuncian el mensaje mediante `LiveSetting="Polite"`
+#### Scenario: Accessible notification
+- **WHEN** a transient notification appears
+- **THEN** assistive technology can announce it without inappropriate focus theft
 
 ### Requirement: PROGRESS_BUSY
+The UI SHALL show a clear busy/progress indication when a ViewModel reports an operation long enough for the user to perceive waiting.
 
-El sistema SHALL mostrar una indicación visual de progreso (`ProgressBar` indeterminada o spinner) cuando el `ViewModel` reporte estado ocupado (`EstaOcupado`).
+#### Scenario: Data-loading operation
+- **WHEN** a prolonged loading operation starts
+- **THEN** the affected surface shows a progress/busy indicator and prevents conflicting actions
 
-#### Scenario: Carga de datos
-
-- **WHEN** el ViewModel inicia una operación de carga prolongada
-- **THEN** la interfaz muestra una `ProgressBar` indeterminada en la zona afectada
-
-#### Scenario: Operación finalizada
-
-- **WHEN** la operación de carga termina
-- **THEN** el indicador de progreso desaparece y se habilita la interacción
+#### Scenario: Operation completes
+- **WHEN** the operation finishes
+- **THEN** the busy indicator disappears and normal interaction is restored
 
 ### Requirement: CUSTOM_DIALOGS
+The system SHALL use product-consistent dialogs for destructive confirmations and important application messages when the native `MessageBox` would provide insufficient styling, context or action clarity.
 
-El sistema SHALL reemplazar los `MessageBox` nativos de Windows por diálogos personalizados que apliquen el sistema de diseño, iconografía consistente y botones con acciones claras.
+#### Scenario: Destructive confirmation
+- **WHEN** a destructive action requires confirmation
+- **THEN** the dialog clearly identifies the action and presents primary/secondary choices
 
-#### Scenario: Diálogo de confirmación
-
-- **WHEN** el sistema requiere confirmar una acción destructiva
-- **THEN** muestra un diálogo custom con título, mensaje, icono y botones primario/secundario alineados al diseño
-
-#### Scenario: Diálogo de error
-
-- **WHEN** ocurre un error crítico que requiere atención del usuario
-- **THEN** muestra un diálogo custom con mensaje descriptivo y botón de aceptación
+#### Scenario: Critical error
+- **WHEN** a blocking error requires acknowledgement
+- **THEN** the dialog presents an understandable message without technical internals
 
 ### Requirement: SUBTLE_ANIMATIONS
+Animations, when used, SHALL be subtle, short and non-essential to understanding. Typical interactive transitions SHOULD remain approximately 150–250 ms and MUST NOT block keyboard operation.
 
-El sistema SHALL aplicar animaciones sutiles (duración entre 150 ms y 250 ms) en transiciones de estado como `hover`, `pressed`, aparición de diálogos y cambio de pestañas.
+#### Scenario: Hover transition
+- **WHEN** a pointer enters an animated interactive surface
+- **THEN** visual transition is brief and unobtrusive
 
-#### Scenario: Transición de hover
-
-- **WHEN** el cursor entra en un botón o tarjeta interactiva
-- **THEN** el cambio visual se realiza mediante una animación de 150-250 ms
-
-#### Scenario: Aparición de diálogo
-
-- **WHEN** se abre un diálogo modal
-- **THEN** la ventana aparece con una animación de fade o escala de duración corta
-
+#### Scenario: Dialog transition
+- **WHEN** a dialog uses an entrance animation
+- **THEN** the animation is short and the dialog becomes usable promptly
 
 ### Requirement: THEME_DICTIONARY
+The system SHALL support at least Light, Dark and High Contrast visual themes through semantic resources.
 
-El sistema SHALL proporcionar un `ThemeDictionary` que soporte al menos los temas claro, oscuro y de alto contraste, permitiendo cambiar la apariencia global sin reiniciar la aplicación.
+#### Scenario: Change to Dark theme
+- **WHEN** Dark theme is activated
+- **THEN** theme-sensitive controls update consistently without requiring application restart where runtime switching is supported
 
-#### Scenario: Cambio a tema oscuro
-
-- **WHEN** el usuario selecciona el tema oscuro en la configuración
-- **THEN** todos los controles actualizan sus colores mediante `DynamicResource` sin requerir reinicio
-
-#### Scenario: Tema de alto contraste
-
-- **WHEN** Windows está en modo de alto contraste
-- **THEN** la aplicación respeta o proporciona un tema `HighContrast` accesible
+#### Scenario: High Contrast
+- **WHEN** High Contrast is used
+- **THEN** the application provides readable, distinguishable semantic states
 
 ### Requirement: LOCALIZED_RESOURCES
+The system SHALL structure user-visible strings so localization can be introduced without rewriting workflow logic. Strings that require reuse or future localization SHALL live in resources instead of being duplicated across code.
 
-El sistema SHALL extraer todas las cadenas de texto visibles del código XAML y C# a archivos de recursos `.resx`, eliminando los textos hardcodeados en español.
+#### Scenario: Shared static text
+- **WHEN** a shared user-visible phrase is reused across surfaces
+- **THEN** it can be sourced from a common resource rather than independently duplicated
 
-#### Scenario: Texto de botón desde recurso
-
-- **WHEN** se muestra un botón con texto estático
-- **THEN** el contenido proviene de un recurso localizado, no de una cadena inline
-
-#### Scenario: Mensaje de error desde recurso
-
-- **WHEN** se muestra un mensaje de error al usuario
-- **THEN** el mensaje se obtiene del archivo de recursos correspondiente
+#### Scenario: Shared error text
+- **WHEN** a reusable user-facing error is presented
+- **THEN** the message can be centralized without exposing technical exception text
 
 ### Requirement: XML_LANG
+Each principal WPF window/view SHALL declare an appropriate `xml:lang`, normally `es-MX`, so assistive technology interprets the Spanish UI correctly.
 
-El sistema SHALL declarar `xml:lang` en cada ventana principal y diálogo modal para indicar el idioma de la interfaz a lectores de pantalla y motores de búsqueda.
+#### Scenario: Language declared on MainWindow
+- **WHEN** `MainWindow.xaml` loads
+- **THEN** its root declares `xml:lang="es-MX"` or the active UI language
 
-#### Scenario: Idioma declarado en ventana principal
-
-- **WHEN** se carga `MainWindow.xaml`
-- **THEN** el elemento raíz contiene el atributo `xml:lang="es-MX"` u otro idioma activo
-
-#### Scenario: Idioma declarado en diálogo
-
-- **WHEN** se abre un diálogo modal
-- **THEN** el elemento raíz del diálogo declara `xml:lang` con el idioma activo
-
+#### Scenario: Language declared on dialog
+- **WHEN** a modal dialog loads
+- **THEN** its root declares the active UI language
 
 ### Requirement: SORT_COLUMNS
+Data grids SHALL enable user sorting only where sorting adds value and does not break the operational meaning of the matrix/list.
 
-El sistema SHALL habilitar `CanUserSortColumns="True"` en las grillas de datos donde ordenar columnas aporte valor a la experiencia del usuario, manteniendo la ordenación por defecto definida por el ViewModel.
+#### Scenario: Sort by name
+- **WHEN** a sortable student-name header is activated
+- **THEN** the rows are ordered by that field
 
-#### Scenario: Ordenar por nombre
-
-- **WHEN** el usuario hace clic en el encabezado de la columna de nombre
-- **THEN** las filas del `DataGrid` se ordenan ascendentemente por ese campo
-
-#### Scenario: Ordenar por número de lista
-
-- **WHEN** el usuario hace clic en el encabezado de la columna número de lista
-- **THEN** las filas se ordenan numéricamente respetando el tipo de dato
+#### Scenario: Sort by list number
+- **WHEN** a sortable list-number header is activated
+- **THEN** rows are numerically sorted
 
 ### Requirement: SEARCH_STUDENTS
+The student roster SHALL provide search/filtering by relevant identifiers such as name, list number and, when structured multigrade data is available, grade.
 
-El sistema SHALL proporcionar una caja de búsqueda en la grilla de estudiantes que filtre resultados por nombre o número de lista mientras el usuario escribe.
+#### Scenario: Filter by name
+- **WHEN** the user types a student name fragment
+- **THEN** the roster shows matching students
 
-#### Scenario: Filtrar por nombre
-
-- **WHEN** el usuario escribe texto en la caja de búsqueda de estudiantes
-- **THEN** la grilla muestra únicamente los estudiantes cuyo nombre contiene el texto
-
-#### Scenario: Sin resultados
-
-- **WHEN** la búsqueda no coincide con ningún estudiante
-- **THEN** se muestra el componente `EmptyState` indicando que no hay coincidencias
+#### Scenario: No results
+- **WHEN** no students match the query
+- **THEN** the interface communicates that no matches were found
 
 ### Requirement: DYNAMIC_TITLE
+The main window SHALL provide useful current context in its title, such as the active group or Demo state, to improve orientation.
 
-El sistema SHALL actualizar el título de la ventana principal (`Title`) para reflejar el grupo activo o la vista actual, mejorando la orientación del usuario.
+#### Scenario: Active-group title
+- **WHEN** a group is active
+- **THEN** the window title includes useful active-group context
 
-#### Scenario: Título con grupo activo
-
-- **WHEN** el usuario selecciona un grupo
-- **THEN** el título de la ventana incluye el nombre del grupo activo
-
-#### Scenario: Título en vista de evaluación
-
-- **WHEN** el usuario cambia a la pestaña de evaluación
-- **THEN** el título refleja que se encuentra en el módulo de evaluación
+#### Scenario: Evaluation context
+- **WHEN** the user works in Evaluation
+- **THEN** the title/context still makes the active application/group understandable
 
 ### Requirement: BREADCRUMB_DIALOGS
+Nested workflows SHALL communicate parent context and provide breadcrumb-style navigation when it materially improves orientation; such navigation SHALL NOT be introduced when a dedicated-window title and parent context are clearer or safer.
 
-El sistema SHALL mostrar un breadcrumb en los diálogos anidados (proyecto → actividad → evaluación) para indicar la ubicación actual y permitir navegar hacia niveles superiores.
+#### Scenario: Activity detail context
+- **WHEN** an activity detail window needs parent-project context
+- **THEN** the UI communicates the project/activity relationship clearly
 
-#### Scenario: Breadcrumb en detalle de actividad
-
-- **WHEN** el usuario abre el detalle de una actividad desde un proyecto
-- **THEN** el diálogo muestra la ruta `Proyecto > Actividad` en un breadcrumb
-
-#### Scenario: Navegación mediante breadcrumb
-
-- **WHEN** el usuario hace clic en un nivel superior del breadcrumb
-- **THEN** el sistema navega al diálogo o vista correspondiente
+#### Scenario: Navigate to a parent level
+- **WHEN** an explicit parent-navigation affordance is provided
+- **THEN** it returns safely without discarding unsaved changes
 
 ### Requirement: CLEAN_DEAD_CODE
+The system SHALL remove obsolete unused converters, event handlers and commands when identified, and SHALL correct naming/logic defects rather than preserving dead compatibility code without a reason.
 
-El sistema SHALL eliminar el código muerto identificado en la auditoría (conversores sin uso, manejadores de eventos obsoletos, comandos con bugs como `MarcarTodosEntregadaCommand`) y corregir los errores de nomenclatura o lógica encontrados.
+#### Scenario: Remove unused converter
+- **WHEN** a converter is proven to have no references
+- **THEN** it is removed rather than kept as dead application code
 
-#### Scenario: Conversor sin uso eliminado
-
-- **WHEN** se revisan los recursos y code-behind de la aplicación
-- **THEN** no se encuentran conversores declarados que no sean referenciados
-
-#### Scenario: Comando corregido
-
-- **WHEN** se invoca el comando de marcar todas las actividades como entregadas
-- **THEN** ejecuta la acción correcta con el nombre y valor apropiados
+#### Scenario: Correct a command defect
+- **WHEN** a command's name/implementation does not match its intended action
+- **THEN** the implementation is corrected and covered by regression tests where practical
 
 ### Requirement: TOOLTIP_HEADERS
+The system SHALL provide descriptive tooltips for compact/ambiguous headers whose meaning cannot be understood reliably from the visible label alone.
 
-El sistema SHALL agregar `ToolTip` descriptivos en los encabezados mensuales y otros encabezados de columna cuyo significado pueda no ser evidente para el usuario.
-
-#### Scenario: Tooltip en encabezado mensual
-
-- **WHEN** el usuario coloca el cursor sobre un encabezado de mes en la grilla
-- **THEN** se muestra un tooltip con la descripción del período o acciones disponibles
-
+#### Scenario: Compact matrix header
+- **WHEN** the user hovers a compact activity/month header
+- **THEN** a tooltip provides the fuller context such as name/date/period

@@ -24,6 +24,8 @@ public sealed class GestionGrupoViewModel : ViewModelBase
     private IReadOnlyList<EstudianteVisual> _estudiantes = Array.Empty<EstudianteVisual>();
     private EstudianteVisual? _estudianteSeleccionado;
     private string _filtroBusqueda = string.Empty;
+    private GradoPrimaria _gradoEdicion;
+    private IReadOnlyList<OpcionGradoPrimaria> _gradosDisponiblesEdicion = CrearOpcionesGrado(CatalogoNemPrimaria.TodosLosGrados);
 
     public GestionGrupoViewModel(
         IGestionGrupoPresentacion gestion,
@@ -209,6 +211,18 @@ public sealed class GestionGrupoViewModel : ViewModelBase
         set => SetProperty(ref _observacionesEdicion, value);
     }
 
+    public GradoPrimaria GradoEdicion
+    {
+        get => _gradoEdicion;
+        set => SetProperty(ref _gradoEdicion, value);
+    }
+
+    public IReadOnlyList<OpcionGradoPrimaria> GradosDisponiblesEdicion
+    {
+        get => _gradosDisponiblesEdicion;
+        private set => SetProperty(ref _gradosDisponiblesEdicion, value);
+    }
+
     public string MensajeEdicion
     {
         get => _mensajeEdicion;
@@ -227,7 +241,13 @@ public sealed class GestionGrupoViewModel : ViewModelBase
         set { if (SetProperty(ref _filtroBusqueda, value)) OnPropertyChanged(nameof(EstudiantesFiltrados)); }
     }
 
-    public System.Collections.Generic.IEnumerable<EstudianteVisual> EstudiantesFiltrados => string.IsNullOrWhiteSpace(_filtroBusqueda) ? _estudiantes : _estudiantes.Where(e => e.Nombre.Contains(_filtroBusqueda, System.StringComparison.CurrentCultureIgnoreCase) || e.NumeroLista.ToString(System.Globalization.CultureInfo.CurrentCulture).Contains(_filtroBusqueda, System.StringComparison.Ordinal));
+    public IEnumerable<EstudianteVisual> EstudiantesFiltrados => string.IsNullOrWhiteSpace(_filtroBusqueda)
+        ? _estudiantes
+        : _estudiantes.Where(e =>
+            e.Nombre.Contains(_filtroBusqueda, StringComparison.CurrentCultureIgnoreCase)
+            || e.NumeroLista.ToString(System.Globalization.CultureInfo.CurrentCulture)
+                .Contains(_filtroBusqueda, StringComparison.Ordinal)
+            || e.GradoTexto.Contains(_filtroBusqueda, StringComparison.CurrentCultureIgnoreCase));
 
     public EstudianteVisual? EstudianteSeleccionado
     {
@@ -303,6 +323,33 @@ public sealed class GestionGrupoViewModel : ViewModelBase
         OnPropertyChanged(nameof(GrupoSeleccionadoCombo));
     }
 
+    public void ConfigurarGradosDisponibles(IEnumerable<GradoPrimaria>? gradosConfigurados)
+    {
+        var grados = CatalogoNemPrimaria.NormalizarGrados(gradosConfigurados);
+        if (grados.Count == 0)
+        {
+            grados = CatalogoNemPrimaria.TodosLosGrados;
+        }
+
+        if (PanelActual == PanelEdicion.EditarEstudiante
+            && CatalogoNemPrimaria.EsGradoReal(GradoEdicion)
+            && !grados.Contains(GradoEdicion))
+        {
+            grados = grados.Append(GradoEdicion).Distinct().OrderBy(g => (int)g).ToArray();
+        }
+
+        GradosDisponiblesEdicion = CrearOpcionesGrado(grados);
+
+        if (PanelActual == PanelEdicion.AgregarEstudiante && grados.Count == 1)
+        {
+            GradoEdicion = grados[0];
+        }
+        else if (!grados.Contains(GradoEdicion))
+        {
+            GradoEdicion = GradoPrimaria.NoEspecificado;
+        }
+    }
+
     private void ActualizarListaGrupos()
     {
         GruposDisponibles = _gestion.ListarGrupos();
@@ -358,6 +405,8 @@ public sealed class GestionGrupoViewModel : ViewModelBase
         GeneroIndexEdicion = 0;
         FechaIngresoEdicion = null;
         ObservacionesEdicion = string.Empty;
+        GradoEdicion = GradoPrimaria.NoEspecificado;
+        GradosDisponiblesEdicion = CrearOpcionesGrado(CatalogoNemPrimaria.TodosLosGrados);
         MensajeEdicion = string.Empty;
         PanelActual = PanelEdicion.AgregarEstudiante;
         OnPropertyChanged(nameof(TituloEditorEstudiante));
@@ -375,10 +424,16 @@ public sealed class GestionGrupoViewModel : ViewModelBase
         SegundoApellidoEdicion = EstudianteSeleccionado.SegundoApellido;
         NombresEdicion = EstudianteSeleccionado.Nombres;
         NumeroListaEdicion = EstudianteSeleccionado.NumeroLista.ToString(System.Globalization.CultureInfo.CurrentCulture);
-        FechaNacimientoEdicion = EstudianteSeleccionado.FechaNacimiento.HasValue ? EstudianteSeleccionado.FechaNacimiento.Value.ToDateTime(TimeOnly.MinValue) : null;
+        FechaNacimientoEdicion = EstudianteSeleccionado.FechaNacimiento.HasValue
+            ? EstudianteSeleccionado.FechaNacimiento.Value.ToDateTime(TimeOnly.MinValue)
+            : null;
         GeneroIndexEdicion = (int)EstudianteSeleccionado.Genero;
-        FechaIngresoEdicion = EstudianteSeleccionado.FechaIngreso.HasValue ? EstudianteSeleccionado.FechaIngreso.Value.ToDateTime(TimeOnly.MinValue) : null;
+        FechaIngresoEdicion = EstudianteSeleccionado.FechaIngreso.HasValue
+            ? EstudianteSeleccionado.FechaIngreso.Value.ToDateTime(TimeOnly.MinValue)
+            : null;
         ObservacionesEdicion = EstudianteSeleccionado.Observaciones;
+        GradoEdicion = EstudianteSeleccionado.Grado;
+        GradosDisponiblesEdicion = CrearOpcionesGrado(CatalogoNemPrimaria.TodosLosGrados);
         MensajeEdicion = string.Empty;
         PanelActual = PanelEdicion.EditarEstudiante;
         OnPropertyChanged(nameof(TituloEditorEstudiante));
@@ -397,6 +452,12 @@ public sealed class GestionGrupoViewModel : ViewModelBase
             return;
         }
 
+        if (!CatalogoNemPrimaria.EsGradoReal(GradoEdicion))
+        {
+            MensajeEdicion = "Selecciona el grado de primaria del estudiante.";
+            return;
+        }
+
         DateOnly? fechaNac = FechaNacimientoEdicion.HasValue ? DateOnly.FromDateTime(FechaNacimientoEdicion.Value) : null;
         DateOnly? fechaIng = FechaIngresoEdicion.HasValue ? DateOnly.FromDateTime(FechaIngresoEdicion.Value) : null;
         var genero = (GeneroEstudiante)GeneroIndexEdicion;
@@ -405,7 +466,7 @@ public sealed class GestionGrupoViewModel : ViewModelBase
         {
             if (PanelActual == PanelEdicion.AgregarEstudiante)
             {
-                _gestion.AgregarEstudiante(
+                _gestion.AgregarEstudianteConGrado(
                     _grupoConfirmado.GrupoId,
                     NombreEstudianteEdicion,
                     numeroLista,
@@ -415,11 +476,12 @@ public sealed class GestionGrupoViewModel : ViewModelBase
                     fechaNac,
                     genero,
                     fechaIng,
-                    ObservacionesEdicion);
+                    ObservacionesEdicion,
+                    GradoEdicion);
             }
             else if (EstudianteSeleccionado is not null)
             {
-                _gestion.EditarEstudiante(
+                _gestion.EditarEstudianteConGrado(
                     _grupoConfirmado.GrupoId,
                     EstudianteSeleccionado.Id,
                     NombreEstudianteEdicion,
@@ -430,7 +492,8 @@ public sealed class GestionGrupoViewModel : ViewModelBase
                     fechaNac,
                     genero,
                     fechaIng,
-                    ObservacionesEdicion);
+                    ObservacionesEdicion,
+                    GradoEdicion);
             }
 
             RefrescarGrupo();
@@ -612,5 +675,11 @@ public sealed class GestionGrupoViewModel : ViewModelBase
             estudiante.FechaIngreso,
             estudiante.Observaciones,
             estudiante.NumeroLista,
-            estudiante.EstaActivo);
+            estudiante.EstaActivo,
+            estudiante.Grado);
+
+    private static OpcionGradoPrimaria[] CrearOpcionesGrado(IEnumerable<GradoPrimaria> grados) =>
+        CatalogoNemPrimaria.NormalizarGrados(grados)
+            .Select(grado => new OpcionGradoPrimaria(grado, CatalogoNemPrimaria.FormatearGrado(grado)))
+            .ToArray();
 }

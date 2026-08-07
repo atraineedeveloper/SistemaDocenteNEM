@@ -154,6 +154,9 @@ public sealed class ModernizacionUiEvaluacionDemoTests
         Assert.Contains("31", seeder, StringComparison.Ordinal);
         Assert.Contains("EstadoAsistencia.Falta", seeder, StringComparison.Ordinal);
         Assert.Contains("NivelLogro.RequiereApoyo", seeder, StringComparison.Ordinal);
-        Assert.Contains("OperacionesConcretas", contexto, StringComparison.Ordinal);
+        Assert.Contains("GradoPrimaria.Cuarto", contexto, StringComparison.Ordinal);
+        Assert.Contains("OrganizacionEscolar.Completa", contexto, StringComparison.Ordinal);
+        Assert.Contains("EtapaDesarrolloCognoscitivo.NoEspecificada", contexto, StringComparison.Ordinal);
+        Assert.DoesNotContain("OperacionesConcretas", contexto, StringComparison.Ordinal);
     }
 }

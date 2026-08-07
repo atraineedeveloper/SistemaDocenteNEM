@@ -67,6 +67,56 @@ public interface IGestionGrupoPresentacion
     EstudianteDetalle DesactivarEstudiante(GrupoId grupoId, EstudianteId estudianteId);
     EstudianteDetalle ReactivarEstudiante(GrupoId grupoId, EstudianteId estudianteId);
     IReadOnlyList<EstudianteDetalle> ObtenerTodosLosEstudiantes(GrupoId grupoId);
+
+    EstudianteDetalle AgregarEstudianteConGrado(
+        GrupoId grupoId,
+        string nombreVisible,
+        int numeroLista,
+        string primerApellido,
+        string segundoApellido,
+        string nombres,
+        DateOnly? fechaNacimiento,
+        GeneroEstudiante genero,
+        DateOnly? fechaIngreso,
+        string observaciones,
+        GradoPrimaria grado) =>
+        AgregarEstudiante(
+            grupoId,
+            nombreVisible,
+            numeroLista,
+            primerApellido,
+            segundoApellido,
+            nombres,
+            fechaNacimiento,
+            genero,
+            fechaIngreso,
+            observaciones);
+
+    EstudianteDetalle EditarEstudianteConGrado(
+        GrupoId grupoId,
+        EstudianteId estudianteId,
+        string nombreVisible,
+        int numeroLista,
+        string primerApellido,
+        string segundoApellido,
+        string nombres,
+        DateOnly? fechaNacimiento,
+        GeneroEstudiante genero,
+        DateOnly? fechaIngreso,
+        string observaciones,
+        GradoPrimaria grado) =>
+        EditarEstudiante(
+            grupoId,
+            estudianteId,
+            nombreVisible,
+            numeroLista,
+            primerApellido,
+            segundoApellido,
+            nombres,
+            fechaNacimiento,
+            genero,
+            fechaIngreso,
+            observaciones);
 }
 
 public sealed class GestionGrupoPresentacion : IGestionGrupoPresentacion
@@ -119,4 +169,56 @@ public sealed class GestionGrupoPresentacion : IGestionGrupoPresentacion
         _casosUso.ReactivarEstudiante(grupoId, estudianteId);
     public IReadOnlyList<EstudianteDetalle> ObtenerTodosLosEstudiantes(GrupoId grupoId) =>
         _casosUso.ObtenerTodosLosEstudiantes(grupoId);
+
+    public EstudianteDetalle AgregarEstudianteConGrado(
+        GrupoId grupoId,
+        string nombreVisible,
+        int numeroLista,
+        string primerApellido,
+        string segundoApellido,
+        string nombres,
+        DateOnly? fechaNacimiento,
+        GeneroEstudiante genero,
+        DateOnly? fechaIngreso,
+        string observaciones,
+        GradoPrimaria grado) =>
+        _casosUso.AgregarEstudiante(
+            grupoId,
+            nombreVisible,
+            numeroLista,
+            primerApellido,
+            segundoApellido,
+            nombres,
+            fechaNacimiento,
+            genero,
+            fechaIngreso,
+            observaciones,
+            grado);
+
+    public EstudianteDetalle EditarEstudianteConGrado(
+        GrupoId grupoId,
+        EstudianteId estudianteId,
+        string nombreVisible,
+        int numeroLista,
+        string primerApellido,
+        string segundoApellido,
+        string nombres,
+        DateOnly? fechaNacimiento,
+        GeneroEstudiante genero,
+        DateOnly? fechaIngreso,
+        string observaciones,
+        GradoPrimaria grado) =>
+        _casosUso.EditarEstudiante(
+            grupoId,
+            estudianteId,
+            nombreVisible,
+            numeroLista,
+            primerApellido,
+            segundoApellido,
+            nombres,
+            fechaNacimiento,
+            genero,
+            fechaIngreso,
+            observaciones,
+            grado);
 }
