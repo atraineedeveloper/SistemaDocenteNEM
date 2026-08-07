@@ -25,5 +25,5 @@
 - [x] 14. Add Presentation tests for unified evaluation result mapping.
 - [x] 15. Add WPF structural regressions for group workspace and cell menus.
 - [x] 16. Update architecture/UX documentation in English.
-- [ ] 17. Run Windows CI: format, Release build, tests, OpenSpec and whitespace.
+- [x] 17. Run Windows CI: format, Release build, tests, OpenSpec and whitespace.
 - [ ] 18. Perform manual UX validation in Demo mode, including Light/Dark/High Contrast and 100/125/150% scaling.
