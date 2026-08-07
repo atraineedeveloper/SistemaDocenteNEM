@@ -4,6 +4,18 @@ namespace SistemaDocente.Presentation;
 
 public sealed record OpcionNivelLogroVisual(NivelLogro Nivel, string Texto);
 public sealed record OpcionEstadoEntregaVisual(EstadoEntregaActividad Estado, string Texto);
+public sealed record OpcionResultadoEvaluacionVisual(ResultadoEvaluacionVisual Resultado, string Texto);
+
+public enum ResultadoEvaluacionVisual
+{
+    Pendiente = 0,
+    EntregadaSinEvaluar = 1,
+    Domina = 2,
+    Suficiente = 3,
+    EnProceso = 4,
+    RequiereApoyo = 5,
+    NoEntregada = 6,
+}
 
 public sealed class ActividadEvaluacionColumnaVisual : ViewModelBase
 {
@@ -72,6 +84,17 @@ public sealed class EvaluacionCeldaVisual : ViewModelBase
         new(EstadoEntregaActividad.NoEntregada, "No entregada"),
     ];
 
+    private static readonly IReadOnlyList<OpcionResultadoEvaluacionVisual> OpcionesResultadoDisponibles =
+    [
+        new(ResultadoEvaluacionVisual.Pendiente, "Pendiente"),
+        new(ResultadoEvaluacionVisual.EntregadaSinEvaluar, "Entregada · evaluar después"),
+        new(ResultadoEvaluacionVisual.Domina, "Domina"),
+        new(ResultadoEvaluacionVisual.Suficiente, "Suficiente"),
+        new(ResultadoEvaluacionVisual.EnProceso, "En proceso"),
+        new(ResultadoEvaluacionVisual.RequiereApoyo, "Requiere apoyo"),
+        new(ResultadoEvaluacionVisual.NoEntregada, "No entregó"),
+    ];
+
     private EstadoEntregaActividad _estadoEntrega;
     private NivelLogro _nivelLogro;
     private string _observacion;
@@ -123,6 +146,7 @@ public sealed class EvaluacionCeldaVisual : ViewModelBase
     public bool EsEditable { get; }
     public IReadOnlyList<OpcionNivelLogroVisual> OpcionesNivel { get; } = OpcionesNivelDisponibles;
     public IReadOnlyList<OpcionEstadoEntregaVisual> OpcionesEstadoEntrega { get; } = OpcionesEstadoDisponibles;
+    public IReadOnlyList<OpcionResultadoEvaluacionVisual> OpcionesResultado { get; } = OpcionesResultadoDisponibles;
 
     public EstadoEntregaActividad EstadoEntrega
     {
@@ -179,6 +203,26 @@ public sealed class EvaluacionCeldaVisual : ViewModelBase
                 OnPropertyChanged(nameof(EstadoEntrega));
                 NotificarEstadoVisual();
             }
+        }
+    }
+
+    public ResultadoEvaluacionVisual Resultado
+    {
+        get => ObtenerResultado(_estadoEntrega, _nivelLogro);
+        set
+        {
+            if (!EsEditable || !EsAplicable || !Enum.IsDefined(value)) return;
+
+            var (estado, nivel) = ConvertirResultado(value);
+            var cambioEstado = _estadoEntrega != estado;
+            var cambioNivel = _nivelLogro != nivel;
+            if (!cambioEstado && !cambioNivel) return;
+
+            _estadoEntrega = estado;
+            _nivelLogro = nivel;
+            if (cambioEstado) OnPropertyChanged(nameof(EstadoEntrega));
+            if (cambioNivel) OnPropertyChanged(nameof(NivelLogro));
+            NotificarEstadoVisual();
         }
     }
 
@@ -273,6 +317,7 @@ public sealed class EvaluacionCeldaVisual : ViewModelBase
 
     private void NotificarEstadoVisual()
     {
+        OnPropertyChanged(nameof(Resultado));
         OnPropertyChanged(nameof(PuedeEvaluarLogro));
         OnPropertyChanged(nameof(EtiquetaNivel));
         OnPropertyChanged(nameof(NombreNivel));
@@ -284,6 +329,7 @@ public sealed class EvaluacionCeldaVisual : ViewModelBase
     {
         OnPropertyChanged(nameof(EstadoEntrega));
         OnPropertyChanged(nameof(NivelLogro));
+        OnPropertyChanged(nameof(Resultado));
         OnPropertyChanged(nameof(Observacion));
         OnPropertyChanged(nameof(PuedeEvaluarLogro));
         OnPropertyChanged(nameof(EtiquetaNivel));
@@ -292,6 +338,35 @@ public sealed class EvaluacionCeldaVisual : ViewModelBase
         OnPropertyChanged(nameof(TieneObservacion));
         OnPropertyChanged(nameof(DescripcionAccesible));
     }
+
+    private static ResultadoEvaluacionVisual ObtenerResultado(
+        EstadoEntregaActividad estadoEntrega,
+        NivelLogro nivelLogro)
+    {
+        if (estadoEntrega == EstadoEntregaActividad.Pendiente) return ResultadoEvaluacionVisual.Pendiente;
+        if (estadoEntrega == EstadoEntregaActividad.NoEntregada) return ResultadoEvaluacionVisual.NoEntregada;
+        return nivelLogro switch
+        {
+            NivelLogro.Domina => ResultadoEvaluacionVisual.Domina,
+            NivelLogro.Suficiente => ResultadoEvaluacionVisual.Suficiente,
+            NivelLogro.EnProceso => ResultadoEvaluacionVisual.EnProceso,
+            NivelLogro.RequiereApoyo => ResultadoEvaluacionVisual.RequiereApoyo,
+            _ => ResultadoEvaluacionVisual.EntregadaSinEvaluar,
+        };
+    }
+
+    private static (EstadoEntregaActividad Estado, NivelLogro Nivel) ConvertirResultado(ResultadoEvaluacionVisual resultado) =>
+        resultado switch
+        {
+            ResultadoEvaluacionVisual.Pendiente => (EstadoEntregaActividad.Pendiente, NivelLogro.Pendiente),
+            ResultadoEvaluacionVisual.EntregadaSinEvaluar => (EstadoEntregaActividad.Entregada, NivelLogro.Pendiente),
+            ResultadoEvaluacionVisual.Domina => (EstadoEntregaActividad.Entregada, NivelLogro.Domina),
+            ResultadoEvaluacionVisual.Suficiente => (EstadoEntregaActividad.Entregada, NivelLogro.Suficiente),
+            ResultadoEvaluacionVisual.EnProceso => (EstadoEntregaActividad.Entregada, NivelLogro.EnProceso),
+            ResultadoEvaluacionVisual.RequiereApoyo => (EstadoEntregaActividad.Entregada, NivelLogro.RequiereApoyo),
+            ResultadoEvaluacionVisual.NoEntregada => (EstadoEntregaActividad.NoEntregada, NivelLogro.Pendiente),
+            _ => (EstadoEntregaActividad.Pendiente, NivelLogro.Pendiente),
+        };
 
     private static (EstadoEntregaActividad EstadoEntrega, NivelLogro NivelLogro) Normalizar(
         EstadoEntregaActividad estadoEntrega,
