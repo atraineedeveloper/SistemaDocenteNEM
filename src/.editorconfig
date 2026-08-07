@@ -1,0 +1,4 @@
+# Hereda todas las reglas del .editorconfig raíz.
+# No se fuerza una convención de salto de línea final en fuentes existentes o generadas.
+[*.cs]
+insert_final_newline = unset
