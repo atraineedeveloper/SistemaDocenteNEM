@@ -16,7 +16,8 @@ public sealed class ThemeServiceAuditTests
     {
         var code = Leer("src/SistemaDocente.App.Wpf/Services/ThemeService.cs");
 
-        Assert.Contains("!source.EndsWith(\"/DesignTokens.xaml\"", code, StringComparison.Ordinal);
+        Assert.Contains("source.Contains(\"Themes/\"", code, StringComparison.Ordinal);
+        Assert.Contains("!source.EndsWith(\"DesignTokens.xaml\"", code, StringComparison.Ordinal);
         Assert.Contains("dictionaries.Remove(existingTheme)", code, StringComparison.Ordinal);
         Assert.Contains("dictionaries.Add(new ResourceDictionary", code, StringComparison.Ordinal);
         Assert.DoesNotContain("dictionaries.Insert(index", code, StringComparison.Ordinal);
