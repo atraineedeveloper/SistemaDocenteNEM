@@ -246,7 +246,7 @@ public sealed class PersistenciaContextoGrupoSqlite : IAlmacenamientoContextoGru
             : (OrganizacionEscolar.NoEspecificada, string.Empty, string.Empty);
     }
 
-    private static IReadOnlyList<GradoPrimaria> LeerGrados(SqliteConnection conexion, GrupoId grupoId)
+    private static List<GradoPrimaria> LeerGrados(SqliteConnection conexion, GrupoId grupoId)
     {
         using var comando = conexion.CreateCommand();
         comando.CommandText = "SELECT grado FROM grados_grupo WHERE grupo_id = $grupo ORDER BY grado;";
