@@ -17,17 +17,21 @@ public partial class MainWindow : Window
 
     public MainWindow(
         MainWindowViewModel viewModel,
-        ConfiguracionGrupoViewModel configuracionGrupo)
+        ConfiguracionGrupoViewModel configuracionGrupo,
+        ImportacionEstudiantesViewModel importacionEstudiantes)
     {
         ArgumentNullException.ThrowIfNull(viewModel);
         ArgumentNullException.ThrowIfNull(configuracionGrupo);
+        ArgumentNullException.ThrowIfNull(importacionEstudiantes);
         ConfiguracionGrupo = configuracionGrupo;
+        ImportacionEstudiantes = importacionEstudiantes;
         InitializeComponent();
         DataContext = viewModel;
     }
 
     public MainWindowViewModel ViewModel => (MainWindowViewModel)DataContext;
     public ConfiguracionGrupoViewModel ConfiguracionGrupo { get; }
+    public ImportacionEstudiantesViewModel ImportacionEstudiantes { get; }
 
     private void OnClosing(object? sender, CancelEventArgs e)
     {
