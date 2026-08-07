@@ -40,7 +40,11 @@ public sealed class ActividadProyecto
         var ids = ValidarIdentidades(estudiantes);
         return new(ActividadId.Crear(), proyectoId, grupoId, datos.Titulo, datos.Descripcion,
             fechaRealizacion, datos.Observaciones, EstadoActividad.Activa, 1,
-            ids.Select(id => new EntregaActividad(id, NivelLogro.Pendiente, string.Empty)).ToList());
+            ids.Select(id => new EntregaActividad(
+                id,
+                EstadoEntregaActividad.Pendiente,
+                NivelLogro.Pendiente,
+                string.Empty)).ToList());
     }
 
     public static ActividadProyecto Rehidratar(ActividadId id, ProyectoId proyectoId, GrupoId grupoId,
@@ -59,8 +63,14 @@ public sealed class ActividadProyecto
         {
             if (entrega.EstudianteId == default || !ids.Add(entrega.EstudianteId))
                 throw new DomainValidationException("Las identidades de entrega deben ser válidas y únicas.");
+            ValidarEstadoEntrega(entrega.EstadoEntrega);
             ValidarNivelLogro(entrega.NivelLogro);
-            registros.Add(new(entrega.EstudianteId, entrega.NivelLogro, ValidarObservacion(entrega.Observacion)));
+            ValidarCombinacionPersistida(entrega.EstadoEntrega, entrega.NivelLogro);
+            registros.Add(new(
+                entrega.EstudianteId,
+                entrega.EstadoEntrega,
+                entrega.NivelLogro,
+                ValidarObservacion(entrega.Observacion)));
         }
         return new(id, proyectoId, grupoId, datos.Titulo, datos.Descripcion, fechaRealizacion,
             datos.Observaciones, estado, version, registros);
@@ -83,11 +93,25 @@ public sealed class ActividadProyecto
         if (snapshot.Length != _entregas.Count || snapshot.Select(x => x.EstudianteId).Distinct().Count() != snapshot.Length
             || snapshot.Select(x => x.EstudianteId).ToHashSet().SetEquals(_entregas.Select(x => x.EstudianteId)) == false)
             throw new DomainValidationException("Debe proporcionarse exactamente el padrón histórico completo.");
-        var validadas = snapshot.Select(x => { ValidarNivelLogro(x.NivelLogro); return new DatosEntregaActividadRehidratada(x.EstudianteId, x.NivelLogro, ValidarObservacion(x.Observacion)); }).ToArray();
+
+        var validadas = snapshot.Select(x =>
+        {
+            ValidarEstadoEntrega(x.EstadoEntrega);
+            ValidarNivelLogro(x.NivelLogro);
+            var normalizada = NormalizarSeguimiento(x.EstadoEntrega, x.NivelLogro);
+            return new DatosEntregaActividadRehidratada(
+                x.EstudianteId,
+                normalizada.EstadoEntrega,
+                normalizada.NivelLogro,
+                ValidarObservacion(x.Observacion));
+        }).ToArray();
+
         foreach (var datos in validadas)
         {
             var entrega = _entregas.Single(x => x.EstudianteId == datos.EstudianteId);
-            entrega.NivelLogro = datos.NivelLogro; entrega.Observacion = datos.Observacion;
+            entrega.EstadoEntrega = datos.EstadoEntrega;
+            entrega.NivelLogro = datos.NivelLogro;
+            entrega.Observacion = datos.Observacion;
         }
     }
 
@@ -129,8 +153,33 @@ public sealed class ActividadProyecto
         return texto;
     }
 
+    private static void ValidarEstadoEntrega(EstadoEntregaActividad estado)
+    {
+        if (!Enum.IsDefined(estado)) throw new DomainValidationException("El estado de entrega no es válido.");
+    }
+
     private static void ValidarNivelLogro(NivelLogro nivel)
     {
         if (!Enum.IsDefined(nivel)) throw new DomainValidationException("El nivel de logro no es válido.");
+    }
+
+    private static void ValidarCombinacionPersistida(EstadoEntregaActividad estado, NivelLogro nivel)
+    {
+        if (nivel == NivelLogro.NoEntrego)
+            throw new DomainValidationException("'No entregó' debe persistirse como estado de entrega, no como nivel de logro.");
+        if (estado is EstadoEntregaActividad.Pendiente or EstadoEntregaActividad.NoEntregada
+            && nivel != NivelLogro.Pendiente)
+            throw new DomainValidationException("Una entrega pendiente o no entregada no puede tener un nivel de logro evaluado.");
+    }
+
+    private static (EstadoEntregaActividad EstadoEntrega, NivelLogro NivelLogro) NormalizarSeguimiento(
+        EstadoEntregaActividad estado,
+        NivelLogro nivel)
+    {
+        if (nivel == NivelLogro.NoEntrego || estado == EstadoEntregaActividad.NoEntregada)
+            return (EstadoEntregaActividad.NoEntregada, NivelLogro.Pendiente);
+        if (nivel != NivelLogro.Pendiente)
+            return (EstadoEntregaActividad.Entregada, nivel);
+        return (estado, NivelLogro.Pendiente);
     }
 }
