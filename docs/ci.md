@@ -32,9 +32,10 @@ Un fallo detiene el job y deja visible el paso responsable en la pestaña **Acti
 ## Cuándo se ejecuta
 
 - pull requests dirigidos a `main`;
-- pushes a `main`;
-- pushes a ramas `feature/**`;
-- ejecución manual mediante `workflow_dispatch`.
+- pushes a `main` después de integrar cambios;
+- ejecución manual mediante `workflow_dispatch` para validar una rama que todavía no tenga pull request.
+
+No se ejecuta también por cada push a `feature/**` cuando ya existe un PR, para evitar dos jobs idénticos por el mismo commit.
 
 ## Validación local recomendada
 
