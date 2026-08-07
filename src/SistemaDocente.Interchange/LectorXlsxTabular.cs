@@ -7,7 +7,7 @@ using SistemaDocente.Application;
 
 namespace SistemaDocente.Interchange;
 
-public sealed class LectorXlsxTabular
+public sealed class LectorXlsxTabular : ILectorImportacionTabular
 {
     private static readonly HashSet<uint> FormatosFechaIntegrados =
     [
