@@ -3,24 +3,26 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:controls="clr-namespace:SistemaDocente.App.Wpf.Controls"
         xmlns:views="clr-namespace:SistemaDocente.App.Wpf.Views"
-        xmlns:prop="clr-namespace:SistemaDocente.App.Wpf.Properties"
         xml:lang="es-MX"
-        Title="{Binding TituloVentana}" Height="740" Width="1060" MinHeight="600" MinWidth="860"
+        Title="{Binding TituloVentana}" Height="780" Width="1280" MinHeight="640" MinWidth="1000"
         WindowStartupLocation="CenterScreen" Closing="OnClosing">
     <Grid Background="{DynamicResource WindowBackgroundBrush}">
-        <Grid.RowDefinitions><RowDefinition Height="Auto"/><RowDefinition Height="*"/></Grid.RowDefinitions>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
 
-        <!-- ══ ENCABEZADO GLOBAL: branding + selector de grupo + navegación + tema ══ -->
+        <!-- Encabezado global: branding + selector de grupo + navegación + tema -->
         <controls:MainNavigationHeader Grid.Row="0"/>
 
-        <!-- ══ ÁREA DE MÓDULOS: MainWindow sólo ensambla vistas ══ -->
+        <!-- Área de módulos: MainWindow sólo ensambla vistas -->
         <Grid Grid.Row="1">
             <views:GrupoView DataContext="{Binding Grupo}"
                              Visibility="{Binding MostrarGrupo, Converter={StaticResource BoolToVisibility}}"/>
-            <views:AsistenciaView
-                             Visibility="{Binding MostrarAsistencia, Converter={StaticResource BoolToVisibility}}"/>
+            <views:AsistenciaView DataContext="{Binding ModuloAsistencia}"
+                                  Visibility="{Binding MostrarAsistencia, Converter={StaticResource BoolToVisibility}}"/>
             <views:ProyectosView DataContext="{Binding Proyectos}"
-                                Visibility="{Binding MostrarProyectos, Converter={StaticResource BoolToVisibility}}"/>
+                                 Visibility="{Binding MostrarProyectos, Converter={StaticResource BoolToVisibility}}"/>
             <views:EvaluacionView DataContext="{Binding Evaluacion}"
                                   Visibility="{Binding MostrarEvaluacion, Converter={StaticResource BoolToVisibility}}"/>
         </Grid>
