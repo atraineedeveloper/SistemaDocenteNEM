@@ -1,3 +1,6 @@
+using System;
+using System.IO;
+
 namespace SistemaDocente.App.Wpf.Tests;
 
 public sealed class ThemeServiceAuditTests
