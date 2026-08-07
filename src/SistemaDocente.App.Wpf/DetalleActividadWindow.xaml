@@ -5,7 +5,7 @@
         xmlns:prop="clr-namespace:SistemaDocente.App.Wpf.Properties"
         xml:lang="es-MX"
         Title="{x:Static prop:Resources.DetalleActividadTitle}"
-        Height="620" Width="700" MinHeight="520" MinWidth="600"
+        Height="700" Width="760" MinHeight="580" MinWidth="640"
         WindowStartupLocation="CenterOwner" ShowInTaskbar="False"
         ResizeMode="CanResizeWithGrip"
         Background="{DynamicResource WindowBackgroundBrush}">
@@ -68,7 +68,7 @@
                 <Border Style="{StaticResource PopupCard}">
                     <StackPanel>
                         <TextBlock Text="Datos de la actividad" Style="{StaticResource PopupSectionTitle}"/>
-                        <TextBlock Text="Define qué se realizará, cuándo y qué observaciones generales deben conservarse."
+                        <TextBlock Text="Define qué se realizará, el campo formativo y los grados que participan en esta actividad."
                                    Style="{StaticResource PopupSubtitle}" Margin="0,0,0,14"/>
 
                         <Grid>
@@ -93,6 +93,43 @@
                             </controls:FormField>
                         </Grid>
 
+                        <controls:FormField Header="Campo formativo *">
+                            <ComboBox ItemsSource="{Binding CamposFormativos}"
+                                      DisplayMemberPath="Texto"
+                                      SelectedValuePath="Valor"
+                                      SelectedValue="{Binding CampoFormativoActividad, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                      MinHeight="38"
+                                      TabIndex="12"
+                                      AutomationProperties.Name="Campo formativo de la actividad"/>
+                        </controls:FormField>
+
+                        <controls:FormField Header="Grados objetivo">
+                            <StackPanel>
+                                <ItemsControl ItemsSource="{Binding GradosActividad}"
+                                              AutomationProperties.Name="Grados objetivo de la actividad">
+                                    <ItemsControl.ItemsPanel>
+                                        <ItemsPanelTemplate>
+                                            <WrapPanel/>
+                                        </ItemsPanelTemplate>
+                                    </ItemsControl.ItemsPanel>
+                                    <ItemsControl.ItemTemplate>
+                                        <DataTemplate>
+                                            <CheckBox Content="{Binding Texto}"
+                                                      IsChecked="{Binding Seleccionado, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                                      IsEnabled="{Binding DataContext.PuedeEditarGradosActividad, RelativeSource={RelativeSource AncestorType=Window}}"
+                                                      Margin="0,0,18,8"
+                                                      MinWidth="52"
+                                                      AutomationProperties.Name="{Binding Texto}"/>
+                                        </DataTemplate>
+                                    </ItemsControl.ItemTemplate>
+                                </ItemsControl>
+                                <TextBlock Text="En una actividad nueva puedes usar todos o sólo algunos de los grados del proyecto. Después de crearla, el alcance queda fijo para proteger su padrón histórico."
+                                           Style="{StaticResource PopupSubtitle}"
+                                           TextWrapping="Wrap"
+                                           Margin="0,2,0,0"/>
+                            </StackPanel>
+                        </controls:FormField>
+
                         <controls:FormField Header="Descripción">
                             <TextBox Text="{Binding DescripcionActividad, UpdateSourceTrigger=PropertyChanged}"
                                      AcceptsReturn="True"
@@ -100,7 +137,7 @@
                                      TextWrapping="Wrap"
                                      VerticalScrollBarVisibility="Auto"
                                      VerticalContentAlignment="Top"
-                                     TabIndex="12"
+                                     TabIndex="13"
                                      AutomationProperties.Name="Descripción de la actividad"/>
                         </controls:FormField>
 
@@ -111,7 +148,7 @@
                                      TextWrapping="Wrap"
                                      VerticalScrollBarVisibility="Auto"
                                      VerticalContentAlignment="Top"
-                                     TabIndex="13"
+                                     TabIndex="14"
                                      AutomationProperties.Name="Observaciones generales de la actividad"/>
                         </controls:FormField>
 

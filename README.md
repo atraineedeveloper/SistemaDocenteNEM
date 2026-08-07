@@ -17,7 +17,7 @@ The application already includes working modules for:
 - Light, Dark and High Contrast themes;
 - automated Windows CI for formatting, Release build, tests, OpenSpec and whitespace validation.
 
-The current development branch is extending group context with structured primary grades, automatic NEM phases, multigrade support, school organization, student grade and offline Mexico entity/municipality catalogs.
+The current stacked development work adds structured primary grades, automatic NEM phases, multigrade support, school organization, student grade, offline Mexico entity/municipality catalogs and structured NEM project planning. Projects can carry a NEM methodology and target grades; activities can carry one formative field and an explicit grade scope while preserving their historical student roster. See [`docs/nem-project-planning.md`](docs/nem-project-planning.md).
 
 ## Product principles
 
@@ -64,7 +64,7 @@ From the repository root on Windows:
 dotnet run --project .\src\SistemaDocente.App.Wpf\SistemaDocente.App.Wpf.csproj -- --demo-reset
 ```
 
-`--demo-reset` recreates the isolated fictitious Demo dataset. Production and Demo SQLite/application-state paths are separate.
+`--demo-reset` recreates the isolated fictitious Demo dataset. Production and Demo SQLite/application-state paths are separate. The Demo dataset includes structured grades and representative NEM project/activity metadata so the planning flow can be validated without real student data.
 
 ## Automated validation
 
@@ -81,7 +81,7 @@ git diff --check
 
 ## Roadmap
 
-The maintained roadmap is [`checklist_modulos_sistema_docente_nem.md`](checklist_modulos_sistema_docente_nem.md). Major upcoming areas include structured NEM planning metadata, XLSX/CSV import, exports, backup/restore and additional reporting outputs.
+The maintained roadmap is [`checklist_modulos_sistema_docente_nem.md`](checklist_modulos_sistema_docente_nem.md). Major upcoming areas include XLSX/CSV import, exports, backup/restore and additional reporting outputs.
 
 ## Data policy
 

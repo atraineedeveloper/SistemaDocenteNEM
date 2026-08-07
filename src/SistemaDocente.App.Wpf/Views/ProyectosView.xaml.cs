@@ -24,11 +24,24 @@ public partial class ProyectosView : System.Windows.Controls.UserControl
         DataContextChanged += OnDataContextChanged;
     }
 
+    public static readonly DependencyProperty ConfiguracionProperty = DependencyProperty.Register(
+        nameof(Configuracion),
+        typeof(ConfiguracionGrupoViewModel),
+        typeof(ProyectosView),
+        new PropertyMetadata(null));
+
+    public ConfiguracionGrupoViewModel? Configuracion
+    {
+        get => (ConfiguracionGrupoViewModel?)GetValue(ConfiguracionProperty);
+        set => SetValue(ConfiguracionProperty, value);
+    }
+
     private GestionProyectosViewModel? ViewModel => DataContext as GestionProyectosViewModel;
 
     private void OnLoaded(object sender, RoutedEventArgs e)
     {
         CambiarSuscripcion(ViewModel);
+        SincronizarContextoPlaneacion();
         AplicarBusqueda();
     }
 
@@ -37,7 +50,11 @@ public partial class ProyectosView : System.Windows.Controls.UserControl
     private void OnDataContextChanged(object sender, DependencyPropertyChangedEventArgs e)
     {
         CambiarSuscripcion(e.NewValue as GestionProyectosViewModel);
-        Dispatcher.BeginInvoke(AplicarBusqueda);
+        Dispatcher.BeginInvoke(() =>
+        {
+            SincronizarContextoPlaneacion();
+            AplicarBusqueda();
+        });
     }
 
     private void CambiarSuscripcion(GestionProyectosViewModel? nuevo)
@@ -53,7 +70,20 @@ public partial class ProyectosView : System.Windows.Controls.UserControl
     private void OnViewModelPropertyChanged(object? sender, PropertyChangedEventArgs e)
     {
         if (e.PropertyName == nameof(GestionProyectosViewModel.ProyectosVisibles))
+        {
             Dispatcher.BeginInvoke(AplicarBusqueda);
+        }
+        else if (e.PropertyName == nameof(GestionProyectosViewModel.GrupoIdActual))
+        {
+            Dispatcher.BeginInvoke(SincronizarContextoPlaneacion);
+        }
+    }
+
+    private void SincronizarContextoPlaneacion()
+    {
+        if (ViewModel is not { GrupoIdActual: { } grupoId } vm || Configuracion is null) return;
+        Configuracion.Inicializar(grupoId);
+        vm.ConfigurarGradosDisponibles(Configuracion.ObtenerGradosConfigurados());
     }
 
     private void OnBusquedaProyectoCambiada(object sender, System.Windows.Controls.TextChangedEventArgs e) =>
@@ -77,6 +107,7 @@ public partial class ProyectosView : System.Windows.Controls.UserControl
         if (ViewModel is not { } vm) return;
         if (vm.ProyectoSeleccionado is null && !vm.TieneCambiosProyecto) return;
 
+        SincronizarContextoPlaneacion();
         var ventanaProyecto = new DetalleProyectoWindow(vm) { Owner = Window.GetWindow(this) };
         ventanaProyecto.ShowDialog();
     }

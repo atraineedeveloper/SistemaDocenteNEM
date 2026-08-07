@@ -14,6 +14,10 @@
   </ItemGroup>
 
   <ItemGroup>
+    <InternalsVisibleTo Include="SistemaDocente.App.Wpf.Tests" />
+  </ItemGroup>
+
+  <ItemGroup>
     <Resource Include="Fonts\*.ttf" />
     <EmbeddedResource Update="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>

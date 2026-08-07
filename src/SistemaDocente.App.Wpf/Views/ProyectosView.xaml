@@ -10,6 +10,8 @@
              xml:lang="es-MX">
     <UserControl.Resources>
         <converters:CollectionMetricConverter x:Key="CollectionMetric"/>
+        <converters:MetodologiaProyectoNemConverter x:Key="MetodologiaNem"/>
+        <converters:GradosObjetivoConverter x:Key="GradosObjetivo"/>
     </UserControl.Resources>
 
     <Grid Margin="24">
@@ -66,7 +68,7 @@
         <Border Grid.Row="3" Background="{DynamicResource CardBackgroundBrush}" BorderBrush="{DynamicResource BorderLightBrush}" BorderThickness="1" CornerRadius="10">
             <DataGrid x:Name="GrillaProyectosPrincipal" ItemsSource="{Binding ProyectosVisibles}" SelectedItem="{Binding ProyectoSeleccionado}"
                       AutoGenerateColumns="False" IsReadOnly="True" CanUserSortColumns="True" SelectionMode="Single" SelectionUnit="FullRow"
-                      HeadersVisibility="Column" GridLinesVisibility="Horizontal" RowHeaderWidth="0" FontSize="14" RowHeight="48"
+                      HeadersVisibility="Column" GridLinesVisibility="Horizontal" RowHeaderWidth="0" FontSize="14" RowHeight="70"
                       MouseDoubleClick="OnAbrirDetalleProyectoClic" EnableRowVirtualization="True" EnableColumnVirtualization="True"
                       BorderThickness="0" TabIndex="303" AutomationProperties.Name="Lista de proyectos didácticos">
                 <DataGrid.ContextMenu>
@@ -77,12 +79,20 @@
                     </ContextMenu>
                 </DataGrid.ContextMenu>
                 <DataGrid.Columns>
-                    <DataGridTemplateColumn Header="Proyecto" Width="2*">
+                    <DataGridTemplateColumn Header="Proyecto" Width="3*">
                         <DataGridTemplateColumn.CellTemplate>
                             <DataTemplate>
-                                <StackPanel Margin="8,0" VerticalAlignment="Center">
+                                <StackPanel Margin="8,4" VerticalAlignment="Center">
                                     <TextBlock Text="{Binding Nombre}" Foreground="{DynamicResource TextPrimaryBrush}" FontWeight="SemiBold"/>
-                                    <TextBlock Text="{Binding NumeroActividades, StringFormat={}{0} actividades}" Foreground="{DynamicResource TextMutedBrush}" FontSize="11" Margin="0,2,0,0"/>
+                                    <TextBlock Text="{Binding Metodologia, Converter={StaticResource MetodologiaNem}}"
+                                               Foreground="{DynamicResource TextSecondaryBrush}" FontSize="11" Margin="0,2,0,0"/>
+                                    <StackPanel Orientation="Horizontal" Margin="0,2,0,0">
+                                        <TextBlock Text="{Binding GradosObjetivo, Converter={StaticResource GradosObjetivo}}"
+                                                   Foreground="{DynamicResource TextMutedBrush}" FontSize="11"/>
+                                        <TextBlock Text=" · " Foreground="{DynamicResource TextMutedBrush}" FontSize="11"/>
+                                        <TextBlock Text="{Binding NumeroActividades, StringFormat={}{0} actividades}"
+                                                   Foreground="{DynamicResource TextMutedBrush}" FontSize="11"/>
+                                    </StackPanel>
                                 </StackPanel>
                             </DataTemplate>
                         </DataGridTemplateColumn.CellTemplate>

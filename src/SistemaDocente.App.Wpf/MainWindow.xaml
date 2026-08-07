@@ -32,6 +32,7 @@
 
             <views:ProyectosView
                 DataContext="{Binding DataContext.Proyectos, ElementName=RootWindow}"
+                Configuracion="{Binding ConfiguracionGrupo, ElementName=RootWindow}"
                 Visibility="{Binding DataContext.MostrarProyectos, ElementName=RootWindow, Converter={StaticResource BoolToVisibility}}"/>
 
             <views:EvaluacionView
