@@ -1,0 +1,289 @@
+<Window x:Class="SistemaDocente.App.Wpf.ImportacionEstudiantesWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:controls="clr-namespace:SistemaDocente.App.Wpf.Controls"
+        xml:lang="es-MX"
+        Title="Importar alumnos"
+        Height="780" Width="1080" MinHeight="680" MinWidth="900"
+        WindowStartupLocation="CenterOwner" ShowInTaskbar="False"
+        ResizeMode="CanResizeWithGrip"
+        Background="{DynamicResource WindowBackgroundBrush}">
+
+    <Window.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="Styles/PopupStyles.xaml"/>
+            </ResourceDictionary.MergedDictionaries>
+        </ResourceDictionary>
+    </Window.Resources>
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <Border Grid.Row="0" Style="{StaticResource PopupHeader}">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+                <StackPanel>
+                    <TextBlock Text="IMPORTACIÓN SEGURA" Style="{StaticResource PopupEyebrow}"/>
+                    <TextBlock Text="Importar alumnos" Style="{StaticResource PopupTitle}" Margin="0,4,0,4"/>
+                    <TextBlock Text="Revisa y corrige los datos antes de agregarlos al grupo. El archivo original no se modifica."
+                               Style="{StaticResource PopupSubtitle}"/>
+                </StackPanel>
+                <Border Grid.Column="1" Style="{StaticResource PopupInfoPill}" VerticalAlignment="Center" Margin="20,0,0,0">
+                    <TextBlock Text="{Binding TituloPaso}" Foreground="{DynamicResource InfoBrush}" FontWeight="SemiBold"/>
+                </Border>
+            </Grid>
+        </Border>
+
+        <Grid Grid.Row="1" Margin="24,20">
+            <!-- Archivo -->
+            <Border Style="{StaticResource PopupCard}"
+                    Visibility="{Binding MostrarArchivo, Converter={StaticResource BoolToVisibility}}">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="*"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
+                    <StackPanel Grid.Row="1" MaxWidth="680" HorizontalAlignment="Center">
+                        <TextBlock Text="Selecciona una lista de alumnos" Style="{StaticResource PopupSectionTitle}"/>
+                        <TextBlock Margin="0,0,0,18" TextWrapping="Wrap" Style="{StaticResource PopupSubtitle}"
+                                   Text="Puedes usar Excel (.xlsx) o CSV UTF-8. Primero veremos una vista previa; nada se guardará al seleccionar el archivo."/>
+                        <Border Background="{DynamicResource SectionBackgroundBrush}" CornerRadius="8" Padding="16" Margin="0,0,0,16">
+                            <StackPanel>
+                                <TextBlock Text="Formatos admitidos" FontWeight="SemiBold"/>
+                                <TextBlock Text=".xlsx · .csv   |   CSV: coma, punto y coma o tabulador" Margin="0,5,0,0" Foreground="{DynamicResource TextSecondaryBrush}"/>
+                            </StackPanel>
+                        </Border>
+                        <Button Style="{StaticResource PrimaryButton}" Content="Seleccionar archivo…"
+                                Click="OnSeleccionarArchivoClic" HorizontalAlignment="Left"
+                                AutomationProperties.Name="Seleccionar archivo Excel o CSV"/>
+                        <TextBlock Text="{Binding Mensaje}" Margin="0,12,0,0" Foreground="{DynamicResource ErrorBrush}" TextWrapping="Wrap"/>
+                    </StackPanel>
+                </Grid>
+            </Border>
+
+            <!-- Columnas -->
+            <Border Style="{StaticResource PopupCard}"
+                    Visibility="{Binding MostrarColumnas, Converter={StaticResource BoolToVisibility}}">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
+
+                    <Grid Margin="0,0,0,16">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="260"/>
+                        </Grid.ColumnDefinitions>
+                        <StackPanel>
+                            <TextBlock Text="Relaciona las columnas" Style="{StaticResource PopupSectionTitle}"/>
+                            <TextBlock Style="{StaticResource PopupSubtitle}" TextWrapping="Wrap"
+                                       Text="Confirma qué significa cada columna. Las columnas marcadas como Ignorar no se importarán."/>
+                            <TextBlock Text="{Binding NombreArchivo}" Margin="0,8,0,0" FontWeight="SemiBold"/>
+                        </StackPanel>
+                        <controls:FormField Grid.Column="1" Header="Hoja">
+                            <ComboBox ItemsSource="{Binding Hojas}" DisplayMemberPath="Nombre"
+                                      SelectedItem="{Binding HojaSeleccionada, Mode=TwoWay}"/>
+                        </controls:FormField>
+                    </Grid>
+
+                    <TextBlock Grid.Row="1" Text="Se requiere Número de lista y alguna fuente de nombre. CURP no es un destino disponible."
+                               Foreground="{DynamicResource TextSecondaryBrush}" Margin="0,0,0,10"/>
+
+                    <DataGrid Grid.Row="2" ItemsSource="{Binding Columnas}" AutoGenerateColumns="False"
+                              CanUserAddRows="False" CanUserDeleteRows="False" HeadersVisibility="Column"
+                              GridLinesVisibility="Horizontal" RowHeaderWidth="0" IsReadOnly="False"
+                              AutomationProperties.Name="Mapeo de columnas de importación">
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Header="Columna del archivo" Binding="{Binding Encabezado}" Width="*" IsReadOnly="True"/>
+                            <DataGridTemplateColumn Header="Importar como" Width="300">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <ComboBox ItemsSource="{Binding DataContext.OpcionesCampos, RelativeSource={RelativeSource AncestorType=Window}}"
+                                                  DisplayMemberPath="Etiqueta" SelectedValuePath="Campo"
+                                                  SelectedValue="{Binding Campo, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                                  Margin="6,3"/>
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+                        </DataGrid.Columns>
+                    </DataGrid>
+                </Grid>
+            </Border>
+
+            <!-- Vista previa -->
+            <Grid Visibility="{Binding MostrarPrevia, Converter={StaticResource BoolToVisibility}}">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
+
+                <Grid Margin="0,0,0,12">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+                    <StackPanel>
+                        <TextBlock Text="Vista previa" Style="{StaticResource PopupSectionTitle}"/>
+                        <WrapPanel Margin="0,7,0,0">
+                            <TextBlock Text="Listas: " Foreground="{DynamicResource TextSecondaryBrush}"/>
+                            <TextBlock Text="{Binding Listas}" FontWeight="Bold"/>
+                            <TextBlock Text="   Revisión: " Foreground="{DynamicResource TextSecondaryBrush}"/>
+                            <TextBlock Text="{Binding RequierenRevision}" FontWeight="Bold"/>
+                            <TextBlock Text="   Inválidas: " Foreground="{DynamicResource TextSecondaryBrush}"/>
+                            <TextBlock Text="{Binding Invalidas}" FontWeight="Bold"/>
+                            <TextBlock Text="   Excluidas: " Foreground="{DynamicResource TextSecondaryBrush}"/>
+                            <TextBlock Text="{Binding Excluidas}" FontWeight="Bold"/>
+                        </WrapPanel>
+                    </StackPanel>
+                    <CheckBox Grid.Column="1" Content="Mostrar sólo problemas" IsChecked="{Binding SoloProblemas}"
+                              VerticalAlignment="Bottom" Margin="16,0,0,2"/>
+                </Grid>
+
+                <DataGrid Grid.Row="1" ItemsSource="{Binding FilasVisibles}" SelectedItem="{Binding FilaSeleccionada}"
+                          AutoGenerateColumns="False" CanUserAddRows="False" HeadersVisibility="Column"
+                          GridLinesVisibility="Horizontal" RowHeaderWidth="0" MinHeight="220"
+                          AutomationProperties.Name="Vista previa de alumnos a importar">
+                    <DataGrid.Columns>
+                        <DataGridTextColumn Header="Fila" Binding="{Binding NumeroOrigen}" Width="60" IsReadOnly="True"/>
+                        <DataGridTextColumn Header="Núm." Binding="{Binding NumeroListaTexto, UpdateSourceTrigger=PropertyChanged}" Width="70"/>
+                        <DataGridTextColumn Header="Nombre completo" Binding="{Binding NombreCompleto, UpdateSourceTrigger=PropertyChanged}" Width="2*"/>
+                        <DataGridTextColumn Header="Grado" Binding="{Binding GradoTexto, UpdateSourceTrigger=PropertyChanged}" Width="85"/>
+                        <DataGridTextColumn Header="Estado" Binding="{Binding EstadoTexto}" Width="130" IsReadOnly="True"/>
+                        <DataGridTextColumn Header="Problema" Binding="{Binding ResumenProblemas}" Width="2*" IsReadOnly="True"/>
+                    </DataGrid.Columns>
+                </DataGrid>
+
+                <Border Grid.Row="2" Style="{StaticResource PopupCard}" Margin="0,12,0,0" Padding="14">
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                        </Grid.RowDefinitions>
+                        <TextBlock Text="Corregir fila seleccionada" Style="{StaticResource PopupSectionTitle}" FontSize="15"/>
+                        <Grid Grid.Row="1" Margin="0,10,0,0">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="10"/>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="10"/>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="10"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                            </Grid.RowDefinitions>
+
+                            <controls:FormField Grid.Column="0" Header="Primer apellido">
+                                <TextBox Text="{Binding FilaSeleccionada.PrimerApellido, UpdateSourceTrigger=PropertyChanged}"/>
+                            </controls:FormField>
+                            <controls:FormField Grid.Column="2" Header="Segundo apellido">
+                                <TextBox Text="{Binding FilaSeleccionada.SegundoApellido, UpdateSourceTrigger=PropertyChanged}"/>
+                            </controls:FormField>
+                            <controls:FormField Grid.Column="4" Header="Nombres">
+                                <TextBox Text="{Binding FilaSeleccionada.Nombres, UpdateSourceTrigger=PropertyChanged}"/>
+                            </controls:FormField>
+                            <controls:FormField Grid.Column="6" Header="Género">
+                                <TextBox Text="{Binding FilaSeleccionada.GeneroTexto, UpdateSourceTrigger=PropertyChanged}"/>
+                            </controls:FormField>
+
+                            <controls:FormField Grid.Row="1" Grid.Column="0" Header="Fecha de nacimiento">
+                                <TextBox Text="{Binding FilaSeleccionada.FechaNacimientoTexto, UpdateSourceTrigger=PropertyChanged}"/>
+                            </controls:FormField>
+                            <controls:FormField Grid.Row="1" Grid.Column="2" Header="Fecha de ingreso">
+                                <TextBox Text="{Binding FilaSeleccionada.FechaIngresoTexto, UpdateSourceTrigger=PropertyChanged}"/>
+                            </controls:FormField>
+                            <controls:FormField Grid.Row="1" Grid.Column="4" Grid.ColumnSpan="3" Header="Observaciones">
+                                <TextBox Text="{Binding FilaSeleccionada.Observaciones, UpdateSourceTrigger=PropertyChanged}"/>
+                            </controls:FormField>
+                        </Grid>
+
+                        <WrapPanel Grid.Row="2" Margin="0,10,0,0">
+                            <Button Content="Revalidar cambios" Command="{Binding RevalidarCommand}"/>
+                            <Button Content="Incluir / excluir fila" Command="{Binding AlternarExclusionCommand}"/>
+                            <Button Content="Importar duplicado como nuevo" Command="{Binding AutorizarDuplicadoCommand}"/>
+                        </WrapPanel>
+                    </Grid>
+                </Border>
+            </Grid>
+
+            <!-- Confirmación -->
+            <Border Style="{StaticResource PopupCard}"
+                    Visibility="{Binding MostrarConfirmacion, Converter={StaticResource BoolToVisibility}}">
+                <StackPanel MaxWidth="720" HorizontalAlignment="Center" VerticalAlignment="Center">
+                    <TextBlock Text="Confirma la importación" Style="{StaticResource PopupSectionTitle}"/>
+                    <TextBlock Margin="0,8,0,18" TextWrapping="Wrap" Style="{StaticResource PopupSubtitle}"
+                               Text="Se volverá a leer el estado actual del grupo antes de guardar. Si aparece un conflicto nuevo, no se importará ninguna fila."/>
+                    <Border Background="{DynamicResource InfoBackgroundBrush}" BorderBrush="{DynamicResource InfoBrush}"
+                            BorderThickness="1" CornerRadius="8" Padding="16" Margin="0,0,0,14">
+                        <StackPanel>
+                            <TextBlock FontWeight="Bold" Text="Los alumnos existentes no se modificarán."/>
+                            <TextBlock TextWrapping="Wrap" Margin="0,5,0,0"
+                                       Text="No se sobrescriben, reactivan ni desactivan registros existentes y no se reescriben historiales anteriores."/>
+                        </StackPanel>
+                    </Border>
+                    <TextBlock FontSize="18">
+                        <Run Text="Alumnos a importar: "/><Run Text="{Binding Listas}" FontWeight="Bold"/>
+                    </TextBlock>
+                    <TextBlock Margin="0,5,0,0">
+                        <Run Text="Filas excluidas: "/><Run Text="{Binding Excluidas}" FontWeight="Bold"/>
+                    </TextBlock>
+                </StackPanel>
+            </Border>
+
+            <!-- Resultado -->
+            <Border Style="{StaticResource PopupCard}"
+                    Visibility="{Binding MostrarResultado, Converter={StaticResource BoolToVisibility}}">
+                <StackPanel MaxWidth="620" HorizontalAlignment="Center" VerticalAlignment="Center">
+                    <Border Width="64" Height="64" CornerRadius="32" Background="{DynamicResource SuccessBackgroundBrush}" Margin="0,0,0,16">
+                        <TextBlock Text="✓" FontSize="30" Foreground="{DynamicResource SuccessBrush}" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                    </Border>
+                    <TextBlock Text="Importación completada" Style="{StaticResource PopupTitle}" HorizontalAlignment="Center"/>
+                    <TextBlock Margin="0,8,0,20" TextWrapping="Wrap" TextAlignment="Center" Style="{StaticResource PopupSubtitle}"
+                               Text="El padrón del grupo se guardó en una sola operación y la lista se actualizará al cerrar esta ventana."/>
+                    <TextBlock FontSize="18" HorizontalAlignment="Center">
+                        <Run Text="Importados: "/><Run Text="{Binding Importados}" FontWeight="Bold"/>
+                        <Run Text="   ·   Excluidos: "/><Run Text="{Binding ExcluidosResultado}" FontWeight="Bold"/>
+                    </TextBlock>
+                </StackPanel>
+            </Border>
+        </Grid>
+
+        <Border Grid.Row="2" Style="{StaticResource PopupFooter}">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+                <TextBlock Text="{Binding Mensaje}" Foreground="{DynamicResource ErrorBrush}" TextWrapping="Wrap" VerticalAlignment="Center"/>
+                <StackPanel Grid.Column="1" Orientation="Horizontal">
+                    <Button Content="Volver" Command="{Binding VolverCommand}"/>
+                    <Button Style="{StaticResource PrimaryButton}" Content="Crear vista previa"
+                            Command="{Binding GenerarPreviaCommand}"
+                            Visibility="{Binding MostrarColumnas, Converter={StaticResource BoolToVisibility}}"/>
+                    <Button Style="{StaticResource PrimaryButton}" Content="Continuar"
+                            Command="{Binding PrepararConfirmacionCommand}"
+                            Visibility="{Binding MostrarPrevia, Converter={StaticResource BoolToVisibility}}"/>
+                    <Button Style="{StaticResource PrimaryButton}" Content="Importar alumnos"
+                            Command="{Binding ConfirmarCommand}"
+                            Visibility="{Binding MostrarConfirmacion, Converter={StaticResource BoolToVisibility}}"/>
+                    <Button Content="Cerrar" Click="OnCerrarClic"/>
+                </StackPanel>
+            </Grid>
+        </Border>
+    </Grid>
+</Window>
