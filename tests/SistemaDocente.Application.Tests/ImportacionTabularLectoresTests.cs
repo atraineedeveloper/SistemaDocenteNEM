@@ -1,6 +1,7 @@
 using System.Globalization;
 using System.Text;
 
+using DocumentFormat.OpenXml;
 using DocumentFormat.OpenXml.Packaging;
 using DocumentFormat.OpenXml.Spreadsheet;
 
@@ -12,7 +13,7 @@ namespace SistemaDocente.Application.Tests;
 public sealed class ImportacionTabularLectoresTests
 {
     [Fact]
-    public void Csv_LeeUtf8ComillasYDelimitadorDetectado()
+    public void CsvLeeUtf8ComillasYDelimitadorDetectado()
     {
         var ruta = CrearRutaTemporal(".csv");
 
@@ -40,7 +41,7 @@ public sealed class ImportacionTabularLectoresTests
     }
 
     [Fact]
-    public void Csv_DelimitadorAmbiguoRequiereResolucionExplicita()
+    public void CsvDelimitadorAmbiguoRequiereResolucionExplicita()
     {
         var ruta = CrearRutaTemporal(".csv");
 
@@ -63,7 +64,7 @@ public sealed class ImportacionTabularLectoresTests
     }
 
     [Fact]
-    public void Xlsx_LeeHojasUtilesSharedStringsYTiposNativos()
+    public void XlsxLeeHojasUtilesSharedStringsYTiposNativos()
     {
         var ruta = CrearRutaTemporal(".xlsx");
 
@@ -93,7 +94,7 @@ public sealed class ImportacionTabularLectoresTests
     }
 
     [Fact]
-    public void LectorGeneral_RechazaExtensionNoCompatible()
+    public void LectorGeneralRechazaExtensionNoCompatible()
     {
         var exception = Assert.Throws<ImportacionTabularException>(
             () => new LectorImportacionTabular().Leer("alumnos.xls"));
