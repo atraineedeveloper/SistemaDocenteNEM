@@ -3,97 +3,110 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:controls="clr-namespace:SistemaDocente.App.Wpf.Controls"
         xml:lang="es-MX"
-        Title="{Binding TituloEditorEstudiante}" Height="600" Width="640" MinHeight="520" MinWidth="560"
-        WindowStartupLocation="CenterOwner" ShowInTaskbar="False">
-    <Grid Background="{DynamicResource SectionBackgroundBrush}">
+        Title="{Binding TituloEditorEstudiante}"
+        Height="680" Width="720" MinHeight="560" MinWidth="640"
+        WindowStartupLocation="CenterOwner" ShowInTaskbar="False"
+        ResizeMode="CanResizeWithGrip"
+        Background="{DynamicResource WindowBackgroundBrush}">
+
+    <Window.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="Styles/PopupStyles.xaml"/>
+            </ResourceDictionary.MergedDictionaries>
+        </ResourceDictionary>
+    </Window.Resources>
+
+    <Window.InputBindings>
+        <KeyBinding Modifiers="Control" Key="S" Command="{Binding GuardarEstudianteCommand}"/>
+    </Window.InputBindings>
+
+    <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
 
-        <!-- Header Banner -->
-        <Border Grid.Row="0" Background="{DynamicResource CardBackgroundBrush}" Padding="20,16" BorderBrush="{DynamicResource BorderLightBrush}" BorderThickness="0,0,0,1" Margin="0,0,0,14">
-            <DockPanel>
-                <StackPanel DockPanel.Dock="Left" VerticalAlignment="Center">
-                    <TextBlock Text="Gestión de Alumnos" Foreground="{DynamicResource TextSecondaryBrush}" FontSize="12" FontWeight="SemiBold" Margin="0,0,0,2"/>
-                    <TextBlock Text="{Binding TituloEditorEstudiante}" FontSize="20" FontWeight="Bold" Foreground="{DynamicResource TextPrimaryBrush}"/>
-                </StackPanel>
-            </DockPanel>
+        <Border Grid.Row="0" Style="{StaticResource PopupHeader}">
+            <StackPanel>
+                <TextBlock Text="ESTUDIANTE" Style="{StaticResource PopupEyebrow}"/>
+                <TextBlock Text="{Binding TituloEditorEstudiante}" Style="{StaticResource PopupTitle}" Margin="0,4,0,4"/>
+                <TextBlock Text="Completa los datos básicos del estudiante. Los campos marcados con * son obligatorios."
+                           Style="{StaticResource PopupSubtitle}"/>
+            </StackPanel>
         </Border>
 
-        <!-- Contenido Principal con Scroll -->
-        <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" Margin="16,0,16,10">
+        <ScrollViewer Grid.Row="1"
+                      VerticalScrollBarVisibility="Auto"
+                      HorizontalScrollBarVisibility="Disabled"
+                      Padding="24,20">
             <StackPanel>
-                <!-- Sección 1: Datos Personales -->
-                <Border Style="{StaticResource SectionCard}" Margin="0,0,0,14" Padding="16">
+                <Border Style="{StaticResource PopupCard}" Margin="0,0,0,16">
                     <StackPanel>
-                        <DockPanel Margin="0,0,0,12">
-                            <TextBlock Text="📌 Datos Personales" Style="{StaticResource Heading3}" Foreground="{DynamicResource TextPrimaryBrush}"/>
-                        </DockPanel>
+                        <TextBlock Text="Datos personales" Style="{StaticResource PopupSectionTitle}"/>
+                        <TextBlock Text="Nombre legal o de uso escolar con el que se identificará al estudiante."
+                                   Style="{StaticResource PopupSubtitle}" Margin="0,0,0,14"/>
 
-                        <!-- Apellidos (2 Columnas) -->
-                        <Grid Margin="0,0,0,12">
+                        <Grid>
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="*"/>
-                                <ColumnDefinition Width="14"/>
+                                <ColumnDefinition Width="16"/>
                                 <ColumnDefinition Width="*"/>
                             </Grid.ColumnDefinitions>
 
                             <controls:FormField Grid.Column="0" Header="Primer apellido *">
-                                <TextBox TabIndex="10" Text="{Binding PrimerApellidoEdicion, UpdateSourceTrigger=PropertyChanged}">
-                                    <TextBox.InputBindings>
-                                        <KeyBinding Key="Enter" Command="{Binding GuardarEstudianteCommand}"/>
-                                    </TextBox.InputBindings>
-                                </TextBox>
+                                <TextBox TabIndex="10"
+                                         MinHeight="38"
+                                         Text="{Binding PrimerApellidoEdicion, UpdateSourceTrigger=PropertyChanged}"
+                                         AutomationProperties.Name="Primer apellido del estudiante"/>
                             </controls:FormField>
 
                             <controls:FormField Grid.Column="2" Header="Segundo apellido">
-                                <TextBox TabIndex="11" Text="{Binding SegundoApellidoEdicion, UpdateSourceTrigger=PropertyChanged}">
-                                    <TextBox.InputBindings>
-                                        <KeyBinding Key="Enter" Command="{Binding GuardarEstudianteCommand}"/>
-                                    </TextBox.InputBindings>
-                                </TextBox>
+                                <TextBox TabIndex="11"
+                                         MinHeight="38"
+                                         Text="{Binding SegundoApellidoEdicion, UpdateSourceTrigger=PropertyChanged}"
+                                         AutomationProperties.Name="Segundo apellido del estudiante"/>
                             </controls:FormField>
                         </Grid>
 
-                        <!-- Nombres (Fila completa) -->
                         <controls:FormField Header="Nombre(s) *">
-                            <TextBox TabIndex="12" Text="{Binding NombresEdicion, UpdateSourceTrigger=PropertyChanged}">
-                                <TextBox.InputBindings>
-                                    <KeyBinding Key="Enter" Command="{Binding GuardarEstudianteCommand}"/>
-                                </TextBox.InputBindings>
-                            </TextBox>
+                            <TextBox TabIndex="12"
+                                     MinHeight="38"
+                                     Text="{Binding NombresEdicion, UpdateSourceTrigger=PropertyChanged}"
+                                     AutomationProperties.Name="Nombres del estudiante"/>
                         </controls:FormField>
                     </StackPanel>
                 </Border>
 
-                <!-- Sección 2: Datos Escolares -->
-                <Border Style="{StaticResource SectionCard}" Margin="0,0,0,14" Padding="16">
+                <Border Style="{StaticResource PopupCard}" Margin="0,0,0,16">
                     <StackPanel>
-                        <DockPanel Margin="0,0,0,12">
-                            <TextBlock Text="🎓 Datos Escolares" Style="{StaticResource Heading3}" Foreground="{DynamicResource TextPrimaryBrush}"/>
-                        </DockPanel>
+                        <TextBlock Text="Datos escolares" Style="{StaticResource PopupSectionTitle}"/>
+                        <TextBlock Text="Información utilizada para identificar al estudiante dentro del grupo."
+                                   Style="{StaticResource PopupSubtitle}" Margin="0,0,0,14"/>
 
                         <Grid>
                             <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="100"/>
-                                <ColumnDefinition Width="14"/>
+                                <ColumnDefinition Width="120"/>
+                                <ColumnDefinition Width="16"/>
                                 <ColumnDefinition Width="*"/>
-                                <ColumnDefinition Width="14"/>
-                                <ColumnDefinition Width="1.3*"/>
+                                <ColumnDefinition Width="16"/>
+                                <ColumnDefinition Width="1.25*"/>
                             </Grid.ColumnDefinitions>
 
-                            <controls:FormField Grid.Column="0" Header="Núm. lista *">
-                                <TextBox TabIndex="13" Text="{Binding NumeroListaEdicion, UpdateSourceTrigger=PropertyChanged}">
-                                    <TextBox.InputBindings>
-                                        <KeyBinding Key="Enter" Command="{Binding GuardarEstudianteCommand}"/>
-                                    </TextBox.InputBindings>
-                                </TextBox>
+                            <controls:FormField Grid.Column="0" Header="Núm. de lista *">
+                                <TextBox TabIndex="13"
+                                         MinHeight="38"
+                                         Text="{Binding NumeroListaEdicion, UpdateSourceTrigger=PropertyChanged}"
+                                         AutomationProperties.Name="Número de lista del estudiante"/>
                             </controls:FormField>
 
                             <controls:FormField Grid.Column="2" Header="Género *">
-                                <ComboBox TabIndex="14" SelectedIndex="{Binding GeneroIndexEdicion, Mode=TwoWay}" AutomationProperties.Name="Género del estudiante">
+                                <ComboBox TabIndex="14"
+                                          MinHeight="38"
+                                          Margin="0,4,0,10"
+                                          SelectedIndex="{Binding GeneroIndexEdicion, Mode=TwoWay}"
+                                          AutomationProperties.Name="Género del estudiante">
                                     <ComboBoxItem Content="No especificado"/>
                                     <ComboBoxItem Content="Hombre"/>
                                     <ComboBoxItem Content="Mujer"/>
@@ -101,40 +114,62 @@
                             </controls:FormField>
 
                             <controls:FormField Grid.Column="4" Header="Fecha de nacimiento *">
-                                <DatePicker TabIndex="15" SelectedDate="{Binding FechaNacimientoEdicion, Mode=TwoWay}" AutomationProperties.Name="Fecha de nacimiento del estudiante"/>
+                                <DatePicker TabIndex="15"
+                                            Style="{StaticResource PopupDatePicker}"
+                                            SelectedDate="{Binding FechaNacimientoEdicion, Mode=TwoWay}"
+                                            AutomationProperties.Name="Fecha de nacimiento del estudiante"/>
                             </controls:FormField>
                         </Grid>
                     </StackPanel>
                 </Border>
 
-                <!-- Sección 3: Observaciones -->
-                <Border Style="{StaticResource SectionCard}" Margin="0,0,0,10" Padding="16">
+                <Border Style="{StaticResource PopupCard}" Margin="0,0,0,12">
                     <StackPanel>
-                        <DockPanel Margin="0,0,0,10">
-                            <TextBlock Text="📝 Observaciones Particulares" Style="{StaticResource Heading3}" Foreground="{DynamicResource TextPrimaryBrush}"/>
-                        </DockPanel>
+                        <TextBlock Text="Observaciones particulares" Style="{StaticResource PopupSectionTitle}"/>
+                        <TextBlock Text="Registra únicamente información pedagógica útil para el seguimiento."
+                                   Style="{StaticResource PopupSubtitle}" Margin="0,0,0,14"/>
 
                         <controls:FormField Header="Registro cualitativo">
-                            <TextBox TabIndex="16" Text="{Binding ObservacionesEdicion, UpdateSourceTrigger=PropertyChanged}"
-                                     Height="65" TextWrapping="Wrap" AcceptsReturn="True"
-                                     ToolTip="Registro cualitativo y pedagógico del estudiante"/>
+                            <TextBox TabIndex="16"
+                                     Text="{Binding ObservacionesEdicion, UpdateSourceTrigger=PropertyChanged}"
+                                     MinHeight="110"
+                                     TextWrapping="Wrap"
+                                     AcceptsReturn="True"
+                                     VerticalScrollBarVisibility="Auto"
+                                     VerticalContentAlignment="Top"
+                                     AutomationProperties.Name="Observaciones particulares del estudiante"/>
                         </controls:FormField>
                     </StackPanel>
                 </Border>
 
-                <!-- Mensaje de error/validación -->
-                <TextBlock Foreground="{DynamicResource ErrorBrush}" Text="{Binding MensajeEdicion}" Margin="4,4,4,6" FontWeight="SemiBold" TextWrapping="Wrap"/>
+                <TextBlock Text="{Binding MensajeEdicion}"
+                           Foreground="{DynamicResource ErrorBrush}"
+                           Margin="4,0,4,4"
+                           FontWeight="SemiBold"
+                           TextWrapping="Wrap"
+                           AutomationProperties.LiveSetting="Polite"/>
             </StackPanel>
         </ScrollViewer>
 
-        <!-- Botonera Inferior -->
-        <Border Grid.Row="2" Background="{DynamicResource CardBackgroundBrush}" Padding="16,12" BorderBrush="{DynamicResource BorderLightBrush}" BorderThickness="0,1,0,0">
-            <DockPanel>
-                <StackPanel Orientation="Horizontal" DockPanel.Dock="Right" HorizontalAlignment="Right">
-                    <Button TabIndex="20" Content="Cancelar" Click="OnCancelarClic" IsCancel="True" Margin="0,0,10,0" MinWidth="90"/>
-                    <Button Style="{StaticResource PrimaryButton}" TabIndex="19" Content="💾 Guardar estudiante" Click="OnGuardarClic" IsDefault="True" MinWidth="140"/>
+        <Border Grid.Row="2" Style="{StaticResource PopupFooter}">
+            <Grid>
+                <TextBlock Text="Ctrl+S para guardar · Esc para cancelar"
+                           Style="{StaticResource PopupSubtitle}"
+                           VerticalAlignment="Center"/>
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                    <Button TabIndex="20"
+                            Content="Cancelar"
+                            Click="OnCancelarClic"
+                            IsCancel="True"
+                            MinWidth="100"/>
+                    <Button TabIndex="19"
+                            Style="{StaticResource PrimaryButton}"
+                            Content="Guardar estudiante"
+                            Click="OnGuardarClic"
+                            IsDefault="True"
+                            MinWidth="150"/>
                 </StackPanel>
-            </DockPanel>
+            </Grid>
         </Border>
     </Grid>
 </Window>
