@@ -14,7 +14,9 @@ public sealed class ProyectoDidactico
         DateOnly fechaTermino,
         EstadoProyecto estado,
         string observaciones,
-        int version)
+        int version,
+        MetodologiaProyectoNem metodologia,
+        IReadOnlyList<GradoPrimaria> gradosObjetivo)
     {
         Id = id;
         GrupoId = grupoId;
@@ -25,6 +27,8 @@ public sealed class ProyectoDidactico
         Estado = estado;
         Observaciones = observaciones;
         Version = version;
+        Metodologia = metodologia;
+        GradosObjetivo = gradosObjetivo;
     }
 
     public ProyectoId Id { get; }
@@ -36,6 +40,8 @@ public sealed class ProyectoDidactico
     public EstadoProyecto Estado { get; private set; }
     public string Observaciones { get; private set; }
     public int Version { get; }
+    public MetodologiaProyectoNem Metodologia { get; private set; }
+    public IReadOnlyList<GradoPrimaria> GradosObjetivo { get; private set; }
 
     public static ProyectoDidactico Crear(
         GrupoId grupoId,
@@ -43,12 +49,42 @@ public sealed class ProyectoDidactico
         string? descripcion,
         DateOnly fechaInicio,
         DateOnly fechaTermino,
-        string? observaciones)
+        string? observaciones) =>
+        Crear(
+            grupoId,
+            nombre,
+            descripcion,
+            fechaInicio,
+            fechaTermino,
+            observaciones,
+            MetodologiaProyectoNem.NoEspecificada,
+            []);
+
+    public static ProyectoDidactico Crear(
+        GrupoId grupoId,
+        string nombre,
+        string? descripcion,
+        DateOnly fechaInicio,
+        DateOnly fechaTermino,
+        string? observaciones,
+        MetodologiaProyectoNem metodologia,
+        IEnumerable<GradoPrimaria>? gradosObjetivo)
     {
         ValidarIdentidad(grupoId);
         var datos = ValidarDatos(nombre, descripcion, fechaInicio, fechaTermino, observaciones);
-        return new(ProyectoId.Crear(), grupoId, datos.Nombre, datos.Descripcion,
-            fechaInicio, fechaTermino, EstadoProyecto.Borrador, datos.Observaciones, 1);
+        var planeacion = ValidarPlaneacion(metodologia, gradosObjetivo);
+        return new(
+            ProyectoId.Crear(),
+            grupoId,
+            datos.Nombre,
+            datos.Descripcion,
+            fechaInicio,
+            fechaTermino,
+            EstadoProyecto.Borrador,
+            datos.Observaciones,
+            1,
+            planeacion.Metodologia,
+            planeacion.Grados);
     }
 
     public static ProyectoDidactico Rehidratar(
@@ -60,14 +96,51 @@ public sealed class ProyectoDidactico
         DateOnly fechaTermino,
         EstadoProyecto estado,
         string? observaciones,
-        int version)
+        int version) =>
+        Rehidratar(
+            id,
+            grupoId,
+            nombre,
+            descripcion,
+            fechaInicio,
+            fechaTermino,
+            estado,
+            observaciones,
+            version,
+            MetodologiaProyectoNem.NoEspecificada,
+            []);
+
+    public static ProyectoDidactico Rehidratar(
+        ProyectoId id,
+        GrupoId grupoId,
+        string nombre,
+        string? descripcion,
+        DateOnly fechaInicio,
+        DateOnly fechaTermino,
+        EstadoProyecto estado,
+        string? observaciones,
+        int version,
+        MetodologiaProyectoNem metodologia,
+        IEnumerable<GradoPrimaria>? gradosObjetivo)
     {
         if (id == default) throw new DomainValidationException("La identidad del proyecto no puede estar vacía.");
         ValidarIdentidad(grupoId);
         ValidarEstado(estado);
         if (version <= 0) throw new DomainValidationException("La versión del proyecto debe ser positiva.");
         var datos = ValidarDatos(nombre, descripcion, fechaInicio, fechaTermino, observaciones, true);
-        return new(id, grupoId, datos.Nombre, datos.Descripcion, fechaInicio, fechaTermino, estado, datos.Observaciones, version);
+        var planeacion = ValidarPlaneacion(metodologia, gradosObjetivo);
+        return new(
+            id,
+            grupoId,
+            datos.Nombre,
+            datos.Descripcion,
+            fechaInicio,
+            fechaTermino,
+            estado,
+            datos.Observaciones,
+            version,
+            planeacion.Metodologia,
+            planeacion.Grados);
     }
 
     public void Actualizar(
@@ -75,14 +148,34 @@ public sealed class ProyectoDidactico
         string? descripcion,
         DateOnly fechaInicio,
         DateOnly fechaTermino,
-        string? observaciones)
+        string? observaciones) =>
+        Actualizar(
+            nombre,
+            descripcion,
+            fechaInicio,
+            fechaTermino,
+            observaciones,
+            Metodologia,
+            GradosObjetivo);
+
+    public void Actualizar(
+        string nombre,
+        string? descripcion,
+        DateOnly fechaInicio,
+        DateOnly fechaTermino,
+        string? observaciones,
+        MetodologiaProyectoNem metodologia,
+        IEnumerable<GradoPrimaria>? gradosObjetivo)
     {
         var datos = ValidarDatos(nombre, descripcion, fechaInicio, fechaTermino, observaciones);
+        var planeacion = ValidarPlaneacion(metodologia, gradosObjetivo);
         Nombre = datos.Nombre;
         Descripcion = datos.Descripcion;
         FechaInicio = fechaInicio;
         FechaTermino = fechaTermino;
         Observaciones = datos.Observaciones;
+        Metodologia = planeacion.Metodologia;
+        GradosObjetivo = planeacion.Grados;
     }
 
     public void Iniciar()
@@ -118,6 +211,18 @@ public sealed class ProyectoDidactico
             throw new DomainValidationException("Los textos del proyecto deben estar normalizados.");
         if (fechaInicio > fechaTermino) throw new DomainValidationException("La fecha inicial no puede ser posterior a la fecha final.");
         return (nombreValidado, descripcionValidada, observacionesValidadas);
+    }
+
+    private static (MetodologiaProyectoNem Metodologia, IReadOnlyList<GradoPrimaria> Grados) ValidarPlaneacion(
+        MetodologiaProyectoNem metodologia,
+        IEnumerable<GradoPrimaria>? gradosObjetivo)
+    {
+        if (!CatalogoPlaneacionNem.EsMetodologiaValida(metodologia))
+        {
+            throw new DomainValidationException("La metodología NEM del proyecto no es válida.");
+        }
+
+        return (metodologia, CatalogoPlaneacionNem.NormalizarGradosObjetivo(gradosObjetivo));
     }
 
     private static string ValidarOpcional(string? valor, int maximo, string campo)
