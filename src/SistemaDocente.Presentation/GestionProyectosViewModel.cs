@@ -20,6 +20,9 @@ public sealed class GestionProyectosViewModel : ViewModelBase
     private IReadOnlyList<ActividadProyectoResumen> _todasActividades = [];
     private IReadOnlyList<EntregaActividadVisual> _entregas = [];
     private IReadOnlyList<EntregaActividadVisual> _entregasVisibles = [];
+    private IReadOnlyList<GradoPrimaria> _gradosConfigurados = CatalogoNemPrimaria.TodosLosGrados;
+    private IReadOnlyList<SeleccionGradoPlaneacion> _gradosProyecto = [];
+    private IReadOnlyList<SeleccionGradoPlaneacion> _gradosActividad = [];
     private bool _estaOcupado;
     private FiltroProyecto _filtroProyecto;
     private FiltroEntrega _filtroEntrega;
@@ -29,10 +32,12 @@ public sealed class GestionProyectosViewModel : ViewModelBase
     private string _observacionesProyecto = string.Empty;
     private DateOnly _inicio = DateOnly.FromDateTime(DateTime.Today);
     private DateOnly _termino = DateOnly.FromDateTime(DateTime.Today).AddDays(13);
+    private MetodologiaProyectoNem _metodologiaProyecto = MetodologiaProyectoNem.NoEspecificada;
     private string _tituloActividad = string.Empty;
     private string _descripcionActividad = string.Empty;
     private string _observacionesActividad = string.Empty;
     private DateOnly _fechaActividad = DateOnly.FromDateTime(DateTime.Today);
+    private CampoFormativoNem _campoFormativoActividad = CampoFormativoNem.NoEspecificado;
     private bool _nuevoProyecto;
     private bool _nuevaActividad;
 
@@ -46,11 +51,33 @@ public sealed class GestionProyectosViewModel : ViewModelBase
         _dialogo = dialogo;
         _confirmacion = confirmacion;
         _mensajes = mensajes;
+        MetodologiasProyecto =
+        [
+            new(MetodologiaProyectoNem.NoEspecificada, "No especificada"),
+            .. CatalogoPlaneacionNem.MetodologiasProyecto.Select(
+                valor => new OpcionMetodologiaProyectoNem(
+                    valor,
+                    CatalogoPlaneacionNem.FormatearMetodologia(valor))),
+        ];
+        CamposFormativos =
+        [
+            new(CampoFormativoNem.NoEspecificado, "No especificado"),
+            .. CatalogoPlaneacionNem.CamposFormativos.Select(
+                valor => new OpcionCampoFormativoNem(
+                    valor,
+                    CatalogoPlaneacionNem.FormatearCampo(valor))),
+        ];
+        EstablecerGradosProyecto([]);
+        EstablecerGradosActividad([]);
+
         NuevoProyectoCommand = new RelayCommand(NuevoProyecto, () => !EstaOcupado);
         GuardarProyectoCommand = new RelayCommand(
             GuardarProyecto,
             () => !EstaOcupado && _grupoId is not null
-                && !string.IsNullOrWhiteSpace(NombreProyecto) && TieneCambiosProyecto);
+                && !string.IsNullOrWhiteSpace(NombreProyecto)
+                && TieneCambiosProyecto
+                && CatalogoPlaneacionNem.EsMetodologiaEspecifica(MetodologiaProyecto)
+                && GradosProyectoSeleccionados.Count > 0);
         IniciarProyectoCommand = new RelayCommand(
             () => CambiarEstado(EstadoProyecto.EnCurso),
             () => ProyectoSeleccionado?.Estado == EstadoProyecto.Borrador && !EstaOcupado);
@@ -69,7 +96,11 @@ public sealed class GestionProyectosViewModel : ViewModelBase
                 && ProyectoSeleccionado.Estado != EstadoProyecto.Finalizado && !EstaOcupado);
         GuardarActividadCommand = new RelayCommand(
             GuardarActividad,
-            () => PuedeEditarActividad && !string.IsNullOrWhiteSpace(TituloActividad) && TieneCambiosActividad);
+            () => PuedeEditarActividad
+                && !string.IsNullOrWhiteSpace(TituloActividad)
+                && TieneCambiosActividad
+                && CatalogoPlaneacionNem.EsCampoEspecifico(CampoFormativoActividad)
+                && GradosActividadSeleccionados.Count > 0);
         DescartarActividadCommand = new RelayCommand(
             DescartarActividad,
             () => TieneCambiosActividad && !EstaOcupado);
@@ -95,7 +126,7 @@ public sealed class GestionProyectosViewModel : ViewModelBase
         MarcarTodosDominaCommand = new RelayCommand(
             () =>
             {
-                foreach (var fila in Entregas) fila.NivelLogro = NivelLogro.Domina;
+                foreach (var fila in EntregasVisibles) fila.NivelLogro = NivelLogro.Domina;
                 NotificarEdicion();
             },
             () => PuedeEditarActividad);
@@ -121,6 +152,10 @@ public sealed class GestionProyectosViewModel : ViewModelBase
     public RelayCommand MarcarTodosDominaCommand { get; }
     public IReadOnlyList<FiltroProyecto> FiltrosProyecto { get; } = Enum.GetValues<FiltroProyecto>();
     public IReadOnlyList<FiltroEntrega> FiltrosEntrega { get; } = Enum.GetValues<FiltroEntrega>();
+    public IReadOnlyList<OpcionMetodologiaProyectoNem> MetodologiasProyecto { get; }
+    public IReadOnlyList<OpcionCampoFormativoNem> CamposFormativos { get; }
+    public GrupoId? GrupoIdActual => _grupoId;
+
     public IReadOnlyList<ProyectoResumen> ProyectosVisibles
     {
         get => _proyectosVisibles;
@@ -144,6 +179,27 @@ public sealed class GestionProyectosViewModel : ViewModelBase
         get => _entregasVisibles;
         private set => SetProperty(ref _entregasVisibles, value);
     }
+
+    public IReadOnlyList<SeleccionGradoPlaneacion> GradosProyecto
+    {
+        get => _gradosProyecto;
+        private set => SetProperty(ref _gradosProyecto, value);
+    }
+
+    public IReadOnlyList<SeleccionGradoPlaneacion> GradosActividad
+    {
+        get => _gradosActividad;
+        private set => SetProperty(ref _gradosActividad, value);
+    }
+
+    public IReadOnlyList<GradoPrimaria> GradosProyectoSeleccionados => ObtenerSeleccionados(GradosProyecto);
+    public IReadOnlyList<GradoPrimaria> GradosActividadSeleccionados => ObtenerSeleccionados(GradosActividad);
+    public bool EsGrupoUnigrado => _gradosConfigurados.Count == 1;
+    public bool EsGrupoMultigrado => _gradosConfigurados.Count > 1;
+    public string GradoUnigradoTexto => EsGrupoUnigrado
+        ? CatalogoNemPrimaria.FormatearGrado(_gradosConfigurados[0])
+        : string.Empty;
+    public bool PuedeEditarGradosActividad => _nuevaActividad && PuedeEditarActividad;
 
     public ProyectoResumen? ProyectoSeleccionado
     {
@@ -230,6 +286,12 @@ public sealed class GestionProyectosViewModel : ViewModelBase
         set { if (SetProperty(ref _termino, value)) NotificarEdicion(); }
     }
 
+    public MetodologiaProyectoNem MetodologiaProyecto
+    {
+        get => _metodologiaProyecto;
+        set { if (SetProperty(ref _metodologiaProyecto, value)) NotificarEdicion(); }
+    }
+
     public string TituloActividad
     {
         get => _tituloActividad;
@@ -254,6 +316,12 @@ public sealed class GestionProyectosViewModel : ViewModelBase
         set { if (SetProperty(ref _fechaActividad, value)) NotificarEdicion(); }
     }
 
+    public CampoFormativoNem CampoFormativoActividad
+    {
+        get => _campoFormativoActividad;
+        set { if (SetProperty(ref _campoFormativoActividad, value)) NotificarEdicion(); }
+    }
+
     public bool EstaOcupado
     {
         get => _estaOcupado;
@@ -266,12 +334,16 @@ public sealed class GestionProyectosViewModel : ViewModelBase
             || DescripcionProyecto != _proyectoConfirmado.Descripcion
             || FechaInicio != _proyectoConfirmado.FechaInicio
             || FechaTermino != _proyectoConfirmado.FechaTermino
-            || ObservacionesProyecto != _proyectoConfirmado.Observaciones);
+            || ObservacionesProyecto != _proyectoConfirmado.Observaciones
+            || MetodologiaProyecto != _proyectoConfirmado.Metodologia
+            || !MismosGrados(GradosProyectoSeleccionados, _proyectoConfirmado.GradosObjetivo));
     public bool TieneCambiosActividad => _nuevaActividad || _actividadConfirmada is not null
         && (TituloActividad != _actividadConfirmada.Titulo
             || DescripcionActividad != _actividadConfirmada.Descripcion
             || FechaActividad != _actividadConfirmada.FechaRealizacion
             || ObservacionesActividad != _actividadConfirmada.ObservacionesGenerales
+            || CampoFormativoActividad != _actividadConfirmada.CampoFormativo
+            || !MismosGrados(GradosActividadSeleccionados, _actividadConfirmada.GradosObjetivo)
             || Entregas.Any(fila =>
             {
                 var confirmada = _actividadConfirmada.Entregas.Single(x => x.EstudianteId == fila.EstudianteId);
@@ -280,19 +352,45 @@ public sealed class GestionProyectosViewModel : ViewModelBase
     public bool PuedeEditarActividad => !EstaOcupado
         && ProyectoSeleccionado?.Estado != EstadoProyecto.Finalizado
         && (_nuevaActividad || ActividadSeleccionada?.Estado == EstadoActividad.Activa);
-    public int Total => Entregas.Count;
-    public int Pendientes => Entregas.Count(x => x.NivelLogro == NivelLogro.Pendiente);
-    public int Domina => Entregas.Count(x => x.NivelLogro == NivelLogro.Domina);
-    public int Suficiente => Entregas.Count(x => x.NivelLogro == NivelLogro.Suficiente);
-    public int EnProceso => Entregas.Count(x => x.NivelLogro == NivelLogro.EnProceso);
-    public int RequiereApoyo => Entregas.Count(x => x.NivelLogro == NivelLogro.RequiereApoyo);
-    public int NoEntrego => Entregas.Count(x => x.NivelLogro == NivelLogro.NoEntrego);
+    public int Total => EntregasObjetivo().Count();
+    public int Pendientes => EntregasObjetivo().Count(x => x.NivelLogro == NivelLogro.Pendiente);
+    public int Domina => EntregasObjetivo().Count(x => x.NivelLogro == NivelLogro.Domina);
+    public int Suficiente => EntregasObjetivo().Count(x => x.NivelLogro == NivelLogro.Suficiente);
+    public int EnProceso => EntregasObjetivo().Count(x => x.NivelLogro == NivelLogro.EnProceso);
+    public int RequiereApoyo => EntregasObjetivo().Count(x => x.NivelLogro == NivelLogro.RequiereApoyo);
+    public int NoEntrego => EntregasObjetivo().Count(x => x.NivelLogro == NivelLogro.NoEntrego);
 
     public void Inicializar(GrupoId grupoId)
     {
         if (_grupoId is not null && _grupoId != grupoId && !ConfirmarPendientes()) return;
         _grupoId = grupoId;
         RecargarProyectos();
+    }
+
+    public void ConfigurarGradosDisponibles(IEnumerable<GradoPrimaria>? gradosConfigurados)
+    {
+        var grados = CatalogoNemPrimaria.NormalizarGrados(gradosConfigurados);
+        _gradosConfigurados = grados.Count == 0 ? CatalogoNemPrimaria.TodosLosGrados : grados;
+
+        var seleccionProyecto = GradosProyectoSeleccionados;
+        var seleccionActividad = GradosActividadSeleccionados;
+        EstablecerGradosProyecto(seleccionProyecto);
+        EstablecerGradosActividad(seleccionActividad);
+
+        if (_nuevoProyecto && GradosProyectoSeleccionados.Count == 0 && EsGrupoUnigrado)
+        {
+            EstablecerGradosProyecto(_gradosConfigurados);
+        }
+
+        if (_nuevaActividad && GradosActividadSeleccionados.Count == 0)
+        {
+            EstablecerGradosActividad(GradosPredeterminadosActividad());
+        }
+
+        OnPropertyChanged(nameof(EsGrupoUnigrado));
+        OnPropertyChanged(nameof(EsGrupoMultigrado));
+        OnPropertyChanged(nameof(GradoUnigradoTexto));
+        NotificarEdicion();
     }
 
     public bool SolicitarSalir() => ConfirmarPendientes();
@@ -310,6 +408,9 @@ public sealed class GestionProyectosViewModel : ViewModelBase
         ObservacionesProyecto = string.Empty;
         FechaInicio = DateOnly.FromDateTime(DateTime.Today);
         FechaTermino = FechaInicio.AddDays(13);
+        _metodologiaProyecto = MetodologiaProyectoNem.NoEspecificada;
+        OnPropertyChanged(nameof(MetodologiaProyecto));
+        EstablecerGradosProyecto(EsGrupoUnigrado ? _gradosConfigurados : []);
         NotificarEdicion();
     }
 
@@ -342,11 +443,14 @@ public sealed class GestionProyectosViewModel : ViewModelBase
         _observacionesProyecto = detalle.Observaciones;
         _inicio = detalle.FechaInicio;
         _termino = detalle.FechaTermino;
+        _metodologiaProyecto = detalle.Metodologia;
+        EstablecerGradosProyecto(detalle.GradosObjetivo ?? []);
         OnPropertyChanged(nameof(NombreProyecto));
         OnPropertyChanged(nameof(DescripcionProyecto));
         OnPropertyChanged(nameof(ObservacionesProyecto));
         OnPropertyChanged(nameof(FechaInicio));
         OnPropertyChanged(nameof(FechaTermino));
+        OnPropertyChanged(nameof(MetodologiaProyecto));
         NotificarEdicion();
     }
 
@@ -355,9 +459,28 @@ public sealed class GestionProyectosViewModel : ViewModelBase
     private bool IntentarGuardarProyecto()
     {
         if (_grupoId is null) return false;
+        if (!CatalogoPlaneacionNem.EsMetodologiaEspecifica(MetodologiaProyecto))
+        {
+            _mensajes.MostrarError("Selecciona una metodología NEM para el proyecto.");
+            return false;
+        }
+
+        var grados = GradosProyectoSeleccionados;
+        if (grados.Count == 0)
+        {
+            _mensajes.MostrarError("Selecciona al menos un grado objetivo para el proyecto.");
+            return false;
+        }
+
         ProyectoDetalle? guardado = null;
         var entrada = new EntradaProyecto(
-            NombreProyecto, DescripcionProyecto, FechaInicio, FechaTermino, ObservacionesProyecto);
+            NombreProyecto,
+            DescripcionProyecto,
+            FechaInicio,
+            FechaTermino,
+            ObservacionesProyecto,
+            MetodologiaProyecto,
+            grados);
         var correcto = Ejecutar(() =>
         {
             guardado = _nuevoProyecto
@@ -454,10 +577,17 @@ public sealed class GestionProyectosViewModel : ViewModelBase
         _descripcionActividad = detalle.Descripcion;
         _fechaActividad = detalle.FechaRealizacion;
         _observacionesActividad = detalle.ObservacionesGenerales;
+        _campoFormativoActividad = detalle.CampoFormativo;
+        var gradosDetalle = detalle.GradosObjetivo ?? [];
+        EstablecerGradosActividad(
+            _nuevaActividad && gradosDetalle.Count == 0
+                ? GradosPredeterminadosActividad()
+                : gradosDetalle);
         OnPropertyChanged(nameof(TituloActividad));
         OnPropertyChanged(nameof(DescripcionActividad));
         OnPropertyChanged(nameof(FechaActividad));
         OnPropertyChanged(nameof(ObservacionesActividad));
+        OnPropertyChanged(nameof(CampoFormativoActividad));
         Entregas = detalle.Entregas.Select(x => new EntregaActividadVisual(x)).ToArray();
         foreach (var fila in Entregas)
         {
@@ -477,11 +607,34 @@ public sealed class GestionProyectosViewModel : ViewModelBase
     private bool IntentarGuardarActividad()
     {
         if (_proyecto is null) return false;
+        if (!CatalogoPlaneacionNem.EsCampoEspecifico(CampoFormativoActividad))
+        {
+            _mensajes.MostrarError("Selecciona el campo formativo de la actividad.");
+            return false;
+        }
+
+        var grados = GradosActividadSeleccionados;
+        if (grados.Count == 0)
+        {
+            _mensajes.MostrarError("Selecciona al menos un grado objetivo para la actividad.");
+            return false;
+        }
+
         ActividadProyectoDetalle? guardada = null;
-        var entradas = Entregas.Select(x =>
-            new EntradaEntregaActividad(x.EstudianteId, x.NivelLogro, x.Observacion)).ToArray();
+        var gradosSet = grados.ToHashSet();
+        var filas = _nuevaActividad
+            ? Entregas.Where(x => gradosSet.Contains(x.Grado)).ToArray()
+            : Entregas.ToArray();
+        var entradas = filas.Select(x =>
+            new EntradaEntregaActividad(x.EstudianteId, x.EstadoEntrega, x.NivelLogro, x.Observacion)).ToArray();
         var entrada = new EntradaActividad(
-            TituloActividad, DescripcionActividad, FechaActividad, ObservacionesActividad, entradas);
+            TituloActividad,
+            DescripcionActividad,
+            FechaActividad,
+            ObservacionesActividad,
+            entradas,
+            CampoFormativoActividad,
+            grados);
         var correcto = Ejecutar(() => guardada = _nuevaActividad
             ? _gestion.CrearActividad(_proyecto.ProyectoId, entrada)
             : _gestion.ActualizarActividad(_actividad!.ActividadId, _actividad.Version, entrada));
@@ -535,7 +688,7 @@ public sealed class GestionProyectosViewModel : ViewModelBase
         NotificarEdicion();
     }
 
-    // El orden es deliberado: primero se resuelve la actividad y después el proyecto.
+    // Deliberate order: resolve activity changes before project changes.
     private bool ConfirmarPendientes() =>
         ConfirmarPendientesActividad() && ConfirmarPendientesProyecto();
 
@@ -576,6 +729,9 @@ public sealed class GestionProyectosViewModel : ViewModelBase
             _nombreProyecto = string.Empty;
             _descripcionProyecto = string.Empty;
             _observacionesProyecto = string.Empty;
+            _metodologiaProyecto = MetodologiaProyectoNem.NoEspecificada;
+            EstablecerGradosProyecto([]);
+            OnPropertyChanged(nameof(MetodologiaProyecto));
         }
         else if (_proyectoConfirmado is not null)
         {
@@ -592,8 +748,11 @@ public sealed class GestionProyectosViewModel : ViewModelBase
         _actividadConfirmada = null;
         _nuevaActividad = false;
         _todasActividades = [];
+        _campoFormativoActividad = CampoFormativoNem.NoEspecificado;
+        EstablecerGradosActividad([]);
         Entregas = [];
         OnPropertyChanged(nameof(ActividadSeleccionada));
+        OnPropertyChanged(nameof(CampoFormativoActividad));
         AplicarFiltros();
         NotificarEdicion();
     }
@@ -634,7 +793,7 @@ public sealed class GestionProyectosViewModel : ViewModelBase
                 || x.Titulo.Contains(BusquedaActividad, StringComparison.CurrentCultureIgnoreCase)
                 || x.FechaRealizacion.ToString("dd/MM/yyyy", System.Globalization.CultureInfo.InvariantCulture)
                     .Contains(BusquedaActividad, StringComparison.Ordinal)).ToArray();
-        EntregasVisibles = Entregas.Where(x => FiltroEntrega switch
+        EntregasVisibles = EntregasObjetivo().Where(x => FiltroEntrega switch
         {
             FiltroEntrega.Pendientes => x.NivelLogro == NivelLogro.Pendiente,
             FiltroEntrega.Domina => x.NivelLogro == NivelLogro.Domina,
@@ -654,6 +813,23 @@ public sealed class GestionProyectosViewModel : ViewModelBase
         OnPropertyChanged(nameof(EnProceso));
         OnPropertyChanged(nameof(RequiereApoyo));
         OnPropertyChanged(nameof(NoEntrego));
+    }
+
+    private IEnumerable<EntregaActividadVisual> EntregasObjetivo()
+    {
+        if (!_nuevaActividad)
+        {
+            return Entregas;
+        }
+
+        var grados = GradosActividadSeleccionados;
+        if (grados.Count == 0)
+        {
+            return Array.Empty<EntregaActividadVisual>();
+        }
+
+        var conjunto = grados.ToHashSet();
+        return Entregas.Where(x => conjunto.Contains(x.Grado));
     }
 
     private bool Ejecutar(Action accion)
@@ -700,11 +876,72 @@ public sealed class GestionProyectosViewModel : ViewModelBase
         return valor;
     }
 
+    private void EstablecerGradosProyecto(IEnumerable<GradoPrimaria> seleccionados)
+    {
+        GradosProyecto = CrearSelecciones(seleccionados, NotificarEdicion);
+        OnPropertyChanged(nameof(GradosProyectoSeleccionados));
+    }
+
+    private void EstablecerGradosActividad(IEnumerable<GradoPrimaria> seleccionados)
+    {
+        GradosActividad = CrearSelecciones(seleccionados, NotificarEdicion);
+        OnPropertyChanged(nameof(GradosActividadSeleccionados));
+    }
+
+    private IReadOnlyList<SeleccionGradoPlaneacion> CrearSelecciones(
+        IEnumerable<GradoPrimaria> seleccionados,
+        Action alCambiar)
+    {
+        var seleccion = CatalogoPlaneacionNem.NormalizarGradosObjetivo(seleccionados);
+        var disponibles = _gradosConfigurados
+            .Concat(seleccion)
+            .Where(CatalogoNemPrimaria.EsGradoReal)
+            .Distinct()
+            .OrderBy(x => (int)x)
+            .ToArray();
+        var conjunto = seleccion.ToHashSet();
+        var opciones = disponibles
+            .Select(grado => new SeleccionGradoPlaneacion(grado, conjunto.Contains(grado)))
+            .ToArray();
+        foreach (var opcion in opciones)
+        {
+            opcion.PropertyChanged += (_, args) =>
+            {
+                if (args.PropertyName == nameof(SeleccionGradoPlaneacion.Seleccionado))
+                {
+                    OnPropertyChanged(nameof(GradosProyectoSeleccionados));
+                    OnPropertyChanged(nameof(GradosActividadSeleccionados));
+                    alCambiar();
+                }
+            };
+        }
+        return opciones;
+    }
+
+    private IReadOnlyList<GradoPrimaria> GradosPredeterminadosActividad()
+    {
+        var proyecto = GradosProyectoSeleccionados;
+        return proyecto.Count > 0 ? proyecto : _gradosConfigurados;
+    }
+
+    private static IReadOnlyList<GradoPrimaria> ObtenerSeleccionados(
+        IEnumerable<SeleccionGradoPlaneacion> opciones) =>
+        opciones.Where(x => x.Seleccionado).Select(x => x.Grado).OrderBy(x => (int)x).ToArray();
+
+    private static bool MismosGrados(
+        IEnumerable<GradoPrimaria> actuales,
+        IEnumerable<GradoPrimaria>? confirmados) =>
+        CatalogoPlaneacionNem.NormalizarGradosObjetivo(actuales)
+            .SequenceEqual(CatalogoPlaneacionNem.NormalizarGradosObjetivo(confirmados));
+
     private void NotificarEdicion()
     {
         OnPropertyChanged(nameof(DuracionAtipica));
         OnPropertyChanged(nameof(TieneCambiosProyecto));
         OnPropertyChanged(nameof(TieneCambiosActividad));
+        OnPropertyChanged(nameof(GradosProyectoSeleccionados));
+        OnPropertyChanged(nameof(GradosActividadSeleccionados));
+        OnPropertyChanged(nameof(PuedeEditarGradosActividad));
         AplicarFiltros();
         NotificarComandos();
     }
@@ -726,12 +963,30 @@ public sealed class GestionProyectosViewModel : ViewModelBase
     }
 
     private static ProyectoResumen Resumir(ProyectoDetalle proyecto) => new(
-        proyecto.ProyectoId, proyecto.Nombre, proyecto.FechaInicio, proyecto.FechaTermino,
-        proyecto.Estado, proyecto.NumeroActividades, proyecto.Version);
+        proyecto.ProyectoId,
+        proyecto.Nombre,
+        proyecto.FechaInicio,
+        proyecto.FechaTermino,
+        proyecto.Estado,
+        proyecto.NumeroActividades,
+        proyecto.Version,
+        proyecto.Metodologia,
+        proyecto.GradosObjetivo);
 
     private static ActividadProyectoResumen Resumir(ActividadProyectoDetalle actividad) => new(
-        actividad.ActividadId, actividad.ProyectoId, actividad.Titulo, actividad.FechaRealizacion,
-        actividad.Estado, actividad.Total, actividad.Pendientes, actividad.Domina,
-        actividad.Suficiente, actividad.EnProceso, actividad.RequiereApoyo,
-        actividad.NoEntrego, actividad.Version);
+        actividad.ActividadId,
+        actividad.ProyectoId,
+        actividad.Titulo,
+        actividad.FechaRealizacion,
+        actividad.Estado,
+        actividad.Total,
+        actividad.Pendientes,
+        actividad.Domina,
+        actividad.Suficiente,
+        actividad.EnProceso,
+        actividad.RequiereApoyo,
+        actividad.NoEntrego,
+        actividad.Version,
+        actividad.CampoFormativo,
+        actividad.GradosObjetivo);
 }
