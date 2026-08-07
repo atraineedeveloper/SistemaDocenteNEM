@@ -191,6 +191,8 @@ public sealed class PersistenciaContextoGrupoSqlite : IAlmacenamientoContextoGru
         SqliteTransaction transaccion,
         ContextoGrupo contexto)
     {
+        var grados = CatalogoNemPrimaria.NormalizarGrados(contexto.GradosAtendidos);
+
         using (var borrar = conexion.CreateCommand())
         {
             borrar.Transaction = transaccion;
@@ -199,7 +201,7 @@ public sealed class PersistenciaContextoGrupoSqlite : IAlmacenamientoContextoGru
             borrar.ExecuteNonQuery();
         }
 
-        foreach (var grado in contexto.GradosAtendidos.Where(CatalogoNemPrimaria.EsGradoReal))
+        foreach (var grado in grados)
         {
             using var insertar = conexion.CreateCommand();
             insertar.Transaction = transaccion;
@@ -207,6 +209,24 @@ public sealed class PersistenciaContextoGrupoSqlite : IAlmacenamientoContextoGru
             insertar.Parameters.AddWithValue("$grupo", contexto.GrupoId.ToString());
             insertar.Parameters.AddWithValue("$grado", (int)grado);
             insertar.ExecuteNonQuery();
+        }
+
+        // In a one-grade classroom there is no ambiguity: every student belongs to that
+        // grade. This also gives deterministic structured data to legacy/demo rosters.
+        if (grados.Count == 1)
+        {
+            using var asignar = conexion.CreateCommand();
+            asignar.Transaction = transaccion;
+            asignar.CommandText = """
+                INSERT INTO grados_estudiante (grupo_id, estudiante_id, grado)
+                SELECT grupo_id, id, $grado
+                FROM estudiantes
+                WHERE grupo_id = $grupo
+                ON CONFLICT(grupo_id, estudiante_id) DO UPDATE SET grado = excluded.grado;
+                """;
+            asignar.Parameters.AddWithValue("$grupo", contexto.GrupoId.ToString());
+            asignar.Parameters.AddWithValue("$grado", (int)grados[0]);
+            asignar.ExecuteNonQuery();
         }
     }
 
