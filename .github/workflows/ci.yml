@@ -36,23 +36,9 @@ jobs:
         with:
           dotnet-version: 10.0.x
 
-      - name: Setup Node.js 24
-        uses: actions/setup-node@v6
-        with:
-          node-version: 24.x
-          package-manager-cache: false
-
-      - name: Install OpenSpec
+      - name: .NET version
         shell: pwsh
-        run: npm install --global @fission-ai/openspec@1.6.0
-
-      - name: Tool versions
-        shell: pwsh
-        run: |
-          dotnet --version
-          node --version
-          npm --version
-          openspec --version
+        run: dotnet --version
 
       - name: Restore
         shell: pwsh
@@ -69,6 +55,20 @@ jobs:
       - name: Test
         shell: pwsh
         run: dotnet test SistemaDocente.sln --configuration Release --no-build
+
+      - name: Setup Node.js 24
+        uses: actions/setup-node@v6
+        with:
+          node-version: 24.x
+          package-manager-cache: false
+
+      - name: Install OpenSpec
+        shell: pwsh
+        run: npm install --global @fission-ai/openspec@1.6.0
+
+      - name: OpenSpec version
+        shell: pwsh
+        run: openspec --version
 
       - name: Validate OpenSpec
         shell: pwsh
