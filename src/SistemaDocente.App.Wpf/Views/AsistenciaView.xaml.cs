@@ -27,6 +27,7 @@ public partial class AsistenciaView : UserControl
         Loaded += OnLoaded;
         Unloaded += OnUnloaded;
         DataContextChanged += OnDataContextChanged;
+        GrillaMensual.PreviewMouseLeftButtonUp += OnGrillaMensualClick;
     }
 
     private ModuloAsistenciaViewModel? ViewModel => DataContext as ModuloAsistenciaViewModel;
@@ -40,6 +41,9 @@ public partial class AsistenciaView : UserControl
             _temaSuscrito = true;
         }
 
+        GrillaMensual.RowHeight = 42;
+        GrillaMensual.ColumnHeaderHeight = 48;
+        GrillaMensual.GridLinesVisibility = DataGridGridLinesVisibility.Horizontal;
         CrearColumnasMensuales();
     }
 
@@ -111,11 +115,12 @@ public partial class AsistenciaView : UserControl
                 {
                     Text = $"{dia.NumeroDia}\n{dia.AbreviaturaDiaSemana}",
                     ToolTip = $"Día {dia.NumeroDia} - {dia.Fecha:dd/MM/yyyy}",
+                    TextAlignment = TextAlignment.Center,
                 },
                 Binding = new Binding($"Celdas[{indice}].Texto"),
-                Width = 43,
-                ElementStyle = CrearEstiloCelda(indice),
-                CellStyle = CrearEstiloContenedor(dia.EsCierreSemana),
+                Width = 48,
+                ElementStyle = CrearEstiloCeldaTexto(),
+                CellStyle = CrearEstiloContenedor(indice, dia.EsCierreSemana),
                 HeaderStyle = CrearEstiloEncabezado(dia.EsCierreSemana),
             });
         }
@@ -147,28 +152,40 @@ public partial class AsistenciaView : UserControl
             Width = ancho,
         });
 
-    private static Style CrearEstiloCelda(int indice)
+    private static Style CrearEstiloCeldaTexto()
     {
         var estilo = new Style(typeof(TextBlock));
         estilo.Setters.Add(new Setter(TextBlock.TextAlignmentProperty, TextAlignment.Center));
+        estilo.Setters.Add(new Setter(TextBlock.HorizontalAlignmentProperty, HorizontalAlignment.Stretch));
         estilo.Setters.Add(new Setter(TextBlock.VerticalAlignmentProperty, VerticalAlignment.Center));
         estilo.Setters.Add(new Setter(TextBlock.FontWeightProperty, FontWeights.SemiBold));
-        AgregarColor(estilo, indice, "P", "SuccessBackgroundBrush", "SuccessBrush");
-        AgregarColor(estilo, indice, "F", "ErrorBackgroundBrush", "ErrorBrush");
-        AgregarColor(estilo, indice, "R", "WarningBackgroundBrush", "WarningBrush");
-        AgregarColor(estilo, indice, "J", "InfoBackgroundBrush", "InfoBrush");
+        estilo.Setters.Add(new Setter(TextBlock.FontSizeProperty, 13d));
         return estilo;
     }
 
-    private static Style CrearEstiloContenedor(bool esCierreSemana)
+    private static Style CrearEstiloContenedor(int indice, bool esCierreSemana)
     {
         var estilo = new Style(typeof(DataGridCell));
-        if (esCierreSemana)
-        {
-            estilo.Setters.Add(new Setter(Control.BorderBrushProperty, ObtenerBrush("BorderDefaultBrush")));
-            estilo.Setters.Add(new Setter(Control.BorderThicknessProperty, new Thickness(0, 0, 3, 0)));
-        }
+        estilo.Setters.Add(new Setter(Control.HorizontalContentAlignmentProperty, HorizontalAlignment.Stretch));
+        estilo.Setters.Add(new Setter(Control.VerticalContentAlignmentProperty, VerticalAlignment.Stretch));
+        estilo.Setters.Add(new Setter(Control.BorderBrushProperty, ObtenerBrush("BorderLightBrush")));
+        estilo.Setters.Add(new Setter(Control.BorderThicknessProperty, esCierreSemana
+            ? new Thickness(0, 0, 3, 1)
+            : new Thickness(0, 0, 1, 1)));
 
+        AgregarColorCelda(estilo, indice, "P", "SuccessBackgroundBrush", "SuccessBrush");
+        AgregarColorCelda(estilo, indice, "F", "ErrorBackgroundBrush", "ErrorBrush");
+        AgregarColorCelda(estilo, indice, "R", "WarningBackgroundBrush", "WarningBrush");
+        AgregarColorCelda(estilo, indice, "J", "InfoBackgroundBrush", "InfoBrush");
+
+        var hover = new Trigger { Property = UIElement.IsMouseOverProperty, Value = true };
+        hover.Setters.Add(new Setter(Control.BorderBrushProperty, ObtenerBrush("PrimaryBrush")));
+        estilo.Triggers.Add(hover);
+
+        var seleccion = new Trigger { Property = DataGridCell.IsSelectedProperty, Value = true };
+        seleccion.Setters.Add(new Setter(Control.BorderBrushProperty, ObtenerBrush("PrimaryBrush")));
+        seleccion.Setters.Add(new Setter(Control.BorderThicknessProperty, new Thickness(2)));
+        estilo.Triggers.Add(seleccion);
         return estilo;
     }
 
@@ -176,6 +193,8 @@ public partial class AsistenciaView : UserControl
     {
         var estilo = new Style(typeof(DataGridColumnHeader));
         estilo.Setters.Add(new Setter(Control.HorizontalContentAlignmentProperty, HorizontalAlignment.Center));
+        estilo.Setters.Add(new Setter(Control.VerticalContentAlignmentProperty, VerticalAlignment.Center));
+        estilo.Setters.Add(new Setter(Control.FontWeightProperty, FontWeights.SemiBold));
         if (esCierreSemana)
         {
             estilo.Setters.Add(new Setter(Control.BorderBrushProperty, ObtenerBrush("BorderDefaultBrush")));
@@ -185,15 +204,15 @@ public partial class AsistenciaView : UserControl
         return estilo;
     }
 
-    private static void AgregarColor(Style estilo, int indice, string texto, string fondoKey, string frenteKey)
+    private static void AgregarColorCelda(Style estilo, int indice, string texto, string fondoKey, string frenteKey)
     {
         var disparador = new DataTrigger
         {
             Binding = new Binding($"Celdas[{indice}].Texto"),
             Value = texto,
         };
-        disparador.Setters.Add(new Setter(TextBlock.BackgroundProperty, ObtenerBrush(fondoKey)));
-        disparador.Setters.Add(new Setter(TextBlock.ForegroundProperty, ObtenerBrush(frenteKey)));
+        disparador.Setters.Add(new Setter(Control.BackgroundProperty, ObtenerBrush(fondoKey)));
+        disparador.Setters.Add(new Setter(Control.ForegroundProperty, ObtenerBrush(frenteKey)));
         estilo.Triggers.Add(disparador);
     }
 
@@ -206,6 +225,23 @@ public partial class AsistenciaView : UserControl
         {
             vm.Mensual.SeleccionarCelda(seleccion.Fila, seleccion.Fecha);
         }
+    }
+
+    private void OnGrillaMensualClick(object sender, MouseButtonEventArgs e)
+    {
+        if (e.OriginalSource is not DependencyObject origen) return;
+        var celda = BuscarAncestro<DataGridCell>(origen);
+        if (celda?.Column is null || ViewModel is not { } vm) return;
+
+        var indiceDia = celda.Column.DisplayIndex - 2;
+        if (indiceDia < 0 || indiceDia >= vm.Mensual.Dias.Count) return;
+
+        GrillaMensual.CurrentCell = new DataGridCellInfo(celda.DataContext, celda.Column);
+        GrillaMensual.SelectedCells.Clear();
+        GrillaMensual.SelectedCells.Add(GrillaMensual.CurrentCell);
+        OnCeldaMensualSeleccionada(sender, EventArgs.Empty);
+        MostrarSelectorCompacto(celda);
+        e.Handled = true;
     }
 
     private void OnCeldaMensualDobleClic(object sender, MouseButtonEventArgs e)
@@ -265,15 +301,19 @@ public partial class AsistenciaView : UserControl
         }
     }
 
-    private void MostrarSelectorCompacto()
+    private void MostrarSelectorCompacto(FrameworkElement? destino = null)
     {
         if (ObtenerCeldaActual() is null) return;
 
-        var menu = new ContextMenu { PlacementTarget = GrillaMensual };
+        var menu = new ContextMenu
+        {
+            PlacementTarget = destino ?? GrillaMensual,
+            Placement = destino is null ? PlacementMode.MousePoint : PlacementMode.Bottom,
+        };
         AgregarOpcion(menu, "Presente (P)", EstadoAsistencia.Presente);
         AgregarOpcion(menu, "Falta (F)", EstadoAsistencia.Falta);
         AgregarOpcion(menu, "Retardo (R)", EstadoAsistencia.Retardo);
-        AgregarOpcion(menu, "Falta justificada (J)", EstadoAsistencia.Justificada);
+        AgregarOpcion(menu, "Justificada (J)", EstadoAsistencia.Justificada);
         menu.IsOpen = true;
     }
 
@@ -324,5 +364,17 @@ public partial class AsistenciaView : UserControl
         var columna = GrillaMensual.Columns[indiceColumna];
         GrillaMensual.CurrentCell = new DataGridCellInfo(GrillaMensual.CurrentItem, columna);
         GrillaMensual.ScrollIntoView(GrillaMensual.CurrentItem, columna);
+    }
+
+    private static T? BuscarAncestro<T>(DependencyObject origen) where T : DependencyObject
+    {
+        DependencyObject? actual = origen;
+        while (actual is not null)
+        {
+            if (actual is T encontrado) return encontrado;
+            actual = VisualTreeHelper.GetParent(actual);
+        }
+
+        return null;
     }
 }
