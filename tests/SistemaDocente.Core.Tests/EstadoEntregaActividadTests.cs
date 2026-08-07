@@ -1,3 +1,5 @@
+using SistemaDocente.Core;
+
 namespace SistemaDocente.Core.Tests;
 
 public sealed class EstadoEntregaActividadTests
