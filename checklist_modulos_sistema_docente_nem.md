@@ -66,9 +66,9 @@ This checklist reflects the current product state rather than the original proto
   - Light, Dark and High Contrast themes.
   - Shared popup styles and accessible keyboard patterns.
 
-## Current stacked changes: structured school context and NEM planning
+## Structured school context and NEM planning
 
-- [~] **School context, NEM phase and multigrade foundation** — PR #11 / `feature/nem-multigrade-catalogs`
+- [x] **School context, NEM phase and multigrade foundation**
   - [x] Structured primary grades 1.º–6.º.
   - [x] Automatic NEM phase mapping: 1.º–2.º → Phase 3; 3.º–4.º → Phase 4; 5.º–6.º → Phase 5.
   - [x] Unigrade/multigrade modality derived from served grades.
@@ -78,9 +78,9 @@ This checklist reflects the current product state rather than the original proto
   - [x] Derived, non-diagnostic Piaget developmental reference.
   - [x] Additive SQLite extension while keeping `PRAGMA user_version = 6`.
   - [x] Automated regression coverage and Windows CI.
-  - [ ] Complete manual unigrade/multigrade UX validation.
+  - [x] Manual unigrade/multigrade UX validation completed before merge.
 
-- [~] **Structured NEM project/activity metadata** — PR #12 / `feature/nem-project-planning-catalogs`
+- [x] **Structured NEM project/activity metadata**
   - [x] Four structured project methodologies plus legacy `No especificada`.
   - [x] Four structured formative fields plus legacy `No especificado`.
   - [x] Project target grades.
@@ -92,7 +92,7 @@ This checklist reflects the current product state rather than the original proto
   - [x] Demo data with explicit NEM planning metadata.
   - [x] Executable Demo seeder integration test against temporary SQLite storage.
   - [x] Automated regression coverage and Windows CI.
-  - [ ] Complete manual Demo UX validation and normalize the stacked branch after PR #11 merges.
+  - [x] Manual Demo UX validation and normalized merge completed.
 
 ---
 
@@ -100,7 +100,7 @@ This checklist reflects the current product state rather than the original proto
 
 ## 1. Richer NEM pedagogical planning
 
-The structured methodology/formative-field/grade foundation is implemented in the current PR #12. Remaining planning depth includes:
+The structured methodology/formative-field/grade foundation is implemented in `main`. Remaining planning depth includes:
 
 - [ ] Register project purpose and expected final product.
 - [ ] Register curriculum content and learning-development processes (PDA).
@@ -183,17 +183,25 @@ The report calculation/model foundation already exists. Remaining work includes:
 
 ## 10. Student import
 
-- [ ] Import `.xlsx` and `.csv`.
-- [ ] Preview before writing.
-- [ ] Map source columns to application fields.
-- [ ] Validate headers/data types and required fields.
-- [ ] Detect probable duplicates.
-- [ ] Allow corrections or row exclusion before commit.
-- [ ] Use one transaction for the confirmed import.
-- [ ] Show imported / skipped / needs-review counts.
-- [ ] For a unigrade group, default missing grade to the group's only grade.
-- [ ] For a multigrade group, require or resolve student grade explicitly.
-- [ ] Never overwrite existing students without explicit confirmation.
+**Current feature branch:** `feature/student-import-xlsx-csv` / PR #15. Automated implementation is complete pending final CI/manual acceptance.
+
+- [x] Import `.xlsx` and UTF-8 `.csv`.
+- [x] Preview before any SQLite write.
+- [x] Map source columns only to supported student fields; CURP is excluded.
+- [x] Validate headers/data types and required fields.
+- [x] Detect hard list-number conflicts and deterministic probable duplicates.
+- [x] Allow in-memory corrections, row exclusion and explicit `import as new` review decisions.
+- [x] Resolve ambiguous CSV delimiters explicitly (comma / semicolon / tab).
+- [x] Revalidate against a fresh group/context snapshot before commit.
+- [x] Use one aggregate save / SQLite transaction for the confirmed import.
+- [x] Prove rollback when a later SQLite insert fails.
+- [x] Show ready / needs-review / invalid / excluded counts plus final imported/excluded counts.
+- [x] For a unigrade group, default a missing grade to the group's only configured grade.
+- [x] For a multigrade or unconfigured group, require explicit grade resolution.
+- [x] Never overwrite, reactivate or deactivate existing students implicitly.
+- [x] Keep imported students out of historical attendance/activity/evaluation rosters.
+- [x] Keep raw workbook rows out of technical logs.
+- [ ] Complete manual XLSX/CSV validation in supported themes and scaling before merge.
 
 ## 11. Data export
 
@@ -267,9 +275,9 @@ Backup is intentionally separate from export.
 
 # Recommended development sequence from the current state
 
-1. [~] Complete manual validation and merge the structured school-context/multigrade foundation (PR #11).
-2. [~] Normalize, manually validate and merge structured NEM project/activity metadata (PR #12).
-3. [ ] Implement student XLSX/CSV import.
+1. [x] Merge structured school-context/multigrade foundation.
+2. [x] Merge structured NEM project/activity metadata.
+3. [~] Complete manual validation and merge student XLSX/CSV import (PR #15).
 4. [ ] Implement data XLSX/CSV export.
 5. [ ] Implement backup/restore before production use with irreplaceable real data.
 6. [ ] Extend richer NEM planning fields, evaluation criteria/rubrics and reporting periods.

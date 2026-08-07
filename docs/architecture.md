@@ -11,13 +11,14 @@ The solution targets .NET 10. Portable production projects use `net10.0`; the WP
 | Project | Responsibility |
 | --- | --- |
 | `SistemaDocente.Core` | Domain entities, identities, invariants and domain exceptions. Includes groups/students, attendance, projects/activities, delivery/achievement, school context, NEM primary-grade/planning rules and student-record concepts. |
-| `SistemaDocente.Application` | Use cases, persistence ports, snapshots and orchestration between aggregates. |
+| `SistemaDocente.Application` | Use cases, persistence/interchange ports, snapshots and orchestration between aggregates. |
+| `SistemaDocente.Interchange` | File-format adapters for neutral tabular interchange. It currently reads XLSX and UTF-8 CSV for student import without depending on WPF or SQLite. |
 | `SistemaDocente.Data` | SQLite adapters, base-schema initialization, additive versioned extensions, queries and transactions. Technical exceptions are translated at the infrastructure boundary. |
 | `SistemaDocente.Presentation` | Portable MVVM: ViewModels, commands, visual models, editable snapshots, filters, module boundaries and local catalog services. It does not reference WPF or SQLite. |
 | `SistemaDocente.Reporting` | Pure report models and calculations for individual/group reports, attendance, delivery compliance and achievement distribution. |
 | `SistemaDocente.App.Wpf` | WPF shell, module views, dedicated windows, themes, WPF services, application composition and isolated Demo mode. |
 
-Test projects mirror the production layers: Core, Application, Data, Presentation and WPF. Reporting tests currently live in Application tests.
+Test projects mirror Core, Application, Data, Presentation and WPF. Reporting tests and Interchange adapter tests currently live in Application tests.
 
 ## Dependency direction
 
@@ -38,6 +39,7 @@ Relevant production references:
 ```text
 Application  → Core + Reporting
 Data         → Application + Core
+Interchange  → Application
 Presentation → Application + Reporting
 Reporting    → Core
 App.Wpf      → Presentation + Application + Data
@@ -145,6 +147,14 @@ Delivered / (Delivered + NotDelivered) × 100
 
 Pending delivery decisions are excluded from the denominator. No decided deliveries produces an undefined value (`—` in UI), not 0%.
 
+## Tabular interchange and student import
+
+Student import uses an explicit adapter boundary rather than putting spreadsheet parsing in WPF or SQLite. `SistemaDocente.Interchange` implements Application-owned neutral tabular contracts for `.xlsx` and UTF-8 `.csv`. XLSX parsing reads stored cell values only; CSV supports quoted fields plus comma, semicolon and tab delimiters, with explicit teacher resolution when delimiter detection is ambiguous.
+
+Application owns column mapping, deterministic normalization, unigrade/multigrade grade resolution, list-number conflicts, probable-duplicate review and the final commit boundary. Preview/corrections remain in memory and never rewrite the source file. Immediately before confirmation, Application reloads the current group/context, revalidates every included row, mutates a cloned `Grupo` aggregate and calls `IAlmacenamientoGrupos.Guardar` exactly once. The existing SQLite aggregate transaction therefore makes a confirmed multi-row import all-or-nothing.
+
+Presentation owns wizard state (`Archivo → Columnas → Vista previa → Confirmación → Resultado`) while WPF owns only desktop-specific file selection and window behavior. Existing students are never overwritten/reactivated implicitly, CURP is not an import destination and imported students do not enter historical attendance/activity/evaluation rosters retroactively. See [`student-import.md`](student-import.md).
+
 ## SQLite persistence
 
 The base schema remains:
@@ -221,7 +231,7 @@ Presentation uses portable MVVM. ViewModels own selection, filters, editable sta
 
 The shell uses one top navigation surface. Current modules are Group, Attendance, Projects, Evaluation and Reports. `Mis grupos` is the explicit group workspace; after opening a group, a compact context switcher allows fast changes while preserving unsaved-change guards.
 
-Complex tasks remain in dedicated windows, including student editing, project/activity detail, student record, evaluation-cell detail and structured group configuration. Project/activity editors expose structured NEM planning catalogs and grade scope while project/activity summaries surface compact planning metadata.
+Complex tasks remain in dedicated windows, including student editing, student import, project/activity detail, student record, evaluation-cell detail and structured group configuration. Project/activity editors expose structured NEM planning catalogs and grade scope while project/activity summaries surface compact planning metadata.
 
 ## Themes, accessibility and density
 
