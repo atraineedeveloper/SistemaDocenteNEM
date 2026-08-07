@@ -8,14 +8,13 @@ public sealed class ActividadEvaluacionColumnaVisual : ViewModelBase
 {
     internal ActividadEvaluacionColumnaVisual(
         ActividadId actividadId,
-        string codigo,
         string titulo,
         DateOnly fechaRealizacion,
         EstadoActividad estado,
         int version)
     {
         ActividadId = actividadId;
-        Codigo = codigo;
+        Codigo = CrearCodigoEstable(actividadId);
         Titulo = titulo;
         FechaRealizacion = fechaRealizacion;
         Estado = estado;
@@ -31,6 +30,18 @@ public sealed class ActividadEvaluacionColumnaVisual : ViewModelBase
     public bool EstaActiva => Estado == EstadoActividad.Activa;
     public string FechaTexto => FechaRealizacion.ToString("dd/MM/yyyy", System.Globalization.CultureInfo.CurrentCulture);
     public string DescripcionAccesible => $"{Codigo} · {Titulo} · {FechaTexto}";
+
+    /// <summary>
+    /// Código compacto, estable y puramente visual derivado de la identidad inmutable de la
+    /// actividad. No depende de su posición, fecha o título, por lo que no se renumera si
+    /// otras actividades cambian de orden o se anulan.
+    /// </summary>
+    internal static string CrearCodigoEstable(ActividadId actividadId)
+    {
+        if (actividadId == default) throw new ArgumentException("La actividad debe tener identidad.", nameof(actividadId));
+        var hexadecimal = actividadId.Valor.ToString("N", System.Globalization.CultureInfo.InvariantCulture).ToUpperInvariant();
+        return "A" + hexadecimal[..6];
+    }
 
     internal void ActualizarVersion(int version)
     {
