@@ -20,3 +20,6 @@
 - [x] Restringir PageUp/PageDown y atajos simples de asistencia al contexto real de `GrillaMensual` <!-- id: 15 -->
 - [x] Desacoplar `GrupoView` de la clase concreta `MainWindow` mediante una propiedad de dependencia para `Expediente` <!-- id: 16 -->
 - [x] Añadir pruebas estructurales para frontera de asistencia, suscripciones, temas, virtualización y teclado contextual <!-- id: 17 -->
+- [x] Anclar explícitamente al `RootWindow` los bindings de `DataContext` y `Visibility` de cada vista para evitar que el DataContext local cambie la fuente del binding <!-- id: 18 -->
+- [x] Corregir precedencia de diccionarios en `ThemeService`: conservar `DesignTokens` y colocar el tema activo al final como override <!-- id: 19 -->
+- [x] Ajustar contraste del encabezado y ancho mínimo de la ventana para mantener navegación legible en Light/Dark/HighContrast <!-- id: 20 -->
