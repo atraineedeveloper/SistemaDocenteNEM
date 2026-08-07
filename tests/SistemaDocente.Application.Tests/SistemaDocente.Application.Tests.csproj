@@ -19,6 +19,7 @@
   <ItemGroup>
     <ProjectReference Include="..\..\src\SistemaDocente.Application\SistemaDocente.Application.csproj" />
     <ProjectReference Include="..\..\src\SistemaDocente.Core\SistemaDocente.Core.csproj" />
+    <ProjectReference Include="..\..\src\SistemaDocente.Reporting\SistemaDocente.Reporting.csproj" />
   </ItemGroup>
 
 </Project>

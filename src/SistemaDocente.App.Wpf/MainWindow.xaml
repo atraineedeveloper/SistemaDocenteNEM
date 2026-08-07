@@ -19,6 +19,7 @@
             <views:GrupoView
                 DataContext="{Binding DataContext.Grupo, ElementName=RootWindow}"
                 Expediente="{Binding DataContext.Expediente, ElementName=RootWindow}"
+                Configuracion="{Binding ConfiguracionGrupo, ElementName=RootWindow}"
                 Visibility="{Binding DataContext.MostrarGrupo, ElementName=RootWindow, Converter={StaticResource BoolToVisibility}}"/>
 
             <views:AsistenciaView
@@ -32,6 +33,11 @@
             <views:EvaluacionView
                 DataContext="{Binding DataContext.Evaluacion, ElementName=RootWindow}"
                 Visibility="{Binding DataContext.MostrarEvaluacion, ElementName=RootWindow, Converter={StaticResource BoolToVisibility}}"/>
+
+            <views:ReportesView
+                DataContext="{Binding DataContext.Reportes, ElementName=RootWindow}"
+                Configuracion="{Binding ConfiguracionGrupo, ElementName=RootWindow}"
+                Visibility="{Binding DataContext.MostrarReportes, ElementName=RootWindow, Converter={StaticResource BoolToVisibility}}"/>
         </Grid>
 
         <Border x:Name="ToastBanner" Grid.Row="0" Grid.RowSpan="2"

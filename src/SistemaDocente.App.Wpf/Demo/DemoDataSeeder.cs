@@ -238,10 +238,15 @@ internal static class DemoDataSeeder
         var grupoId = gestion.ObtenerProyecto(proyectoId).GrupoId;
         var grupo = grupos.Cargar(grupoId)!;
         var entradas = grupo.EstudiantesActivos
-            .Select(estudiante => new EntradaEntregaActividad(
-                estudiante.Id,
-                NivelPara(estudiante.NumeroLista, semilla),
-                ObservacionPara(estudiante.NumeroLista, semilla)))
+            .Select(estudiante =>
+            {
+                var (estado, nivel) = SeguimientoPara(estudiante.NumeroLista, semilla);
+                return new EntradaEntregaActividad(
+                    estudiante.Id,
+                    estado,
+                    nivel,
+                    ObservacionPara(estudiante.NumeroLista, semilla));
+            })
             .ToArray();
         gestion.CrearActividad(
             proyectoId,
@@ -253,17 +258,18 @@ internal static class DemoDataSeeder
                 entradas));
     }
 
-    private static NivelLogro NivelPara(int numeroLista, int semilla)
+    private static (EstadoEntregaActividad Estado, NivelLogro Nivel) SeguimientoPara(int numeroLista, int semilla)
     {
-        var valor = (numeroLista * 3 + semilla) % 17;
+        var valor = (numeroLista * 3 + semilla) % 19;
         return valor switch
         {
-            0 => NivelLogro.Pendiente,
-            1 or 2 => NivelLogro.RequiereApoyo,
-            3 => NivelLogro.NoEntrego,
-            4 or 5 or 6 => NivelLogro.EnProceso,
-            7 or 8 or 9 or 10 or 11 => NivelLogro.Suficiente,
-            _ => NivelLogro.Domina,
+            0 => (EstadoEntregaActividad.Pendiente, NivelLogro.Pendiente),
+            1 => (EstadoEntregaActividad.Entregada, NivelLogro.Pendiente),
+            2 or 3 => (EstadoEntregaActividad.Entregada, NivelLogro.RequiereApoyo),
+            4 => (EstadoEntregaActividad.NoEntregada, NivelLogro.Pendiente),
+            5 or 6 or 7 => (EstadoEntregaActividad.Entregada, NivelLogro.EnProceso),
+            8 or 9 or 10 or 11 or 12 => (EstadoEntregaActividad.Entregada, NivelLogro.Suficiente),
+            _ => (EstadoEntregaActividad.Entregada, NivelLogro.Domina),
         };
     }
 

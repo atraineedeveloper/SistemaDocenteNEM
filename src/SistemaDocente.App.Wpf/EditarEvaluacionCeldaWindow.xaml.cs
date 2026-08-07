@@ -9,6 +9,7 @@ namespace SistemaDocente.App.Wpf;
 public partial class EditarEvaluacionCeldaWindow : Window
 {
     private readonly EvaluacionCeldaVisual _celda;
+    private readonly EstadoEntregaActividad _estadoOriginal;
     private readonly NivelLogro _nivelOriginal;
     private readonly string _observacionOriginal;
     private bool _aceptado;
@@ -24,6 +25,7 @@ public partial class EditarEvaluacionCeldaWindow : Window
 
         InitializeComponent();
         _celda = celda;
+        _estadoOriginal = celda.EstadoEntrega;
         _nivelOriginal = celda.NivelLogro;
         _observacionOriginal = celda.Observacion;
         DataContext = celda;
@@ -51,6 +53,7 @@ public partial class EditarEvaluacionCeldaWindow : Window
 
     private void RestaurarEdicionLocal()
     {
+        _celda.EstadoEntrega = _estadoOriginal;
         _celda.NivelLogro = _nivelOriginal;
         _celda.Observacion = _observacionOriginal;
     }

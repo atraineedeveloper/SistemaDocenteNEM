@@ -254,7 +254,7 @@ public sealed class RefactorMainWindowVistasTests
                 }
 
                 var viewModel = ConstruirViewModel();
-                var ventana = new MainWindow(viewModel);
+                var ventana = new MainWindow(viewModel, ConstruirConfiguracionGrupo());
                 ventana.Measure(new System.Windows.Size(1280, 780));
                 ventana.Arrange(new System.Windows.Rect(0, 0, 1280, 780));
                 ventana.UpdateLayout();
@@ -309,5 +309,15 @@ public sealed class RefactorMainWindowVistasTests
         return new MainWindowViewModel(
             viewModelGrupo, viewModelAsistencia, viewModelMensual,
             viewModelProyectos, viewModelEvaluacion, viewModelExpediente);
+    }
+
+    private static ConfiguracionGrupoViewModel ConstruirConfiguracionGrupo()
+    {
+        var directorio = Path.Combine(Path.GetTempPath(), "SistemaDocenteNEM-SmokeConfig-" + Guid.NewGuid().ToString("N"));
+        Directory.CreateDirectory(directorio);
+        var baseSqlite = Path.Combine(directorio, "sistema-docente.db");
+        var grupos = new PersistenciaGrupoSqlite(baseSqlite);
+        var contextos = new PersistenciaContextoGrupoSqlite(baseSqlite);
+        return new ConfiguracionGrupoViewModel(new GestionContextoGrupoCasosUso(grupos, contextos));
     }
 }

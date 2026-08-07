@@ -14,8 +14,31 @@ public sealed record HistorialEntregaEstudiante(
     string NombreProyecto,
     string TituloActividad,
     DateOnly Fecha,
+    EstadoEntregaActividad EstadoEntrega,
     NivelLogro NivelLogro,
-    string Observacion);
+    string Observacion)
+{
+    public HistorialEntregaEstudiante(
+        string nombreProyecto,
+        string tituloActividad,
+        DateOnly fecha,
+        NivelLogro nivelLogro,
+        string observacion)
+        : this(
+            nombreProyecto,
+            tituloActividad,
+            fecha,
+            nivelLogro switch
+            {
+                NivelLogro.NoEntrego => EstadoEntregaActividad.NoEntregada,
+                NivelLogro.Pendiente => EstadoEntregaActividad.Pendiente,
+                _ => EstadoEntregaActividad.Entregada,
+            },
+            nivelLogro == NivelLogro.NoEntrego ? NivelLogro.Pendiente : nivelLogro,
+            observacion)
+    {
+    }
+}
 
 public sealed record ExpedienteEstudianteDetalle(
     EstudianteId EstudianteId,

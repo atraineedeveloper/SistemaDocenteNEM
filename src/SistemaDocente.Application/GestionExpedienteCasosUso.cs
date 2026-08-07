@@ -38,7 +38,6 @@ public sealed class GestionExpedienteCasosUso
         var estudiante = grupo.Estudiantes.FirstOrDefault(e => e.Id == estudianteId)
             ?? throw new DomainConflictException("El estudiante especificado no existe en el grupo.");
 
-        // 1. Asistencia histórica
         var asistenciasHistorial = _almacenamientoAsistencia.CargarIntervalo(grupoId, DateOnly.MinValue, DateOnly.MaxValue);
         var registrosEstudiante = asistenciasHistorial
             .SelectMany(a => a.Registros)
@@ -53,7 +52,6 @@ public sealed class GestionExpedienteCasosUso
         var porcentajeAsistencia = totalDias > 0 ? (double)(presentes + retardos) / totalDias * 100.0 : 100.0;
         var resumenAsistencia = new ResumenAsistenciaEstudiante(totalDias, presentes, faltas, retardos, justificadas, porcentajeAsistencia);
 
-        // 2. Historial de entregas de proyectos
         var proyectos = _almacenamientoProyectos.ListarPorGrupo(grupoId);
         var entregas = new List<HistorialEntregaEstudiante>();
         foreach (var p in proyectos)
@@ -68,16 +66,19 @@ public sealed class GestionExpedienteCasosUso
                     if (entregaEst is not null)
                     {
                         entregas.Add(new HistorialEntregaEstudiante(
-                            p.Nombre, a.Titulo, a.FechaRealizacion, entregaEst.NivelLogro, entregaEst.Observacion));
+                            p.Nombre,
+                            a.Titulo,
+                            a.FechaRealizacion,
+                            entregaEst.EstadoEntrega,
+                            entregaEst.NivelLogro,
+                            entregaEst.Observacion));
                     }
                 }
             }
         }
 
-        // 3. Ficha de expediente cualitativo
         var expediente = _almacenamientoExpedientes.ObtenerExpediente(estudianteId, grupoId);
 
-        // 4. Calcular alertas pedagógicas formativas (sin emision de diagnósticos médicos)
         var alertas = new List<AlertaPedagogica>();
         if (totalDias >= 5 && porcentajeAsistencia < 80.0)
         {
@@ -85,7 +86,7 @@ public sealed class GestionExpedienteCasosUso
         }
 
         var reqApoyo = entregas.Count(e => e.NivelLogro == NivelLogro.RequiereApoyo);
-        var noEntrego = entregas.Count(e => e.NivelLogro == NivelLogro.NoEntrego);
+        var noEntrego = entregas.Count(e => e.EstadoEntrega == EstadoEntregaActividad.NoEntregada);
         if (reqApoyo > 0 || noEntrego > 0)
         {
             alertas.Add(new AlertaPedagogica(NivelGravedadAlerta.Informativa, $"Presenta {reqApoyo} actividades en nivel 'Requiere apoyo' y {noEntrego} sin entregar."));

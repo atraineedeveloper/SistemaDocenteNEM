@@ -10,11 +10,11 @@ La solución usa .NET 10. Los proyectos productivos portables usan `net10.0`; la
 
 | Proyecto | Responsabilidad actual |
 | --- | --- |
-| `SistemaDocente.Core` | Modelo de dominio, identidades, invariantes y excepciones. Contiene grupo/estudiantes, asistencia, proyectos didácticos, actividades, entregas/niveles de logro y elementos del expediente pedagógico. |
-| `SistemaDocente.Application` | Casos de uso, puertos de persistencia, snapshots y coordinación entre agregados. Gestiona grupo, asistencia, proyectos/actividades, evaluación y expediente. |
-| `SistemaDocente.Data` | Adaptadores SQLite, inicialización/migración de esquema, consultas y persistencia transaccional. Traduce errores técnicos en la frontera de infraestructura. |
-| `SistemaDocente.Presentation` | MVVM portable: ViewModels, comandos, modelos visuales, confirmaciones, estado editable y fronteras de módulo. Incluye la matriz visual de evaluación, pero no depende de WPF, Data ni SQLite. |
-| `SistemaDocente.Reporting` | Frontera reservada para reportes. Sigue separado del resto de la interfaz. |
+| `SistemaDocente.Core` | Modelo de dominio, identidades, invariantes y excepciones. Contiene grupo/estudiantes, asistencia, proyectos didácticos, actividades, estado de entrega, niveles de logro, contexto de grupo y elementos del expediente pedagógico. |
+| `SistemaDocente.Application` | Casos de uso, puertos de persistencia, snapshots y coordinación entre agregados. Gestiona grupo, asistencia, proyectos/actividades, evaluación, expediente, contexto y construcción de fuentes para reportes. |
+| `SistemaDocente.Data` | Adaptadores SQLite, inicialización/migración de esquema, extensiones versionadas, consultas y persistencia transaccional. Traduce errores técnicos en la frontera de infraestructura. |
+| `SistemaDocente.Presentation` | MVVM portable: ViewModels, comandos, modelos visuales, confirmaciones, estado editable y fronteras de módulo. Incluye matriz de evaluación, reportes y configuración contextual sin depender de WPF ni SQLite. |
+| `SistemaDocente.Reporting` | Modelos y cálculos puros para reporte individual/grupal, asistencia, cumplimiento de entregas y distribución de logro. No conoce SQLite ni WPF. |
 | `SistemaDocente.App.Wpf` | Shell WPF (`MainWindow`), vistas de módulos, ventanas dedicadas, temas, recursos visuales, servicios WPF, notificaciones, raíz de composición y modo de demostración aislado. |
 
 Los proyectos de pruebas existentes son:
@@ -25,22 +25,24 @@ Los proyectos de pruebas existentes son:
 - `SistemaDocente.Presentation.Tests`;
 - `SistemaDocente.App.Wpf.Tests`.
 
+Las pruebas puras de `SistemaDocente.Reporting` viven actualmente en `SistemaDocente.Application.Tests`, que referencia explícitamente al proyecto Reporting para no introducir otro proyecto de pruebas en este corte.
+
 ## Grafo de dependencias
 
 ```text
 SistemaDocente.Core
     ↑          ↑             ↑
 Application   Data       Reporting
-    ↑          ↑
-Presentation  │
-    ↑          │
-    └──── App.Wpf ────────┘
+    ↑          ↑             ↑
+Presentation  │             │
+    ↑          │             │
+    └──── App.Wpf ───────────┘
 ```
 
-Referencias productivas:
+Referencias productivas relevantes:
 
 ```text
-Application  → Core
+Application  → Core + Reporting
 Data         → Application + Core
 Presentation → Application
 Reporting    → Core
@@ -56,6 +58,20 @@ No existen ciclos. Data se instancia desde `SistemaDocente.App.Wpf`; Presentatio
 
 `Grupo` es el agregado responsable de su nombre, estudiantes, números de lista, situación activa y consistencia de la matrícula.
 
+### Contexto del grupo
+
+`ContextoGrupo` representa información contextual 1:1 asociada a `GrupoId`:
+
+- ciclo escolar;
+- escuela y CCT;
+- entidad, municipio y localidad;
+- grado, grupo y turno;
+- etapa cognoscitiva grupal de referencia;
+- docente responsable y periodo de responsabilidad;
+- horario de entrada/salida.
+
+La etapa de Piaget es una referencia pedagógica general del grupo, no un diagnóstico ni una clasificación individual.
+
 ### Asistencia
 
 `AsistenciaDiaria` es el agregado de asistencia. Su identidad natural es `GrupoId + DateOnly`. Cada fecha se persiste de manera independiente y atómica.
@@ -70,50 +86,147 @@ El mes no es un agregado. Application construye una proyección mensual inmutabl
 
 La actividad, no el proyecto completo, es la unidad atómica para guardar el padrón asociado. No se persisten las entregas una por una como operaciones independientes.
 
+### Entrega y nivel de logro
+
+`EntregaActividad` mantiene dos dimensiones separadas:
+
+```text
+EstadoEntregaActividad
+├── Pendiente
+├── Entregada
+└── NoEntregada
+
+NivelLogro
+├── Pendiente
+├── Domina
+├── Suficiente
+├── EnProceso
+├── RequiereApoyo
+└── NoEntrego  (sólo legado/compatibilidad)
+```
+
+Invariantes actuales:
+
+- actividad recién creada → `Pendiente + NivelLogro.Pendiente`;
+- `Entregada + NivelLogro.Pendiente` es válida: trabajo recibido, evaluación aún pendiente;
+- `NoEntregada` fuerza `NivelLogro.Pendiente`;
+- asignar Domina/Suficiente/EnProceso/RequiereApoyo fuerza `Entregada`;
+- `NivelLogro.NoEntrego` no se persiste en flujos nuevos: se normaliza a `NoEntregada + Pendiente`.
+
 ### Evaluación
 
-La evaluación reutiliza el padrón histórico de `ActividadProyecto`. El dominio usa `NivelLogro` con los valores:
-
-- Pendiente;
-- Domina;
-- Suficiente;
-- EnProceso;
-- RequiereApoyo;
-- NoEntrego.
-
-La interfaz no crea un nuevo agregado de evaluación. `EvaluacionActividadesViewModel` proyecta una matriz visual:
+La evaluación reutiliza el padrón histórico de `ActividadProyecto`; no introduce un agregado separado. `EvaluacionActividadesViewModel` proyecta una matriz:
 
 ```text
 filas    = estudiantes presentes en al menos un padrón histórico del proyecto
 columnas = actividades del proyecto
-celda    = entrega/evaluación de ese estudiante en esa actividad
+celda    = EstadoEntrega + NivelLogro + Observación
 ```
 
 Una celda inexistente en el padrón histórico se representa como `—` y no puede editarse. Así, una alta posterior no se agrega retroactivamente a actividades previas y un estudiante inactivo puede conservarse en el historial.
 
-Cada columna recibe un código visual estable con formato `A` + seis caracteres hexadecimales derivados de la identidad inmutable `ActividadId`, por ejemplo `A4F2C91`. El código no depende del orden, fecha ni título de la actividad y por tanto no se renumera cuando otras actividades cambian. Es sólo una referencia de interfaz; `ActividadId` continúa siendo la identidad real y no se requiere una migración SQLite para el código visual.
+Cada columna recibe un código visual estable con formato `A` + ocho caracteres hexadecimales derivados de `ActividadId`, por ejemplo `A4F2C91B7`. El código no depende del orden, fecha ni título, por lo que no se renumera. `ActividadId` sigue siendo la identidad real.
 
-Guardar la matriz no crea una transacción de proyecto. Presentation detecta las actividades con cambios y llama secuencialmente al caso de uso existente para guardar el padrón completo de cada actividad. Cada actividad conserva su propia atomicidad y concurrencia optimista. Si una actividad posterior falla, las anteriores ya confirmadas permanecen guardadas y el resto conserva la edición local.
+La representación compacta de celda es:
+
+```text
+P  pendiente de entrega
+N  no entregada
+✓  entregada, pendiente de evaluación
+D  domina
+S  suficiente
+E  en proceso
+R  requiere apoyo
+—  no aplicable
+```
+
+Guardar la matriz no crea una transacción de proyecto. Presentation detecta actividades con cambios y llama secuencialmente al caso de uso para guardar el padrón completo de cada actividad. Cada actividad conserva su propia atomicidad y concurrencia optimista.
 
 ### Expediente y seguimiento individual
 
-El expediente del estudiante consolida información procedente de asistencia, actividades/evaluación y registros pedagógicos propios. La persistencia incluye notas pedagógicas y acuerdos con tutores vinculados por estudiante y grupo.
+El expediente consolida información procedente de asistencia, actividades/evaluación y registros pedagógicos propios. La persistencia incluye notas pedagógicas y acuerdos con tutores vinculados por estudiante y grupo.
 
-El diseño del módulo prioriza seguimiento formativo y evita tratar alertas pedagógicas como diagnósticos clínicos.
+El diseño prioriza seguimiento formativo y evita tratar alertas pedagógicas como diagnósticos clínicos.
+
+## Reporting
+
+`SistemaDocente.Reporting` contiene cálculos puros. Application obtiene datos mediante los puertos existentes, construye `EstudianteReporteFuente` y delega los agregados al generador.
+
+Reporting no consulta SQLite, no conoce Presentation y no produce WPF.
+
+### Reporte individual
+
+Incluye:
+
+- identidad del estudiante y contexto del grupo;
+- asistencia mensual y porcentaje agregado;
+- entregadas, no entregadas, pendientes y porcentaje de cumplimiento;
+- distribución de niveles de logro sólo sobre entregas;
+- proyectos/actividades aplicables;
+- fortalezas, dificultades, apoyos, observaciones y acuerdos del expediente.
+
+### Reporte grupal
+
+Incluye:
+
+- matrícula histórica y activa;
+- asistencia agregada;
+- cumplimiento de entregas;
+- distribución de niveles de logro;
+- evolución mensual;
+- tabla de seguimiento individual sin ranking competitivo.
+
+El porcentaje de cumplimiento se define como:
+
+```text
+Entregadas / (Entregadas + NoEntregadas) * 100
+```
+
+Los estados `Pendiente` no entran en el denominador. Si no hay decisiones de entrega, se representa como valor indefinido (`—` en UI), no como 0 %.
 
 ## Persistencia
 
 La persistencia local usa SQLite mediante `Microsoft.Data.Sqlite` directo, sin ORM ni micro-ORM.
 
-El esquema vigente usa:
+El esquema base vigente continúa en:
 
 ```text
 PRAGMA user_version = 6
 ```
 
-La base ha evolucionado mediante migraciones incrementales; una actualización no debe reconstruir destructivamente la base ni perder datos existentes.
+### Extensión versionada de reportes/contexto/entregas
 
-Principios vigentes:
+Para no reconstruir destructivamente una base v6 ya validada, el estado explícito y el contexto se incorporan mediante una extensión aditiva:
+
+```text
+esquema_extensiones
+└── reportes-contexto-entregas = 1
+
+configuracion_grupo
+└── contexto 1:1 por GrupoId
+
+estados_entrega_actividad
+└── EstadoEntregaActividad por actividad + estudiante
+```
+
+La columna histórica `entregas_actividad.estado_entrega` conserva temporalmente `NivelLogro` por compatibilidad. `PersistenciaProyectosSqlite` realiza lectura combinada y escritura dual:
+
+- nivel → columna histórica de `entregas_actividad`;
+- estado explícito → `estados_entrega_actividad`.
+
+Al inicializar por primera vez la extensión:
+
+```text
+NoEntrego legado       -> NoEntregada + Pendiente
+Pendiente legado       -> Pendiente + Pendiente
+Domina/Suf/etc. legado -> Entregada + mismo nivel
+```
+
+La inicialización de la extensión es transaccional e idempotente. Su versión se controla de forma independiente de `PRAGMA user_version`.
+
+Las entradas Application legacy que sólo expresan `NivelLogro` se distinguen de las entradas nuevas. Cuando una edición legacy trae `Pendiente` sin expresar un cambio de estado, el caso de uso conserva el estado histórico existente para que editar metadatos no borre `Entregada + Pendiente` ni otros estados ya decididos.
+
+### Principios SQLite vigentes
 
 - `PRAGMA foreign_keys = ON`;
 - consultas parametrizadas;
@@ -121,10 +234,10 @@ Principios vigentes:
 - transacciones por operación compuesta;
 - asistencia atómica por día;
 - actividad + padrón guardados en una sola transacción;
-- concurrencia optimista en entidades que exponen versión;
-- restricciones relacionales para mantener pertenencia a grupo/proyecto;
-- historial pedagógico no debe eliminarse accidentalmente mediante cascadas inapropiadas;
-- errores SQLite no deben filtrarse a Presentation ni a la UI.
+- concurrencia optimista donde se expone versión;
+- restricciones relacionales de pertenencia a grupo/proyecto;
+- historial pedagógico no se elimina accidentalmente;
+- errores SQLite no llegan a Presentation ni UI.
 
 `app-state.json` conserva estado mínimo de reapertura; los datos de dominio permanecen en SQLite.
 
@@ -142,13 +255,13 @@ Demostración
 %LOCALAPPDATA%\SistemaDocenteNEM-Demo\data\app-state.json
 ```
 
-`--demo` abre/crea exclusivamente el almacenamiento de demostración. `--demo-reset` sólo puede borrar archivos cuando `RutasAplicacion.EsDemostracion` es verdadero y vuelve a sembrar datos ficticios. El seeder usa Core/Application y adaptadores existentes; no contiene SQL de negocio dentro de WPF.
+`--demo` abre/crea exclusivamente almacenamiento de demostración. `--demo-reset` sólo borra archivos cuando `RutasAplicacion.EsDemostracion` es verdadero. `DemoDataSeeder` siembra datos escolares y `DemoContextSeeder` añade el contexto ficticio del grupo.
 
 ## Presentación y composición
 
 Presentation usa MVVM propio y portable. Los ViewModels gestionan selección, edición, filtros, confirmaciones, cambios pendientes y comandos sin conocer WPF.
 
-Asistencia dispone de una frontera explícita de módulo:
+Asistencia dispone de una frontera explícita:
 
 ```text
 ModuloAsistenciaViewModel
@@ -158,41 +271,39 @@ ModuloAsistenciaViewModel
 └── comandos de cambio de vista
 ```
 
-`AsistenciaView` consume esta frontera en lugar del `MainWindowViewModel` completo. `MainWindowViewModel` coordina la navegación global y expone `ModoDemostracion` únicamente como estado del shell.
+`MainWindowViewModel` coordina navegación global. `App.xaml.cs` es la raíz de composición: crea persistencias, casos de uso, ViewModels y servicios WPF, interpreta `--demo`/`--demo-reset` y conecta contexto/reportes.
 
-`App.xaml.cs` es la raíz de composición. Allí se crean persistencias, casos de uso, ViewModels y servicios WPF. También interpreta `--demo`/`--demo-reset`, selecciona las rutas apropiadas y ejecuta `DemoDataSeeder` antes de construir los ViewModels cuando corresponde.
-
-La aplicación registra errores no controlados en un log local de diagnóstico y evita mostrar trazas técnicas al usuario final.
+La configuración contextual usa una sola instancia de `ConfiguracionGrupoViewModel` compartida por `GrupoView` y `ReportesView` mediante propiedades de dependencia del shell.
 
 ## Arquitectura de interfaz WPF
 
 ### MainWindow como shell
 
-`MainWindow` es únicamente el shell visual: ensambla `MainNavigationHeader`, las vistas de módulos y el feedback global. La navegación incluye:
+`MainWindow` ensambla `MainNavigationHeader`, vistas de módulos y feedback global. La navegación incluye:
 
 - Grupo;
 - Asistencia;
 - Proyectos;
-- Evaluación.
+- Evaluación;
+- Reportes.
 
-Existe una sola navegación global superior. No se duplica mediante sidebar. El encabezado usa una superficie clara, mantiene el acento institucional guinda para marca/selección/acciones primarias e incorpora un badge `DEMO` cuando el almacenamiento es ficticio.
+Existe una sola navegación global superior; no hay sidebar duplicado.
 
 ### Vistas principales especializadas
 
-Cada módulo recibe una frontera explícita por binding:
+Cada módulo recibe una frontera explícita:
 
-- `GrupoView` → `GestionGrupoViewModel`;
+- `GrupoView` → `GestionGrupoViewModel` + expediente + configuración contextual;
 - `AsistenciaView` → `ModuloAsistenciaViewModel`;
 - `ProyectosView` → `GestionProyectosViewModel`;
-- `EvaluacionView` → `EvaluacionActividadesViewModel`.
+- `EvaluacionView` → `EvaluacionActividadesViewModel`;
+- `ReportesView` → `GestionReportesViewModel` + configuración contextual.
 
-`GrupoView` usa jerarquía de página, búsqueda, métricas compactas, tabla virtualizada y una barra de acciones donde `Agregar estudiante` es primaria.
+`GrupoView` mantiene tabla virtualizada y añade acceso a `Configurar grupo` sin convertir el header global en un panel de configuración.
 
-`AsistenciaView` conserva una densidad alta apropiada para captura operativa, con métricas, filtros y grilla mensual congelando número/nombre.
+`ReportesView` contiene modos Individual/Grupal y puede abrir la misma ventana de configuración contextual.
 
-`ProyectosView` funciona como superficie de consulta y entrada; la edición sigue en ventanas dedicadas.
-
-`EvaluacionView` funciona como matriz estudiante × actividad y congela `Núm.` + `Estudiante`. Los encabezados dinámicos muestran el código visual estable y exponen nombre + fecha mediante tooltip/nombre accesible. La columna de la celda actual define la actividad seleccionada para métricas y acciones masivas.
+`EvaluacionView` mantiene la matriz estudiante × actividad y congela `Núm.` + `Estudiante`. La actividad de contexto se deriva de la columna actual.
 
 ### Ventanas dedicadas
 
@@ -202,86 +313,97 @@ Las tareas complejas siguen en ventanas enfocadas:
 - `DetalleProyectoWindow`;
 - `DetalleActividadWindow`;
 - `ExpedienteEstudianteWindow`;
-- `EditarEvaluacionCeldaWindow` para nivel/observación de una celda sin ensanchar la matriz.
+- `EditarEvaluacionCeldaWindow` para estado de entrega, nivel y observación;
+- `ConfiguracionGrupoWindow` para contexto escolar y pedagógico.
 
-La regla sigue siendo:
+La jerarquía del dominio no se copia automáticamente como jerarquía visual. Master-detail sigue siendo opcional.
 
-> la jerarquía del dominio no se copia automáticamente como jerarquía visual.
+### Evaluación por teclado
 
-Master-detail queda como patrón opcional, no obligatorio.
+Los atajos sólo se procesan cuando el foco pertenece a la grilla:
 
-### Diseño, temas y recursos dinámicos
+```text
+D/S/E/R = nivel de logro (y fuerza Entregada)
+T       = Entregada, pendiente de evaluación
+N       = No entregada
+P       = Pendiente de entrega
+Enter/F2 o doble clic = editor compacto
+Ctrl+S = guardar cambios
+```
 
-La interfaz usa `DesignTokens.xaml` y soporta Claro, Oscuro y Alto contraste. Vistas y shell deben consumir recursos semánticos mediante `DynamicResource` o resolver brushes del tema actual cuando las columnas se generan en code-behind.
+Los controles de texto quedan excluidos del manejo contextual.
 
-La aplicación usa `xml:lang="es-MX"`, foco visible, propiedades de automatización y teclado contextual. Los tooltips no son el único medio para comunicar información esencial: los encabezados dinámicos también reciben nombre accesible y el contexto de la actividad seleccionada se muestra sobre la matriz.
+### Diseño, temas y virtualización
 
-Las reglas de interfaz se documentan en `docs/UI-GUIDELINES.md`.
+La interfaz usa `DesignTokens.xaml` y soporta Claro, Oscuro y Alto contraste. Vistas y shell consumen recursos semánticos mediante `DynamicResource` o resuelven brushes del tema actual cuando las columnas se generan dinámicamente.
 
-### Ciclo de vida y virtualización
+La aplicación usa `xml:lang="es-MX"`, foco visible y propiedades de automatización. Los `UserControl` con suscripciones las hacen idempotentes y las liberan en `Unloaded`.
 
-Los `UserControl` que escuchan `PropertyChanged` o eventos estáticos mantienen suscripciones idempotentes y las liberan en `Unloaded`.
+Los `DataGrid` operativos controlan su propio scroll y conservan virtualización; no deben envolverse en un `ScrollViewer` exterior no acotado.
 
-Los `DataGrid` operativos controlan su propio scroll y conservan virtualización. No deben envolverse en un `ScrollViewer` exterior que les entregue altura no acotada.
+Las reglas visuales generales viven en `docs/UI-GUIDELINES.md`.
 
 ## Flujos principales
 
 ### Gestión de grupo y estudiantes
 
-La UI delega al ViewModel; Presentation delega a Application; Application modifica `Grupo` y Data confirma SQLite. La edición compleja de estudiante se realiza en ventana dedicada.
+UI → Presentation → Application → Core/Data. La edición compleja de estudiante se realiza en ventana dedicada. La configuración contextual puede abrirse directamente desde Grupo.
 
 ### Asistencia mensual
 
 Application proyecta días lectivos, matrícula activa e historial. Presentation mantiene cambios por fecha. Guardar varias fechas ejecuta operaciones diarias secuenciales y no afirma atomicidad mensual.
 
-P/F/R/J, Enter, Home/End y PageUp/PageDown sólo se procesan cuando el foco pertenece a `GrillaMensual`; los controles de texto quedan excluidos. Ctrl+S es atajo del módulo.
-
 ### Proyectos y actividades
 
-La vista principal de Proyectos es lista/punto de entrada. `DetalleProyectoWindow` y `DetalleActividadWindow` concentran edición compleja. La actividad conserva el padrón histórico.
+`ProyectosView` es lista/punto de entrada. `DetalleProyectoWindow` y `DetalleActividadWindow` concentran edición compleja. La actividad conserva el padrón histórico.
 
 ### Evaluación matricial
 
-El usuario selecciona únicamente un proyecto. Presentation carga sus actividades y construye la matriz. Mover la celda seleccionada cambia implícitamente la actividad de contexto.
+El usuario selecciona un proyecto. Presentation carga actividades y construye la matriz. Mover la celda cambia la actividad de contexto. Estado de entrega y nivel se editan por separado y se persisten juntos por actividad.
 
-D/S/E/R/N/P modifican sólo la celda actual y únicamente cuando el foco pertenece a la grilla. Enter/F2 o doble clic abre el editor compacto de nivel/observación. Las acciones masivas afectan sólo la actividad seleccionada y nunca las celdas `—`.
+### Reportes
+
+Application obtiene contexto, grupo, asistencia, proyectos/actividades y expediente. Reporting calcula snapshots puros. Presentation selecciona modo/alumno y WPF muestra el resultado. La configuración se puede abrir desde Reportes y, al cerrarla, el reporte se refresca.
 
 ### Expediente
 
-Desde Grupo se abre la ventana de expediente. Application consolida asistencia, entregas/evaluación y registros pedagógicos; Data persiste notas y acuerdos propios del seguimiento.
+Desde Grupo se abre la ventana de expediente. Application consolida asistencia, entregas/evaluación y registros pedagógicos; Data persiste notas y acuerdos.
 
 ### Demostración
 
-`--demo` usa un conjunto ficticio suficientemente rico para probar listas largas, historial, asistencia, proyectos, evaluación y expediente. La guía de uso vive en `docs/demo-mode.md`.
+`--demo` usa un conjunto ficticio rico para probar listas, historial, asistencia, proyectos, estados de entrega, evaluación, expediente, contexto y reportes. La guía vive en `docs/demo-mode.md`.
 
 ## Estrategia de pruebas
 
-- **Core:** invariantes, transiciones y comportamiento de agregados.
-- **Application:** casos de uso, snapshots y conflictos.
-- **Data:** SQLite temporal real, migraciones, restricciones, rollback y reapertura.
-- **Presentation:** ViewModels, matriz, filtros, cambios pendientes, códigos visuales estables y guardado secuencial sin WPF.
-- **App.Wpf:** composición, bindings, rutas demo, recursos semánticos, teclado contextual y límites del code-behind.
-- **Prueba manual:** apertura real, modo demo, redimensionamiento, foco, teclado, temas, scroll horizontal/vertical y ventanas dedicadas.
-- **Auditoría independiente:** arquitectura, persistencia, UX y regresiones antes de cerrar cambios relevantes.
+- **Core:** invariantes de agregados, incluida separación entrega/logro.
+- **Application:** casos de uso, compatibilidad legacy y contratos de entrada.
+- **Data:** SQLite temporal real, extensión versionada, conversión legacy, restricciones y reapertura.
+- **Reporting:** cálculos puros de cumplimiento y distribución de logro.
+- **Presentation:** ViewModels, matriz, filtros, cambios pendientes y persistencia explícita.
+- **App.Wpf:** composición, bindings, rutas demo, recursos, teclado contextual y configuración compartida.
+- **Prueba manual:** apertura real, demo, redimensionamiento, foco, teclado, temas, scroll y ventanas dedicadas.
 
 ## Decisiones arquitectónicas vigentes
 
-- Core permanece independiente y concentra invariantes del dominio.
+- Core permanece independiente y concentra invariantes.
 - Los puertos viven en Application; Data aporta adaptadores concretos.
 - SQLite se usa directamente mediante `Microsoft.Data.Sqlite`.
+- El esquema base permanece en `user_version = 6`; capacidades nuevas de este corte usan una extensión aditiva versionada.
 - La unidad atómica de asistencia es el día.
 - `ProyectoDidactico` y `ActividadProyecto` son agregados separados.
-- La actividad es la unidad atómica para su padrón de entregas/evaluación.
-- La matriz de evaluación es una proyección de Presentation, no un nuevo agregado ni una tabla SQLite.
-- Los códigos visuales de actividad son estables porque se derivan de `ActividadId`; la identidad real sigue siendo `ActividadId`.
-- Guardar varias columnas modificadas significa operaciones atómicas por actividad ejecutadas secuencialmente.
+- La actividad es la unidad atómica para su padrón de entrega/evaluación.
+- Estado de entrega y nivel de logro son dimensiones distintas.
+- La matriz de evaluación es una proyección de Presentation, no un nuevo agregado ni tabla SQLite.
+- Los códigos visuales de actividad derivan de `ActividadId` y son estables.
+- Guardar varias columnas significa operaciones atómicas por actividad ejecutadas secuencialmente.
+- Reporting contiene cálculos puros y no accede a infraestructura.
 - Presentation es portable y usa MVVM propio.
 - WPF queda aislado en `SistemaDocente.App.Wpf`.
 - La composición es manual.
+- Grupo y Reportes reutilizan la misma configuración contextual.
 - El modo demo usa almacenamiento separado y no toca producción.
-- No se introducen ORM, repositorios genéricos ni framework de navegación sin una decisión explícita.
+- No se introducen ORM, repositorios genéricos ni framework de navegación sin decisión explícita.
 - Master-detail no es una regla de UI.
 - `MainWindow` actúa como shell visual y cada módulo recibe una frontera explícita.
-- Las tareas complejas pueden usar ventanas dedicadas y las tareas intensivas usan superficies principales amplias.
 - Los estilos y colores nuevos deben integrarse al sistema de diseño compartido.
 - Las suscripciones WPF de larga vida deben ser idempotentes y liberarse con el ciclo de vida visual.

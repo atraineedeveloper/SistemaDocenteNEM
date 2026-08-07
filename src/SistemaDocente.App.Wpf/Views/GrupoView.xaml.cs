@@ -36,6 +36,18 @@ public partial class GrupoView : UserControl
         set => SetValue(ExpedienteProperty, value);
     }
 
+    public static readonly DependencyProperty ConfiguracionProperty = DependencyProperty.Register(
+        nameof(Configuracion),
+        typeof(ConfiguracionGrupoViewModel),
+        typeof(GrupoView),
+        new PropertyMetadata(null));
+
+    public ConfiguracionGrupoViewModel? Configuracion
+    {
+        get => (ConfiguracionGrupoViewModel?)GetValue(ConfiguracionProperty);
+        set => SetValue(ConfiguracionProperty, value);
+    }
+
     private GestionGrupoViewModel? ViewModel => DataContext as GestionGrupoViewModel;
 
     private void OnLoaded(object sender, RoutedEventArgs e)
@@ -90,6 +102,18 @@ public partial class GrupoView : UserControl
     }
 
     private void OnVerExpedienteEstudianteClic(object sender, RoutedEventArgs e) => AbrirExpedienteEstudiante();
+
+    private void OnConfigurarGrupoClic(object sender, RoutedEventArgs e)
+    {
+        if (ViewModel?.GrupoIdActual is not { } grupoId || Configuracion is null) return;
+
+        Configuracion.Inicializar(grupoId);
+        var ventana = new ConfiguracionGrupoWindow(Configuracion)
+        {
+            Owner = Window.GetWindow(this),
+        };
+        ventana.ShowDialog();
+    }
 
     private void AbrirExpedienteEstudiante()
     {

@@ -1,0 +1,185 @@
+<Window x:Class="SistemaDocente.App.Wpf.ConfiguracionGrupoWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xml:lang="es-MX"
+        Title="Configuración del grupo"
+        Width="760" Height="720" MinWidth="680" MinHeight="600"
+        WindowStartupLocation="CenterOwner" ShowInTaskbar="False">
+    <Grid Background="{DynamicResource SectionBackgroundBrush}">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <Border Grid.Row="0"
+                Background="{DynamicResource CardBackgroundBrush}"
+                BorderBrush="{DynamicResource BorderLightBrush}"
+                BorderThickness="0,0,0,1"
+                Padding="20,16">
+            <StackPanel>
+                <TextBlock Text="CONFIGURACIÓN DEL GRUPO"
+                           Foreground="{DynamicResource PrimaryBrush}"
+                           FontSize="12" FontWeight="SemiBold"/>
+                <TextBlock Text="Contexto escolar y referencia pedagógica"
+                           Style="{StaticResource Heading2}" Margin="0,3,0,3"/>
+                <TextBlock Text="Estos datos contextualizan los reportes del grupo. La etapa cognoscitiva es una referencia general y no un diagnóstico individual."
+                           Foreground="{DynamicResource TextMutedBrush}"
+                           TextWrapping="Wrap"/>
+            </StackPanel>
+        </Border>
+
+        <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" Margin="16,14,16,10">
+            <StackPanel>
+                <Border Style="{StaticResource SectionCard}" Padding="16" Margin="0,0,0,14">
+                    <StackPanel>
+                        <TextBlock Text="Contexto escolar" Style="{StaticResource Heading3}" Margin="0,0,0,12"/>
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="14"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                            </Grid.RowDefinitions>
+
+                            <StackPanel Grid.Row="0" Grid.Column="0" Margin="0,0,0,12">
+                                <TextBlock Text="Ciclo escolar" Style="{StaticResource FormLabel}"/>
+                                <TextBox Text="{Binding CicloEscolar, UpdateSourceTrigger=PropertyChanged}"/>
+                            </StackPanel>
+                            <StackPanel Grid.Row="0" Grid.Column="2" Margin="0,0,0,12">
+                                <TextBlock Text="Nombre de la escuela" Style="{StaticResource FormLabel}"/>
+                                <TextBox Text="{Binding NombreEscuela, UpdateSourceTrigger=PropertyChanged}"/>
+                            </StackPanel>
+
+                            <StackPanel Grid.Row="1" Grid.Column="0" Margin="0,0,0,12">
+                                <TextBlock Text="CCT" Style="{StaticResource FormLabel}"/>
+                                <TextBox Text="{Binding Cct, UpdateSourceTrigger=PropertyChanged}"/>
+                            </StackPanel>
+                            <StackPanel Grid.Row="1" Grid.Column="2" Margin="0,0,0,12">
+                                <TextBlock Text="Entidad federativa" Style="{StaticResource FormLabel}"/>
+                                <TextBox Text="{Binding EntidadFederativa, UpdateSourceTrigger=PropertyChanged}"/>
+                            </StackPanel>
+
+                            <StackPanel Grid.Row="2" Grid.Column="0">
+                                <TextBlock Text="Municipio" Style="{StaticResource FormLabel}"/>
+                                <TextBox Text="{Binding Municipio, UpdateSourceTrigger=PropertyChanged}"/>
+                            </StackPanel>
+                            <StackPanel Grid.Row="2" Grid.Column="2">
+                                <TextBlock Text="Localidad" Style="{StaticResource FormLabel}"/>
+                                <TextBox Text="{Binding Localidad, UpdateSourceTrigger=PropertyChanged}"/>
+                            </StackPanel>
+                        </Grid>
+                    </StackPanel>
+                </Border>
+
+                <Border Style="{StaticResource SectionCard}" Padding="16" Margin="0,0,0,14">
+                    <StackPanel>
+                        <TextBlock Text="Datos del grupo" Style="{StaticResource Heading3}" Margin="0,0,0,12"/>
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="14"/>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="14"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <StackPanel Grid.Column="0">
+                                <TextBlock Text="Grado" Style="{StaticResource FormLabel}"/>
+                                <TextBox Text="{Binding Grado, UpdateSourceTrigger=PropertyChanged}"/>
+                            </StackPanel>
+                            <StackPanel Grid.Column="2">
+                                <TextBlock Text="Grupo" Style="{StaticResource FormLabel}"/>
+                                <TextBox Text="{Binding Grupo, UpdateSourceTrigger=PropertyChanged}"/>
+                            </StackPanel>
+                            <StackPanel Grid.Column="4">
+                                <TextBlock Text="Turno" Style="{StaticResource FormLabel}"/>
+                                <TextBox Text="{Binding Turno, UpdateSourceTrigger=PropertyChanged}"/>
+                            </StackPanel>
+                        </Grid>
+                    </StackPanel>
+                </Border>
+
+                <Border Style="{StaticResource SectionCard}" Padding="16" Margin="0,0,0,14">
+                    <StackPanel>
+                        <TextBlock Text="Referencia pedagógica" Style="{StaticResource Heading3}" Margin="0,0,0,8"/>
+                        <TextBlock Text="Etapa de desarrollo cognoscitivo de referencia para el grupo"
+                                   Style="{StaticResource FormLabel}"/>
+                        <ComboBox ItemsSource="{Binding EtapasCognoscitivas}"
+                                  DisplayMemberPath="Texto"
+                                  SelectedValuePath="Valor"
+                                  SelectedValue="{Binding EtapaCognoscitiva, Mode=TwoWay}"
+                                  AutomationProperties.Name="Etapa cognoscitiva de referencia"/>
+                        <TextBlock Text="Úsala sólo como contexto pedagógico general; no clasifica ni diagnostica a estudiantes individuales."
+                                   Foreground="{DynamicResource TextMutedBrush}"
+                                   FontSize="12" TextWrapping="Wrap" Margin="0,8,0,0"/>
+                    </StackPanel>
+                </Border>
+
+                <Border Style="{StaticResource SectionCard}" Padding="16" Margin="0,0,0,14">
+                    <StackPanel>
+                        <TextBlock Text="Responsabilidad docente" Style="{StaticResource Heading3}" Margin="0,0,0,12"/>
+                        <StackPanel Margin="0,0,0,12">
+                            <TextBlock Text="Docente responsable" Style="{StaticResource FormLabel}"/>
+                            <TextBox Text="{Binding DocenteResponsable, UpdateSourceTrigger=PropertyChanged}"/>
+                        </StackPanel>
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="14"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <StackPanel Grid.Column="0">
+                                <TextBlock Text="Responsable desde" Style="{StaticResource FormLabel}"/>
+                                <DatePicker SelectedDate="{Binding ResponsableDesdeFecha, Mode=TwoWay}"/>
+                            </StackPanel>
+                            <StackPanel Grid.Column="2">
+                                <TextBlock Text="Responsable hasta" Style="{StaticResource FormLabel}"/>
+                                <DatePicker SelectedDate="{Binding ResponsableHastaFecha, Mode=TwoWay}"/>
+                            </StackPanel>
+                        </Grid>
+                    </StackPanel>
+                </Border>
+
+                <Border Style="{StaticResource SectionCard}" Padding="16" Margin="0,0,0,10">
+                    <StackPanel>
+                        <TextBlock Text="Horario" Style="{StaticResource Heading3}" Margin="0,0,0,12"/>
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="14"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <StackPanel Grid.Column="0">
+                                <TextBlock Text="Hora de entrada (HH:mm)" Style="{StaticResource FormLabel}"/>
+                                <TextBox Text="{Binding HoraEntrada, UpdateSourceTrigger=PropertyChanged}"/>
+                            </StackPanel>
+                            <StackPanel Grid.Column="2">
+                                <TextBlock Text="Hora de salida (HH:mm)" Style="{StaticResource FormLabel}"/>
+                                <TextBox Text="{Binding HoraSalida, UpdateSourceTrigger=PropertyChanged}"/>
+                            </StackPanel>
+                        </Grid>
+                    </StackPanel>
+                </Border>
+
+                <TextBlock Text="{Binding Mensaje}"
+                           Foreground="{DynamicResource ErrorBrush}"
+                           FontWeight="SemiBold" TextWrapping="Wrap" Margin="4,2,4,6"/>
+            </StackPanel>
+        </ScrollViewer>
+
+        <Border Grid.Row="2"
+                Background="{DynamicResource CardBackgroundBrush}"
+                BorderBrush="{DynamicResource BorderLightBrush}"
+                BorderThickness="0,1,0,0" Padding="16,12">
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                <Button Content="Cancelar" Click="OnCancelarClic" IsCancel="True" MinWidth="96" Margin="0,0,10,0"/>
+                <Button Content="Guardar configuración" Style="{StaticResource PrimaryButton}"
+                        Click="OnGuardarClic" IsDefault="True" MinWidth="160"/>
+            </StackPanel>
+        </Border>
+    </Grid>
+</Window>

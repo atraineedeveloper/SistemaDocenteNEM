@@ -103,7 +103,7 @@ public sealed class GestionProyectosActividadesTests
         public int Guardados { get; private set; }
         public ActividadProyecto? Cargar(ActividadId id) => _datos.GetValueOrDefault(id);
         public IReadOnlyList<ActividadProyecto> ListarPorProyecto(ProyectoId id) => _datos.Values.Where(x => x.ProyectoId == id).ToArray();
-        public void Guardar(ActividadProyecto a, int? version) { Guardados++; _datos[a.Id] = ActividadProyecto.Rehidratar(a.Id, a.ProyectoId, a.GrupoId, a.Titulo, a.Descripcion, a.FechaRealizacion, a.ObservacionesGenerales, a.Estado, (version ?? 0) + 1, a.Entregas.Select(x => new DatosEntregaActividadRehidratada(x.EstudianteId, x.NivelLogro, x.Observacion)).ToArray()); }
+        public void Guardar(ActividadProyecto a, int? version) { Guardados++; _datos[a.Id] = ActividadProyecto.Rehidratar(a.Id, a.ProyectoId, a.GrupoId, a.Titulo, a.Descripcion, a.FechaRealizacion, a.ObservacionesGenerales, a.Estado, (version ?? 0) + 1, a.Entregas.Select(x => new DatosEntregaActividadRehidratada(x.EstudianteId, x.EstadoEntrega, x.NivelLogro, x.Observacion)).ToArray()); }
         public void Eliminar(ActividadId id, int version) => _datos.Remove(id);
     }
 }

@@ -139,7 +139,8 @@ public sealed class GestionProyectosActividadesCasosUso
     public void EliminarActividadSinSeguimiento(ActividadId id, int version)
     {
         var actividad = CargarActividad(id); VerificarVersion(actividad.Version, version);
-        if (actividad.Entregas.Any(x => x.NivelLogro != NivelLogro.Pendiente))
+        if (actividad.Entregas.Any(x =>
+                x.EstadoEntrega != EstadoEntregaActividad.Pendiente || x.NivelLogro != NivelLogro.Pendiente))
             throw new DomainConflictException("La actividad con seguimiento debe conservarse o anularse.");
         _actividades.Eliminar(id, version);
     }
@@ -157,34 +158,55 @@ public sealed class GestionProyectosActividadesCasosUso
             if (!estudiantes.TryGetValue(x.EstudianteId, out var estudiante))
                 throw new DomainConflictException("Un estudiante histórico ya no pertenece al grupo.");
             return new EntregaActividadDetalle(x.EstudianteId, estudiante.NumeroLista,
-                estudiante.NombreVisible, estudiante.EstaActivo, x.NivelLogro, x.Observacion);
+                estudiante.NombreVisible, estudiante.EstaActivo, x.EstadoEntrega, x.NivelLogro, x.Observacion);
         }).OrderBy(x => x.NumeroLista).ThenBy(x => x.NombreVisible, StringComparer.Ordinal)
             .ThenBy(x => x.EstudianteId.Valor).ToArray();
         return new(a.Id, a.ProyectoId, a.GrupoId, a.Titulo, a.Descripcion, a.FechaRealizacion,
             a.ObservacionesGenerales, a.Estado, entregas, entregas.Length,
-            entregas.Count(x => x.NivelLogro == NivelLogro.Pendiente),
+            entregas.Count(x => x.EstadoEntrega != EstadoEntregaActividad.NoEntregada && x.NivelLogro == NivelLogro.Pendiente),
             entregas.Count(x => x.NivelLogro == NivelLogro.Domina),
             entregas.Count(x => x.NivelLogro == NivelLogro.Suficiente),
             entregas.Count(x => x.NivelLogro == NivelLogro.EnProceso),
             entregas.Count(x => x.NivelLogro == NivelLogro.RequiereApoyo),
-            entregas.Count(x => x.NivelLogro == NivelLogro.NoEntrego), a.Version);
+            entregas.Count(x => x.EstadoEntrega == EstadoEntregaActividad.NoEntregada), a.Version);
     }
 
     private static ActividadProyectoResumen ProyectarResumen(ActividadProyecto a) => new(a.Id, a.ProyectoId,
         a.Titulo, a.FechaRealizacion, a.Estado, a.Entregas.Count,
-        a.Entregas.Count(x => x.NivelLogro == NivelLogro.Pendiente),
+        a.Entregas.Count(x => x.EstadoEntrega != EstadoEntregaActividad.NoEntregada && x.NivelLogro == NivelLogro.Pendiente),
         a.Entregas.Count(x => x.NivelLogro == NivelLogro.Domina),
         a.Entregas.Count(x => x.NivelLogro == NivelLogro.Suficiente),
         a.Entregas.Count(x => x.NivelLogro == NivelLogro.EnProceso),
         a.Entregas.Count(x => x.NivelLogro == NivelLogro.RequiereApoyo),
-        a.Entregas.Count(x => x.NivelLogro == NivelLogro.NoEntrego), a.Version);
+        a.Entregas.Count(x => x.EstadoEntrega == EstadoEntregaActividad.NoEntregada), a.Version);
 
     private static DatosEntregaActividadRehidratada[] Mapear(IEnumerable<EntradaEntregaActividad> entregas) =>
-        entregas.Select(x => new DatosEntregaActividadRehidratada(x.EstudianteId, x.NivelLogro, x.Observacion)).ToArray();
+        entregas.Select(x => new DatosEntregaActividadRehidratada(
+            x.EstudianteId, x.EstadoEntrega, x.NivelLogro, x.Observacion)).ToArray();
 
     private static DatosEntregaActividadRehidratada[] MapearValidandoHistorico(ActividadProyecto actividad,
         IReadOnlyCollection<EntradaEntregaActividad> entregas)
-    { ValidarEntradas(entregas, actividad.Entregas.Select(x => x.EstudianteId).ToHashSet()); return Mapear(entregas); }
+    {
+        ValidarEntradas(entregas, actividad.Entregas.Select(x => x.EstudianteId).ToHashSet());
+        var existentes = actividad.Entregas.ToDictionary(x => x.EstudianteId);
+        return entregas.Select(x =>
+        {
+            var estado = x.EstadoEntrega;
+            if (!x.EstadoEntregaEsExplicito
+                && estado == EstadoEntregaActividad.Pendiente
+                && x.NivelLogro == NivelLogro.Pendiente
+                && existentes.TryGetValue(x.EstudianteId, out var existente))
+            {
+                estado = existente.EstadoEntrega;
+            }
+
+            return new DatosEntregaActividadRehidratada(
+                x.EstudianteId,
+                estado,
+                x.NivelLogro,
+                x.Observacion);
+        }).ToArray();
+    }
 
     private static void ValidarEntradas(IReadOnlyCollection<EntradaEntregaActividad> entradas, HashSet<EstudianteId> esperados)
     {

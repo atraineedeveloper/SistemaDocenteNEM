@@ -15,14 +15,19 @@ public partial class MainWindow : Window
 {
     private DispatcherTimer? _toastTimer;
 
-    public MainWindow(MainWindowViewModel viewModel)
+    public MainWindow(
+        MainWindowViewModel viewModel,
+        ConfiguracionGrupoViewModel configuracionGrupo)
     {
         ArgumentNullException.ThrowIfNull(viewModel);
+        ArgumentNullException.ThrowIfNull(configuracionGrupo);
+        ConfiguracionGrupo = configuracionGrupo;
         InitializeComponent();
         DataContext = viewModel;
     }
 
     public MainWindowViewModel ViewModel => (MainWindowViewModel)DataContext;
+    public ConfiguracionGrupoViewModel ConfiguracionGrupo { get; }
 
     private void OnClosing(object? sender, CancelEventArgs e)
     {
