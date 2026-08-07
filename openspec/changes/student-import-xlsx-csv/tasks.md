@@ -34,5 +34,5 @@
 - [x] 23. Add real XLSX/CSV adapter fixtures for worksheets, quotes, delimiters, native dates, blanks and malformed input.
 - [x] 24. Add Data/integration tests proving one confirmed import is all-or-nothing through the existing group transaction.
 - [x] 25. Add Presentation/WPF regressions for correction/exclusion, commit gating, accessibility and result counts.
-- [ ] 26. Run Windows CI: format, Release build, full tests, OpenSpec and whitespace.
+- [x] 26. Run Windows CI: format, Release build, full tests, OpenSpec and whitespace.
 - [ ] 27. Manually validate fictitious unigrade/multigrade XLSX and CSV imports in Light/Dark/High Contrast and 100/125/150% scaling.
