@@ -1,45 +1,43 @@
-# Proposal: Reportes, configuración contextual del grupo y estado explícito de entrega
+# Change: Reportes, configuración contextual del grupo y estado explícito de entrega
 
-## Problema
+## Why
 
-El sistema ya registra grupo, asistencia, proyectos, actividades, niveles de logro y expediente, pero todavía no consolida esa información en reportes pedagógicos individual y grupal. Tampoco existe un contexto escolar persistente por grupo para identificar ciclo, escuela, grado, turno y etapa de desarrollo cognoscitivo de referencia. Finalmente, el estado de entrega está implícito dentro de `NivelLogro`, lo que impide distinguir con rigor entre una actividad pendiente de evaluación y una actividad no entregada.
+El sistema ya registra grupo, asistencia, proyectos, actividades, niveles de logro y expediente, pero no consolida esa información en reportes pedagógicos individual y grupal. Tampoco existe un contexto escolar persistente por grupo para identificar ciclo, escuela, grado, turno y etapa cognoscitiva de referencia. Además, el estado de entrega estaba implícito en `NivelLogro`, impidiendo distinguir una actividad recibida aún no evaluada de una actividad no entregada.
 
-## Objetivo
+## What Changes
 
-Agregar tres capacidades relacionadas:
+- Agregar `ContextoGrupo` 1:1 por grupo con ciclo escolar, escuela/CCT, ubicación, grado/grupo/turno, referencia cognoscitiva grupal, docente responsable, periodo y horario.
+- Tratar la etapa de Piaget como referencia pedagógica del grupo, nunca como diagnóstico individual.
+- Introducir `EstadoEntregaActividad` con `Pendiente`, `Entregada` y `NoEntregada`, separado de `NivelLogro`.
+- Permitir explícitamente `Entregada + NivelLogro.Pendiente` cuando el trabajo fue recibido pero aún no evaluado.
+- Normalizar `NoEntregada` a `NivelLogro.Pendiente` y mantener `NivelLogro.NoEntrego` sólo como compatibilidad legacy.
+- Persistir el estado explícito mediante la extensión SQLite aditiva versionada `reportes-contexto-entregas` v1 sobre `PRAGMA user_version = 6`, sin reconstruir destructivamente `entregas_actividad`.
+- Convertir datos legacy de forma transaccional e idempotente.
+- Activar `SistemaDocente.Reporting` con reportes individual y grupal y cálculos puros.
+- Calcular cumplimiento como `Entregadas / (Entregadas + NoEntregadas) * 100`; los pendientes se muestran aparte y no entran al denominador.
+- Agregar navegación global a Reportes y una ventana de Configuración del grupo reutilizada desde Grupo y Reportes.
+- Adaptar la matriz de Evaluación, filtros, métricas, editor y atajos para conservar entrega y logro por separado.
+- Mantener fuera de alcance calificaciones numéricas, rankings competitivos y generación PDF final.
 
-1. **Configuración contextual por grupo**, vinculada a un ciclo escolar y conservada históricamente aunque el docente cambie de escuela/grupo durante el ciclo.
-2. **Estado explícito de entrega**, separado del nivel de logro, con `Pendiente`, `Entregada` y `NoEntregada` para calcular cumplimiento real sin interpretar `NivelLogro.Pendiente` como falta de entrega.
-3. **Módulo Reportes**, con vista individual y grupal, basado en proyecciones de datos existentes y preparado para una futura salida imprimible/PDF desde `SistemaDocente.Reporting`.
+## Capabilities
 
-## Decisiones funcionales
+### New Capabilities
 
-- La **etapa de desarrollo cognoscitivo de Piaget** es contexto del grupo, no diagnóstico individual. Se registra de forma descriptiva, por ejemplo `Operaciones concretas`.
-- No se guardan “estilos de aprendizaje” visual/auditivo/kinestésico como diagnóstico individual.
-- `EstadoEntregaActividad` es independiente de `NivelLogro`.
-- Una actividad nueva inicia con entrega `Pendiente` y nivel de logro `Pendiente`.
-- `Entregada` permite cualquier nivel evaluativo y también `NivelLogro.Pendiente` cuando el trabajo ya fue recibido pero aún no evaluado.
-- `NoEntregada` no se transforma en una calificación numérica; el nivel de logro queda `Pendiente` y el reporte muestra el estado de entrega por separado.
-- La compatibilidad SQLite se implementa mediante una **extensión aditiva versionada** sobre el esquema base v6, sin reconstruir la tabla histórica `entregas_actividad` ni cambiar `PRAGMA user_version`.
-- La conversión inicial transforma el legado `NivelLogro.NoEntrego` en `EstadoEntregaActividad.NoEntregada + NivelLogro.Pendiente`; otros niveles distintos de `Pendiente` se interpretan como `Entregada`; `Pendiente` permanece como entrega `Pendiente`.
-- El porcentaje de cumplimiento usa únicamente estados explícitos decididos: `Entregadas / (Entregadas + NoEntregadas) * 100`; las entregas `Pendiente` se muestran aparte y no alteran el porcentaje.
-- La configuración pertenece al **grupo**. Un cambio de adscripción se representa con otro grupo/contexto, preservando reportes históricos.
-- Grupo y Reportes abren la misma ventana de configuración y reutilizan el mismo ViewModel contextual.
+- `contexto-grupo`: configuración escolar y pedagógica persistente 1:1 por grupo, editable de forma progresiva.
+- `estado-entrega-actividad`: seguimiento explícito de entrega independiente del nivel de logro, con compatibilidad legacy y persistencia aditiva.
+- `reportes-pedagogicos`: reportes individual y grupal con asistencia, cumplimiento, niveles de logro y seguimiento pedagógico.
 
-## Fuera de alcance inicial
+### Modified Capabilities
 
-- calificaciones numéricas y reglas de aprobación;
-- convertir una no entrega en cero;
-- clasificación individual por etapas de Piaget;
-- generación PDF final (se deja preparada la frontera de Reporting y la vista imprimible se aborda posteriormente);
-- rankings competitivos de estudiantes;
-- reconstruir el esquema base v6 únicamente para renombrar/consolidar columnas históricas que ya pueden convivir de forma segura mediante la extensión aditiva.
+- Ninguna. La adaptación visual de Evaluación se especifica como comportamiento consumidor de `estado-entrega-actividad` sin crear un nuevo agregado.
 
-## Impacto esperado
+## Impact
 
-- Core: nuevo estado de entrega y contexto de grupo.
-- Application: contratos/casos de uso para contexto y reportes, con compatibilidad para llamadas legacy de entrega.
-- Data: extensión SQLite `reportes-contexto-entregas` v1, persistencia de contexto/estado explícito y conversión de datos legacy.
-- Reporting: modelos y cálculos agregados reutilizables.
-- Presentation/WPF: nuevo módulo Reportes, edición de configuración del grupo y evaluación con entrega/nivel separados.
-- Tests: dominio, compatibilidad SQLite, cálculos, matriz y composición WPF.
+- **Core:** nuevo estado de entrega, contexto de grupo e invariantes de combinación entrega/logro.
+- **Application:** contratos y casos de uso para contexto, reportes y compatibilidad de entradas legacy.
+- **Data:** extensión SQLite `reportes-contexto-entregas` v1, configuración 1:1, estados explícitos y conversión legacy.
+- **Reporting:** modelos y cálculos puros reutilizables, sin dependencia de SQLite ni WPF.
+- **Presentation:** ViewModels para configuración/reportes y matriz de evaluación con las dos dimensiones separadas.
+- **App.Wpf:** navegación Reportes, `ReportesView`, `ConfiguracionGrupoWindow` y editor de evaluación actualizado.
+- **Demo:** contexto ficticio y mezcla de estados `Pendiente`, `Entregada`, `NoEntregada` y `Entregada + Pendiente de evaluación`.
+- **Pruebas:** cobertura Core/Application/Data/Reporting/Presentation/WPF y validación manual posterior en Windows.
