@@ -14,8 +14,8 @@ public partial class ImportacionEstudiantesWindow : Window
     {
         ArgumentNullException.ThrowIfNull(viewModel);
         _viewModel = viewModel;
-        InitializeComponent();
         DataContext = viewModel;
+        InitializeComponent();
     }
 
     private void OnSeleccionarArchivoClic(object sender, RoutedEventArgs e)
