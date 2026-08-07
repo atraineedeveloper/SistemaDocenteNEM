@@ -18,11 +18,13 @@ Agregar tres capacidades relacionadas:
 - No se guardan “estilos de aprendizaje” visual/auditivo/kinestésico como diagnóstico individual.
 - `EstadoEntregaActividad` es independiente de `NivelLogro`.
 - Una actividad nueva inicia con entrega `Pendiente` y nivel de logro `Pendiente`.
-- `Entregada` permite cualquier nivel de logro evaluativo excepto el legado `NoEntrego`.
-- `NoEntregada` no se transforma en una calificación numérica; para compatibilidad, el nivel de logro queda `Pendiente` y el reporte muestra el estado de entrega por separado.
-- La migración convierte el legado `NivelLogro.NoEntrego` en `EstadoEntregaActividad.NoEntregada + NivelLogro.Pendiente`; otros niveles distintos de `Pendiente` se migran como `Entregada`; `Pendiente` permanece como entrega `Pendiente`.
+- `Entregada` permite cualquier nivel evaluativo y también `NivelLogro.Pendiente` cuando el trabajo ya fue recibido pero aún no evaluado.
+- `NoEntregada` no se transforma en una calificación numérica; el nivel de logro queda `Pendiente` y el reporte muestra el estado de entrega por separado.
+- La compatibilidad SQLite se implementa mediante una **extensión aditiva versionada** sobre el esquema base v6, sin reconstruir la tabla histórica `entregas_actividad` ni cambiar `PRAGMA user_version`.
+- La conversión inicial transforma el legado `NivelLogro.NoEntrego` en `EstadoEntregaActividad.NoEntregada + NivelLogro.Pendiente`; otros niveles distintos de `Pendiente` se interpretan como `Entregada`; `Pendiente` permanece como entrega `Pendiente`.
 - El porcentaje de cumplimiento usa únicamente estados explícitos decididos: `Entregadas / (Entregadas + NoEntregadas) * 100`; las entregas `Pendiente` se muestran aparte y no alteran el porcentaje.
 - La configuración pertenece al **grupo**. Un cambio de adscripción se representa con otro grupo/contexto, preservando reportes históricos.
+- Grupo y Reportes abren la misma ventana de configuración y reutilizan el mismo ViewModel contextual.
 
 ## Fuera de alcance inicial
 
@@ -30,13 +32,14 @@ Agregar tres capacidades relacionadas:
 - convertir una no entrega en cero;
 - clasificación individual por etapas de Piaget;
 - generación PDF final (se deja preparada la frontera de Reporting y la vista imprimible se aborda posteriormente);
-- rankings competitivos de estudiantes.
+- rankings competitivos de estudiantes;
+- reconstruir el esquema base v6 únicamente para renombrar/consolidar columnas históricas que ya pueden convivir de forma segura mediante la extensión aditiva.
 
 ## Impacto esperado
 
 - Core: nuevo estado de entrega y contexto de grupo.
-- Application: contratos/casos de uso para contexto y reportes.
-- Data: migración SQLite y persistencia de contexto/estado explícito.
+- Application: contratos/casos de uso para contexto y reportes, con compatibilidad para llamadas legacy de entrega.
+- Data: extensión SQLite `reportes-contexto-entregas` v1, persistencia de contexto/estado explícito y conversión de datos legacy.
 - Reporting: modelos y cálculos agregados reutilizables.
-- Presentation/WPF: nuevo módulo Reportes y edición de configuración del grupo.
-- Tests: dominio, migración, cálculos y composición WPF.
+- Presentation/WPF: nuevo módulo Reportes, edición de configuración del grupo y evaluación con entrega/nivel separados.
+- Tests: dominio, compatibilidad SQLite, cálculos, matriz y composición WPF.
