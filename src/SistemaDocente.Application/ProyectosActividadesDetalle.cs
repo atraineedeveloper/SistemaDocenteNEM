@@ -60,6 +60,13 @@ public sealed record EntradaEntregaActividad(
     NivelLogro NivelLogro,
     string Observacion)
 {
+    /// <summary>
+    /// Distingue llamadas nuevas, que expresan el estado de entrega de forma intencional,
+    /// de llamadas legacy que sólo proporcionaban NivelLogro. Permite conservar el estado
+    /// histórico cuando una pantalla antigua edita metadatos sin conocer esta dimensión.
+    /// </summary>
+    public bool EstadoEntregaEsExplicito { get; private init; } = true;
+
     public EntradaEntregaActividad(EstudianteId estudianteId, NivelLogro nivelLogro, string observacion)
         : this(
             estudianteId,
@@ -72,6 +79,7 @@ public sealed record EntradaEntregaActividad(
             nivelLogro == NivelLogro.NoEntrego ? NivelLogro.Pendiente : nivelLogro,
             observacion)
     {
+        EstadoEntregaEsExplicito = false;
     }
 }
 
