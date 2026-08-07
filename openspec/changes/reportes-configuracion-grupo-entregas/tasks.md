@@ -23,5 +23,5 @@
 ## Calidad
 - [x] 15. Agregar pruebas Core/Application/Data/Reporting/Presentation/WPF para invariantes, compatibilidad legacy, extensión SQLite, cálculos, matriz y composición.
 - [x] 16. Actualizar arquitectura y guía de reportes/configuración, incluida documentación de demo y persistencia aditiva.
-- [ ] 17. Ejecutar format/build/test/OpenSpec/diff-check en Windows.
+- [x] 17. Ejecutar format/build/test/OpenSpec/diff-check en Windows mediante GitHub Actions; CI verde con build Release, 308 pruebas, OpenSpec completo y whitespace check.
 - [ ] 18. Validar manualmente reportes, configuración, temas y escalado.
