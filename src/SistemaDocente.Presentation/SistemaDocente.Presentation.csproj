@@ -6,4 +6,7 @@
     <ProjectReference Include="..\SistemaDocente.Application\SistemaDocente.Application.csproj" />
     <ProjectReference Include="..\SistemaDocente.Reporting\SistemaDocente.Reporting.csproj" />
   </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Data\estados-municipios.json" />
+  </ItemGroup>
 </Project>
