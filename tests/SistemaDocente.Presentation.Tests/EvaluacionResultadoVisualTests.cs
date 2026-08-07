@@ -28,7 +28,7 @@ public sealed class EvaluacionResultadoVisualTests
         Assert.Equal(estadoEsperado, celda.EstadoEntrega);
         Assert.Equal(nivelEsperado, celda.NivelLogro);
         Assert.Equal(etiquetaEsperada, celda.EtiquetaNivel);
-        Assert.True(celda.TieneCambios);
+        Assert.Equal(resultado != ResultadoEvaluacionVisual.Pendiente, celda.TieneCambios);
     }
 
     [Fact]
