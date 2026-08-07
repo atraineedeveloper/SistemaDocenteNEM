@@ -92,6 +92,7 @@ public sealed class EvaluacionCeldaVisual : ViewModelBase
                 OnPropertyChanged(nameof(EtiquetaNivel));
                 OnPropertyChanged(nameof(NombreNivel));
                 OnPropertyChanged(nameof(TieneCambios));
+                OnPropertyChanged(nameof(DescripcionAccesible));
             }
         }
     }
@@ -108,6 +109,7 @@ public sealed class EvaluacionCeldaVisual : ViewModelBase
             {
                 OnPropertyChanged(nameof(TieneCambios));
                 OnPropertyChanged(nameof(TieneObservacion));
+                OnPropertyChanged(nameof(DescripcionAccesible));
             }
         }
     }
