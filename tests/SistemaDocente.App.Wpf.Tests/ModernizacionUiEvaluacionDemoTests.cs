@@ -56,7 +56,7 @@ public sealed class ModernizacionUiEvaluacionDemoTests
     }
 
     [Fact]
-    public void GrupoYReportesCompartenConfiguracionContextual()
+    public void GrupoProyectosYReportesCompartenConfiguracionContextual()
     {
         var main = Leer("src/SistemaDocente.App.Wpf/MainWindow.xaml");
         var grupo = Leer("src/SistemaDocente.App.Wpf/Views/GrupoView.xaml");
@@ -64,7 +64,7 @@ public sealed class ModernizacionUiEvaluacionDemoTests
         var reportesCode = Leer("src/SistemaDocente.App.Wpf/Views/ReportesView.xaml.cs");
         const string binding = "Configuracion=\"{Binding ConfiguracionGrupo, ElementName=RootWindow}\"";
 
-        Assert.Equal(2, main.Split(binding, StringSplitOptions.None).Length - 1);
+        Assert.Equal(3, main.Split(binding, StringSplitOptions.None).Length - 1);
         Assert.Contains("⚙  Configurar grupo", grupo, StringComparison.Ordinal);
         Assert.Contains("OnConfigurarGrupoClic", grupo, StringComparison.Ordinal);
         Assert.Contains("ConfiguracionGrupoWindow", grupoCode, StringComparison.Ordinal);
@@ -154,6 +154,9 @@ public sealed class ModernizacionUiEvaluacionDemoTests
         Assert.Contains("31", seeder, StringComparison.Ordinal);
         Assert.Contains("EstadoAsistencia.Falta", seeder, StringComparison.Ordinal);
         Assert.Contains("NivelLogro.RequiereApoyo", seeder, StringComparison.Ordinal);
+        Assert.Contains("MetodologiaProyectoNem.ProyectosComunitarios", seeder, StringComparison.Ordinal);
+        Assert.Contains("CampoFormativoNem.SaberesPensamientoCientifico", seeder, StringComparison.Ordinal);
+        Assert.Contains("grado: GradoPrimaria.Quinto", seeder, StringComparison.Ordinal);
         Assert.Contains("GradoPrimaria.Cuarto", contexto, StringComparison.Ordinal);
         Assert.Contains("OrganizacionEscolar.Completa", contexto, StringComparison.Ordinal);
         Assert.Contains("EtapaDesarrolloCognoscitivo.NoEspecificada", contexto, StringComparison.Ordinal);

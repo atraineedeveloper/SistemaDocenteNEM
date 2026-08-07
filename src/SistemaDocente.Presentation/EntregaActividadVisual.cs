@@ -16,6 +16,7 @@ public sealed class EntregaActividadVisual : ViewModelBase
         NumeroLista = detalle.NumeroLista;
         Nombre = detalle.NombreVisible;
         EstaActivoActualmente = detalle.EstaActivoActualmente;
+        Grado = detalle.Grado;
         _estadoEntrega = detalle.EstadoEntrega;
         _nivelLogro = detalle.NivelLogro;
         _observacion = detalle.Observacion;
@@ -25,6 +26,8 @@ public sealed class EntregaActividadVisual : ViewModelBase
     public int NumeroLista { get; }
     public string Nombre { get; }
     public bool EstaActivoActualmente { get; }
+    public GradoPrimaria Grado { get; }
+    public string GradoTexto => CatalogoNemPrimaria.FormatearGrado(Grado);
     public string SituacionActual => EstaActivoActualmente ? "Activo actualmente" : "Inactivo actualmente";
 
     public EstadoEntregaActividad EstadoEntrega

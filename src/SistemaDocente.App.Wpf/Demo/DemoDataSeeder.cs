@@ -57,7 +57,8 @@ internal static class DemoDataSeeder
             new DateOnly(2016, 11, 18),
             GeneroEstudiante.Mujer,
             new DateOnly(2026, 8, 10),
-            "Ingreso posterior al inicio del proyecto de demostración.");
+            "Ingreso posterior al inicio del proyecto de demostración.",
+            GradoPrimaria.Cuarto);
         grupos.Guardar(grupo);
 
         CrearActividadesPosteriores(gestionProyectos, grupos, proyectoActual);
@@ -119,7 +120,8 @@ internal static class DemoDataSeeder
                 dato.Nacimiento,
                 dato.Genero,
                 new DateOnly(2026, 7, 1),
-                indice % 9 == 0 ? "Dato ficticio para probar observaciones del expediente." : string.Empty);
+                indice % 9 == 0 ? "Dato ficticio para probar observaciones del expediente." : string.Empty,
+                GradoPrimaria.Cuarto);
         }
 
         return grupo;
@@ -137,7 +139,9 @@ internal static class DemoDataSeeder
                 "Proyecto ficticio para comprobar historial y proyecto finalizado.",
                 new DateOnly(2026, 7, 6),
                 new DateOnly(2026, 7, 31),
-                "Datos exclusivos del modo demostración."));
+                "Datos exclusivos del modo demostración.",
+                MetodologiaProyectoNem.ProyectosComunitarios,
+                [GradoPrimaria.Cuarto]));
         proyecto = gestion.CambiarEstadoProyecto(proyecto.ProyectoId, proyecto.Version, EstadoProyecto.EnCurso);
 
         var actividades = new[]
@@ -151,7 +155,14 @@ internal static class DemoDataSeeder
 
         for (var i = 0; i < actividades.Length; i++)
         {
-            CrearActividadConPatron(gestion, grupos, proyecto.ProyectoId, actividades[i].Item1, actividades[i].Item2, i + 2);
+            CrearActividadConPatron(
+                gestion,
+                grupos,
+                proyecto.ProyectoId,
+                actividades[i].Item1,
+                actividades[i].Item2,
+                i + 2,
+                CampoFormativoNem.EticaNaturalezaSociedades);
         }
 
         var actualizado = gestion.ObtenerProyecto(proyecto.ProyectoId);
@@ -170,7 +181,9 @@ internal static class DemoDataSeeder
                 "Proyecto ficticio en curso con suficientes actividades para probar la matriz de evaluación.",
                 new DateOnly(2026, 8, 3),
                 new DateOnly(2026, 8, 28),
-                "La mitad de las actividades se creó antes del ingreso de Ximena."));
+                "La mitad de las actividades se creó antes del ingreso de Ximena.",
+                MetodologiaProyectoNem.ProyectosComunitarios,
+                [GradoPrimaria.Cuarto]));
         proyecto = gestion.CambiarEstadoProyecto(proyecto.ProyectoId, proyecto.Version, EstadoProyecto.EnCurso);
 
         var tempranas = new[]
@@ -183,7 +196,14 @@ internal static class DemoDataSeeder
 
         for (var i = 0; i < tempranas.Length; i++)
         {
-            CrearActividadConPatron(gestion, grupos, proyecto.ProyectoId, tempranas[i].Item1, tempranas[i].Item2, i + 11);
+            CrearActividadConPatron(
+                gestion,
+                grupos,
+                proyecto.ProyectoId,
+                tempranas[i].Item1,
+                tempranas[i].Item2,
+                i + 11,
+                CampoFormativoNem.Lenguajes);
         }
 
         return gestion.ObtenerProyecto(proyecto.ProyectoId);
@@ -205,7 +225,14 @@ internal static class DemoDataSeeder
 
         for (var i = 0; i < posteriores.Length; i++)
         {
-            CrearActividadConPatron(gestion, grupos, proyecto.ProyectoId, posteriores[i].Item1, posteriores[i].Item2, i + 23);
+            CrearActividadConPatron(
+                gestion,
+                grupos,
+                proyecto.ProyectoId,
+                posteriores[i].Item1,
+                posteriores[i].Item2,
+                i + 23,
+                CampoFormativoNem.Lenguajes);
         }
     }
 
@@ -221,10 +248,26 @@ internal static class DemoDataSeeder
                 "Borrador ficticio para probar filtros y estados de proyectos.",
                 new DateOnly(2026, 9, 7),
                 new DateOnly(2026, 9, 25),
-                string.Empty));
+                string.Empty,
+                MetodologiaProyectoNem.IndagacionSteam,
+                [GradoPrimaria.Cuarto]));
 
-        CrearActividadConPatron(gestion, grupos, proyecto.ProyectoId, "¿Cómo usamos el agua?", new DateOnly(2026, 9, 8), 37);
-        CrearActividadConPatron(gestion, grupos, proyecto.ProyectoId, "Registro de consumo y propuestas", new DateOnly(2026, 9, 14), 41);
+        CrearActividadConPatron(
+            gestion,
+            grupos,
+            proyecto.ProyectoId,
+            "¿Cómo usamos el agua?",
+            new DateOnly(2026, 9, 8),
+            37,
+            CampoFormativoNem.SaberesPensamientoCientifico);
+        CrearActividadConPatron(
+            gestion,
+            grupos,
+            proyecto.ProyectoId,
+            "Registro de consumo y propuestas",
+            new DateOnly(2026, 9, 14),
+            41,
+            CampoFormativoNem.SaberesPensamientoCientifico);
     }
 
     private static void CrearActividadConPatron(
@@ -233,11 +276,13 @@ internal static class DemoDataSeeder
         ProyectoId proyectoId,
         string titulo,
         DateOnly fecha,
-        int semilla)
+        int semilla,
+        CampoFormativoNem campoFormativo)
     {
         var grupoId = gestion.ObtenerProyecto(proyectoId).GrupoId;
         var grupo = grupos.Cargar(grupoId)!;
         var entradas = grupo.EstudiantesActivos
+            .Where(estudiante => estudiante.Grado == GradoPrimaria.Cuarto)
             .Select(estudiante =>
             {
                 var (estado, nivel) = SeguimientoPara(estudiante.NumeroLista, semilla);
@@ -255,7 +300,9 @@ internal static class DemoDataSeeder
                 "Actividad ficticia para explorar estados, teclado, filtros y seguimiento.",
                 fecha,
                 string.Empty,
-                entradas));
+                entradas,
+                campoFormativo,
+                [GradoPrimaria.Cuarto]));
     }
 
     private static (EstadoEntregaActividad Estado, NivelLogro Nivel) SeguimientoPara(int numeroLista, int semilla)
@@ -357,7 +404,8 @@ internal static class DemoDataSeeder
                 i + 1,
                 fechaNacimiento: new DateOnly(2015, (i % 12) + 1, Math.Min(20, i + 3)),
                 genero: i % 2 == 0 ? GeneroEstudiante.Mujer : GeneroEstudiante.Hombre,
-                fechaIngreso: new DateOnly(2026, 7, 1));
+                fechaIngreso: new DateOnly(2026, 7, 1),
+                grado: GradoPrimaria.Quinto);
         }
         grupos.Guardar(grupo);
     }

@@ -2,10 +2,11 @@
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:controls="clr-namespace:SistemaDocente.App.Wpf.Controls"
+        xmlns:converters="clr-namespace:SistemaDocente.App.Wpf.Converters"
         xmlns:prop="clr-namespace:SistemaDocente.App.Wpf.Properties"
         xml:lang="es-MX"
         Title="{x:Static prop:Resources.DetalleProyectoTitle}"
-        Height="720" Width="820" MinHeight="600" MinWidth="700"
+        Height="760" Width="860" MinHeight="620" MinWidth="720"
         WindowStartupLocation="CenterOwner" ShowInTaskbar="False"
         ResizeMode="CanResizeWithGrip"
         Background="{DynamicResource WindowBackgroundBrush}">
@@ -15,6 +16,8 @@
             <ResourceDictionary.MergedDictionaries>
                 <ResourceDictionary Source="Styles/PopupStyles.xaml"/>
             </ResourceDictionary.MergedDictionaries>
+            <converters:CampoFormativoNemConverter x:Key="CampoFormativoNem"/>
+            <converters:GradosObjetivoConverter x:Key="GradosObjetivo"/>
         </ResourceDictionary>
     </Window.Resources>
 
@@ -62,7 +65,7 @@
                 <Border Style="{StaticResource PopupCard}" Margin="0,0,0,16">
                     <StackPanel>
                         <TextBlock Text="Datos del proyecto" Style="{StaticResource PopupSectionTitle}"/>
-                        <TextBlock Text="Mantén una descripción breve y un periodo coherente con la intención didáctica."
+                        <TextBlock Text="Mantén una descripción breve, define la metodología NEM y delimita los grados a los que se dirige."
                                    Style="{StaticResource PopupSubtitle}" Margin="0,0,0,14"/>
 
                         <controls:FormField Header="{x:Static prop:Resources.NombreProyecto}">
@@ -83,6 +86,42 @@
                                      AutomationProperties.Name="Descripción del proyecto"/>
                         </controls:FormField>
 
+                        <controls:FormField Header="Metodología NEM *">
+                            <ComboBox ItemsSource="{Binding MetodologiasProyecto}"
+                                      DisplayMemberPath="Texto"
+                                      SelectedValuePath="Valor"
+                                      SelectedValue="{Binding MetodologiaProyecto, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                      MinHeight="38"
+                                      TabIndex="12"
+                                      AutomationProperties.Name="Metodología NEM del proyecto"/>
+                        </controls:FormField>
+
+                        <controls:FormField Header="Grados objetivo *">
+                            <StackPanel>
+                                <ItemsControl ItemsSource="{Binding GradosProyecto}"
+                                              AutomationProperties.Name="Grados objetivo del proyecto">
+                                    <ItemsControl.ItemsPanel>
+                                        <ItemsPanelTemplate>
+                                            <WrapPanel/>
+                                        </ItemsPanelTemplate>
+                                    </ItemsControl.ItemsPanel>
+                                    <ItemsControl.ItemTemplate>
+                                        <DataTemplate>
+                                            <CheckBox Content="{Binding Texto}"
+                                                      IsChecked="{Binding Seleccionado, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                                      Margin="0,0,18,8"
+                                                      MinWidth="52"
+                                                      AutomationProperties.Name="{Binding Texto}"/>
+                                        </DataTemplate>
+                                    </ItemsControl.ItemTemplate>
+                                </ItemsControl>
+                                <TextBlock Text="En un grupo unigrado el grado se preselecciona; en multigrado puedes elegir uno o varios grados atendidos."
+                                           Style="{StaticResource PopupSubtitle}"
+                                           TextWrapping="Wrap"
+                                           Margin="0,2,0,0"/>
+                            </StackPanel>
+                        </controls:FormField>
+
                         <Grid>
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="*"/>
@@ -93,14 +132,14 @@
                             <controls:FormField Grid.Column="0" Header="{x:Static prop:Resources.FechaInicio}">
                                 <DatePicker SelectedDate="{Binding FechaInicio, Mode=TwoWay}"
                                             Style="{StaticResource PopupDatePicker}"
-                                            TabIndex="12"
+                                            TabIndex="13"
                                             AutomationProperties.Name="Fecha de inicio del proyecto"/>
                             </controls:FormField>
 
                             <controls:FormField Grid.Column="2" Header="{x:Static prop:Resources.FechaTermino}">
                                 <DatePicker SelectedDate="{Binding FechaTermino, Mode=TwoWay}"
                                             Style="{StaticResource PopupDatePicker}"
-                                            TabIndex="13"
+                                            TabIndex="14"
                                             AutomationProperties.Name="Fecha de término del proyecto"/>
                             </controls:FormField>
                         </Grid>
@@ -123,7 +162,7 @@
                                      VerticalScrollBarVisibility="Auto"
                                      VerticalContentAlignment="Top"
                                      TextWrapping="Wrap"
-                                     TabIndex="14"
+                                     TabIndex="15"
                                      AutomationProperties.Name="Observaciones del proyecto"/>
                         </controls:FormField>
 
@@ -184,7 +223,7 @@
                                      AutomationProperties.Name="Buscar actividad"/>
                         </controls:FormField>
 
-                        <Grid MinHeight="190" Height="220">
+                        <Grid MinHeight="210" Height="250">
                             <ListBox ItemsSource="{Binding Actividades}"
                                      SelectedItem="{Binding ActividadSeleccionada}"
                                      MouseDoubleClick="OnActividadDobleClic"
@@ -195,7 +234,7 @@
                                      AutomationProperties.Name="Lista de actividades del proyecto">
                                 <ListBox.ItemTemplate>
                                     <DataTemplate>
-                                        <Grid Margin="8,6">
+                                        <Grid Margin="8,7">
                                             <Grid.ColumnDefinitions>
                                                 <ColumnDefinition Width="*"/>
                                                 <ColumnDefinition Width="Auto"/>
@@ -204,9 +243,19 @@
                                                 <TextBlock Text="{Binding Titulo}"
                                                            FontWeight="SemiBold"
                                                            Foreground="{DynamicResource TextPrimaryBrush}"/>
-                                                <TextBlock Text="{Binding FechaRealizacion, StringFormat=Fecha: {0:dd/MM/yyyy}}"
-                                                           Style="{StaticResource PopupSubtitle}"
+                                                <TextBlock Text="{Binding CampoFormativo, Converter={StaticResource CampoFormativoNem}}"
+                                                           Foreground="{DynamicResource TextSecondaryBrush}"
+                                                           FontSize="11"
                                                            Margin="0,2,0,0"/>
+                                                <StackPanel Orientation="Horizontal" Margin="0,2,0,0">
+                                                    <TextBlock Text="{Binding GradosObjetivo, Converter={StaticResource GradosObjetivo}}"
+                                                               Foreground="{DynamicResource TextMutedBrush}"
+                                                               FontSize="11"/>
+                                                    <TextBlock Text=" · " Foreground="{DynamicResource TextMutedBrush}" FontSize="11"/>
+                                                    <TextBlock Text="{Binding FechaRealizacion, StringFormat={}{0:dd/MM/yyyy}}"
+                                                               Foreground="{DynamicResource TextMutedBrush}"
+                                                               FontSize="11"/>
+                                                </StackPanel>
                                             </StackPanel>
                                             <Border Grid.Column="1"
                                                     Style="{StaticResource PopupNeutralPill}"

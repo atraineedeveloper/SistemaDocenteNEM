@@ -66,9 +66,9 @@ This checklist reflects the current product state rather than the original proto
   - Light, Dark and High Contrast themes.
   - Shared popup styles and accessible keyboard patterns.
 
-## Current change: structured school context, NEM and multigrade
+## Current stacked changes: structured school context and NEM planning
 
-- [~] **School context and NEM catalogs** — `feature/nem-multigrade-catalogs`
+- [~] **School context, NEM phase and multigrade foundation** — PR #11 / `feature/nem-multigrade-catalogs`
   - [x] Structured primary grades 1.º–6.º.
   - [x] Automatic NEM phase mapping: 1.º–2.º → Phase 3; 3.º–4.º → Phase 4; 5.º–6.º → Phase 5.
   - [x] Unigrade/multigrade modality derived from served grades.
@@ -77,30 +77,36 @@ This checklist reflects the current product state rather than the original proto
   - [x] Offline Mexico entity/municipality catalog; locality remains free text.
   - [x] Derived, non-diagnostic Piaget developmental reference.
   - [x] Additive SQLite extension while keeping `PRAGMA user_version = 6`.
-  - [ ] Complete automated regression coverage and final CI.
+  - [x] Automated regression coverage and Windows CI.
   - [ ] Complete manual unigrade/multigrade UX validation.
+
+- [~] **Structured NEM project/activity metadata** — PR #12 / `feature/nem-project-planning-catalogs`
+  - [x] Four structured project methodologies plus legacy `No especificada`.
+  - [x] Four structured formative fields plus legacy `No especificado`.
+  - [x] Project target grades.
+  - [x] Activity target grades constrained by explicit project scope.
+  - [x] New activity roster filtered by active students in target grades.
+  - [x] Historical activity roster preserved after creation.
+  - [x] Unigrade grade preselection and explicit multigrade selection.
+  - [x] Additive SQLite extension `nem-planeacion-proyectos` while keeping `PRAGMA user_version = 6`.
+  - [x] Demo data with explicit NEM planning metadata.
+  - [x] Executable Demo seeder integration test against temporary SQLite storage.
+  - [x] Automated regression coverage and Windows CI.
+  - [ ] Complete manual Demo UX validation and normalize the stacked branch after PR #11 merges.
 
 ---
 
 # Planned modules and extensions
 
-## 1. NEM pedagogical planning and project metadata
+## 1. Richer NEM pedagogical planning
 
-- [ ] Add one of the four project-methodology options:
-  - Community Project-Based Learning (`Aprendizaje Basado en Proyectos Comunitarios`).
-  - Inquiry-Based Learning with STEAM approach (`Aprendizaje Basado en Indagación · STEAM`).
-  - Problem-Based Learning (`Aprendizaje Basado en Problemas · ABP`).
-  - Service Learning (`Aprendizaje Servicio · AS`).
-- [ ] Assign each activity a primary formative field:
-  - `Lenguajes`.
-  - `Saberes y Pensamiento Científico`.
-  - `Ética, Naturaleza y Sociedades`.
-  - `De lo Humano y lo Comunitario`.
-- [ ] Support target grades per project/activity for multigrade classrooms.
+The structured methodology/formative-field/grade foundation is implemented in the current PR #12. Remaining planning depth includes:
+
 - [ ] Register project purpose and expected final product.
 - [ ] Register curriculum content and learning-development processes (PDA).
 - [ ] Register articulating axes.
 - [ ] Register resources/materials and support/adaptation notes.
+- [ ] Decide whether additional activity-level planning fields are useful without duplicating the project plan.
 - [ ] Keep teacher-authored planning flexible rather than turning NEM guidance into a rigid recipe.
 
 ## 2. Evaluation criteria, rubrics and richer formative evidence
@@ -261,12 +267,12 @@ Backup is intentionally separate from export.
 
 # Recommended development sequence from the current state
 
-1. [~] Finish structured school context / NEM phases / multigrade foundation.
-2. [ ] Add NEM project methodology, formative fields and multigrade activity targeting.
+1. [~] Complete manual validation and merge the structured school-context/multigrade foundation (PR #11).
+2. [~] Normalize, manually validate and merge structured NEM project/activity metadata (PR #12).
 3. [ ] Implement student XLSX/CSV import.
 4. [ ] Implement data XLSX/CSV export.
 5. [ ] Implement backup/restore before production use with irreplaceable real data.
-6. [ ] Extend evaluation criteria/rubrics and reporting periods.
+6. [ ] Extend richer NEM planning fields, evaluation criteria/rubrics and reporting periods.
 7. [ ] Add PDF/print report outputs.
 8. [ ] Add teacher journal, family workflow, evidence attachments and calendar as prioritized.
 9. [ ] Harden privacy, installer/update and long-term support workflows.
