@@ -5,6 +5,11 @@ public interface ILectorImportacionTabular
     DocumentoTabular Leer(string rutaArchivo);
 }
 
+public interface ILectorImportacionCsvConfigurable : ILectorImportacionTabular
+{
+    DocumentoTabular LeerCsv(string rutaArchivo, char delimitador);
+}
+
 public sealed record DocumentoTabular(
     string NombreArchivo,
     IReadOnlyList<HojaTabular> Hojas);
@@ -56,13 +61,20 @@ public sealed record CeldaTabular(
 
 public sealed class ImportacionTabularException : Exception
 {
-    public ImportacionTabularException(string message)
+    public ImportacionTabularException(string message, string? codigo = null)
         : base(message)
     {
+        Codigo = codigo;
     }
 
-    public ImportacionTabularException(string message, Exception innerException)
+    public ImportacionTabularException(
+        string message,
+        Exception innerException,
+        string? codigo = null)
         : base(message, innerException)
     {
+        Codigo = codigo;
     }
+
+    public string? Codigo { get; }
 }
