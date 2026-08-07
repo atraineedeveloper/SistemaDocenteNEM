@@ -26,6 +26,7 @@ public partial class MainWindow : Window
         ConfiguracionGrupo = configuracionGrupo;
         ImportacionEstudiantes = importacionEstudiantes;
         InitializeComponent();
+        GrupoModule.Importacion = importacionEstudiantes;
         DataContext = viewModel;
     }
 
