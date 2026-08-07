@@ -98,7 +98,7 @@ public partial class EvaluacionView : UserControl
             {
                 Header = header,
                 Binding = new Binding($"Celdas[{indice}].EtiquetaNivel"),
-                Width = 54,
+                Width = 58,
                 IsReadOnly = true,
                 ElementStyle = CrearEstiloTextoCelda(indice),
                 CellStyle = CrearEstiloCelda(indice),
@@ -129,6 +129,8 @@ public partial class EvaluacionView : UserControl
         AgregarEstado(estilo, indice, "S", "InfoBackgroundBrush", "InfoBrush");
         AgregarEstado(estilo, indice, "E", "WarningBackgroundBrush", "WarningBrush");
         AgregarEstado(estilo, indice, "R", "ErrorBackgroundBrush", "ErrorBrush");
+        AgregarEstado(estilo, indice, "✓", "InfoBackgroundBrush", "InfoBrush");
+        AgregarEstado(estilo, indice, "P", "WarningBackgroundBrush", "WarningBrush");
         AgregarEstado(estilo, indice, "N", "DisabledBackgroundBrush", "TextMutedBrush");
 
         var noAplicable = new DataTrigger
@@ -190,7 +192,7 @@ public partial class EvaluacionView : UserControl
         }
 
         if (Keyboard.Modifiers == ModifierKeys.None
-            && e.Key is Key.D or Key.S or Key.E or Key.R or Key.N or Key.P)
+            && e.Key is Key.D or Key.S or Key.E or Key.R or Key.T or Key.N or Key.P)
         {
             if (!SeleccionarCeldaActual()) return;
             var command = e.Key switch
@@ -199,8 +201,9 @@ public partial class EvaluacionView : UserControl
                 Key.S => vm.MarcarSuficienteCommand,
                 Key.E => vm.MarcarEnProcesoCommand,
                 Key.R => vm.MarcarRequiereApoyoCommand,
-                Key.N => vm.MarcarNoEntregoCommand,
-                _ => vm.MarcarPendienteCommand,
+                Key.T => vm.MarcarEntregadaCommand,
+                Key.N => vm.MarcarNoEntregadaCommand,
+                _ => vm.MarcarPendienteEntregaCommand,
             };
             if (command.CanExecute(null))
             {
