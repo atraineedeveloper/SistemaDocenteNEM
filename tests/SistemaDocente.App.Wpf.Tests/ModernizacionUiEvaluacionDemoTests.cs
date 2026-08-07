@@ -53,6 +53,22 @@ public sealed class ModernizacionUiEvaluacionDemoTests
     }
 
     [Fact]
+    public void GrupoYReportesCompartenConfiguracionContextual()
+    {
+        var main = Leer("src/SistemaDocente.App.Wpf/MainWindow.xaml");
+        var grupo = Leer("src/SistemaDocente.App.Wpf/Views/GrupoView.xaml");
+        var grupoCode = Leer("src/SistemaDocente.App.Wpf/Views/GrupoView.xaml.cs");
+        var reportesCode = Leer("src/SistemaDocente.App.Wpf/Views/ReportesView.xaml.cs");
+        const string binding = "Configuracion=\"{Binding ConfiguracionGrupo, ElementName=RootWindow}\"";
+
+        Assert.Equal(2, main.Split(binding, StringSplitOptions.None).Length - 1);
+        Assert.Contains("⚙  Configurar grupo", grupo, StringComparison.Ordinal);
+        Assert.Contains("OnConfigurarGrupoClic", grupo, StringComparison.Ordinal);
+        Assert.Contains("ConfiguracionGrupoWindow", grupoCode, StringComparison.Ordinal);
+        Assert.Contains("ConfiguracionGrupoWindow", reportesCode, StringComparison.Ordinal);
+    }
+
+    [Fact]
     public void HeaderNoIntroduceSidebarYDistingueModoDemo()
     {
         var header = Leer("src/SistemaDocente.App.Wpf/Controls/MainNavigationHeader.xaml");
