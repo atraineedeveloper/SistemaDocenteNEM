@@ -21,10 +21,10 @@
                 Visibility="{Binding DataContext.MostrarInicio, ElementName=RootWindow, Converter={StaticResource BoolToVisibility}}"/>
 
             <views:GrupoView
+                x:Name="GrupoModule"
                 DataContext="{Binding DataContext.Grupo, ElementName=RootWindow}"
                 Expediente="{Binding DataContext.Expediente, ElementName=RootWindow}"
                 Configuracion="{Binding ConfiguracionGrupo, ElementName=RootWindow}"
-                Importacion="{Binding ImportacionEstudiantes, ElementName=RootWindow}"
                 Visibility="{Binding DataContext.MostrarGrupo, ElementName=RootWindow, Converter={StaticResource BoolToVisibility}}"/>
 
             <views:AsistenciaView
