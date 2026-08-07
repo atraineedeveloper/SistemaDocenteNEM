@@ -72,8 +72,11 @@
                         <Run Text=" activos"/>
                     </TextBlock>
                 </StackPanel>
-                <Button Grid.Column="1" HorizontalAlignment="Right" VerticalAlignment="Top"
-                        TabIndex="20" Content="✎  Cambiar nombre" Command="{Binding AbrirCambioNombreCommand}"/>
+                <StackPanel Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Top">
+                    <Button TabIndex="19" Content="⚙  Configurar grupo" Click="OnConfigurarGrupoClic"
+                            Margin="0,0,8,0" AutomationProperties.Name="Abrir configuración del grupo"/>
+                    <Button TabIndex="20" Content="✎  Cambiar nombre" Command="{Binding AbrirCambioNombreCommand}"/>
+                </StackPanel>
             </Grid>
 
             <!-- Búsqueda y métricas -->
