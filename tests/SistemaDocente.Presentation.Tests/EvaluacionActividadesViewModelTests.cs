@@ -32,7 +32,7 @@ public sealed class EvaluacionActividadesViewModelTests
     }
 
     [Fact]
-    public void AtajoModificaSoloCeldaSeleccionada()
+    public void AtajoDeLogroMarcaLaEntregaYModificaSoloLaCeldaSeleccionada()
     {
         var vm = Crear(out var gestion);
         vm.Inicializar(gestion.GrupoId);
@@ -42,14 +42,16 @@ public sealed class EvaluacionActividadesViewModelTests
         vm.MarcarDominaCommand.Execute(null);
 
         Assert.Equal(NivelLogro.Pendiente, fila.Celdas[0].NivelLogro);
+        Assert.Equal(EstadoEntregaActividad.Pendiente, fila.Celdas[0].EstadoEntrega);
         Assert.Equal(NivelLogro.Domina, fila.Celdas[1].NivelLogro);
+        Assert.Equal(EstadoEntregaActividad.Entregada, fila.Celdas[1].EstadoEntrega);
         Assert.Equal(NivelLogro.Pendiente, fila.Celdas[2].NivelLogro);
         Assert.True(vm.TieneCambios);
         Assert.True(vm.GuardarCambiosCommand.CanExecute(null));
     }
 
     [Fact]
-    public void AccionMasivaAfectaSoloActividadSeleccionadaYRespetaNoAplicables()
+    public void AccionMasivaDeLogroAfectaSoloActividadSeleccionadaYRespetaNoAplicables()
     {
         var vm = Crear(out var gestion);
         vm.Inicializar(gestion.GrupoId);
@@ -58,8 +60,10 @@ public sealed class EvaluacionActividadesViewModelTests
         vm.MarcarTodosSuficienteCommand.Execute(null);
 
         Assert.All(vm.Filas.Take(3), fila => Assert.Equal(NivelLogro.Suficiente, fila.Celdas[0].NivelLogro));
+        Assert.All(vm.Filas.Take(3), fila => Assert.Equal(EstadoEntregaActividad.Entregada, fila.Celdas[0].EstadoEntrega));
         Assert.False(vm.Filas[3].Celdas[0].EsAplicable);
         Assert.All(vm.Filas.Take(3), fila => Assert.Equal(NivelLogro.Pendiente, fila.Celdas[1].NivelLogro));
+        Assert.All(vm.Filas.Take(3), fila => Assert.Equal(EstadoEntregaActividad.Pendiente, fila.Celdas[1].EstadoEntrega));
     }
 
     [Fact]
@@ -81,6 +85,49 @@ public sealed class EvaluacionActividadesViewModelTests
     }
 
     [Fact]
+    public void EntregadaPendienteDeEvaluacionSeConservaDespuesDeGuardar()
+    {
+        var vm = Crear(out var gestion);
+        vm.Inicializar(gestion.GrupoId);
+        var celda = vm.Filas[0].Celdas[0];
+
+        vm.SeleccionarCelda(vm.Filas[0], 0);
+        vm.MarcarEntregadaCommand.Execute(null);
+
+        Assert.Equal(EstadoEntregaActividad.Entregada, celda.EstadoEntrega);
+        Assert.Equal(NivelLogro.Pendiente, celda.NivelLogro);
+        Assert.Equal("✓", celda.EtiquetaNivel);
+        Assert.Equal(1, vm.PendientesEvaluacion);
+
+        vm.GuardarCambiosCommand.Execute(null);
+
+        Assert.False(vm.TieneCambios);
+        Assert.Equal(EstadoEntregaActividad.Entregada, celda.EstadoEntrega);
+        Assert.Equal(NivelLogro.Pendiente, celda.NivelLogro);
+        Assert.Equal("✓", celda.EtiquetaNivel);
+    }
+
+    [Fact]
+    public void NoEntregadaEsEstadoYNoNivelDeLogro()
+    {
+        var vm = Crear(out var gestion);
+        vm.Inicializar(gestion.GrupoId);
+
+        vm.SeleccionarCelda(vm.Filas[1], 0);
+        vm.MarcarNoEntregadaCommand.Execute(null);
+
+        var celda = vm.Filas[1].Celdas[0];
+        Assert.Equal(EstadoEntregaActividad.NoEntregada, celda.EstadoEntrega);
+        Assert.Equal(NivelLogro.Pendiente, celda.NivelLogro);
+        Assert.Equal("N", celda.EtiquetaNivel);
+        Assert.Equal(1, vm.NoEntregadas);
+
+        vm.FiltroEntrega = FiltroEntrega.NoEntregadas;
+        var visible = Assert.Single(vm.FilasVisibles);
+        Assert.Equal(2, visible.NumeroLista);
+    }
+
+    [Fact]
     public void FiltroDeNivelUsaLaActividadSeleccionada()
     {
         var vm = Crear(out var gestion);
@@ -98,20 +145,22 @@ public sealed class EvaluacionActividadesViewModelTests
     }
 
     [Fact]
-    public void DescartarRestauraTodasLasActividadesModificadas()
+    public void DescartarRestauraEstadoNivelYTodasLasActividadesModificadas()
     {
         var vm = Crear(out var gestion);
         vm.Inicializar(gestion.GrupoId);
         vm.SeleccionarCelda(vm.Filas[0], 0);
         vm.MarcarDominaCommand.Execute(null);
         vm.SeleccionarCelda(vm.Filas[1], 2);
-        vm.MarcarNoEntregoCommand.Execute(null);
+        vm.MarcarNoEntregadaCommand.Execute(null);
 
         vm.DescartarCambiosCommand.Execute(null);
 
         Assert.False(vm.TieneCambios);
         Assert.Equal(NivelLogro.Pendiente, vm.Filas[0].Celdas[0].NivelLogro);
+        Assert.Equal(EstadoEntregaActividad.Pendiente, vm.Filas[0].Celdas[0].EstadoEntrega);
         Assert.Equal(NivelLogro.Pendiente, vm.Filas[1].Celdas[2].NivelLogro);
+        Assert.Equal(EstadoEntregaActividad.Pendiente, vm.Filas[1].Celdas[2].EstadoEntrega);
     }
 
     private static EvaluacionActividadesViewModel Crear(
@@ -198,8 +247,13 @@ public sealed class EvaluacionActividadesViewModelTests
             {
                 var entrada = entregas.Single(e => e.EstudianteId == x.EstudianteId);
                 return new EntregaActividadDetalle(
-                    x.EstudianteId, x.NumeroLista, x.NombreVisible, x.EstaActivoActualmente,
-                    entrada.NivelLogro, entrada.Observacion);
+                    x.EstudianteId,
+                    x.NumeroLista,
+                    x.NombreVisible,
+                    x.EstaActivoActualmente,
+                    entrada.EstadoEntrega,
+                    entrada.NivelLogro,
+                    entrada.Observacion);
             }).ToArray();
 
             var actualizada = new ActividadProyectoDetalle(
@@ -207,12 +261,12 @@ public sealed class EvaluacionActividadesViewModelTests
                 actividad.Titulo, actividad.Descripcion, actividad.FechaRealizacion,
                 actividad.ObservacionesGenerales, actividad.Estado, nuevas,
                 nuevas.Length,
-                nuevas.Count(x => x.NivelLogro == NivelLogro.Pendiente),
+                nuevas.Count(x => x.EstadoEntrega != EstadoEntregaActividad.NoEntregada && x.NivelLogro == NivelLogro.Pendiente),
                 nuevas.Count(x => x.NivelLogro == NivelLogro.Domina),
                 nuevas.Count(x => x.NivelLogro == NivelLogro.Suficiente),
                 nuevas.Count(x => x.NivelLogro == NivelLogro.EnProceso),
                 nuevas.Count(x => x.NivelLogro == NivelLogro.RequiereApoyo),
-                nuevas.Count(x => x.NivelLogro == NivelLogro.NoEntrego),
+                nuevas.Count(x => x.EstadoEntrega == EstadoEntregaActividad.NoEntregada),
                 actividad.Version + 1);
             _actividades[_actividades.IndexOf(actividad)] = actualizada;
             return actualizada;
@@ -226,7 +280,7 @@ public sealed class EvaluacionActividadesViewModelTests
             var actividadId = ActividadId.DesdeGuid(GuidUtility(100 + numero));
             var entregas = numerosLista.Select(n => new EntregaActividadDetalle(
                 _estudiantes[n - 1], n, $"Estudiante {n}", true,
-                NivelLogro.Pendiente, string.Empty)).ToArray();
+                EstadoEntregaActividad.Pendiente, NivelLogro.Pendiente, string.Empty)).ToArray();
             return new ActividadProyectoDetalle(
                 actividadId, ProyectoId.DesdeGuid(_proyecto1), GrupoId,
                 $"Actividad {numero}", "", fecha, "", EstadoActividad.Activa,
