@@ -10,7 +10,7 @@ The solution targets .NET 10. Portable production projects use `net10.0`; the WP
 
 | Project | Responsibility |
 | --- | --- |
-| `SistemaDocente.Core` | Domain entities, identities, invariants and domain exceptions. Includes groups/students, attendance, projects/activities, delivery/achievement, school context, NEM primary-grade rules and student-record concepts. |
+| `SistemaDocente.Core` | Domain entities, identities, invariants and domain exceptions. Includes groups/students, attendance, projects/activities, delivery/achievement, school context, NEM primary-grade/planning rules and student-record concepts. |
 | `SistemaDocente.Application` | Use cases, persistence ports, snapshots and orchestration between aggregates. |
 | `SistemaDocente.Data` | SQLite adapters, base-schema initialization, additive versioned extensions, queries and transactions. Technical exceptions are translated at the infrastructure boundary. |
 | `SistemaDocente.Presentation` | Portable MVVM: ViewModels, commands, visual models, editable snapshots, filters, module boundaries and local catalog services. It does not reference WPF or SQLite. |
@@ -80,11 +80,13 @@ The month is a projection, not an aggregate. Application builds an immutable mon
 
 ### Projects and activities
 
-`ProyectoDidactico` is an independent aggregate with group, date range, lifecycle state, description, observations and optimistic-concurrency version.
+`ProyectoDidactico` is an independent aggregate with group, date range, lifecycle state, description, observations, optimistic-concurrency version, one structured `MetodologiaProyectoNem` value and an ordered unique target-grade set.
 
-`ActividadProyecto` belongs to a project/group and owns its historical student applicability plus delivery/evaluation entries. Activity + full applicable roster is the atomic save unit.
+`ActividadProyecto` belongs to a project/group and owns its historical student applicability plus delivery/evaluation entries. Activity + full applicable roster is the atomic save unit. It also stores one structured `CampoFormativoNem` and an ordered unique target-grade set.
 
-A follow-up change will add structured NEM project methodology and formative field/target grades to activities.
+A project's methodology is an explicit teacher choice and is not inferred from formative field. A new activity may target all or a subset of the project's explicit target grades. Its initial roster contains active students whose individual grade belongs to that scope. After creation, activity grade scope and roster are historical: later student/group changes do not rewrite applicability.
+
+Legacy project/activity rows remain conservative: unspecified methodology/field and empty target-grade sets. No historical pedagogical intent is guessed. See [`nem-project-planning.md`](nem-project-planning.md) for the detailed contract.
 
 ### Delivery and achievement
 
@@ -180,6 +182,20 @@ The existing `configuracion_grupo` table remains a compatibility/reporting proje
 
 Legacy grade migration is conservative: deterministic values such as `4`, `4.º` or `Cuarto` may become structured fourth grade; ambiguous text is not guessed. A configured one-grade group can deterministically assign that grade to its students.
 
+### NEM project-planning extension
+
+```text
+esquema_extensiones
+└── nem-planeacion-proyectos = 1
+
+proyectos_nem
+actividades_nem
+grados_proyecto
+grados_actividad
+```
+
+Project methodology/grades and activity formative-field/grades are stored in side tables and written in the same transaction as their base aggregate. Legacy rows are initialized with unspecified metadata and empty grade sets; later legacy inserts are self-healed without guessing grades.
+
 ### SQLite principles
 
 - `PRAGMA foreign_keys = ON`;
@@ -201,11 +217,11 @@ Presentation embeds a local Mexico entity/municipality catalog. Entity selection
 
 Presentation uses portable MVVM. ViewModels own selection, filters, editable state, confirmation boundaries and unsaved-change logic without WPF dependencies.
 
-`MainWindowViewModel` coordinates global navigation. `App.xaml.cs` is the composition root: it creates SQLite adapters, use cases, ViewModels and WPF services; interprets Demo arguments; and wires shared group context/reporting.
+`MainWindowViewModel` coordinates global navigation. `App.xaml.cs` is the composition root: it creates SQLite adapters, use cases, ViewModels and WPF services; interprets Demo arguments; and wires shared group context across Group, Projects and Reports.
 
 The shell uses one top navigation surface. Current modules are Group, Attendance, Projects, Evaluation and Reports. `Mis grupos` is the explicit group workspace; after opening a group, a compact context switcher allows fast changes while preserving unsaved-change guards.
 
-Complex tasks remain in dedicated windows, including student editing, project/activity detail, student record, evaluation-cell detail and structured group configuration.
+Complex tasks remain in dedicated windows, including student editing, project/activity detail, student record, evaluation-cell detail and structured group configuration. Project/activity editors expose structured NEM planning catalogs and grade scope while project/activity summaries surface compact planning metadata.
 
 ## Themes, accessibility and density
 
@@ -229,7 +245,7 @@ Demo
 %LOCALAPPDATA%\SistemaDocenteNEM-Demo\data\app-state.json
 ```
 
-`--demo-reset` deletes/recreates only Demo storage.
+`--demo-reset` deletes/recreates only Demo storage. The Demo dataset contains structured student grades plus representative project methodologies, formative fields and target grades.
 
 ## Engineering invariants
 
