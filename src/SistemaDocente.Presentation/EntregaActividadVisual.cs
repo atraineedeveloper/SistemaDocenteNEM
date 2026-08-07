@@ -34,7 +34,7 @@ public sealed class EntregaActividadVisual : ViewModelBase
         {
             if (!Enum.IsDefined(value)) return;
             var nivelAnterior = _nivelLogro;
-            if (value == EstadoEntregaActividad.NoEntregada)
+            if (value is EstadoEntregaActividad.Pendiente or EstadoEntregaActividad.NoEntregada)
             {
                 _nivelLogro = NivelLogro.Pendiente;
             }
@@ -113,7 +113,17 @@ public sealed class EntregaActividadVisual : ViewModelBase
 public enum FiltroProyecto { Todos, Borrador, EnCurso, Finalizado }
 public enum FiltroEntrega
 {
-    Todos, Pendientes,
-    Domina, Suficiente, EnProceso, RequiereApoyo, NoEntrego,
-    SoloIncidencias, SoloActivos, ActivosEInactivosHistoricos
+    Todos,
+    Entregadas,
+    NoEntregadas,
+    Pendientes,
+    PendientesEvaluacion,
+    Domina,
+    Suficiente,
+    EnProceso,
+    RequiereApoyo,
+    NoEntrego,
+    SoloIncidencias,
+    SoloActivos,
+    ActivosEInactivosHistoricos,
 }
