@@ -3,8 +3,8 @@ using Microsoft.Data.Sqlite;
 namespace SistemaDocente.Data;
 
 /// <summary>
-/// Extensión aditiva del esquema base. Mantiene PRAGMA user_version del núcleo para no
-/// romper bases v6 ya validadas y versiona esta capacidad de forma independiente.
+/// Additive extension of the base schema. It keeps the core PRAGMA user_version unchanged
+/// for already validated v6 databases and versions this capability independently.
 /// </summary>
 internal static class EsquemaReportesSqlite
 {
@@ -30,6 +30,12 @@ internal static class EsquemaReportesSqlite
                 CrearVersionUno(conexion, transaccion);
                 EstablecerVersion(conexion, transaccion, VersionActual);
             }
+
+            // Keep the compatibility bridge self-healing. An older application can still
+            // write legacy NivelLogro.NoEntrego (5) because the base user_version remains 6.
+            // Reconciliation is idempotent and prevents those writes from surviving once a
+            // current build opens the database again.
+            ReconciliarEntregasLegacy(conexion, transaccion);
 
             transaccion.Commit();
         }
@@ -96,7 +102,17 @@ internal static class EsquemaReportesSqlite
                 FOREIGN KEY (actividad_id, estudiante_id)
                     REFERENCES entregas_actividad(actividad_id, estudiante_id) ON DELETE CASCADE
             );
+            """;
+        comando.ExecuteNonQuery();
+    }
 
+    private static void ReconciliarEntregasLegacy(
+        SqliteConnection conexion,
+        SqliteTransaction transaccion)
+    {
+        using var comando = conexion.CreateCommand();
+        comando.Transaction = transaccion;
+        comando.CommandText = """
             INSERT OR IGNORE INTO estados_entrega_actividad (actividad_id, estudiante_id, estado_entrega)
             SELECT actividad_id,
                    estudiante_id,
@@ -106,6 +122,16 @@ internal static class EsquemaReportesSqlite
                        ELSE 1
                    END
             FROM entregas_actividad;
+
+            UPDATE estados_entrega_actividad
+            SET estado_entrega = 2
+            WHERE EXISTS (
+                SELECT 1
+                FROM entregas_actividad e
+                WHERE e.actividad_id = estados_entrega_actividad.actividad_id
+                  AND e.estudiante_id = estados_entrega_actividad.estudiante_id
+                  AND e.estado_entrega = 5
+            );
 
             UPDATE entregas_actividad
             SET estado_entrega = 0
