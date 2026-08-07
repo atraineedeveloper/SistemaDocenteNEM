@@ -50,12 +50,12 @@
                 </StackPanel>
             </Border>
             <WrapPanel Grid.Column="1" VerticalAlignment="Center">
-                <Border Background="{DynamicResource SectionBackgroundBrush}" CornerRadius="8" Padding="10,7" Margin="0,0,6,0"><TextBlock><Run Text="Total "/><Run Text="{Binding Total}" FontWeight="Bold"/></TextBlock></Border>
-                <Border Background="{DynamicResource SectionBackgroundBrush}" CornerRadius="8" Padding="10,7" Margin="0,0,6,0"><TextBlock><Run Text="Pend. "/><Run Text="{Binding Pendientes}" FontWeight="Bold"/></TextBlock></Border>
-                <Border Background="{DynamicResource SuccessBackgroundBrush}" CornerRadius="8" Padding="10,7" Margin="0,0,6,0"><TextBlock Foreground="{DynamicResource SuccessBrush}"><Run Text="Domina "/><Run Text="{Binding Domina}" FontWeight="Bold"/></TextBlock></Border>
-                <Border Background="{DynamicResource InfoBackgroundBrush}" CornerRadius="8" Padding="10,7" Margin="0,0,6,0"><TextBlock Foreground="{DynamicResource InfoBrush}"><Run Text="Suficiente "/><Run Text="{Binding Suficiente}" FontWeight="Bold"/></TextBlock></Border>
-                <Border Background="{DynamicResource WarningBackgroundBrush}" CornerRadius="8" Padding="10,7" Margin="0,0,6,0"><TextBlock Foreground="{DynamicResource WarningBrush}"><Run Text="En proceso "/><Run Text="{Binding EnProceso}" FontWeight="Bold"/></TextBlock></Border>
-                <Border Background="{DynamicResource ErrorBackgroundBrush}" CornerRadius="8" Padding="10,7"><TextBlock Foreground="{DynamicResource ErrorBrush}"><Run Text="Apoyo/NE "/><Run Text="{Binding RequiereApoyo}" FontWeight="Bold"/><Run Text="/"/><Run Text="{Binding NoEntrego}" FontWeight="Bold"/></TextBlock></Border>
+                <Border Background="{DynamicResource SectionBackgroundBrush}" CornerRadius="8" Padding="10,7" Margin="0,0,6,0"><TextBlock><Run Text="Total "/><Run Text="{Binding Total, Mode=OneWay}" FontWeight="Bold"/></TextBlock></Border>
+                <Border Background="{DynamicResource SectionBackgroundBrush}" CornerRadius="8" Padding="10,7" Margin="0,0,6,0"><TextBlock><Run Text="Pend. "/><Run Text="{Binding Pendientes, Mode=OneWay}" FontWeight="Bold"/></TextBlock></Border>
+                <Border Background="{DynamicResource SuccessBackgroundBrush}" CornerRadius="8" Padding="10,7" Margin="0,0,6,0"><TextBlock Foreground="{DynamicResource SuccessBrush}"><Run Text="Domina "/><Run Text="{Binding Domina, Mode=OneWay}" FontWeight="Bold"/></TextBlock></Border>
+                <Border Background="{DynamicResource InfoBackgroundBrush}" CornerRadius="8" Padding="10,7" Margin="0,0,6,0"><TextBlock Foreground="{DynamicResource InfoBrush}"><Run Text="Suficiente "/><Run Text="{Binding Suficiente, Mode=OneWay}" FontWeight="Bold"/></TextBlock></Border>
+                <Border Background="{DynamicResource WarningBackgroundBrush}" CornerRadius="8" Padding="10,7" Margin="0,0,6,0"><TextBlock Foreground="{DynamicResource WarningBrush}"><Run Text="En proceso "/><Run Text="{Binding EnProceso, Mode=OneWay}" FontWeight="Bold"/></TextBlock></Border>
+                <Border Background="{DynamicResource ErrorBackgroundBrush}" CornerRadius="8" Padding="10,7"><TextBlock Foreground="{DynamicResource ErrorBrush}"><Run Text="Apoyo/NE "/><Run Text="{Binding RequiereApoyo, Mode=OneWay}" FontWeight="Bold"/><Run Text="/"/><Run Text="{Binding NoEntrego, Mode=OneWay}" FontWeight="Bold"/></TextBlock></Border>
             </WrapPanel>
         </Grid>
 
