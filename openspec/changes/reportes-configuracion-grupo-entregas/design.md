@@ -59,31 +59,47 @@ Reglas:
 - marcar `Entregada` no obliga a evaluar inmediatamente: puede existir `Entregada + NivelLogro.Pendiente`;
 - marcar `NoEntregada` fuerza `NivelLogro.Pendiente` para evitar estados contradictorios;
 - asignar un nivel evaluativo (`Domina`, `Suficiente`, `EnProceso`, `RequiereApoyo`) fuerza `Entregada`;
-- `NivelLogro.NoEntrego` se conserva temporalmente en el enum sólo para compatibilidad binaria/migración, pero nuevos flujos no lo producen.
+- `NivelLogro.NoEntrego` se conserva temporalmente en el enum sólo para compatibilidad binaria/migración, pero los flujos nuevos no lo producen.
 
-### Migración desde esquema 6
+### Estrategia SQLite definitiva: extensión aditiva sobre esquema base v6
 
-La tabla actual usa `entregas_actividad.estado_entrega` para almacenar `NivelLogro`. En esquema 7 se separa:
+La tabla histórica `entregas_actividad` tiene una columna llamada `estado_entrega` que, pese a su nombre, almacena valores de `NivelLogro`. Reconstruir ahora esa tabla para convertirla a un esquema v7 obligaría a una migración más invasiva sobre una base v6 ya validada.
 
-```text
-entregas_actividad
-actividad_id
-estudiante_id
-grupo_id
-estado_entrega    -- 0 Pendiente, 1 Entregada, 2 NoEntregada
-nivel_logro       -- NivelLogro
-observacion
-```
-
-Conversión:
+La estrategia adoptada para este corte es **mantener `PRAGMA user_version = 6`** y versionar esta capacidad mediante una extensión aditiva independiente:
 
 ```text
-legado NoEntrego       -> NoEntregada + Pendiente
-legado Pendiente        -> Pendiente + Pendiente
-legado Domina/Suf/etc.  -> Entregada + mismo nivel
+esquema_extensiones
+├── nombre = reportes-contexto-entregas
+└── version = 1
+
+entregas_actividad                 -- tabla base v6 conservada
+├── actividad_id
+├── estudiante_id
+├── grupo_id
+├── estado_entrega                 -- conserva NivelLogro por compatibilidad
+└── observacion
+
+estados_entrega_actividad          -- extensión v1
+├── actividad_id
+├── estudiante_id
+└── estado_entrega                 -- EstadoEntregaActividad real
 ```
 
-La migración es transaccional y conserva padrón/observación.
+La extensión se inicializa de forma transaccional e idempotente. También crea `configuracion_grupo` y registra su propia versión en `esquema_extensiones`.
+
+Conversión inicial de datos legacy:
+
+```text
+NivelLogro.NoEntrego  -> estado explícito NoEntregada + nivel legado normalizado a Pendiente
+NivelLogro.Pendiente  -> estado explícito Pendiente + nivel Pendiente
+Domina/Suf/etc.       -> estado explícito Entregada + mismo nivel
+```
+
+`PersistenciaProyectosSqlite` realiza lectura combinada de ambas tablas y escritura dual: el nivel continúa en la columna base histórica y el estado explícito se guarda en `estados_entrega_actividad`. Esto permite abrir bases v6 existentes sin reconstruir tablas ni cambiar identidades, padrones u observaciones.
+
+Las llamadas legacy de Application que sólo expresan `NivelLogro` se distinguen de las entradas nuevas con estado explícito. Si una edición legacy no expresa un cambio de estado, Application conserva el estado ya persistido para evitar que editar metadatos de una actividad borre, por ejemplo, `Entregada + Pendiente`.
+
+Una futura migración estructural que renombre la columna histórica y consolide ambos valores en una sola tabla queda fuera de este corte. Deberá justificarse por una necesidad adicional y contar con su propia migración y pruebas.
 
 ## 4. Cálculos de cumplimiento
 
@@ -174,28 +190,63 @@ Individual permite seleccionar estudiante. Grupal muestra agregados y tabla de s
 
 ## 8. Configuración UI
 
-La configuración se abre como ventana dedicada desde Grupo y desde Reportes cuando falte contexto. No se incorpora al header global.
+La configuración se abre como ventana dedicada desde Grupo y desde Reportes. No se incorpora al header global.
+
+Ambas superficies reutilizan la misma instancia de `ConfiguracionGrupoViewModel` creada en la raíz de composición y la misma `ConfiguracionGrupoWindow`.
 
 Usa labels visibles, secciones `Contexto escolar`, `Datos del grupo`, `Referencia pedagógica`, `Responsabilidad docente` y `Horario`, con footer fijo Guardar/Cancelar.
 
-## 9. Compatibilidad
+## 9. Evaluación y estado explícito
+
+La matriz conserva el patrón estudiante × actividad; no se reintroduce un selector separado de actividad.
+
+Cada celda visual mantiene `EstadoEntrega` y `NivelLogro` por separado. La representación compacta es:
+
+```text
+P  pendiente de entrega
+N  no entregada
+✓  entregada, pendiente de evaluación
+D  domina
+S  suficiente
+E  en proceso
+R  requiere apoyo
+—  no aplicable por padrón histórico
+```
+
+Atajos en la grilla:
+
+```text
+T = Entregada, todavía pendiente de evaluación
+N = No entregada
+P = Pendiente de entrega
+D/S/E/R = asignar nivel de logro y marcar Entregada
+Enter/F2 = editor compacto
+```
+
+El editor compacto expone por separado `Estado de entrega`, `Nivel de logro` y `Observación`. El nivel de logro sólo se habilita cuando la actividad está entregada. Guardar la matriz transmite ambas dimensiones a Application y confirma ambas tras la persistencia.
+
+## 10. Compatibilidad
 
 - no cambia la identidad histórica de grupos, actividades ni estudiantes;
 - no reescribe padrones antiguos;
 - mantiene `ActividadId` como identidad;
 - mantiene `NivelLogro.NoEntrego` sólo como valor legado durante transición, pero la UI nueva usa estado explícito;
-- modo demo debe sembrar contexto y mezcla de estados de entrega.
+- mantiene el esquema base en `user_version = 6` y añade capacidad mediante una extensión versionada;
+- el modo demo siembra contexto y una mezcla de estados/niveles suficiente para probar reportes y evaluación.
 
-## 10. Validación
+## 11. Validación
 
 Automática:
 
-- invariantes Core;
-- migración v6→v7;
-- persistencia/reapertura;
+- invariantes Core de estado/nivel;
+- inicialización idempotente de la extensión SQLite;
+- conversión legacy `NoEntrego -> NoEntregada + Pendiente`;
+- comprobación de que `PRAGMA user_version` permanece en 6;
+- persistencia/reapertura de `Entregada + Pendiente`;
 - cálculo de cumplimiento con pendientes;
 - reportes individual/grupal;
-- bindings/navegación WPF.
+- matriz, filtros, atajos y guardado explícito en Presentation/WPF;
+- composición compartida de configuración desde Grupo y Reportes.
 
 Manual:
 
@@ -203,4 +254,5 @@ Manual:
 - scroll/redimensionamiento;
 - Claro/Oscuro/Alto contraste;
 - 100/125/150 %;
-- coherencia entre Evaluación y Reportes después de cambiar entrega/nivel.
+- coherencia entre Evaluación y Reportes después de cambiar entrega/nivel;
+- configuración abierta desde Grupo y desde Reportes.
