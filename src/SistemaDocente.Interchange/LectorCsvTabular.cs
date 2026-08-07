@@ -23,7 +23,9 @@ public sealed class LectorCsvTabular : ILectorImportacionTabular
             var delimitadorReal = delimitador ?? DetectarDelimitador(contenido);
             if (!DelimitadoresSoportados.Contains(delimitadorReal))
             {
-                throw new ImportacionTabularException("El delimitador CSV seleccionado no es compatible.");
+                throw new ImportacionTabularException(
+                    "El delimitador CSV seleccionado no es compatible.",
+                    "csv-delimiter-unsupported");
             }
 
             var filas = Parsear(contenido, delimitadorReal)
@@ -75,7 +77,8 @@ public sealed class LectorCsvTabular : ILectorImportacionTabular
         if (conteos[0].Conteo <= 0 || (conteos.Length > 1 && conteos[0].Conteo == conteos[1].Conteo))
         {
             throw new ImportacionTabularException(
-                "No fue posible detectar de forma unívoca el delimitador CSV. Selecciónalo explícitamente.");
+                "No fue posible detectar de forma unívoca el delimitador CSV. Selecciónalo explícitamente.",
+                "csv-delimiter-ambiguous");
         }
 
         return conteos[0].Delimitador;
