@@ -26,13 +26,60 @@
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
 
+        <!-- ROW 0 — Encabezado: título + estadísticas integradas -->
         <DockPanel Margin="0,0,0,16">
             <StackPanel DockPanel.Dock="Left" VerticalAlignment="Center">
                 <TextBlock Text="Evaluación de Desempeño NEM" Foreground="{DynamicResource TextMutedBrush}" Style="{StaticResource SectionSubtitle}" FontWeight="Medium"/>
                 <TextBlock Text="Registro Pedagógico de Actividades" Foreground="{DynamicResource TextPrimaryBrush}" FontSize="26" FontWeight="Bold"/>
             </StackPanel>
+            <!-- Chips de estadísticas en el encabezado -->
+            <WrapPanel DockPanel.Dock="Right" HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="0,0,0,2">
+                <Border Background="{DynamicResource HoverBackgroundBrush}" CornerRadius="6" Padding="10,5" Margin="3,0" BorderBrush="{DynamicResource BorderLightBrush}" BorderThickness="1">
+                    <TextBlock Foreground="{DynamicResource TextPrimaryBrush}" FontWeight="SemiBold" FontSize="12">
+                        <Run Text="Total "/>
+                        <Run Text="{Binding Total, Mode=OneWay}" FontWeight="Bold"/>
+                    </TextBlock>
+                </Border>
+                <Border Background="{DynamicResource HoverBackgroundBrush}" CornerRadius="6" Padding="10,5" Margin="3,0" BorderBrush="{DynamicResource BorderLightBrush}" BorderThickness="1">
+                    <TextBlock Foreground="{DynamicResource TextSecondaryBrush}" FontWeight="SemiBold" FontSize="12">
+                        <Run Text="Pend. "/>
+                        <Run Text="{Binding Pendientes, Mode=OneWay}" FontWeight="Bold"/>
+                    </TextBlock>
+                </Border>
+                <Border Background="{DynamicResource SuccessBackgroundBrush}" CornerRadius="6" Padding="10,5" Margin="3,0" BorderBrush="{DynamicResource SuccessBorderBrush}" BorderThickness="1">
+                    <TextBlock Foreground="{DynamicResource SuccessBrush}" FontWeight="SemiBold" FontSize="12">
+                        <Run Text="Domina "/>
+                        <Run Text="{Binding Domina, Mode=OneWay}" FontWeight="Bold"/>
+                    </TextBlock>
+                </Border>
+                <Border Background="{DynamicResource InfoBackgroundBrush}" CornerRadius="6" Padding="10,5" Margin="3,0" BorderBrush="{DynamicResource InfoBorderBrush}" BorderThickness="1">
+                    <TextBlock Foreground="{DynamicResource InfoBrush}" FontWeight="SemiBold" FontSize="12">
+                        <Run Text="Suficiente "/>
+                        <Run Text="{Binding Suficiente, Mode=OneWay}" FontWeight="Bold"/>
+                    </TextBlock>
+                </Border>
+                <Border Background="{DynamicResource WarningBackgroundBrush}" CornerRadius="6" Padding="10,5" Margin="3,0" BorderBrush="{DynamicResource WarningBorderBrush}" BorderThickness="1">
+                    <TextBlock Foreground="{DynamicResource WarningBrush}" FontWeight="SemiBold" FontSize="12">
+                        <Run Text="En proceso "/>
+                        <Run Text="{Binding EnProceso, Mode=OneWay}" FontWeight="Bold"/>
+                    </TextBlock>
+                </Border>
+                <Border Background="{DynamicResource ErrorBackgroundBrush}" CornerRadius="6" Padding="10,5" Margin="3,0" BorderBrush="{DynamicResource ErrorBorderBrush}" BorderThickness="1">
+                    <TextBlock Foreground="{DynamicResource ErrorBrush}" FontWeight="SemiBold" FontSize="12">
+                        <Run Text="Req. apoyo "/>
+                        <Run Text="{Binding RequiereApoyo, Mode=OneWay}" FontWeight="Bold"/>
+                    </TextBlock>
+                </Border>
+                <Border Background="{DynamicResource DisabledBackgroundBrush}" CornerRadius="6" Padding="10,5" Margin="3,0" BorderBrush="{DynamicResource BorderLightBrush}" BorderThickness="1">
+                    <TextBlock Foreground="{DynamicResource TextMutedBrush}" FontWeight="SemiBold" FontSize="12">
+                        <Run Text="No entregó "/>
+                        <Run Text="{Binding NoEntrego, Mode=OneWay}" FontWeight="Bold"/>
+                    </TextBlock>
+                </Border>
+            </WrapPanel>
         </DockPanel>
 
+        <!-- ROW 1 — Selección de contexto -->
         <Border Grid.Row="1" Background="{DynamicResource CardBackgroundBrush}" CornerRadius="8" Padding="16" Margin="0,0,0,14" BorderBrush="{DynamicResource BorderLightBrush}" BorderThickness="1">
             <Grid>
                 <Grid.ColumnDefinitions>
@@ -53,101 +100,114 @@
             </Grid>
         </Border>
 
-        <DockPanel Grid.Row="2" Margin="0,0,0,14">
-            <StackPanel DockPanel.Dock="Left" Orientation="Horizontal" VerticalAlignment="Center">
-                <TextBox Width="200" Text="{Binding BusquedaEstudiante, UpdateSourceTrigger=PropertyChanged}" ToolTip="Buscar estudiante..." TabIndex="402" AutomationProperties.Name="Buscar estudiante en evaluación"/>
-                <ComboBox Width="160" Margin="8,0" ItemsSource="{Binding FiltrosEntrega}" SelectedItem="{Binding FiltroEntrega}" TabIndex="403" AutomationProperties.Name="Filtrar por estado de entrega"/>
-            </StackPanel>
-            <WrapPanel DockPanel.Dock="Right" HorizontalAlignment="Right" VerticalAlignment="Center">
-                <Border Background="{DynamicResource HoverBackgroundBrush}" CornerRadius="6" Padding="10,6" Margin="4,0" BorderBrush="{DynamicResource BorderLightBrush}" BorderThickness="1"><TextBlock Foreground="{DynamicResource TextPrimaryBrush}" FontWeight="SemiBold"><Run Text="Total: "/><Run Text="{Binding Total, Mode=OneWay}"/></TextBlock></Border>
-                <Border Background="{DynamicResource HoverBackgroundBrush}" CornerRadius="6" Padding="10,6" Margin="4,0"><TextBlock Foreground="{DynamicResource TextSecondaryBrush}" FontWeight="SemiBold"><Run Text="Pend.: "/><Run Text="{Binding Pendientes, Mode=OneWay}"/></TextBlock></Border>
-                <Border Background="{DynamicResource SuccessBackgroundBrush}" CornerRadius="6" Padding="10,6" Margin="4,0"><TextBlock Foreground="{DynamicResource SuccessBrush}" FontWeight="SemiBold"><Run Text="Domina: "/><Run Text="{Binding Domina, Mode=OneWay}"/></TextBlock></Border>
-                <Border Background="{DynamicResource InfoBackgroundBrush}" CornerRadius="6" Padding="10,6" Margin="4,0"><TextBlock Foreground="{DynamicResource InfoBrush}" FontWeight="SemiBold"><Run Text="Suficiente: "/><Run Text="{Binding Suficiente, Mode=OneWay}"/></TextBlock></Border>
-                <Border Background="{DynamicResource WarningBackgroundBrush}" CornerRadius="6" Padding="10,6" Margin="4,0"><TextBlock Foreground="{DynamicResource WarningBrush}" FontWeight="SemiBold"><Run Text="En proceso: "/><Run Text="{Binding EnProceso, Mode=OneWay}"/></TextBlock></Border>
-                <Border Background="{DynamicResource ErrorBackgroundBrush}" CornerRadius="6" Padding="10,6" Margin="4,0"><TextBlock Foreground="{DynamicResource ErrorBrush}" FontWeight="SemiBold"><Run Text="Req. apoyo: "/><Run Text="{Binding RequiereApoyo, Mode=OneWay}"/></TextBlock></Border>
-                <Border Background="{DynamicResource DisabledBackgroundBrush}" CornerRadius="6" Padding="10,6" Margin="4,0"><TextBlock Foreground="{DynamicResource TextMutedBrush}" FontWeight="SemiBold"><Run Text="No entregó: "/><Run Text="{Binding NoEntrego, Mode=OneWay}"/></TextBlock></Border>
-            </WrapPanel>
-        </DockPanel>
+        <!-- ROW 2 — Barra de filtros (simplificada) -->
+        <StackPanel Grid.Row="2" Orientation="Horizontal" Margin="0,0,0,14" VerticalAlignment="Center">
+            <TextBox Width="220" Text="{Binding BusquedaEstudiante, UpdateSourceTrigger=PropertyChanged}" ToolTip="Buscar estudiante..." TabIndex="402" AutomationProperties.Name="Buscar estudiante en evaluación"/>
+            <ComboBox Width="170" Margin="8,0,0,0" ItemsSource="{Binding FiltrosEntrega}" SelectedItem="{Binding FiltroEntrega}" TabIndex="403" AutomationProperties.Name="Filtrar por estado de entrega"/>
+        </StackPanel>
 
-        <DataGrid x:Name="GrillaEntregasEvaluacion" Grid.Row="3" ItemsSource="{Binding EntregasVisibles}" SelectedItem="{Binding EntregaSeleccionada, Mode=TwoWay}" AutoGenerateColumns="False" CanUserAddRows="False" RowHeaderWidth="0" EnableRowVirtualization="True" PreviewKeyDown="OnGrillaEntregasEvaluacionPreviewKeyDown" AutomationProperties.Name="Evaluación por estudiante">
-            <DataGrid.ContextMenu>
-                <ContextMenu>
-                    <MenuItem Header="🌟 Domina (D) — Alumno seleccionado" Command="{Binding MarcarDominaCommand}"/>
-                    <MenuItem Header="📘 Suficiente (S) — Alumno seleccionado" Command="{Binding MarcarSuficienteCommand}"/>
-                    <MenuItem Header="📙 En proceso (E) — Alumno seleccionado" Command="{Binding MarcarEnProcesoCommand}"/>
-                    <MenuItem Header="🔴 Requiere apoyo (R) — Alumno seleccionado" Command="{Binding MarcarRequiereApoyoCommand}"/>
-                    <MenuItem Header="⚪ No entregó (N) — Alumno seleccionado" Command="{Binding MarcarNoEntregoCommand}"/>
-                    <Separator/>
-                    <MenuItem Header="⚪ Marcar pendiente (P)" Command="{Binding MarcarPendienteCommand}"/>
-                </ContextMenu>
-            </DataGrid.ContextMenu>
-            <DataGrid.Columns>
-                <DataGridCheckBoxColumn Header="Sel." Binding="{Binding Seleccionada}" Width="45"/>
-                <DataGridTextColumn Header="Núm." Binding="{Binding NumeroLista}" IsReadOnly="True" Width="55"/>
-                <DataGridTextColumn Header="Nombre del Estudiante" Binding="{Binding Nombre}" IsReadOnly="True" Width="*"/>
-                <DataGridTextColumn Header="Situación" Binding="{Binding SituacionActual}" IsReadOnly="True" Width="140"/>
-                <DataGridTextColumn Header="Nivel de logro" Binding="{Binding EtiquetaNivel}" IsReadOnly="True" Width="120">
-                    <DataGridTextColumn.ElementStyle>
-                        <Style TargetType="TextBlock">
-                            <Setter Property="HorizontalAlignment" Value="Center"/>
-                            <Setter Property="FontWeight" Value="Bold"/>
-                            <Setter Property="Padding" Value="6,2"/>
-                            <Style.Triggers>
-                                <DataTrigger Binding="{Binding EtiquetaNivel}" Value="D">
-                                    <Setter Property="Foreground" Value="{DynamicResource SuccessBrush}"/>
-                                    <Setter Property="Background" Value="{DynamicResource SuccessBackgroundBrush}"/>
-                                </DataTrigger>
-                                <DataTrigger Binding="{Binding EtiquetaNivel}" Value="S">
-                                    <Setter Property="Foreground" Value="{DynamicResource InfoBrush}"/>
-                                    <Setter Property="Background" Value="{DynamicResource InfoBackgroundBrush}"/>
-                                </DataTrigger>
-                                <DataTrigger Binding="{Binding EtiquetaNivel}" Value="EP">
-                                    <Setter Property="Foreground" Value="{DynamicResource WarningBrush}"/>
-                                    <Setter Property="Background" Value="{DynamicResource WarningBackgroundBrush}"/>
-                                </DataTrigger>
-                                <DataTrigger Binding="{Binding EtiquetaNivel}" Value="RA">
-                                    <Setter Property="Foreground" Value="{DynamicResource ErrorBrush}"/>
-                                    <Setter Property="Background" Value="{DynamicResource ErrorBackgroundBrush}"/>
-                                </DataTrigger>
-                                <DataTrigger Binding="{Binding EtiquetaNivel}" Value="NE">
-                                    <Setter Property="Foreground" Value="{DynamicResource TextMutedBrush}"/>
-                                    <Setter Property="Background" Value="{DynamicResource DisabledBackgroundBrush}"/>
-                                </DataTrigger>
-                            </Style.Triggers>
-                        </Style>
-                    </DataGridTextColumn.ElementStyle>
-                </DataGridTextColumn>
-                <DataGridTextColumn Header="Observación" Binding="{Binding Observacion, UpdateSourceTrigger=PropertyChanged}" Width="220"/>
-            </DataGrid.Columns>
-        </DataGrid>
+        <!-- ROW 3 — Tabla de estudiantes + estado vacío -->
+        <Grid Grid.Row="3">
+            <!-- DataGrid: visible cuando hay entregas -->
+            <DataGrid x:Name="GrillaEntregasEvaluacion"
+                      Visibility="{Binding Total, Converter={StaticResource InverseCountToVisibility}}"
+                      ItemsSource="{Binding EntregasVisibles}"
+                      SelectedItem="{Binding EntregaSeleccionada, Mode=TwoWay}"
+                      AutoGenerateColumns="False"
+                      CanUserAddRows="False"
+                      RowHeaderWidth="0"
+                      EnableRowVirtualization="True"
+                      PreviewKeyDown="OnGrillaEntregasEvaluacionPreviewKeyDown"
+                      AutomationProperties.Name="Evaluación por estudiante">
+                <DataGrid.ContextMenu>
+                    <ContextMenu>
+                        <MenuItem Header="🌟 Domina (D) — Alumno seleccionado" Command="{Binding MarcarDominaCommand}"/>
+                        <MenuItem Header="📘 Suficiente (S) — Alumno seleccionado" Command="{Binding MarcarSuficienteCommand}"/>
+                        <MenuItem Header="📙 En proceso (E) — Alumno seleccionado" Command="{Binding MarcarEnProcesoCommand}"/>
+                        <MenuItem Header="🔴 Requiere apoyo (R) — Alumno seleccionado" Command="{Binding MarcarRequiereApoyoCommand}"/>
+                        <MenuItem Header="⚪ No entregó (N) — Alumno seleccionado" Command="{Binding MarcarNoEntregoCommand}"/>
+                        <Separator/>
+                        <MenuItem Header="⚪ Marcar pendiente (P)" Command="{Binding MarcarPendienteCommand}"/>
+                    </ContextMenu>
+                </DataGrid.ContextMenu>
+                <DataGrid.Columns>
+                    <DataGridTextColumn Header="Núm." Binding="{Binding NumeroLista}" IsReadOnly="True" Width="55"/>
+                    <DataGridTextColumn Header="Nombre del Estudiante" Binding="{Binding Nombre}" IsReadOnly="True" Width="*"/>
+                    <DataGridTextColumn Header="Situación" Binding="{Binding SituacionActual}" IsReadOnly="True" Width="145"/>
+                    <DataGridTextColumn Header="Nivel de logro" Binding="{Binding EtiquetaNivel}" IsReadOnly="True" Width="120">
+                        <DataGridTextColumn.ElementStyle>
+                            <Style TargetType="TextBlock">
+                                <Setter Property="HorizontalAlignment" Value="Center"/>
+                                <Setter Property="FontWeight" Value="Bold"/>
+                                <Setter Property="Padding" Value="6,2"/>
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding EtiquetaNivel}" Value="D">
+                                        <Setter Property="Foreground" Value="{DynamicResource SuccessBrush}"/>
+                                        <Setter Property="Background" Value="{DynamicResource SuccessBackgroundBrush}"/>
+                                    </DataTrigger>
+                                    <DataTrigger Binding="{Binding EtiquetaNivel}" Value="S">
+                                        <Setter Property="Foreground" Value="{DynamicResource InfoBrush}"/>
+                                        <Setter Property="Background" Value="{DynamicResource InfoBackgroundBrush}"/>
+                                    </DataTrigger>
+                                    <DataTrigger Binding="{Binding EtiquetaNivel}" Value="EP">
+                                        <Setter Property="Foreground" Value="{DynamicResource WarningBrush}"/>
+                                        <Setter Property="Background" Value="{DynamicResource WarningBackgroundBrush}"/>
+                                    </DataTrigger>
+                                    <DataTrigger Binding="{Binding EtiquetaNivel}" Value="RA">
+                                        <Setter Property="Foreground" Value="{DynamicResource ErrorBrush}"/>
+                                        <Setter Property="Background" Value="{DynamicResource ErrorBackgroundBrush}"/>
+                                    </DataTrigger>
+                                    <DataTrigger Binding="{Binding EtiquetaNivel}" Value="NE">
+                                        <Setter Property="Foreground" Value="{DynamicResource TextMutedBrush}"/>
+                                        <Setter Property="Background" Value="{DynamicResource DisabledBackgroundBrush}"/>
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </DataGridTextColumn.ElementStyle>
+                    </DataGridTextColumn>
+                    <DataGridTextColumn Header="Observación" Binding="{Binding Observacion, UpdateSourceTrigger=PropertyChanged}" Width="220"/>
+                </DataGrid.Columns>
+            </DataGrid>
 
+            <!-- Estado vacío: visible cuando no hay entregas cargadas -->
+            <Border Visibility="{Binding Total, Converter={StaticResource CountToVisibility}}"
+                    Background="{DynamicResource CardBackgroundBrush}"
+                    CornerRadius="8" BorderBrush="{DynamicResource BorderLightBrush}" BorderThickness="1">
+                <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center" Margin="24">
+                    <TextBlock Text="📋" FontSize="44" HorizontalAlignment="Center" Margin="0,0,0,12" Opacity="0.45"/>
+                    <TextBlock Text="Selecciona una actividad para comenzar"
+                               HorizontalAlignment="Center"
+                               Foreground="{DynamicResource TextSecondaryBrush}"
+                               FontSize="16" FontWeight="SemiBold"
+                               Margin="0,0,0,8"/>
+                    <TextBlock Text="Elige un Proyecto Didáctico y una Actividad a Evaluar en los selectores de arriba&#10;para ver las entregas de tus estudiantes."
+                               HorizontalAlignment="Center" TextAlignment="Center"
+                               Foreground="{DynamicResource TextMutedBrush}"
+                               FontSize="13" TextWrapping="Wrap"
+                               MaxWidth="420"/>
+                </StackPanel>
+            </Border>
+        </Grid>
+
+        <!-- ROW 4 — Barra de acciones simplificada -->
         <DockPanel Grid.Row="4" Margin="0,14,0,0">
-            <WrapPanel DockPanel.Dock="Left" VerticalAlignment="Center">
-                <TextBlock Text="Calificar alumno:" VerticalAlignment="Center" Foreground="{DynamicResource TextSecondaryBrush}" FontWeight="SemiBold" Margin="0,0,6,0"/>
-                <Button Content="D Domina" Command="{Binding MarcarDominaCommand}" MinWidth="85" TabIndex="410"/>
-                <Button Content="S Suficiente" Command="{Binding MarcarSuficienteCommand}" MinWidth="95" TabIndex="411"/>
-                <Button Content="E En proceso" Command="{Binding MarcarEnProcesoCommand}" MinWidth="100" TabIndex="412"/>
-                <Button Content="R Req. apoyo" Command="{Binding MarcarRequiereApoyoCommand}" MinWidth="100" TabIndex="413"/>
-                <Button Content="N No entregó" Command="{Binding MarcarNoEntregoCommand}" MinWidth="100" TabIndex="414"/>
-                <Button Content="P Pendiente" Command="{Binding MarcarPendienteCommand}" MinWidth="90" TabIndex="415"/>
-
-                <Border Width="1" Height="24" Background="{DynamicResource BorderDefaultBrush}" Margin="10,0"/>
-
-                <Menu Background="Transparent" VerticalAlignment="Center">
-                    <MenuItem Header="👥 Marcar a todo el grupo ▾" Foreground="{DynamicResource TextPrimaryBrush}" FontWeight="SemiBold">
-                        <MenuItem Header="🌟 Asignar 'Domina' a todos" Command="{Binding MarcarTodosDominaCommand}"/>
-                        <MenuItem Header="📘 Asignar 'Suficiente' a todos" Command="{Binding MarcarTodosSuficienteCommand}"/>
-                        <MenuItem Header="📙 Asignar 'En proceso' a todos" Command="{Binding MarcarTodosEnProcesoCommand}"/>
-                        <MenuItem Header="🔴 Asignar 'Requiere apoyo' a todos" Command="{Binding MarcarTodosRequiereApoyoCommand}"/>
-                        <MenuItem Header="⚪ Asignar 'No entregó' a todos" Command="{Binding MarcarTodosNoEntregoCommand}"/>
-                    </MenuItem>
-                </Menu>
-            </WrapPanel>
-            <WrapPanel DockPanel.Dock="Right" VerticalAlignment="Center">
+            <!-- Acción de grupo: izquierda -->
+            <Menu DockPanel.Dock="Left" Background="Transparent" VerticalAlignment="Center">
+                <MenuItem Header="👥 Marcar a todo el grupo ▾" Foreground="{DynamicResource TextPrimaryBrush}" FontWeight="SemiBold">
+                    <MenuItem Header="🌟 Asignar 'Domina' a todos" Command="{Binding MarcarTodosDominaCommand}"/>
+                    <MenuItem Header="📘 Asignar 'Suficiente' a todos" Command="{Binding MarcarTodosSuficienteCommand}"/>
+                    <MenuItem Header="📙 Asignar 'En proceso' a todos" Command="{Binding MarcarTodosEnProcesoCommand}"/>
+                    <MenuItem Header="🔴 Asignar 'Requiere apoyo' a todos" Command="{Binding MarcarTodosRequiereApoyoCommand}"/>
+                    <MenuItem Header="⚪ Asignar 'No entregó' a todos" Command="{Binding MarcarTodosNoEntregoCommand}"/>
+                </MenuItem>
+            </Menu>
+            <!-- Guardar / Descartar: derecha -->
+            <WrapPanel DockPanel.Dock="Right" HorizontalAlignment="Right" VerticalAlignment="Center">
                 <Button Content="Descartar" Command="{Binding DescartarActividadCommand}" Margin="0,0,6,0" TabIndex="416"/>
                 <Button Style="{StaticResource PrimaryButton}" Content="Guardar cambios (Ctrl+S)" Command="{Binding GuardarActividadCommand}" TabIndex="417" IsDefault="True"/>
             </WrapPanel>
         </DockPanel>
+
         <Grid.InputBindings>
             <KeyBinding Modifiers="Control" Key="S" Command="{Binding GuardarActividadCommand}"/>
         </Grid.InputBindings>

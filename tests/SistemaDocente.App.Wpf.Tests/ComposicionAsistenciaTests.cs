@@ -58,9 +58,21 @@ public sealed class ComposicionAsistenciaTests
 
         Assert.Contains("ProyectosVisibles", LeerArchivoVista("ProyectosView.xaml"), StringComparison.Ordinal);
         Assert.Contains("EntregasVisibles", xaml, StringComparison.Ordinal);
-        Assert.Contains("D Domina", xaml, StringComparison.Ordinal);
-        Assert.Contains("S Suficiente", xaml, StringComparison.Ordinal);
-        Assert.Contains("P Pendiente", xaml, StringComparison.Ordinal);
+        // Los botones rápidos (D Domina / S Suficiente / P Pendiente) fueron eliminados porque
+        // duplicaban el menú contextual. Las acciones de calificación viven en el ContextMenu.
+        Assert.DoesNotContain("D Domina", xaml, StringComparison.Ordinal);
+        Assert.DoesNotContain("S Suficiente", xaml, StringComparison.Ordinal);
+        Assert.DoesNotContain("P Pendiente", xaml, StringComparison.Ordinal);
+        // El menú contextual sí debe conservar las opciones de calificación.
+        Assert.Contains("MarcarDominaCommand", xaml, StringComparison.Ordinal);
+        Assert.Contains("MarcarSuficienteCommand", xaml, StringComparison.Ordinal);
+        Assert.Contains("MarcarPendienteCommand", xaml, StringComparison.Ordinal);
+        // La columna de checkbox debe estar eliminada.
+        Assert.DoesNotContain("DataGridCheckBoxColumn", xaml, StringComparison.Ordinal);
+        // El estado vacío debe existir.
+        Assert.Contains("Selecciona una actividad para comenzar", xaml, StringComparison.Ordinal);
+        // El menú de grupo a todos debe estar presente.
+        Assert.Contains("MarcarTodosDominaCommand", xaml, StringComparison.Ordinal);
         Assert.Contains("x:Name=\"GrillaEntregasEvaluacion\"", xaml, StringComparison.Ordinal);
         Assert.Contains("PreviewKeyDown=\"OnGrillaEntregasEvaluacionPreviewKeyDown\"", xaml, StringComparison.Ordinal);
         Assert.Contains("Keyboard.FocusedElement is TextBoxBase", codeBehind, StringComparison.Ordinal);

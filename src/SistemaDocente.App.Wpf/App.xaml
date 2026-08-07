@@ -13,6 +13,7 @@
             <FontFamily x:Key="AppFontFamily">pack://application:,,,/SistemaDocente.App.Wpf;component/Fonts/#Montserrat, Segoe UI, sans-serif</FontFamily>
             <BooleanToVisibilityConverter x:Key="BoolToVisibility" />
             <converters:CountToVisibilityConverter x:Key="CountToVisibility" />
+            <converters:InverseCountToVisibilityConverter x:Key="InverseCountToVisibility" />
 
         <Style TargetType="Window">
             <Setter Property="FontFamily" Value="{StaticResource AppFontFamily}"/>
