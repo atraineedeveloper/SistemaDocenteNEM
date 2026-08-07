@@ -30,12 +30,13 @@ public sealed class VentanasEmergentesIntegracionTests
     }
 
     [Fact]
-    public void EvaluacionConservaEntregaYLogroSeparados()
+    public void EditorEvaluacionExponeResultadoUnificadoYObservacion()
     {
         var xaml = Leer("EditarEvaluacionCeldaWindow.xaml");
-        Assert.Contains("OpcionesEstadoEntrega", xaml, StringComparison.Ordinal);
-        Assert.Contains("OpcionesNivel", xaml, StringComparison.Ordinal);
-        Assert.Contains("PuedeEvaluarLogro", xaml, StringComparison.Ordinal);
+        Assert.Contains("OpcionesResultado", xaml, StringComparison.Ordinal);
+        Assert.Contains("SelectedValue=\"{Binding Resultado", xaml, StringComparison.Ordinal);
+        Assert.Contains("Observación pedagógica", xaml, StringComparison.Ordinal);
         Assert.Contains("Aplicar a la matriz", xaml, StringComparison.Ordinal);
+        Assert.DoesNotContain("OpcionesEstadoEntrega", xaml, StringComparison.Ordinal);
     }
 }
