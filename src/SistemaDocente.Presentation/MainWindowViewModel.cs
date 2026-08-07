@@ -5,7 +5,6 @@ public sealed class MainWindowViewModel : ViewModelBase
     private bool _mostrarAsistencia;
     private bool _mostrarProyectos;
     private bool _mostrarEvaluacion;
-    private bool _mostrarVistaDiaria;
 
     public MainWindowViewModel(
         GestionGrupoViewModel grupo,
@@ -17,9 +16,10 @@ public sealed class MainWindowViewModel : ViewModelBase
     {
         ArgumentNullException.ThrowIfNull(grupo);
         ArgumentNullException.ThrowIfNull(asistencia);
+        ArgumentNullException.ThrowIfNull(asistenciaMensual);
+
         Grupo = grupo;
-        Asistencia = asistencia;
-        AsistenciaMensual = asistenciaMensual;
+        ModuloAsistencia = new ModuloAsistenciaViewModel(asistencia, asistenciaMensual);
         Proyectos = proyectos;
         Evaluacion = evaluacion;
         Expediente = expediente;
@@ -28,8 +28,8 @@ public sealed class MainWindowViewModel : ViewModelBase
         IrAAsistenciaCommand = new RelayCommand(IrAAsistencia, () => !MostrarAsistencia && Grupo.GrupoIdActual is not null);
         IrAProyectosCommand = new RelayCommand(IrAProyectos, () => !MostrarProyectos && Grupo.GrupoIdActual is not null && Proyectos is not null);
         IrAEvaluacionCommand = new RelayCommand(IrAEvaluacion, () => !MostrarEvaluacion && Grupo.GrupoIdActual is not null && Evaluacion is not null);
-        MostrarVistaMensualCommand = new RelayCommand(() => MostrarVistaDiaria = false);
-        MostrarVistaDiariaCommand = new RelayCommand(() => MostrarVistaDiaria = true);
+        MostrarVistaMensualCommand = ModuloAsistencia.MostrarVistaMensualCommand;
+        MostrarVistaDiariaCommand = ModuloAsistencia.MostrarVistaDiariaCommand;
 
         Grupo.PropertyChanged += (_, args) =>
         {
@@ -64,6 +64,19 @@ public sealed class MainWindowViewModel : ViewModelBase
             }
         };
 
+        ModuloAsistencia.PropertyChanged += (_, args) =>
+        {
+            if (args.PropertyName is nameof(ModuloAsistenciaViewModel.MostrarDiaria)
+                or nameof(ModuloAsistenciaViewModel.MostrarMensual))
+            {
+                OnPropertyChanged(nameof(MostrarVistaDiaria));
+                OnPropertyChanged(nameof(MostrarVistaMensual));
+                OnPropertyChanged(nameof(MostrarAsistenciaDiaria));
+                OnPropertyChanged(nameof(MostrarAsistenciaMensual));
+                OnPropertyChanged(nameof(TituloVentana));
+            }
+        };
+
         if (Proyectos is not null)
         {
             Proyectos.PropertyChanged += (_, args) =>
@@ -88,7 +101,7 @@ public sealed class MainWindowViewModel : ViewModelBase
 
         if (Expediente is not null)
         {
-            Expediente.PropertyChanged += (_, args) =>
+            Expediente.PropertyChanged += (_, _) =>
             {
                 // El expediente no expone EstaOcupado actualmente.
             };
@@ -103,8 +116,9 @@ public sealed class MainWindowViewModel : ViewModelBase
         (Evaluacion?.EstaOcupado ?? false);
 
     public GestionGrupoViewModel Grupo { get; }
-    public GestionAsistenciaViewModel Asistencia { get; }
-    public GestionAsistenciaMensualViewModel AsistenciaMensual { get; }
+    public ModuloAsistenciaViewModel ModuloAsistencia { get; }
+    public GestionAsistenciaViewModel Asistencia => ModuloAsistencia.Diaria;
+    public GestionAsistenciaMensualViewModel AsistenciaMensual => ModuloAsistencia.Mensual;
     public GestionProyectosViewModel? Proyectos { get; }
     public EvaluacionActividadesViewModel? Evaluacion { get; }
     public GestionExpedienteViewModel? Expediente { get; }
@@ -116,20 +130,8 @@ public sealed class MainWindowViewModel : ViewModelBase
     public RelayCommand MostrarVistaMensualCommand { get; }
     public RelayCommand MostrarVistaDiariaCommand { get; }
 
-    public bool MostrarVistaDiaria
-    {
-        get => _mostrarVistaDiaria;
-        private set
-        {
-            if (SetProperty(ref _mostrarVistaDiaria, value))
-            {
-                OnPropertyChanged(nameof(MostrarVistaMensual));
-                OnPropertyChanged(nameof(MostrarAsistenciaDiaria));
-                OnPropertyChanged(nameof(MostrarAsistenciaMensual));
-            }
-        }
-    }
-    public bool MostrarVistaMensual => !MostrarVistaDiaria;
+    public bool MostrarVistaDiaria => ModuloAsistencia.MostrarDiaria;
+    public bool MostrarVistaMensual => ModuloAsistencia.MostrarMensual;
     public bool MostrarAsistenciaDiaria => MostrarAsistencia && !MostrarProyectos && !MostrarEvaluacion && MostrarVistaDiaria;
     public bool MostrarAsistenciaMensual => MostrarAsistencia && !MostrarProyectos && !MostrarEvaluacion && MostrarVistaMensual;
 
@@ -242,7 +244,7 @@ public sealed class MainWindowViewModel : ViewModelBase
 
         AsistenciaMensual.Inicializar(grupoId);
         Asistencia.Inicializar(grupoId);
-        MostrarVistaDiaria = false;
+        ModuloAsistencia.MostrarVistaMensual();
         MostrarProyectos = false;
         MostrarEvaluacion = false;
         MostrarAsistencia = true;
