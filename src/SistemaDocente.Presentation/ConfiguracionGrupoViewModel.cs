@@ -1,3 +1,5 @@
+using System.Globalization;
+
 using SistemaDocente.Application;
 using SistemaDocente.Core;
 
@@ -92,8 +94,8 @@ public sealed class ConfiguracionGrupoViewModel : ViewModelBase
         DocenteResponsable = contexto.DocenteResponsable;
         ResponsableDesde = contexto.ResponsableDesde;
         ResponsableHasta = contexto.ResponsableHasta;
-        HoraEntrada = contexto.HoraEntrada?.ToString("HH:mm") ?? string.Empty;
-        HoraSalida = contexto.HoraSalida?.ToString("HH:mm") ?? string.Empty;
+        HoraEntrada = contexto.HoraEntrada?.ToString("HH:mm", CultureInfo.InvariantCulture) ?? string.Empty;
+        HoraSalida = contexto.HoraSalida?.ToString("HH:mm", CultureInfo.InvariantCulture) ?? string.Empty;
         Mensaje = string.Empty;
         GuardadoCorrectamente = false;
         OnPropertyChanged(nameof(ResponsableDesdeFecha));
@@ -139,7 +141,7 @@ public sealed class ConfiguracionGrupoViewModel : ViewModelBase
     private static TimeOnly? ParseHora(string valor, string campo)
     {
         if (string.IsNullOrWhiteSpace(valor)) return null;
-        return TimeOnly.TryParseExact(valor.Trim(), "HH:mm", out var hora)
+        return TimeOnly.TryParseExact(valor.Trim(), "HH:mm", CultureInfo.InvariantCulture, DateTimeStyles.None, out var hora)
             ? hora
             : throw new DomainValidationException($"{campo} debe escribirse en formato HH:mm.");
     }
