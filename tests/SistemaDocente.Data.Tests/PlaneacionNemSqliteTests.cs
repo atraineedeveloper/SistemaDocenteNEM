@@ -63,8 +63,8 @@ public sealed class PlaneacionNemSqliteTests
         var grupo = Grupo.Crear("Cuarto A");
         var estudiante = grupo.AgregarEstudiante("Ana", 1, grado: GradoPrimaria.Cuarto);
         baseDatos.Persistencia.Guardar(grupo);
-        var proyectoId = ProyectoId.Crear();
-        var actividadId = ActividadId.Crear();
+        var proyectoId = ProyectoId.DesdeGuid(Guid.NewGuid());
+        var actividadId = ActividadId.DesdeGuid(Guid.NewGuid());
 
         using (var conexion = baseDatos.AbrirConexion())
         using (var transaccion = conexion.BeginTransaction())
@@ -144,7 +144,7 @@ public sealed class PlaneacionNemSqliteTests
             "");
         persistencia.Guardar(inicial, null);
 
-        var legacyPosterior = ProyectoId.Crear();
+        var legacyPosterior = ProyectoId.DesdeGuid(Guid.NewGuid());
         using (var conexion = baseDatos.AbrirConexion())
         using (var comando = conexion.CreateCommand())
         {
