@@ -27,9 +27,11 @@ public sealed class ModernizacionUiEvaluacionDemoTests
     }
 
     [Fact]
-    public void EvaluacionMantieneAtajosContextualesYNoInterceptaTextBox()
+    public void EvaluacionMantieneAtajosContextualesYSeparaEntregaDeLogro()
     {
+        var xaml = Leer("src/SistemaDocente.App.Wpf/Views/EvaluacionView.xaml");
         var code = Leer("src/SistemaDocente.App.Wpf/Views/EvaluacionView.xaml.cs");
+        var editor = Leer("src/SistemaDocente.App.Wpf/EditarEvaluacionCeldaWindow.xaml");
 
         Assert.Contains("GrillaEvaluacionMatriz.IsAncestorOf(foco)", code, StringComparison.Ordinal);
         Assert.Contains("Keyboard.FocusedElement is TextBoxBase", code, StringComparison.Ordinal);
@@ -37,9 +39,17 @@ public sealed class ModernizacionUiEvaluacionDemoTests
         Assert.Contains("Key.S", code, StringComparison.Ordinal);
         Assert.Contains("Key.E", code, StringComparison.Ordinal);
         Assert.Contains("Key.R", code, StringComparison.Ordinal);
+        Assert.Contains("Key.T", code, StringComparison.Ordinal);
         Assert.Contains("Key.N", code, StringComparison.Ordinal);
         Assert.Contains("Key.P", code, StringComparison.Ordinal);
         Assert.Contains("Key.Enter", code, StringComparison.Ordinal);
+        Assert.Contains("T/N/P = entrega", xaml, StringComparison.Ordinal);
+        Assert.Contains("MarcarTodosEntregadaCommand", xaml, StringComparison.Ordinal);
+        Assert.Contains("MarcarTodosNoEntregadaCommand", xaml, StringComparison.Ordinal);
+        Assert.Contains("Estado de entrega", editor, StringComparison.Ordinal);
+        Assert.Contains("SelectedValue=\"{Binding EstadoEntrega", editor, StringComparison.Ordinal);
+        Assert.Contains("IsEnabled=\"{Binding PuedeEvaluarLogro}\"", editor, StringComparison.Ordinal);
+        Assert.DoesNotContain("No entregó (N)", xaml, StringComparison.Ordinal);
     }
 
     [Fact]
@@ -115,13 +125,16 @@ public sealed class ModernizacionUiEvaluacionDemoTests
     {
         var app = Leer("src/SistemaDocente.App.Wpf/App.xaml.cs");
         var seeder = Leer("src/SistemaDocente.App.Wpf/Demo/DemoDataSeeder.cs");
+        var contexto = Leer("src/SistemaDocente.App.Wpf/Demo/DemoContextSeeder.cs");
 
         Assert.Contains("--demo", app, StringComparison.Ordinal);
         Assert.Contains("--demo-reset", app, StringComparison.Ordinal);
         Assert.Contains("DemoDataSeeder.AsegurarDatos", app, StringComparison.Ordinal);
+        Assert.Contains("DemoContextSeeder.AsegurarContexto", app, StringComparison.Ordinal);
         Assert.Contains("4.º A · Demostración", seeder, StringComparison.Ordinal);
         Assert.Contains("31", seeder, StringComparison.Ordinal);
         Assert.Contains("EstadoAsistencia.Falta", seeder, StringComparison.Ordinal);
         Assert.Contains("NivelLogro.RequiereApoyo", seeder, StringComparison.Ordinal);
+        Assert.Contains("OperacionesConcretas", contexto, StringComparison.Ordinal);
     }
 }
