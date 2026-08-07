@@ -66,6 +66,26 @@
                                 Click="OnSeleccionarArchivoClic" HorizontalAlignment="Left"
                                 AutomationProperties.Name="Seleccionar archivo Excel o CSV"/>
                         <TextBlock Text="{Binding Mensaje}" Margin="0,12,0,0" Foreground="{DynamicResource ErrorBrush}" TextWrapping="Wrap"/>
+                        <Border Margin="0,14,0,0" Padding="14" CornerRadius="8"
+                                Background="{DynamicResource InfoBackgroundBrush}"
+                                BorderBrush="{DynamicResource InfoBrush}" BorderThickness="1"
+                                Visibility="{Binding RequiereDelimitadorCsv, Converter={StaticResource BoolToVisibility}}">
+                            <StackPanel>
+                                <TextBlock Text="Selecciona el delimitador del CSV" FontWeight="SemiBold"/>
+                                <TextBlock Margin="0,4,0,10" TextWrapping="Wrap"
+                                           Foreground="{DynamicResource TextSecondaryBrush}"
+                                           Text="El archivo puede usar coma, punto y coma o tabulador. Elige cuál separa sus columnas y vuelve a intentarlo."/>
+                                <StackPanel Orientation="Horizontal">
+                                    <ComboBox Width="230" Margin="0,0,10,0"
+                                              ItemsSource="{Binding OpcionesDelimitadoresCsv}"
+                                              DisplayMemberPath="Etiqueta"
+                                              SelectedItem="{Binding DelimitadorCsvSeleccionado, Mode=TwoWay}"
+                                              AutomationProperties.Name="Delimitador del archivo CSV"/>
+                                    <Button Style="{StaticResource PrimaryButton}" Content="Reintentar CSV"
+                                            Command="{Binding ReintentarCsvCommand}"/>
+                                </StackPanel>
+                            </StackPanel>
+                        </Border>
                     </StackPanel>
                 </Grid>
             </Border>
