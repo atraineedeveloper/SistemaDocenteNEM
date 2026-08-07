@@ -218,7 +218,9 @@
                     <StackPanel DockPanel.Dock="Left" Orientation="Horizontal">
                         <Button TabIndex="40" Content="▱  Ver expediente" Click="OnVerExpedienteEstudianteClic"/>
                         <Button Style="{StaticResource PrimaryButton}" TabIndex="41" Content="＋  Agregar estudiante" Command="{Binding AbrirAgregarEstudianteCommand}"/>
-                        <Button TabIndex="42" Content="✎  Editar estudiante" Command="{Binding AbrirEditarEstudianteCommand}"/>
+                        <Button TabIndex="42" Content="⇩  Importar alumnos…" Click="OnImportarAlumnosClic"
+                                AutomationProperties.Name="Importar alumnos desde Excel o CSV"/>
+                        <Button TabIndex="43" Content="✎  Editar estudiante" Command="{Binding AbrirEditarEstudianteCommand}"/>
                     </StackPanel>
                     <Menu DockPanel.Dock="Right" Background="Transparent" VerticalAlignment="Center">
                         <MenuItem Padding="12,8" Cursor="Hand" Header="•••  Acciones masivas ▾" FontWeight="SemiBold">
