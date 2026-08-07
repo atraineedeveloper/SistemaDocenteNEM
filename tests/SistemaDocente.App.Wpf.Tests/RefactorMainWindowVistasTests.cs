@@ -1,0 +1,215 @@
+using System.IO;
+using System.Threading;
+using System.Windows;
+
+using SistemaDocente.App.Wpf;
+using SistemaDocente.Application;
+using SistemaDocente.Data;
+using SistemaDocente.Presentation;
+
+namespace SistemaDocente.App.Wpf.Tests;
+
+/// <summary>
+/// Pruebas de regresión del refactor que convierte MainWindow en un shell
+/// y extrae las vistas de Grupo, Asistencia, Proyectos y Evaluación.
+/// </summary>
+public sealed class RefactorMainWindowVistasTests
+{
+    private static string ObtenerRaiz() => Path.GetFullPath(Path.Combine(
+        AppContext.BaseDirectory, "..", "..", "..", "..", ".."));
+
+    private static string LeerAplicacion(string nombre) => File.ReadAllText(Path.Combine(
+        ObtenerRaiz(), "src", "SistemaDocente.App.Wpf", nombre));
+
+    private static string LeerVista(string nombre) => File.ReadAllText(Path.Combine(
+        ObtenerRaiz(), "src", "SistemaDocente.App.Wpf", "Views", nombre));
+
+    private static string LeerControl(string nombre) => File.ReadAllText(Path.Combine(
+        ObtenerRaiz(), "src", "SistemaDocente.App.Wpf", "Controls", nombre));
+
+    [Fact]
+    public void MainWindowEnsamblaVistasSeparadas()
+    {
+        var xaml = LeerAplicacion("MainWindow.xaml");
+
+        Assert.Contains("views:GrupoView", xaml, StringComparison.Ordinal);
+        Assert.Contains("views:AsistenciaView", xaml, StringComparison.Ordinal);
+        Assert.Contains("views:ProyectosView", xaml, StringComparison.Ordinal);
+        Assert.Contains("views:EvaluacionView", xaml, StringComparison.Ordinal);
+        Assert.Contains("controls:MainNavigationHeader", xaml, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void MainWindowNoContieneLasPrincipalesDataGridDeModulos()
+    {
+        var xaml = LeerAplicacion("MainWindow.xaml");
+
+        Assert.DoesNotContain("GrillaMensual", xaml, StringComparison.Ordinal);
+        Assert.DoesNotContain("GrillaProyectosPrincipal", xaml, StringComparison.Ordinal);
+        Assert.DoesNotContain("GrillaEntregasEvaluacion", xaml, StringComparison.Ordinal);
+        Assert.DoesNotContain("<DataGrid.Columns>", xaml, StringComparison.Ordinal);
+        Assert.DoesNotContain("EstudiantesFiltrados", xaml, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void GrupoViewReferenciaGestionGrupoViewModelPorDataContext()
+    {
+        var mainWindow = LeerAplicacion("MainWindow.xaml");
+        var grupoXaml = LeerVista("GrupoView.xaml");
+        var grupoCs = LeerVista("GrupoView.xaml.cs");
+
+        Assert.Contains("views:GrupoView DataContext=\"{Binding Grupo}\"", mainWindow, StringComparison.Ordinal);
+        Assert.Contains("xmlns:controls=\"clr-namespace:SistemaDocente.App.Wpf.Controls\"", grupoXaml, StringComparison.Ordinal);
+        Assert.Contains(nameof(GestionGrupoViewModel), grupoCs, StringComparison.Ordinal);
+        Assert.Contains("OnVerExpedienteEstudianteClic", grupoXaml, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void ProyectosViewConservaAperturaDeDetalle()
+    {
+        var xaml = LeerVista("ProyectosView.xaml");
+        var codeBehind = LeerVista("ProyectosView.xaml.cs");
+
+        Assert.Contains("GrillaProyectosPrincipal", xaml, StringComparison.Ordinal);
+        Assert.Contains("MouseDoubleClick=\"OnAbrirDetalleProyectoClic\"", xaml, StringComparison.Ordinal);
+        Assert.Contains("NuevoProyectoCommand", xaml, StringComparison.Ordinal);
+        Assert.Contains(nameof(DetalleProyectoWindow), codeBehind, StringComparison.Ordinal);
+        Assert.Contains("Window.GetWindow(this)", codeBehind, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void LosCuatroModulosSiguenSiendoNavegables()
+    {
+        var header = LeerControl("MainNavigationHeader.xaml");
+
+        Assert.Contains("NavBtnGrupo", header, StringComparison.Ordinal);
+        Assert.Contains("NavBtnAsistencia", header, StringComparison.Ordinal);
+        Assert.Contains("NavBtnProyectos", header, StringComparison.Ordinal);
+        Assert.Contains("NavBtnEvaluacion", header, StringComparison.Ordinal);
+        Assert.Contains("IrAGrupoCommand", header, StringComparison.Ordinal);
+        Assert.Contains("IrAAsistenciaCommand", header, StringComparison.Ordinal);
+        Assert.Contains("IrAProyectosCommand", header, StringComparison.Ordinal);
+        Assert.Contains("IrAEvaluacionCommand", header, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void LosTemasSiguenDisponiblesDesdeElEncabezado()
+    {
+        var header = LeerControl("MainNavigationHeader.xaml");
+        var codeBehind = LeerControl("MainNavigationHeader.xaml.cs");
+
+        Assert.Contains("Tema", header, StringComparison.Ordinal);
+        Assert.Contains("Claro", header, StringComparison.Ordinal);
+        Assert.Contains("Oscuro", header, StringComparison.Ordinal);
+        Assert.Contains("Alto contraste", header, StringComparison.Ordinal);
+        Assert.Contains("ThemeService.ApplyTheme", codeBehind, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void VistasYCodeBehindNoContienenSqlNiReglasDeNegocio()
+    {
+        var archivos = new[]
+        {
+            LeerVista("GrupoView.xaml"), LeerVista("GrupoView.xaml.cs"),
+            LeerVista("AsistenciaView.xaml"), LeerVista("AsistenciaView.xaml.cs"),
+            LeerVista("ProyectosView.xaml"), LeerVista("ProyectosView.xaml.cs"),
+            LeerVista("EvaluacionView.xaml"), LeerVista("EvaluacionView.xaml.cs"),
+            LeerControl("MainNavigationHeader.xaml"), LeerControl("MainNavigationHeader.xaml.cs"),
+            LeerAplicacion("MainWindow.xaml"), LeerAplicacion("MainWindow.xaml.cs"),
+        };
+
+        foreach (var archivo in archivos)
+        {
+            Assert.DoesNotContain("SELECT ", archivo, StringComparison.OrdinalIgnoreCase);
+            Assert.DoesNotContain("INSERT ", archivo, StringComparison.OrdinalIgnoreCase);
+            Assert.DoesNotContain("UPDATE ", archivo, StringComparison.OrdinalIgnoreCase);
+            Assert.DoesNotContain("DELETE ", archivo, StringComparison.OrdinalIgnoreCase);
+            Assert.DoesNotContain("Sqlite", archivo, StringComparison.OrdinalIgnoreCase);
+        }
+
+        var codeBehind = LeerAplicacion("MainWindow.xaml.cs");
+        Assert.DoesNotContain("NivelLogro.", codeBehind, StringComparison.Ordinal);
+        Assert.DoesNotContain("EstadoEntrega.", codeBehind, StringComparison.Ordinal);
+    }
+
+    /// <summary>
+    /// Smoke test STA: construye MainWindow, fuerza InitializeComponent,
+    /// realiza Measure/Arrange y verifica que no haya excepciones de bindings.
+    /// No afirma validez visual automática.
+    /// </summary>
+    [Fact]
+    public void MainWindowPuedeInstanciarseSinExcepcionesDeBindings()
+    {
+        Exception? capturada = null;
+        var thread = new Thread(() =>
+        {
+            try
+            {
+                // Los recursos de App.xaml (converters, estilos, tokens y temas)
+                // sólo están disponibles cuando existe una instancia de Application
+                // con InitializeComponent cargado. En pruebas no hay App en ejecución,
+                // por lo que se carga explícitamente sin invocar Run().
+                if (System.Windows.Application.Current is null)
+                {
+                    var app = new App();
+                    app.InitializeComponent();
+                }
+
+                var viewModel = ConstruirViewModel();
+                var ventana = new MainWindow(viewModel);
+                ventana.Measure(new System.Windows.Size(1060, 740));
+                ventana.Arrange(new System.Windows.Rect(0, 0, 1060, 740));
+                ventana.UpdateLayout();
+            }
+            catch (Exception ex)
+            {
+                capturada = ex;
+            }
+        });
+        thread.SetApartmentState(ApartmentState.STA);
+        thread.Start();
+        thread.Join();
+
+        Assert.Null(capturada);
+    }
+
+    private static MainWindowViewModel ConstruirViewModel()
+    {
+        var directorio = Path.Combine(Path.GetTempPath(), "SistemaDocenteNEM-SmokeTest-" + Guid.NewGuid().ToString("N"));
+        Directory.CreateDirectory(directorio);
+        var baseSqlite = Path.Combine(directorio, "sistema-docente.db");
+        var estadoAplicacion = Path.Combine(directorio, "app-state.json");
+
+        var persistencia = new PersistenciaGrupoSqlite(baseSqlite);
+        var persistenciaAsistencia = new PersistenciaAsistenciaSqlite(baseSqlite);
+        var persistenciaProyectos = new PersistenciaProyectosSqlite(baseSqlite);
+        var gestion = new GestionGrupoPresentacion(new GestionGrupoCasosUso(persistencia));
+        var gestionAsistencia = new GestionAsistenciaPresentacion(
+            new GestionAsistenciaCasosUso(persistencia, persistenciaAsistencia));
+        var gestionProyectos = new GestionProyectosPresentacion(
+            new GestionProyectosActividadesCasosUso(
+                persistencia, persistenciaProyectos, persistenciaProyectos));
+        var estado = new AlmacenamientoEstadoJson(estadoAplicacion);
+        var mensajes = new WpfNotificationService();
+
+        var viewModelGrupo = new GestionGrupoViewModel(
+            gestion, estado, mensajes, new ServicioConfirmacionWpf());
+        var viewModelAsistencia = new GestionAsistenciaViewModel(
+            gestionAsistencia, new RelojLocalSistema(), new DialogoCambiosPendientesWpf(), mensajes);
+        var viewModelMensual = new GestionAsistenciaMensualViewModel(
+            gestionAsistencia, new RelojLocalSistema(), new DialogoCambiosPendientesWpf(), mensajes);
+        var viewModelProyectos = new GestionProyectosViewModel(
+            gestionProyectos, new DialogoCambiosPendientesWpf(), new ConfirmacionProyectosWpf(), mensajes);
+        var viewModelEvaluacion = new EvaluacionActividadesViewModel(
+            gestionProyectos, new DialogoCambiosPendientesWpf(), mensajes);
+
+        var persistenciaExpediente = new PersistenciaExpedienteSqlite(baseSqlite);
+        var gestionExpedienteCasosUso = new GestionExpedienteCasosUso(
+            persistencia, persistenciaAsistencia, persistenciaProyectos, persistenciaProyectos, persistenciaExpediente);
+        var viewModelExpediente = new GestionExpedienteViewModel(gestionExpedienteCasosUso, mensajes);
+
+        return new MainWindowViewModel(
+            viewModelGrupo, viewModelAsistencia, viewModelMensual,
+            viewModelProyectos, viewModelEvaluacion, viewModelExpediente);
+    }
+}

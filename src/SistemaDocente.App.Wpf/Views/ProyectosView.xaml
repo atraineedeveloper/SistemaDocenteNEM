@@ -1,0 +1,63 @@
+<UserControl x:Class="SistemaDocente.App.Wpf.Views.ProyectosView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             mc:Ignorable="d"
+             d:DesignHeight="600" d:DesignWidth="1000"
+             Background="{DynamicResource WindowBackgroundBrush}"
+             xml:lang="es-MX">
+    <Grid Margin="{DynamicResource MarginXXXLarge}">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <DockPanel Margin="0,0,0,16">
+            <StackPanel DockPanel.Dock="Left" VerticalAlignment="Center">
+                <TextBlock Text="Planeación Didáctica" Foreground="{DynamicResource TextMutedBrush}" Style="{StaticResource SectionSubtitle}" FontWeight="Medium"/>
+                <TextBlock Text="Proyectos Didácticos" Foreground="{DynamicResource TextPrimaryBrush}" FontSize="26" FontWeight="Bold"/>
+            </StackPanel>
+            <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" VerticalAlignment="Center">
+                <Button Style="{StaticResource PrimaryButton}" Content="+ Nuevo Proyecto" Command="{Binding NuevoProyectoCommand}" TabIndex="300" AutomationProperties.Name="Crear nuevo proyecto"/>
+            </StackPanel>
+        </DockPanel>
+
+        <DockPanel Grid.Row="1" Margin="0,0,0,14">
+            <Border DockPanel.Dock="Left" Background="{DynamicResource CardBackgroundBrush}" CornerRadius="8" Padding="12,8" BorderBrush="{DynamicResource BorderLightBrush}" BorderThickness="1">
+                <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                    <TextBlock Text="Filtrar por estado: " Foreground="{DynamicResource TextPrimaryBrush}" VerticalAlignment="Center" FontWeight="SemiBold" Margin="0,0,8,0"/>
+                    <ComboBox Width="180" ItemsSource="{Binding FiltrosProyecto}" SelectedItem="{Binding FiltroProyecto}" TabIndex="301" AutomationProperties.Name="Filtrar proyectos por estado"/>
+                </StackPanel>
+            </Border>
+        </DockPanel>
+
+        <DataGrid x:Name="GrillaProyectosPrincipal" Grid.Row="2" ItemsSource="{Binding ProyectosVisibles}" SelectedItem="{Binding ProyectoSeleccionado}"
+                  AutoGenerateColumns="False" IsReadOnly="True" CanUserSortColumns="True" SelectionMode="Single" SelectionUnit="FullRow"
+                  HeadersVisibility="Column" GridLinesVisibility="Horizontal" RowHeaderWidth="0" FontSize="14" MouseDoubleClick="OnAbrirDetalleProyectoClic"
+                  EnableRowVirtualization="True" EnableColumnVirtualization="True">
+            <DataGrid.ContextMenu>
+                <ContextMenu>
+                    <MenuItem Header="📂 Ver / Editar Detalle del Proyecto" Click="OnAbrirDetalleProyectoClic"/>
+                    <Separator/>
+                    <MenuItem Header="✨ Nuevo Proyecto" Command="{Binding NuevoProyectoCommand}"/>
+                </ContextMenu>
+            </DataGrid.ContextMenu>
+            <DataGrid.Columns>
+                <DataGridTextColumn Header="Nombre del Proyecto" Binding="{Binding Nombre}" Width="2*"/>
+                <DataGridTextColumn Header="Estado" Binding="{Binding Estado}" Width="140"/>
+                <DataGridTextColumn Header="Inicio" Binding="{Binding FechaInicio, StringFormat=dd/MM/yyyy}" Width="110"/>
+                <DataGridTextColumn Header="Término" Binding="{Binding FechaTermino, StringFormat=dd/MM/yyyy}" Width="110"/>
+                <DataGridTextColumn Header="Actividades" Binding="{Binding NumeroActividades}" Width="100"/>
+            </DataGrid.Columns>
+        </DataGrid>
+
+        <DockPanel Grid.Row="3" Margin="0,14,0,0">
+            <WrapPanel DockPanel.Dock="Left">
+                <Button Style="{StaticResource PrimaryButton}" Content="📂 Ver / Editar Detalle del Proyecto" Click="OnAbrirDetalleProyectoClic" TabIndex="302" AutomationProperties.Name="Ver o editar detalle del proyecto seleccionado"/>
+            </WrapPanel>
+        </DockPanel>
+    </Grid>
+</UserControl>

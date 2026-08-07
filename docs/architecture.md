@@ -15,7 +15,7 @@ La solución usa .NET 10. Los proyectos productivos portables usan `net10.0`; la
 | `SistemaDocente.Data` | Adaptadores SQLite, inicialización/migración de esquema, consultas y persistencia transaccional. Traduce errores técnicos en la frontera de infraestructura. |
 | `SistemaDocente.Presentation` | MVVM portable: ViewModels, comandos, modelos visuales, confirmaciones y estado editable. No depende de WPF, Data ni SQLite. |
 | `SistemaDocente.Reporting` | Frontera reservada para reportes. Sigue separado del resto de la interfaz. |
-| `SistemaDocente.App.Wpf` | Shell WPF, ventanas dedicadas, temas, recursos visuales, servicios WPF, notificaciones y raíz de composición. |
+| `SistemaDocente.App.Wpf` | Shell WPF (`MainWindow`) que sólo ensambla vistas y feedback global; presentaciones de módulos en `Views/` (Grupo, Asistencia, Proyectos, Evaluación); encabezado de navegación global en `Controls/`; ventanas dedicadas; temas; recursos visuales; servicios WPF; notificaciones; raíz de composición. |
 
 Los proyectos de pruebas existentes son:
 
@@ -137,23 +137,23 @@ La aplicación registra errores no controlados en un log local de diagnóstico y
 
 ### MainWindow como shell
 
-`MainWindow` aloja la navegación principal y las superficies operativas de alto nivel. La navegación actual incluye:
+`MainWindow` es únicamente el shell visual: ensambla el encabezado de navegación global (`Controls/MainNavigationHeader`), las vistas de los módulos (`Views/`) y el feedback global (toast y progreso). No conoce los detalles visuales internos de los módulos. La navegación actual incluye:
 
 - Grupo;
 - Asistencia;
 - Proyectos;
 - Evaluación.
 
-También incluye selector de grupo, selector de tema, progreso global y notificaciones tipo toast.
+El encabezado global contiene branding, selector de grupo, navegación, selector de tema e indicador del módulo activo. El toast y el progreso global permanecen en el shell.
 
 ### Vistas principales especializadas
 
-Se usa una superficie amplia dentro de `MainWindow` para tareas que necesitan panorama o mucho espacio, por ejemplo:
+Cada módulo es responsable exclusivo de su presentación en un `UserControl` de `Views/`, con su propio `DataContext` por binding. Se usa una superficie amplia dentro de la vista correspondiente para tareas que necesitan panorama o mucho espacio, por ejemplo:
 
-- lista de estudiantes;
-- asistencia mensual;
-- lista de proyectos;
-- evaluación de alumnos.
+- lista de estudiantes (`GrupoView`);
+- asistencia mensual (`AsistenciaView`);
+- lista de proyectos (`ProyectosView`);
+- evaluación de alumnos (`EvaluacionView`).
 
 ### Ventanas dedicadas
 
@@ -251,5 +251,6 @@ Siguen existiendo líneas de evolución como reportes, respaldos, importación/e
 - La composición es manual.
 - No se introducen ORM, repositorios genéricos ni framework de navegación sin una decisión explícita.
 - Master-detail no es una regla de UI; se usa sólo cuando mejora realmente la tarea.
+- `MainWindow` actúa como shell visual: sólo ensambla el encabezado de navegación, las vistas de módulos (`Views/`) y el feedback global; cada módulo es responsable exclusivo de su propia presentación.
 - Las tareas complejas pueden usar ventanas dedicadas y las tareas intensivas usan superficies principales amplias.
 - Los estilos y colores nuevos deben integrarse al sistema de diseño compartido.

@@ -1,9 +1,9 @@
+using System.Text.RegularExpressions;
+using System.Xml.Linq;
+
 using SistemaDocente.App.Wpf;
 using SistemaDocente.Data;
 using SistemaDocente.Presentation;
-
-using System.Text.RegularExpressions;
-using System.Xml.Linq;
 
 namespace SistemaDocente.App.Wpf.Tests;
 
@@ -24,21 +24,10 @@ public sealed class ComposicionAsistenciaTests
     }
 
     [Fact]
-    public void VistaIntegraNavegacionCapturaYNoContieneSql()
+    public void AsistenciaViewConservaNavegacionCapturaYNoContieneSql()
     {
-        var raiz = Path.GetFullPath(Path.Combine(
-            AppContext.BaseDirectory,
-            "..", "..", "..", "..", ".."));
-        var xaml = File.ReadAllText(Path.Combine(
-            raiz,
-            "src",
-            "SistemaDocente.App.Wpf",
-            "MainWindow.xaml"));
-        var codeBehind = File.ReadAllText(Path.Combine(
-            raiz,
-            "src",
-            "SistemaDocente.App.Wpf",
-            "MainWindow.xaml.cs"));
+        var xaml = LeerArchivoVista("AsistenciaView.xaml");
+        var codeBehind = LeerArchivoVista("AsistenciaView.xaml.cs");
 
         Assert.Contains("DatePicker", xaml, StringComparison.Ordinal);
         Assert.Contains("DataGrid", xaml, StringComparison.Ordinal);
@@ -59,38 +48,19 @@ public sealed class ComposicionAsistenciaTests
         Assert.DoesNotContain("SELECT ", xaml, StringComparison.OrdinalIgnoreCase);
         Assert.DoesNotContain("INSERT ", codeBehind, StringComparison.OrdinalIgnoreCase);
         Assert.DoesNotContain("Sqlite", codeBehind, StringComparison.OrdinalIgnoreCase);
-        Assert.Contains("Proyectos", xaml, StringComparison.Ordinal);
-        Assert.Contains("Evaluación", xaml, StringComparison.Ordinal);
-        Assert.Contains("ProyectosVisibles", xaml, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void EvaluacionViewConservaBindingsYAtajosDeEvaluacion()
+    {
+        var xaml = LeerArchivoVista("EvaluacionView.xaml");
+        var codeBehind = LeerArchivoVista("EvaluacionView.xaml.cs");
+
+        Assert.Contains("ProyectosVisibles", LeerArchivoVista("ProyectosView.xaml"), StringComparison.Ordinal);
         Assert.Contains("EntregasVisibles", xaml, StringComparison.Ordinal);
         Assert.Contains("D Domina", xaml, StringComparison.Ordinal);
         Assert.Contains("S Suficiente", xaml, StringComparison.Ordinal);
         Assert.Contains("P Pendiente", xaml, StringComparison.Ordinal);
-    }
-
-    [Fact]
-    public void ConteosDeSoloLecturaUsanBindingOneWay()
-    {
-        var xaml = LeerArchivoAplicacion("MainWindow.xaml");
-
-        _ = XDocument.Parse(xaml);
-        foreach (var propiedad in new[] { "Total", "Pendientes", "Domina", "Suficiente", "EnProceso", "RequiereApoyo", "NoEntrego" })
-        {
-            Assert.Contains($"{{Binding {propiedad}, Mode=OneWay}}", xaml, StringComparison.Ordinal);
-            Assert.DoesNotMatch(
-                $"Binding\\s+{propiedad}[^}}]*Mode=(?:TwoWay|OneWayToSource)",
-                xaml);
-        }
-    }
-
-    [Fact]
-    public void AtajosEnpSonContextualesYCtrlSPermaneceGlobal()
-    {
-        var xaml = LeerArchivoAplicacion("MainWindow.xaml");
-        var codeBehind = LeerArchivoAplicacion("MainWindow.xaml.cs");
-
-        Assert.DoesNotMatch("<KeyBinding\\s+Key=\"[ENP]\"", xaml);
-        Assert.Contains("Modifiers=\"Control\" Key=\"S\"", xaml, StringComparison.Ordinal);
         Assert.Contains("x:Name=\"GrillaEntregasEvaluacion\"", xaml, StringComparison.Ordinal);
         Assert.Contains("PreviewKeyDown=\"OnGrillaEntregasEvaluacionPreviewKeyDown\"", xaml, StringComparison.Ordinal);
         Assert.Contains("Keyboard.FocusedElement is TextBoxBase", codeBehind, StringComparison.Ordinal);
@@ -106,6 +76,38 @@ public sealed class ComposicionAsistenciaTests
     }
 
     [Fact]
+    public void ConteosDeSoloLecturaUsanBindingOneWay()
+    {
+        var xaml = LeerArchivoVista("EvaluacionView.xaml");
+
+        _ = XDocument.Parse(xaml);
+        foreach (var propiedad in new[] { "Total", "Pendientes", "Domina", "Suficiente", "EnProceso", "RequiereApoyo", "NoEntrego" })
+        {
+            Assert.Contains($"{{Binding {propiedad}, Mode=OneWay}}", xaml, StringComparison.Ordinal);
+            Assert.DoesNotMatch(
+                $"Binding\\s+{propiedad}[^}}]*Mode=(?:TwoWay|OneWayToSource)",
+                xaml);
+        }
+    }
+
+    [Fact]
+    public void AtajosSimplesSonContextualesYCtrlSPermaneceEnVistas()
+    {
+        var mainWindowXaml = LeerArchivoAplicacion("MainWindow.xaml");
+        var asistenciaXaml = LeerArchivoVista("AsistenciaView.xaml");
+        var evaluacionXaml = LeerArchivoVista("EvaluacionView.xaml");
+
+        // MainWindow ya no registra PreviewKeyDown global ni KeyBindings de módulos.
+        Assert.DoesNotContain("PreviewKeyDown=\"", mainWindowXaml, StringComparison.Ordinal);
+        Assert.DoesNotMatch("<KeyBinding\\s+Key=\"[ENPDS]\"", mainWindowXaml);
+        // Los atajos contextuales viven en las vistas correspondientes.
+        Assert.Contains("Modifiers=\"Control\" Key=\"S\"", asistenciaXaml, StringComparison.Ordinal);
+        Assert.Contains("Modifiers=\"Control\" Key=\"S\"", evaluacionXaml, StringComparison.Ordinal);
+        Assert.Contains("OnGrillaMensualPreviewKeyDown", asistenciaXaml, StringComparison.Ordinal);
+        Assert.Contains("Keyboard.FocusedElement is TextBoxBase", LeerArchivoVista("AsistenciaView.xaml.cs"), StringComparison.Ordinal);
+    }
+
+    [Fact]
     public void NavegacionYCierreDeleganConfirmacionAlModuloProyectos()
     {
         var mainWindowViewModel = LeerArchivoPresentacion("MainWindowViewModel.cs");
@@ -116,6 +118,9 @@ public sealed class ComposicionAsistenciaTests
 
     private static string LeerArchivoAplicacion(string nombre) => File.ReadAllText(Path.Combine(
         ObtenerRaiz(), "src", "SistemaDocente.App.Wpf", nombre));
+
+    private static string LeerArchivoVista(string nombre) => File.ReadAllText(Path.Combine(
+        ObtenerRaiz(), "src", "SistemaDocente.App.Wpf", "Views", nombre));
 
     private static string LeerArchivoPresentacion(string nombre) => File.ReadAllText(Path.Combine(
         ObtenerRaiz(), "src", "SistemaDocente.Presentation", nombre));

@@ -425,7 +425,7 @@ Comprobar texto no cortado, botones visibles, tablas utilizables, diálogos comp
 
 Los estilos comunes deben centralizarse. La estructura actual de `Themes/` y `DesignTokens.xaml` debe reutilizarse antes de crear nuevos diccionarios.
 
-`MainWindow.xaml` actúa como shell. Las áreas funcionales grandes deberían extraerse gradualmente a `UserControl` o vistas dedicadas cuando su tamaño dificulte mantenimiento, sin introducir un framework de navegación ni mover lógica de negocio a code-behind.
+`MainWindow.xaml` actúa como shell y sólo ensambla el encabezado de navegación global, las vistas de módulos y el feedback global. Cada módulo vive en su propio `UserControl` de `Views/` y es responsable exclusivo de su presentación; el encabezado global vive en `Controls/`. Extraer áreas funcionales grandes a vistas dedicadas cuando su tamaño dificulte mantenimiento, sin introducir un framework de navegación ni mover lógica de negocio a code-behind. Cada vista recibe su `DataContext` por binding simple, evitando `DataContext.DataContext...`.
 
 El code-behind puede manejar comportamiento propio de WPF —foco, apertura de ventanas, interacción visual, routing de teclado contextual— pero no reglas de dominio ni SQL.
 
