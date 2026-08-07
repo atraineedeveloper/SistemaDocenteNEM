@@ -85,6 +85,7 @@ public sealed class GestionGrupoViewModelTests
         contexto.ViewModel.AbrirAgregarEstudianteCommand.Execute(null);
         contexto.ViewModel.NombreEstudianteEdicion = "Luis";
         contexto.ViewModel.NumeroListaEdicion = "3";
+        contexto.ViewModel.GradoEdicion = GradoPrimaria.Primero;
         contexto.ViewModel.GuardarEstudianteCommand.Execute(null);
         Assert.Contains(contexto.ViewModel.Estudiantes, x => x.Nombre == "Luis");
 
@@ -92,6 +93,7 @@ public sealed class GestionGrupoViewModelTests
         contexto.ViewModel.AbrirEditarEstudianteCommand.Execute(null);
         contexto.ViewModel.NombreEstudianteEdicion = "Luis Alberto";
         contexto.ViewModel.NumeroListaEdicion = "4";
+        contexto.ViewModel.GradoEdicion = GradoPrimaria.Primero;
         contexto.ViewModel.GuardarEstudianteCommand.Execute(null);
         Assert.Contains(contexto.ViewModel.Estudiantes, x => x.Nombre == "Luis Alberto" && x.NumeroLista == 4);
         Assert.Equal(1, contexto.Gestion.Ediciones);
@@ -108,6 +110,7 @@ public sealed class GestionGrupoViewModelTests
         contexto.ViewModel.AbrirEditarEstudianteCommand.Execute(null);
         contexto.ViewModel.NombreEstudianteEdicion = "Nombre pendiente";
         contexto.ViewModel.NumeroListaEdicion = "2";
+        contexto.ViewModel.GradoEdicion = GradoPrimaria.Primero;
         contexto.Gestion.ErrorEditar = new DomainConflictException("Número ocupado");
 
         contexto.ViewModel.GuardarEstudianteCommand.Execute(null);
@@ -131,6 +134,7 @@ public sealed class GestionGrupoViewModelTests
         contexto.ViewModel.AbrirAgregarEstudianteCommand.Execute(null);
         contexto.ViewModel.NombreEstudianteEdicion = "Luis";
         contexto.ViewModel.NumeroListaEdicion = "1";
+        contexto.ViewModel.GradoEdicion = GradoPrimaria.Primero;
         contexto.ViewModel.GuardarEstudianteCommand.Execute(null);
         Assert.Equal("Luis", contexto.ViewModel.NombreEstudianteEdicion);
         Assert.Equal("1", contexto.ViewModel.NumeroListaEdicion);
