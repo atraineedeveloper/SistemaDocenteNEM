@@ -20,6 +20,10 @@ public sealed record OpcionCampoImportacion(
     CampoImportacionEstudiante Campo,
     string Etiqueta);
 
+public sealed record OpcionDelimitadorCsv(
+    char Delimitador,
+    string Etiqueta);
+
 public sealed class ColumnaImportacionVisual : ViewModelBase
 {
     private CampoImportacionEstudiante _campo;
@@ -241,9 +245,17 @@ public sealed class ImportacionEstudiantesViewModel : ViewModelBase
         new(CampoImportacionEstudiante.Observaciones, "Observaciones"),
     ];
 
+    private static readonly IReadOnlyList<OpcionDelimitadorCsv> OpcionesDelimitadoresCsvInternas =
+    [
+        new(',', "Coma (, )"),
+        new(';', "Punto y coma (;)"),
+        new('\t', "Tabulador"),
+    ];
+
     private readonly ILectorImportacionTabular _lector;
     private readonly ImportacionEstudiantesCasosUso _casosUso;
     private readonly IReadOnlyList<OpcionCampoImportacion> _opcionesCampos = OpcionesCamposInternas;
+    private readonly IReadOnlyList<OpcionDelimitadorCsv> _opcionesDelimitadoresCsv = OpcionesDelimitadoresCsvInternas;
     private readonly ObservableCollection<ColumnaImportacionVisual> _columnas = [];
     private readonly ObservableCollection<FilaImportacionVisual> _filas = [];
     private GrupoId? _grupoId;
@@ -252,6 +264,9 @@ public sealed class ImportacionEstudiantesViewModel : ViewModelBase
     private FilaImportacionVisual? _filaSeleccionada;
     private PasoImportacionEstudiantes _paso = PasoImportacionEstudiantes.Archivo;
     private bool _soloProblemas;
+    private bool _requiereDelimitadorCsv;
+    private OpcionDelimitadorCsv? _delimitadorCsvSeleccionado;
+    private string _rutaArchivoPendiente = string.Empty;
     private string _mensaje = string.Empty;
     private string _nombreArchivo = string.Empty;
     private int _importados;
@@ -273,6 +288,7 @@ public sealed class ImportacionEstudiantesViewModel : ViewModelBase
         VolverCommand = new RelayCommand(Volver, PuedeVolver);
         AlternarExclusionCommand = new RelayCommand(AlternarExclusion, () => FilaSeleccionada is not null);
         AutorizarDuplicadoCommand = new RelayCommand(AutorizarDuplicado, PuedeAutorizarDuplicado);
+        ReintentarCsvCommand = new RelayCommand(ReintentarCsv, PuedeReintentarCsv);
     }
 
     public RelayCommand GenerarPreviaCommand { get; }
@@ -289,7 +305,11 @@ public sealed class ImportacionEstudiantesViewModel : ViewModelBase
 
     public RelayCommand AutorizarDuplicadoCommand { get; }
 
+    public RelayCommand ReintentarCsvCommand { get; }
+
     public IReadOnlyList<OpcionCampoImportacion> OpcionesCampos => _opcionesCampos;
+
+    public IReadOnlyList<OpcionDelimitadorCsv> OpcionesDelimitadoresCsv => _opcionesDelimitadoresCsv;
 
     public IReadOnlyList<ColumnaImportacionVisual> Columnas => _columnas;
 
@@ -366,6 +386,30 @@ public sealed class ImportacionEstudiantesViewModel : ViewModelBase
         _ => "Importar alumnos",
     };
 
+    public bool RequiereDelimitadorCsv
+    {
+        get => _requiereDelimitadorCsv;
+        private set
+        {
+            if (SetProperty(ref _requiereDelimitadorCsv, value))
+            {
+                ReintentarCsvCommand.NotifyCanExecuteChanged();
+            }
+        }
+    }
+
+    public OpcionDelimitadorCsv? DelimitadorCsvSeleccionado
+    {
+        get => _delimitadorCsvSeleccionado;
+        set
+        {
+            if (SetProperty(ref _delimitadorCsvSeleccionado, value))
+            {
+                ReintentarCsvCommand.NotifyCanExecuteChanged();
+            }
+        }
+    }
+
     public string NombreArchivo
     {
         get => _nombreArchivo;
@@ -419,6 +463,9 @@ public sealed class ImportacionEstudiantesViewModel : ViewModelBase
         _filas.Clear();
         NombreArchivo = string.Empty;
         Mensaje = string.Empty;
+        _rutaArchivoPendiente = string.Empty;
+        RequiereDelimitadorCsv = false;
+        DelimitadorCsvSeleccionado = null;
         Importados = 0;
         ExcluidosResultado = 0;
         Paso = PasoImportacionEstudiantes.Archivo;
@@ -438,23 +485,60 @@ public sealed class ImportacionEstudiantesViewModel : ViewModelBase
             return false;
         }
 
+        _rutaArchivoPendiente = rutaArchivo;
+        DelimitadorCsvSeleccionado = null;
+
         try
         {
-            _documento = _lector.Leer(rutaArchivo);
-            NombreArchivo = _documento.NombreArchivo;
-            OnPropertyChanged(nameof(Hojas));
-            HojaSeleccionada = _documento.Hojas.Count > 0
-                ? _documento.Hojas[0]
-                : null;
-            Mensaje = string.Empty;
-            Paso = PasoImportacionEstudiantes.Columnas;
+            AplicarDocumento(_lector.Leer(rutaArchivo));
             return true;
         }
-        catch (Exception exception) when (exception is ImportacionTabularException or IOException or UnauthorizedAccessException)
+        catch (ImportacionTabularException exception)
         {
+            RequiereDelimitadorCsv =
+                exception.Codigo == "csv-delimiter-ambiguous" &&
+                _lector is ILectorImportacionCsvConfigurable;
             Mensaje = exception.Message;
             return false;
         }
+        catch (Exception exception) when (exception is IOException or UnauthorizedAccessException)
+        {
+            RequiereDelimitadorCsv = false;
+            Mensaje = exception.Message;
+            return false;
+        }
+    }
+
+    private void ReintentarCsv()
+    {
+        if (_lector is not ILectorImportacionCsvConfigurable lectorCsv ||
+            DelimitadorCsvSeleccionado is not { } opcion ||
+            string.IsNullOrWhiteSpace(_rutaArchivoPendiente))
+        {
+            return;
+        }
+
+        try
+        {
+            AplicarDocumento(lectorCsv.LeerCsv(_rutaArchivoPendiente, opcion.Delimitador));
+        }
+        catch (ImportacionTabularException exception)
+        {
+            Mensaje = exception.Message;
+        }
+    }
+
+    private void AplicarDocumento(DocumentoTabular documento)
+    {
+        _documento = documento;
+        NombreArchivo = documento.NombreArchivo;
+        OnPropertyChanged(nameof(Hojas));
+        HojaSeleccionada = documento.Hojas.Count > 0
+            ? documento.Hojas[0]
+            : null;
+        RequiereDelimitadorCsv = false;
+        Mensaje = string.Empty;
+        Paso = PasoImportacionEstudiantes.Columnas;
     }
 
     private void CrearColumnas()
@@ -632,6 +716,12 @@ public sealed class ImportacionEstudiantesViewModel : ViewModelBase
         FilaSeleccionada is { Estado: EstadoFilaImportacion.RequiereRevision } fila &&
         fila.ResumenProblemas.Contains("coincid", StringComparison.OrdinalIgnoreCase);
 
+    private bool PuedeReintentarCsv() =>
+        RequiereDelimitadorCsv &&
+        DelimitadorCsvSeleccionado is not null &&
+        _lector is ILectorImportacionCsvConfigurable &&
+        !string.IsNullOrWhiteSpace(_rutaArchivoPendiente);
+
     private void NotificarConteos()
     {
         OnPropertyChanged(nameof(Listas));
@@ -649,6 +739,7 @@ public sealed class ImportacionEstudiantesViewModel : ViewModelBase
         VolverCommand.NotifyCanExecuteChanged();
         AlternarExclusionCommand.NotifyCanExecuteChanged();
         AutorizarDuplicadoCommand.NotifyCanExecuteChanged();
+        ReintentarCsvCommand.NotifyCanExecuteChanged();
     }
 
     private static CampoImportacionEstudiante SugerirCampo(string encabezado)
