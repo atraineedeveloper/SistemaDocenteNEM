@@ -17,7 +17,7 @@
 - [x] 10. Agregar `GestionReportesViewModel` y navegación global Reportes.
 - [x] 11. Crear vista Reportes con modos Individual/Grupal según wireframe aprobado.
 - [x] 12. Crear ventana Configuración del grupo con etapa cognoscitiva grupal de Piaget.
-- [ ] 13. Integrar configuración desde Grupo y Reportes sin alterar las vistas aprobadas más de lo necesario. (Reportes ya integrado; acceso desde Grupo pendiente.)
+- [x] 13. Integrar configuración desde Grupo y Reportes sin alterar las vistas aprobadas más de lo necesario; ambas superficies reutilizan la misma ventana y ViewModel contextual.
 - [x] 14. Adaptar Evaluación para estado explícito sin reintroducir selector de actividad; matriz, guardado, filtros, editor y atajos ya conservan entrega/nivel de forma separada.
 
 ## Calidad
