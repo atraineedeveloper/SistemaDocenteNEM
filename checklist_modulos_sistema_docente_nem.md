@@ -1,339 +1,293 @@
-# Checklist de módulos del Sistema Docente NEM
+# Sistema Docente NEM module roadmap
 
-**Estado del proyecto:** aplicación local de escritorio para un docente de primaria pública, construida con C# .NET, WPF y SQLite.
+**Product:** offline Windows desktop application for a Mexican public-primary-school teacher, built with C#/.NET 10, WPF and SQLite.
 
-## Módulos ya desarrollados
+This checklist reflects the current product state rather than the original prototype plan. A checked item means the capability is implemented in `main` unless it is explicitly marked as part of the current feature branch.
 
-- [x] **Fundación técnica**
-  - Solución por capas.
-  - Composición manual.
-  - Persistencia local con SQLite.
-  - Pruebas por proyecto.
-  - Validación mediante OpenSpec.
+## Implemented foundation and classroom workflows
 
-- [x] **Grupo y estudiantes**
-  - Registro del grupo.
-  - Alta y edición de estudiantes con datos desglosados (Primer Apellido, Segundo Apellido, Nombres, Edad calculada dinámicamente, Género, Fecha de Ingreso y Observaciones cualitativas).
-  - Exclusión explícita de CURP.
-  - Activación e inactivación.
-  - Conservación del historial.
-  - Persistencia local con migración SQLite v6.
-  - Tipografía tipográfica global Montserrat en la interfaz WPF.
+- [x] **Technical foundation**
+  - Layered Core / Application / Data / Presentation / Reporting / WPF solution.
+  - Local SQLite persistence and additive migrations/extensions.
+  - Automated tests by layer.
+  - OpenSpec-driven changes.
+  - Windows GitHub Actions CI: format, Release build, tests, OpenSpec and whitespace.
 
-- [x] **Asistencia**
-  - Asistencia diaria como unidad atómica.
-  - Vista mensual por días lectivos.
-  - Estados: Presente, Falta, Retardo y Falta justificada.
-  - Guardado por día y guardado secuencial de cambios mensuales.
-  - Conteos y porcentajes.
-  - Historial de estudiantes inactivos.
+- [x] **Group and students**
+  - Multiple groups.
+  - Student create/edit/activate/deactivate.
+  - Structured names, birth date, calculated age, gender, admission date and pedagogical observations.
+  - Historical inactive students retained.
+  - Student-record (`Expediente`) workflow.
+  - Explicit exclusion of CURP from the current product model.
 
-- [~] **Proyectos, actividades y entregas**
-  - Agregados de ProyectoDidactico y ActividadProyecto.
-  - Actividades dentro de un proyecto.
-  - Entregas por estudiante.
-  - Estados Pendiente, Entregada y No entregada.
-  - Migración SQLite a versión 3.
-  - Interfaz WPF de tres zonas.
-  - Pendiente: terminar correcciones menores de interfaz, prueba manual completa y cierre formal del cambio.
+- [x] **Attendance**
+  - Atomic daily attendance.
+  - Monthly matrix.
+  - Present, absent, late and justified-absence states.
+  - P/F/R/J keyboard capture.
+  - One-click cell state menu.
+  - Counts, percentages and historical roster behavior.
 
----
+- [x] **Projects and activities — operational foundation**
+  - Project lifecycle: draft, in progress and completed.
+  - Activities within projects.
+  - Historical applicability by roster.
+  - Student delivery/evaluation data.
+  - Dedicated project/activity windows.
 
-# Módulos pendientes
+- [x] **Formative evaluation — operational foundation**
+  - Student × activity matrix.
+  - Delivery separated internally from achievement level.
+  - Teacher-facing unified result interaction.
+  - Pending, delivered-awaiting-evaluation, no-delivery, Domina, Suficiente, En proceso and Requiere apoyo.
+  - Cell observations and keyboard shortcuts.
+  - Filters and per-activity metrics.
 
-## 1. Planeación didáctica NEM
+- [x] **Student record (`Expediente`)**
+  - Individual profile.
+  - Strengths, difficulties, support actions and chronological observations.
+  - Family/tutor agreements.
+  - Attendance, activity/evaluation context and pedagogical follow-up.
+  - No diagnostic labeling.
 
-- [ ] Crear planeaciones asociadas a un proyecto.
-- [ ] Registrar periodo de trabajo.
-- [ ] Definir propósito del proyecto.
-- [ ] Registrar campo o campos formativos.
-- [ ] Registrar contenidos.
-- [ ] Registrar procesos de desarrollo de aprendizaje.
-- [ ] Registrar ejes articuladores.
-- [ ] Registrar metodología del proyecto.
-- [ ] Registrar producto final esperado.
-- [ ] Registrar recursos y materiales.
-- [ ] Registrar adecuaciones o apoyos.
-- [ ] Relacionar actividades ya existentes con la planeación.
-- [ ] Consultar y editar la planeación durante el desarrollo del proyecto.
+- [x] **Reports — first operational version**
+  - Individual report.
+  - Group report.
+  - Attendance, delivery/compliance and achievement summaries.
+  - Group context and student-record evidence.
+  - No competitive student ranking.
 
-**Descripción:**  
-Este módulo convertiría cada proyecto en una planeación didáctica completa y alineada con el Plan de Estudio 2022. El proyecto seguiría siendo el contenedor principal y las actividades serían las acciones concretas realizadas dentro de él.
+- [x] **Demo mode and UX foundation**
+  - Isolated Demo/production data paths.
+  - `--demo` and `--demo-reset`.
+  - Fictitious students, attendance, projects, activities, evaluation and follow-up data.
+  - Group workspace (`Mis grupos`).
+  - Light, Dark and High Contrast themes.
+  - Shared popup styles and accessible keyboard patterns.
 
-## 2. Evaluación formativa
+## Current change: structured school context, NEM and multigrade
 
-- [ ] Definir criterios de evaluación por proyecto o actividad.
-- [ ] Registrar valoraciones cualitativas.
-- [ ] Registrar niveles de desempeño.
-- [ ] Crear rúbricas sencillas.
-- [ ] Evaluar actividades entregadas.
-- [ ] Registrar retroalimentación.
-- [ ] Distinguir actividad no entregada de actividad aún no evaluada.
-- [ ] Consultar avances por estudiante.
-- [ ] Conservar historial de evaluaciones.
-
-**Descripción:**  
-Permitirá evaluar el proceso y no solamente asignar una calificación final. Se apoyará en las actividades y entregas que ya existen.
-
-## 3. Calificaciones y periodos de evaluación
-
-- [ ] Configurar periodos de evaluación.
-- [ ] Registrar calificaciones por campo formativo.
-- [ ] Definir cómo se integran actividades, proyectos y criterios.
-- [ ] Calcular resultados sin ocultar el origen de los datos.
-- [ ] Permitir ajustes manuales justificados.
-- [ ] Registrar observaciones del periodo.
-- [ ] Consultar historial de calificaciones.
-- [ ] Evitar promedios engañosos cuando falten evidencias.
-
-**Descripción:**  
-Este módulo transformará la información formativa en resultados de periodo. Debe construirse después de la evaluación para que las calificaciones tengan una base clara.
-
-## 4. Expediente y seguimiento individual del alumno
-
-- [x] Crear una ficha individual por estudiante.
-- [x] Integrar asistencia.
-- [x] Integrar entregas de actividades.
-- [x] Integrar evaluaciones.
-- [ ] Integrar calificaciones.
-- [x] Registrar fortalezas.
-- [x] Registrar dificultades.
-- [x] Registrar apoyos aplicados.
-- [x] Registrar acuerdos con familiares o tutores.
-- [x] Registrar observaciones cronológicas.
-- [x] Mostrar alertas pedagógicas sin emitir diagnósticos.
-
-**Descripción:**  
-Reunirá en un solo lugar la información relevante de cada alumno para facilitar el acompañamiento, las reuniones con familias y la toma de decisiones pedagógicas.
-
-## 5. Diario y bitácora docente
-
-- [ ] Registrar lo ocurrido cada día.
-- [ ] Relacionar entradas con proyectos y actividades.
-- [ ] Registrar avances, dificultades e incidentes.
-- [ ] Registrar ajustes hechos a la planeación.
-- [ ] Buscar por fecha, proyecto o estudiante.
-- [ ] Mantener notas privadas del docente.
-- [ ] Convertir observaciones relevantes en seguimiento individual.
-
-**Descripción:**  
-Servirá como memoria profesional del docente y permitirá documentar cambios entre lo planeado y lo realizado.
-
-## 6. Comunicación y acuerdos con familias
-
-- [ ] Registrar reuniones con madres, padres o tutores.
-- [ ] Registrar motivo de la reunión.
-- [ ] Registrar acuerdos.
-- [ ] Registrar compromisos y fechas de seguimiento.
-- [ ] Relacionar acuerdos con el estudiante.
-- [ ] Consultar acuerdos pendientes.
-- [ ] Generar un resumen imprimible.
-- [ ] Proteger información sensible.
-
-**Descripción:**  
-Ayudará a conservar evidencia clara de reuniones y acuerdos, evitando depender únicamente de notas sueltas o mensajes informales.
-
-## 7. Incidencias y convivencia escolar
-
-- [ ] Registrar incidencias de manera objetiva.
-- [ ] Diferenciar hechos, interpretaciones y acciones tomadas.
-- [ ] Registrar personas involucradas.
-- [ ] Registrar medidas de atención.
-- [ ] Registrar seguimiento.
-- [ ] Relacionar protocolos escolares cuando corresponda.
-- [ ] Aplicar controles de privacidad.
-- [ ] Evitar etiquetas o diagnósticos sobre estudiantes.
-
-**Descripción:**  
-Permitirá documentar situaciones de convivencia con lenguaje profesional y trazabilidad, sin convertir el sistema en una herramienta de sanción automática.
-
-## 8. Reportes
-
-- [ ] Reporte mensual de asistencia.
-- [ ] Reporte de faltas, retardos y justificadas.
-- [ ] Reporte de entregas.
-- [ ] Reporte de actividades por proyecto.
-- [ ] Reporte de evaluación por estudiante.
-- [ ] Reporte de seguimiento individual.
-- [ ] Resumen para reunión con familias.
-- [ ] Reporte de cierre de proyecto.
-- [ ] Vista previa antes de imprimir.
-- [ ] Exportación a PDF.
-
-**Descripción:**  
-Concentrará los datos de los demás módulos en documentos claros. Conviene desarrollarlo cuando evaluación y seguimiento ya estén disponibles.
-
-## 9. Evidencias digitales
-
-- [ ] Adjuntar fotografías.
-- [ ] Adjuntar documentos.
-- [ ] Adjuntar productos de los estudiantes.
-- [ ] Relacionar archivos con proyecto, actividad y alumno.
-- [ ] Registrar descripción y fecha.
-- [ ] Evitar duplicados innecesarios.
-- [ ] Definir límites de tamaño.
-- [ ] Organizar archivos fuera de la base SQLite.
-- [ ] Detectar archivos faltantes.
-- [ ] Proteger datos personales.
-
-**Descripción:**  
-Ampliará el concepto actual de evidencia, que por ahora representa la entrega registrada. Este módulo incorporará archivos reales sin guardarlos directamente dentro de SQLite.
-
-## 10. Calendario escolar y agenda
-
-- [ ] Registrar días lectivos.
-- [ ] Registrar suspensiones.
-- [ ] Registrar Consejo Técnico Escolar.
-- [ ] Registrar eventos.
-- [ ] Registrar fechas de proyectos y actividades.
-- [ ] Mostrar próximos pendientes.
-- [ ] Relacionar agenda con planeaciones.
-- [ ] Evitar modificar automáticamente registros históricos.
-
-**Descripción:**  
-Permitirá adaptar asistencia, proyectos y planeaciones al calendario real de la escuela. Debe diseñarse con cuidado para no alterar datos ya guardados.
-
-## 11. Importación de estudiantes
-
-- [ ] Importar desde Excel o CSV.
-- [ ] Validar encabezados.
-- [ ] Detectar registros duplicados.
-- [ ] Mostrar vista previa.
-- [ ] Permitir corregir errores antes de importar.
-- [ ] Mantener la importación en una transacción.
-- [ ] Generar resumen de resultados.
-- [ ] No sobrescribir alumnos existentes sin confirmación.
-
-**Descripción:**  
-Reducirá el trabajo inicial de captura cuando el docente reciba una lista institucional.
-
-## 12. Exportación de datos
-
-- [ ] Exportar estudiantes.
-- [ ] Exportar asistencia.
-- [ ] Exportar proyectos y actividades.
-- [ ] Exportar entregas.
-- [ ] Exportar evaluaciones.
-- [ ] Exportar a CSV o Excel.
-- [ ] Excluir información sensible cuando corresponda.
-- [ ] Permitir seleccionar periodo y contenido.
-
-**Descripción:**  
-Facilitará utilizar los datos en herramientas externas y entregar información a la escuela sin depender completamente de la aplicación.
-
-## 13. Respaldos y restauración
-
-- [ ] Crear respaldo manual.
-- [ ] Crear respaldo automático.
-- [ ] Incluir base de datos, configuración y evidencias.
-- [ ] Validar el respaldo antes de confirmarlo.
-- [ ] Restaurar con confirmación.
-- [ ] Conservar copia de seguridad antes de restaurar.
-- [ ] Mostrar fecha y tamaño de cada respaldo.
-- [ ] Detectar respaldos incompatibles.
-- [ ] Evitar pérdida de datos durante actualizaciones.
-
-**Descripción:**  
-Es indispensable antes de usar el sistema con información real durante todo el ciclo escolar.
-
-## 14. Configuración del sistema
-
-- [ ] Datos del docente.
-- [ ] Datos de la escuela.
-- [ ] Ciclo escolar.
-- [ ] Preferencias de fecha.
-- [ ] Carpeta de evidencias.
-- [ ] Carpeta de respaldos.
-- [ ] Apariencia y tamaño de interfaz.
-- [ ] Reglas configurables que no afecten el historial.
-- [ ] Información de versión y diagnóstico.
-
-**Descripción:**  
-Centralizará valores que no deben quedar codificados directamente y permitirá adaptar el sistema al contexto del docente.
-
-## 15. Privacidad y seguridad local
-
-- [ ] Inventario de datos personales tratados.
-- [ ] Avisos sobre información sensible.
-- [ ] Bloqueo local opcional.
-- [ ] Protección de respaldos.
-- [ ] Registro seguro de errores.
-- [ ] Ocultar rutas, SQL y trazas en mensajes al usuario.
-- [ ] Eliminación o anonimización controlada.
-- [ ] Política de conservación de datos.
-- [ ] Revisión de evidencias y observaciones sensibles.
-
-**Descripción:**  
-Este trabajo debe acompañar a todos los módulos, especialmente expediente, familias, incidencias y evidencias digitales.
-
-## 16. Instalación y actualización
-
-- [ ] Crear instalador para Windows.
-- [ ] Comprobar requisitos de .NET.
-- [ ] Crear accesos directos.
-- [ ] Mantener datos al actualizar.
-- [ ] Ejecutar migraciones de base de datos.
-- [ ] Mostrar versión instalada.
-- [ ] Permitir desinstalar sin borrar datos accidentalmente.
-- [ ] Probar instalación en una computadora limpia.
-
-**Descripción:**  
-Convertirá la solución de desarrollo en una aplicación que pueda instalarse y usarse de forma cotidiana.
-
-## 17. Accesibilidad y calidad de interfaz
-
-- [ ] Navegación completa por teclado.
-- [ ] Orden de tabulación.
-- [ ] Etiquetas accesibles.
-- [ ] Contraste suficiente.
-- [ ] No depender únicamente del color.
-- [ ] Escalado de Windows.
-- [ ] Resoluciones pequeñas.
-- [ ] Mensajes de error claros.
-- [ ] Estados de carga y guardado visibles.
-- [ ] Pruebas con listas de 40 estudiantes.
-
-**Descripción:**  
-No es un módulo aislado, sino una línea de trabajo transversal para asegurar que todas las pantallas sean claras, rápidas y utilizables.
+- [~] **School context and NEM catalogs** — `feature/nem-multigrade-catalogs`
+  - [x] Structured primary grades 1.º–6.º.
+  - [x] Automatic NEM phase mapping: 1.º–2.º → Phase 3; 3.º–4.º → Phase 4; 5.º–6.º → Phase 5.
+  - [x] Unigrade/multigrade modality derived from served grades.
+  - [x] School-organization catalog: unitaria/unidocente, bidocente, tridocente, tetradocente, pentadocente, organización completa.
+  - [x] Individual student grade in the domain/persistence model.
+  - [x] Offline Mexico entity/municipality catalog; locality remains free text.
+  - [x] Derived, non-diagnostic Piaget developmental reference.
+  - [x] Additive SQLite extension while keeping `PRAGMA user_version = 6`.
+  - [ ] Complete automated regression coverage and final CI.
+  - [ ] Complete manual unigrade/multigrade UX validation.
 
 ---
 
-# Orden de desarrollo recomendado
+# Planned modules and extensions
 
-1. [ ] Cerrar formalmente Proyectos, Actividades y Entregas.
-2. [ ] Planeación didáctica NEM.
-3. [ ] Evaluación formativa.
-4. [ ] Calificaciones y periodos.
-5. [ ] Expediente y seguimiento individual.
-6. [ ] Diario docente.
-7. [ ] Comunicación con familias.
-8. [ ] Reportes.
-9. [ ] Respaldos y restauración.
-10. [ ] Importación y exportación.
-11. [ ] Evidencias digitales.
-12. [ ] Calendario y agenda.
-13. [ ] Configuración, privacidad e instalación.
+## 1. NEM pedagogical planning and project metadata
+
+- [ ] Add one of the four project-methodology options:
+  - Community Project-Based Learning (`Aprendizaje Basado en Proyectos Comunitarios`).
+  - Inquiry-Based Learning with STEAM approach (`Aprendizaje Basado en Indagación · STEAM`).
+  - Problem-Based Learning (`Aprendizaje Basado en Problemas · ABP`).
+  - Service Learning (`Aprendizaje Servicio · AS`).
+- [ ] Assign each activity a primary formative field:
+  - `Lenguajes`.
+  - `Saberes y Pensamiento Científico`.
+  - `Ética, Naturaleza y Sociedades`.
+  - `De lo Humano y lo Comunitario`.
+- [ ] Support target grades per project/activity for multigrade classrooms.
+- [ ] Register project purpose and expected final product.
+- [ ] Register curriculum content and learning-development processes (PDA).
+- [ ] Register articulating axes.
+- [ ] Register resources/materials and support/adaptation notes.
+- [ ] Keep teacher-authored planning flexible rather than turning NEM guidance into a rigid recipe.
+
+## 2. Evaluation criteria, rubrics and richer formative evidence
+
+- [ ] Define criteria per project or activity.
+- [ ] Add lightweight qualitative rubrics where useful.
+- [ ] Link feedback to criteria/evidence.
+- [ ] Preserve the distinction between non-delivery and not-yet-evaluated work.
+- [ ] Expand progress views without reducing formative assessment to one opaque score.
+
+## 3. Reporting periods and school grades
+
+- [ ] Configure evaluation/reporting periods.
+- [ ] Record or derive results by formative field.
+- [ ] Make every calculated result traceable to its evidence.
+- [ ] Allow justified teacher adjustments when policy/workflow requires them.
+- [ ] Avoid misleading averages when evidence is incomplete.
+
+## 4. Teacher journal / classroom log
+
+- [ ] Daily entries.
+- [ ] Link entries to projects, activities and students when appropriate.
+- [ ] Record progress, difficulties, incidents and planning adjustments.
+- [ ] Search/filter by date, project or student.
+- [ ] Promote relevant observations into student follow-up.
+
+## 5. Family communication and agreements
+
+The current `Expediente` already stores tutor agreements. A future dedicated workflow may add:
+
+- [ ] Meeting records and reasons.
+- [ ] Commitments, responsible parties and follow-up dates.
+- [ ] Pending-agreement view.
+- [ ] Printable/exportable summary.
+- [ ] Strong privacy controls for sensitive content.
+
+## 6. School incidents and coexistence
+
+- [ ] Objective incident record.
+- [ ] Separate facts, interpretations and actions taken.
+- [ ] People involved and follow-up.
+- [ ] Optional links to applicable school protocols.
+- [ ] Privacy controls.
+- [ ] No automatic labels, sanctions or diagnoses.
+
+## 7. Reports and output formats
+
+The report calculation/model foundation already exists. Remaining work includes:
+
+- [ ] Printable attendance report.
+- [ ] Project completion report.
+- [ ] Family-meeting summary.
+- [ ] Print preview.
+- [ ] PDF output.
+- [ ] Period/formative-field reports once those modules exist.
+
+## 8. Digital evidence attachments
+
+- [ ] Attach photos/documents/student products.
+- [ ] Link files to projects, activities and students.
+- [ ] Store metadata in SQLite while keeping large files outside the database.
+- [ ] Detect missing files and avoid unnecessary duplicates.
+- [ ] Define size/storage limits.
+- [ ] Apply personal-data safeguards.
+
+## 9. School calendar and agenda
+
+- [ ] Instructional days.
+- [ ] Suspensions and School Technical Council dates.
+- [ ] Events and project/activity dates.
+- [ ] Upcoming tasks.
+- [ ] Planning links.
+- [ ] Never rewrite historical attendance automatically when the calendar changes.
+
+## 10. Student import
+
+- [ ] Import `.xlsx` and `.csv`.
+- [ ] Preview before writing.
+- [ ] Map source columns to application fields.
+- [ ] Validate headers/data types and required fields.
+- [ ] Detect probable duplicates.
+- [ ] Allow corrections or row exclusion before commit.
+- [ ] Use one transaction for the confirmed import.
+- [ ] Show imported / skipped / needs-review counts.
+- [ ] For a unigrade group, default missing grade to the group's only grade.
+- [ ] For a multigrade group, require or resolve student grade explicitly.
+- [ ] Never overwrite existing students without explicit confirmation.
+
+## 11. Data export
+
+- [ ] Export students to XLSX/CSV.
+- [ ] Export attendance to XLSX/CSV.
+- [ ] Export projects and activities.
+- [ ] Export delivery/evaluation data.
+- [ ] Export student follow-up where appropriate and authorized.
+- [ ] Select period/content before export.
+- [ ] Support a multi-sheet workbook for a complete group export.
+- [ ] Exclude sensitive fields when the selected output purpose does not require them.
+
+## 12. Backup and restore
+
+Backup is intentionally separate from export.
+
+- [ ] Manual backup.
+- [ ] Optional automatic backup policy.
+- [ ] Include SQLite database, application configuration and later evidence files.
+- [ ] Version/validate backup packages.
+- [ ] Restore only after explicit confirmation.
+- [ ] Create a safety backup before restore.
+- [ ] Display backup date/version/size.
+- [ ] Detect incompatible or damaged backups.
+- [ ] Preserve data across application upgrades.
+
+## 13. Application settings
+
+- [ ] Teacher profile defaults.
+- [ ] School defaults reusable across groups.
+- [ ] School-year defaults.
+- [ ] Date/format preferences where needed.
+- [ ] Evidence and backup folders.
+- [ ] Version/diagnostic information.
+- [ ] Configurable rules that never rewrite history silently.
+
+## 14. Privacy and local security
+
+- [ ] Personal-data inventory and classification.
+- [ ] Sensitive-information warnings in relevant workflows.
+- [ ] Optional local application lock.
+- [ ] Backup protection/encryption strategy.
+- [ ] Safe error logging without leaking student data.
+- [ ] Controlled deletion/anonymization strategy.
+- [ ] Retention policy.
+- [ ] Review of sensitive observations/evidence workflows.
+
+## 15. Installation and update
+
+- [ ] Windows installer/package.
+- [ ] Runtime/dependency strategy.
+- [ ] Shortcuts and application identity.
+- [ ] Safe SQLite migrations during updates.
+- [ ] Installed-version display.
+- [ ] Uninstall without accidental user-data deletion.
+- [ ] Clean-machine installation tests.
+
+## 16. Accessibility and UI quality — continuous work
+
+- [~] Keyboard navigation and shortcuts.
+- [~] Accessible labels/names.
+- [x] Semantic Light/Dark/High Contrast resources.
+- [~] Do not communicate state by color alone.
+- [~] Windows scaling validation (100/125/150%).
+- [ ] Small-resolution stress testing.
+- [~] Clear, actionable error messages.
+- [ ] Explicit loading/save-progress treatment for longer operations.
+- [~] 30–40 student list/matrix stress testing.
 
 ---
 
-# Criterio para considerar terminado cada módulo
+# Recommended development sequence from the current state
 
-Un módulo se considera terminado cuando:
+1. [~] Finish structured school context / NEM phases / multigrade foundation.
+2. [ ] Add NEM project methodology, formative fields and multigrade activity targeting.
+3. [ ] Implement student XLSX/CSV import.
+4. [ ] Implement data XLSX/CSV export.
+5. [ ] Implement backup/restore before production use with irreplaceable real data.
+6. [ ] Extend evaluation criteria/rubrics and reporting periods.
+7. [ ] Add PDF/print report outputs.
+8. [ ] Add teacher journal, family workflow, evidence attachments and calendar as prioritized.
+9. [ ] Harden privacy, installer/update and long-term support workflows.
 
-- [ ] La especificación OpenSpec está completa.
-- [ ] El diseño no deja decisiones abiertas.
-- [ ] Core contiene únicamente reglas de dominio.
-- [ ] Application contiene casos de uso y contratos específicos.
-- [ ] Data persiste sin filtrar SQLite a otras capas.
-- [ ] Presentation no depende de WPF ni Data.
-- [ ] La interfaz WPF es usable.
-- [ ] Existen pruebas automatizadas suficientes.
-- [ ] `dotnet format` pasa.
-- [ ] `dotnet build` pasa sin errores ni advertencias.
-- [ ] `dotnet test` pasa.
-- [ ] `openspec validate --all` pasa.
-- [ ] La prueba manual fue completada.
-- [ ] La arquitectura fue actualizada cuando corresponde.
-- [ ] El cambio fue auditado.
-- [ ] OpenSpec fue archivado.
-- [ ] La rama fue fusionada con `main`.
+# Definition of done for a significant module/change
+
+A change is considered complete when applicable items are satisfied:
+
+- [ ] OpenSpec requirements/design/tasks accurately describe the final behavior.
+- [ ] Core contains domain rules only.
+- [ ] Application contains use cases/contracts rather than UI/SQLite details.
+- [ ] Data does not leak SQLite details into upper layers.
+- [ ] Presentation remains independent from WPF and Data.
+- [ ] WPF workflow is usable with keyboard and supported themes/scaling.
+- [ ] Automated regression coverage is sufficient for the risk introduced.
+- [ ] `dotnet format --verify-no-changes` passes.
+- [ ] Release build passes with zero warnings and zero errors.
+- [ ] Full test suite passes.
+- [ ] `openspec validate --all` passes.
+- [ ] `git diff --check` passes.
+- [ ] Required manual UX validation is completed.
+- [ ] Architecture/documentation is updated when behavior changes.
+- [ ] The pull request is reviewed/audited as appropriate.
+- [ ] The feature branch is merged into `main` using the agreed merge strategy.
