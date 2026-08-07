@@ -18,10 +18,10 @@
 - [x] 11. Crear vista Reportes con modos Individual/Grupal según wireframe aprobado.
 - [x] 12. Crear ventana Configuración del grupo con etapa cognoscitiva grupal de Piaget.
 - [ ] 13. Integrar configuración desde Grupo y Reportes sin alterar las vistas aprobadas más de lo necesario. (Reportes ya integrado; acceso desde Grupo pendiente.)
-- [ ] 14. Adaptar Evaluación para estado explícito sin reintroducir selector de actividad; actualizar matriz, guardado, filtros y editor de forma atómica.
+- [x] 14. Adaptar Evaluación para estado explícito sin reintroducir selector de actividad; matriz, guardado, filtros, editor y atajos ya conservan entrega/nivel de forma separada.
 
 ## Calidad
-- [ ] 15. Agregar pruebas Core/Application/Data/Reporting/Presentation/WPF.
+- [ ] 15. Agregar pruebas Core/Application/Data/Reporting/Presentation/WPF. (Ya hay regresiones Presentation/WPF para la matriz; faltan coberturas completas de las demás capas.)
 - [ ] 16. Actualizar arquitectura y guía de reportes/configuración.
 - [ ] 17. Ejecutar format/build/test/OpenSpec/diff-check en Windows.
 - [ ] 18. Validar manualmente reportes, configuración, temas y escalado.
