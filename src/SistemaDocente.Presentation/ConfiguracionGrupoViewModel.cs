@@ -9,6 +9,14 @@ public sealed record OpcionEtapaCognoscitiva(
     EtapaDesarrolloCognoscitivo Valor,
     string Texto);
 
+public sealed record OpcionOrganizacionEscolar(
+    OrganizacionEscolar Valor,
+    string Texto);
+
+public sealed record OpcionGradoPrimaria(
+    GradoPrimaria Valor,
+    string Texto);
+
 public sealed class ConfiguracionGrupoViewModel : ViewModelBase
 {
     private readonly GestionContextoGrupoCasosUso _casosUso;
@@ -19,16 +27,22 @@ public sealed class ConfiguracionGrupoViewModel : ViewModelBase
     private string _entidadFederativa = string.Empty;
     private string _municipio = string.Empty;
     private string _localidad = string.Empty;
-    private string _grado = string.Empty;
     private string _grupo = string.Empty;
     private string _turno = string.Empty;
-    private EtapaDesarrolloCognoscitivo _etapaCognoscitiva;
+    private OrganizacionEscolar _organizacionEscolar;
+    private bool _primerGrado;
+    private bool _segundoGrado;
+    private bool _tercerGrado;
+    private bool _cuartoGrado;
+    private bool _quintoGrado;
+    private bool _sextoGrado;
     private string _docenteResponsable = string.Empty;
     private DateOnly? _responsableDesde;
     private DateOnly? _responsableHasta;
     private string _horaEntrada = string.Empty;
     private string _horaSalida = string.Empty;
     private string _mensaje = string.Empty;
+    private IReadOnlyList<string> _municipiosDisponibles = Array.Empty<string>();
 
     public ConfiguracionGrupoViewModel(GestionContextoGrupoCasosUso casosUso)
     {
@@ -38,6 +52,8 @@ public sealed class ConfiguracionGrupoViewModel : ViewModelBase
 
     public RelayCommand GuardarCommand { get; }
 
+    // Kept as a compatibility projection for existing tests/consumers. The new UI no longer
+    // asks the teacher to classify the group manually by Piaget stage.
     public IReadOnlyList<OpcionEtapaCognoscitiva> EtapasCognoscitivas { get; } =
     [
         new(EtapaDesarrolloCognoscitivo.NoEspecificada, "No especificada"),
@@ -47,16 +63,114 @@ public sealed class ConfiguracionGrupoViewModel : ViewModelBase
         new(EtapaDesarrolloCognoscitivo.OperacionesFormales, "Operaciones formales"),
     ];
 
+    public IReadOnlyList<OpcionOrganizacionEscolar> OrganizacionesEscolares { get; } =
+    [
+        new(OrganizacionEscolar.NoEspecificada, "No especificada"),
+        new(OrganizacionEscolar.Unitaria, "Unitaria / unidocente"),
+        new(OrganizacionEscolar.Bidocente, "Bidocente"),
+        new(OrganizacionEscolar.Tridocente, "Tridocente"),
+        new(OrganizacionEscolar.Tetradocente, "Tetradocente"),
+        new(OrganizacionEscolar.Pentadocente, "Pentadocente"),
+        new(OrganizacionEscolar.Completa, "Organización completa"),
+    ];
+
+    public IReadOnlyList<OpcionGradoPrimaria> GradosPrimaria { get; } =
+    [
+        new(GradoPrimaria.Primero, "1.º"),
+        new(GradoPrimaria.Segundo, "2.º"),
+        new(GradoPrimaria.Tercero, "3.º"),
+        new(GradoPrimaria.Cuarto, "4.º"),
+        new(GradoPrimaria.Quinto, "5.º"),
+        new(GradoPrimaria.Sexto, "6.º"),
+    ];
+
+    public IReadOnlyList<string> EntidadesFederativas => CatalogoGeograficoMexico.EntidadesFederativas;
+
+    public IReadOnlyList<string> MunicipiosDisponibles
+    {
+        get => _municipiosDisponibles;
+        private set => SetProperty(ref _municipiosDisponibles, value);
+    }
+
+    public IReadOnlyList<string> TurnosSugeridos { get; } =
+    [
+        "Matutino",
+        "Vespertino",
+        "Nocturno",
+        "Discontinuo",
+        "Jornada ampliada",
+    ];
+
     public string CicloEscolar { get => _cicloEscolar; set => SetProperty(ref _cicloEscolar, value); }
     public string NombreEscuela { get => _nombreEscuela; set => SetProperty(ref _nombreEscuela, value); }
     public string Cct { get => _cct; set => SetProperty(ref _cct, value); }
-    public string EntidadFederativa { get => _entidadFederativa; set => SetProperty(ref _entidadFederativa, value); }
+
+    public string EntidadFederativa
+    {
+        get => _entidadFederativa;
+        set
+        {
+            if (!SetProperty(ref _entidadFederativa, value)) return;
+            MunicipiosDisponibles = CatalogoGeograficoMexico.ObtenerMunicipios(value);
+            if (!string.IsNullOrWhiteSpace(Municipio)
+                && !CatalogoGeograficoMexico.ContieneMunicipio(value, Municipio))
+            {
+                Municipio = string.Empty;
+            }
+        }
+    }
+
     public string Municipio { get => _municipio; set => SetProperty(ref _municipio, value); }
     public string Localidad { get => _localidad; set => SetProperty(ref _localidad, value); }
-    public string Grado { get => _grado; set => SetProperty(ref _grado, value); }
     public string Grupo { get => _grupo; set => SetProperty(ref _grupo, value); }
     public string Turno { get => _turno; set => SetProperty(ref _turno, value); }
-    public EtapaDesarrolloCognoscitivo EtapaCognoscitiva { get => _etapaCognoscitiva; set => SetProperty(ref _etapaCognoscitiva, value); }
+    public OrganizacionEscolar OrganizacionEscolar { get => _organizacionEscolar; set => SetProperty(ref _organizacionEscolar, value); }
+
+    // Legacy textual projection retained for compatibility with older bindings/tests.
+    public string Grado
+    {
+        get => GradosTexto;
+        set
+        {
+            if (CatalogoNemPrimaria.TryParseGradoLegacy(value, out var grado))
+            {
+                AplicarGrados([grado]);
+            }
+        }
+    }
+
+    public EtapaDesarrolloCognoscitivo EtapaCognoscitiva =>
+        CatalogoNemPrimaria.ObtenerReferenciaPiaget(ObtenerGradosSeleccionados()) is { Count: 1 } etapas
+            ? etapas[0]
+            : EtapaDesarrolloCognoscitivo.NoEspecificada;
+
+    public bool PrimerGrado { get => _primerGrado; set => CambiarGrado(ref _primerGrado, value); }
+    public bool SegundoGrado { get => _segundoGrado; set => CambiarGrado(ref _segundoGrado, value); }
+    public bool TercerGrado { get => _tercerGrado; set => CambiarGrado(ref _tercerGrado, value); }
+    public bool CuartoGrado { get => _cuartoGrado; set => CambiarGrado(ref _cuartoGrado, value); }
+    public bool QuintoGrado { get => _quintoGrado; set => CambiarGrado(ref _quintoGrado, value); }
+    public bool SextoGrado { get => _sextoGrado; set => CambiarGrado(ref _sextoGrado, value); }
+
+    public string GradosTexto
+    {
+        get
+        {
+            var grados = ObtenerGradosSeleccionados();
+            return grados.Count == 0 ? "Sin grados seleccionados" : CatalogoNemPrimaria.FormatearGrados(grados);
+        }
+    }
+
+    public string ModalidadGrupo => ObtenerGradosSeleccionados().Count switch
+    {
+        0 => "Sin configurar",
+        1 => "Unigrado",
+        _ => "Multigrado",
+    };
+
+    public string FasesNemTexto => CatalogoNemPrimaria.FormatearFases(ObtenerGradosSeleccionados());
+
+    public string ReferenciaDesarrolloTexto => CatalogoNemPrimaria.DescribirReferenciaPiaget(ObtenerGradosSeleccionados());
+
     public string DocenteResponsable { get => _docenteResponsable; set => SetProperty(ref _docenteResponsable, value); }
     public DateOnly? ResponsableDesde { get => _responsableDesde; set { if (SetProperty(ref _responsableDesde, value)) OnPropertyChanged(nameof(ResponsableDesdeFecha)); } }
     public DateOnly? ResponsableHasta { get => _responsableHasta; set { if (SetProperty(ref _responsableHasta, value)) OnPropertyChanged(nameof(ResponsableHastaFecha)); } }
@@ -77,6 +191,8 @@ public sealed class ConfiguracionGrupoViewModel : ViewModelBase
         set => ResponsableHasta = value is { } fecha ? DateOnly.FromDateTime(fecha) : null;
     }
 
+    public IReadOnlyList<GradoPrimaria> ObtenerGradosConfigurados() => ObtenerGradosSeleccionados();
+
     public void Inicializar(GrupoId grupoId)
     {
         _grupoId = grupoId;
@@ -84,13 +200,21 @@ public sealed class ConfiguracionGrupoViewModel : ViewModelBase
         CicloEscolar = contexto.CicloEscolar;
         NombreEscuela = contexto.NombreEscuela;
         Cct = contexto.Cct;
-        EntidadFederativa = contexto.EntidadFederativa;
-        Municipio = contexto.Municipio;
+
+        // Preserve a legacy value long enough to select it after the municipality list is loaded.
+        _municipio = contexto.Municipio;
+        EntidadFederativa = CatalogoGeograficoMexico.ContieneEntidad(contexto.EntidadFederativa)
+            ? contexto.EntidadFederativa
+            : string.Empty;
+        Municipio = CatalogoGeograficoMexico.ContieneMunicipio(EntidadFederativa, contexto.Municipio)
+            ? contexto.Municipio
+            : string.Empty;
+
         Localidad = contexto.Localidad;
-        Grado = contexto.Grado;
         Grupo = contexto.Grupo;
         Turno = contexto.Turno;
-        EtapaCognoscitiva = contexto.EtapaCognoscitiva;
+        OrganizacionEscolar = contexto.OrganizacionEscolar;
+        AplicarGrados(contexto.GradosAtendidos);
         DocenteResponsable = contexto.DocenteResponsable;
         ResponsableDesde = contexto.ResponsableDesde;
         ResponsableHasta = contexto.ResponsableHasta;
@@ -100,6 +224,7 @@ public sealed class ConfiguracionGrupoViewModel : ViewModelBase
         GuardadoCorrectamente = false;
         OnPropertyChanged(nameof(ResponsableDesdeFecha));
         OnPropertyChanged(nameof(ResponsableHastaFecha));
+        NotificarContextoDerivado();
         GuardarCommand.NotifyCanExecuteChanged();
     }
 
@@ -108,6 +233,22 @@ public sealed class ConfiguracionGrupoViewModel : ViewModelBase
         if (_grupoId is not { } grupoId) return;
         try
         {
+            var grados = ObtenerGradosSeleccionados();
+            if (grados.Count == 0)
+            {
+                throw new DomainValidationException("Selecciona al menos un grado de primaria.");
+            }
+
+            if (!CatalogoGeograficoMexico.ContieneEntidad(EntidadFederativa))
+            {
+                throw new DomainValidationException("Selecciona una entidad federativa del catálogo.");
+            }
+
+            if (!CatalogoGeograficoMexico.ContieneMunicipio(EntidadFederativa, Municipio))
+            {
+                throw new DomainValidationException("Selecciona un municipio de la entidad elegida.");
+            }
+
             var contexto = ContextoGrupo.Crear(
                 grupoId,
                 CicloEscolar,
@@ -116,15 +257,17 @@ public sealed class ConfiguracionGrupoViewModel : ViewModelBase
                 EntidadFederativa,
                 Municipio,
                 Localidad,
-                Grado,
+                CatalogoNemPrimaria.FormatearGrados(grados),
                 Grupo,
                 Turno,
-                EtapaCognoscitiva,
+                EtapaDesarrolloCognoscitivo.NoEspecificada,
                 DocenteResponsable,
                 ResponsableDesde,
                 ResponsableHasta,
                 ParseHora(HoraEntrada, "La hora de entrada"),
-                ParseHora(HoraSalida, "La hora de salida"));
+                ParseHora(HoraSalida, "La hora de salida"),
+                OrganizacionEscolar,
+                grados);
             _casosUso.Guardar(contexto);
             Mensaje = "Configuración guardada.";
             GuardadoCorrectamente = true;
@@ -136,6 +279,51 @@ public sealed class ConfiguracionGrupoViewModel : ViewModelBase
             GuardadoCorrectamente = false;
             OnPropertyChanged(nameof(GuardadoCorrectamente));
         }
+    }
+
+    private void CambiarGrado(ref bool campo, bool valor)
+    {
+        if (SetProperty(ref campo, valor)) NotificarContextoDerivado();
+    }
+
+    private IReadOnlyList<GradoPrimaria> ObtenerGradosSeleccionados()
+    {
+        var grados = new List<GradoPrimaria>(6);
+        if (PrimerGrado) grados.Add(GradoPrimaria.Primero);
+        if (SegundoGrado) grados.Add(GradoPrimaria.Segundo);
+        if (TercerGrado) grados.Add(GradoPrimaria.Tercero);
+        if (CuartoGrado) grados.Add(GradoPrimaria.Cuarto);
+        if (QuintoGrado) grados.Add(GradoPrimaria.Quinto);
+        if (SextoGrado) grados.Add(GradoPrimaria.Sexto);
+        return grados;
+    }
+
+    private void AplicarGrados(IEnumerable<GradoPrimaria> grados)
+    {
+        var conjunto = CatalogoNemPrimaria.NormalizarGrados(grados).ToHashSet();
+        _primerGrado = conjunto.Contains(GradoPrimaria.Primero);
+        _segundoGrado = conjunto.Contains(GradoPrimaria.Segundo);
+        _tercerGrado = conjunto.Contains(GradoPrimaria.Tercero);
+        _cuartoGrado = conjunto.Contains(GradoPrimaria.Cuarto);
+        _quintoGrado = conjunto.Contains(GradoPrimaria.Quinto);
+        _sextoGrado = conjunto.Contains(GradoPrimaria.Sexto);
+        OnPropertyChanged(nameof(PrimerGrado));
+        OnPropertyChanged(nameof(SegundoGrado));
+        OnPropertyChanged(nameof(TercerGrado));
+        OnPropertyChanged(nameof(CuartoGrado));
+        OnPropertyChanged(nameof(QuintoGrado));
+        OnPropertyChanged(nameof(SextoGrado));
+        NotificarContextoDerivado();
+    }
+
+    private void NotificarContextoDerivado()
+    {
+        OnPropertyChanged(nameof(Grado));
+        OnPropertyChanged(nameof(GradosTexto));
+        OnPropertyChanged(nameof(ModalidadGrupo));
+        OnPropertyChanged(nameof(FasesNemTexto));
+        OnPropertyChanged(nameof(ReferenciaDesarrolloTexto));
+        OnPropertyChanged(nameof(EtapaCognoscitiva));
     }
 
     private static TimeOnly? ParseHora(string valor, string campo)
