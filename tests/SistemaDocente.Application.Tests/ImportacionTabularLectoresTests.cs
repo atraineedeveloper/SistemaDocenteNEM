@@ -51,7 +51,7 @@ public sealed class ImportacionTabularLectoresTests
             var lector = new LectorCsvTabular();
             Assert.Throws<ImportacionTabularException>(() => lector.Leer(ruta));
 
-            var documento = lector.Leer(ruta, ',');
+            var documento = LectorCsvTabular.Leer(ruta, ',');
             var hoja = Assert.Single(documento.Hojas);
             Assert.Equal(2, hoja.Encabezados.Count);
             Assert.Equal("B;C", hoja.Encabezados[1].Texto);
