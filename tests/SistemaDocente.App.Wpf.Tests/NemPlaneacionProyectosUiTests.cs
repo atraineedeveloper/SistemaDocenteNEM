@@ -44,4 +44,19 @@ public sealed class NemPlaneacionProyectosUiTests
         Assert.Contains("DataContext.PuedeEditarGradosActividad", xaml, StringComparison.Ordinal);
         Assert.Contains("el alcance queda fijo para proteger su padrón histórico", xaml, StringComparison.Ordinal);
     }
+
+    [Fact]
+    public void ListasMuestranMetadatosNemCompactos()
+    {
+        var proyectos = Leer("src/SistemaDocente.App.Wpf/Views/ProyectosView.xaml");
+        var detalle = Leer("src/SistemaDocente.App.Wpf/DetalleProyectoWindow.xaml");
+        var converters = Leer("src/SistemaDocente.App.Wpf/Converters/NemPlaneacionConverters.cs");
+
+        Assert.Contains("MetodologiaProyectoNemConverter", proyectos, StringComparison.Ordinal);
+        Assert.Contains("Binding Metodologia, Converter={StaticResource MetodologiaNem}", proyectos, StringComparison.Ordinal);
+        Assert.Contains("GradosObjetivoConverter", proyectos, StringComparison.Ordinal);
+        Assert.Contains("CampoFormativoNemConverter", detalle, StringComparison.Ordinal);
+        Assert.Contains("Binding CampoFormativo, Converter={StaticResource CampoFormativoNem}", detalle, StringComparison.Ordinal);
+        Assert.Contains("Sin grados definidos", converters, StringComparison.Ordinal);
+    }
 }
