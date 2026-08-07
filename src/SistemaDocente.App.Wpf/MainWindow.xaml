@@ -18,6 +18,7 @@
         <!-- Área de módulos: MainWindow sólo ensambla vistas -->
         <Grid Grid.Row="1">
             <views:GrupoView DataContext="{Binding Grupo}"
+                             Expediente="{Binding Expediente}"
                              Visibility="{Binding MostrarGrupo, Converter={StaticResource BoolToVisibility}}"/>
             <views:AsistenciaView DataContext="{Binding ModuloAsistencia}"
                                   Visibility="{Binding MostrarAsistencia, Converter={StaticResource BoolToVisibility}}"/>
