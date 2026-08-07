@@ -3,7 +3,6 @@ using SistemaDocente.Core;
 namespace SistemaDocente.Presentation;
 
 public sealed record OpcionNivelLogroVisual(NivelLogro Nivel, string Texto);
-public sealed record OpcionEstadoEntregaVisual(EstadoEntregaActividad Estado, string Texto);
 
 public sealed class ActividadEvaluacionColumnaVisual : ViewModelBase
 {
@@ -33,6 +32,12 @@ public sealed class ActividadEvaluacionColumnaVisual : ViewModelBase
     public string FechaTexto => FechaRealizacion.ToString("dd/MM/yyyy", System.Globalization.CultureInfo.CurrentCulture);
     public string DescripcionAccesible => $"{Codigo} · {Titulo} · {FechaTexto}";
 
+    /// <summary>
+    /// Código compacto, estable y puramente visual derivado de la identidad inmutable de la
+    /// actividad. Usa ocho dígitos hexadecimales del GUID para reducir de forma importante
+    /// el riesgo de colisión sin convertir la identidad técnica completa en ruido visual.
+    /// No depende de posición, fecha o título, por lo que no se renumera.
+    /// </summary>
     internal static string CrearCodigoEstable(ActividadId actividadId)
     {
         if (actividadId == default) throw new ArgumentException("La actividad debe tener identidad.", nameof(actividadId));
@@ -50,26 +55,18 @@ public sealed class ActividadEvaluacionColumnaVisual : ViewModelBase
 
 public sealed class EvaluacionCeldaVisual : ViewModelBase
 {
-    private static readonly IReadOnlyList<OpcionNivelLogroVisual> OpcionesNivelDisponibles =
+    private static readonly IReadOnlyList<OpcionNivelLogroVisual> Opciones =
     [
-        new(NivelLogro.Pendiente, "Pendiente de evaluar"),
+        new(NivelLogro.Pendiente, "Pendiente"),
         new(NivelLogro.Domina, "Domina"),
         new(NivelLogro.Suficiente, "Suficiente"),
         new(NivelLogro.EnProceso, "En proceso"),
         new(NivelLogro.RequiereApoyo, "Requiere apoyo"),
+        new(NivelLogro.NoEntrego, "No entregó"),
     ];
 
-    private static readonly IReadOnlyList<OpcionEstadoEntregaVisual> OpcionesEstadoDisponibles =
-    [
-        new(EstadoEntregaActividad.Pendiente, "Pendiente de registro"),
-        new(EstadoEntregaActividad.Entregada, "Entregada"),
-        new(EstadoEntregaActividad.NoEntregada, "No entregada"),
-    ];
-
-    private EstadoEntregaActividad _estadoEntrega;
     private NivelLogro _nivelLogro;
     private string _observacion;
-    private EstadoEntregaActividad _estadoConfirmado;
     private NivelLogro _nivelConfirmado;
     private string _observacionConfirmada;
 
@@ -78,7 +75,6 @@ public sealed class EvaluacionCeldaVisual : ViewModelBase
         EstudianteId estudianteId,
         bool esAplicable,
         bool esEditable,
-        EstadoEntregaActividad estadoEntrega,
         NivelLogro nivelLogro = NivelLogro.Pendiente,
         string observacion = "")
     {
@@ -86,57 +82,17 @@ public sealed class EvaluacionCeldaVisual : ViewModelBase
         EstudianteId = estudianteId;
         EsAplicable = esAplicable;
         EsEditable = esAplicable && esEditable;
-        Normalizar(ref estadoEntrega, ref nivelLogro);
-        _estadoEntrega = estadoEntrega;
         _nivelLogro = nivelLogro;
         _observacion = observacion ?? string.Empty;
-        _estadoConfirmado = _estadoEntrega;
         _nivelConfirmado = _nivelLogro;
         _observacionConfirmada = _observacion;
-    }
-
-    internal EvaluacionCeldaVisual(
-        ActividadId actividadId,
-        EstudianteId estudianteId,
-        bool esAplicable,
-        bool esEditable,
-        NivelLogro nivelLogro = NivelLogro.Pendiente,
-        string observacion = "")
-        : this(
-            actividadId,
-            estudianteId,
-            esAplicable,
-            esEditable,
-            EstadoDesdeNivelLegado(nivelLogro),
-            nivelLogro == NivelLogro.NoEntrego ? NivelLogro.Pendiente : nivelLogro,
-            observacion)
-    {
     }
 
     internal ActividadId ActividadId { get; }
     internal EstudianteId EstudianteId { get; }
     public bool EsAplicable { get; }
     public bool EsEditable { get; }
-    public IReadOnlyList<OpcionNivelLogroVisual> OpcionesNivel { get; } = OpcionesNivelDisponibles;
-    public IReadOnlyList<OpcionEstadoEntregaVisual> OpcionesEstadoEntrega { get; } = OpcionesEstadoDisponibles;
-
-    public EstadoEntregaActividad EstadoEntrega
-    {
-        get => _estadoEntrega;
-        set
-        {
-            if (!EsEditable || !EsAplicable || !Enum.IsDefined(value)) return;
-            var nivelAnterior = _nivelLogro;
-            if (value == EstadoEntregaActividad.NoEntregada)
-            {
-                _nivelLogro = NivelLogro.Pendiente;
-            }
-
-            if (!SetProperty(ref _estadoEntrega, value)) return;
-            if (nivelAnterior != _nivelLogro) OnPropertyChanged(nameof(NivelLogro));
-            NotificarEstadoVisual();
-        }
-    }
+    public IReadOnlyList<OpcionNivelLogroVisual> OpcionesNivel { get; } = Opciones;
 
     public NivelLogro NivelLogro
     {
@@ -144,22 +100,13 @@ public sealed class EvaluacionCeldaVisual : ViewModelBase
         set
         {
             if (!EsEditable || !EsAplicable || !Enum.IsDefined(value)) return;
-
-            var estadoAnterior = _estadoEntrega;
-            var nivelNormalizado = value;
-            if (value == NivelLogro.NoEntrego)
+            if (SetProperty(ref _nivelLogro, value))
             {
-                _estadoEntrega = EstadoEntregaActividad.NoEntregada;
-                nivelNormalizado = NivelLogro.Pendiente;
+                OnPropertyChanged(nameof(EtiquetaNivel));
+                OnPropertyChanged(nameof(NombreNivel));
+                OnPropertyChanged(nameof(TieneCambios));
+                OnPropertyChanged(nameof(DescripcionAccesible));
             }
-            else if (value != NivelLogro.Pendiente)
-            {
-                _estadoEntrega = EstadoEntregaActividad.Entregada;
-            }
-
-            var cambioNivel = SetProperty(ref _nivelLogro, nivelNormalizado);
-            if (estadoAnterior != _estadoEntrega) OnPropertyChanged(nameof(EstadoEntrega));
-            if (cambioNivel || estadoAnterior != _estadoEntrega) NotificarEstadoVisual();
         }
     }
 
@@ -181,105 +128,55 @@ public sealed class EvaluacionCeldaVisual : ViewModelBase
     }
 
     public bool TieneCambios => EsAplicable
-        && (_estadoEntrega != _estadoConfirmado
-            || _nivelLogro != _nivelConfirmado
+        && (_nivelLogro != _nivelConfirmado
             || !string.Equals(_observacion, _observacionConfirmada, StringComparison.Ordinal));
 
     public bool TieneObservacion => !string.IsNullOrWhiteSpace(_observacion);
 
-    public string EtiquetaNivel => !EsAplicable ? "—" : _estadoEntrega switch
+    public string EtiquetaNivel => !EsAplicable ? "—" : _nivelLogro switch
     {
-        EstadoEntregaActividad.NoEntregada => "N",
-        _ => _nivelLogro switch
-        {
-            NivelLogro.Pendiente => "P",
-            NivelLogro.Domina => "D",
-            NivelLogro.Suficiente => "S",
-            NivelLogro.EnProceso => "E",
-            NivelLogro.RequiereApoyo => "R",
-            _ => "?",
-        },
+        NivelLogro.Pendiente => "P",
+        NivelLogro.Domina => "D",
+        NivelLogro.Suficiente => "S",
+        NivelLogro.EnProceso => "E",
+        NivelLogro.RequiereApoyo => "R",
+        NivelLogro.NoEntrego => "N",
+        _ => "?",
     };
 
-    public string NombreNivel => !EsAplicable ? "No aplicable" : _estadoEntrega switch
+    public string NombreNivel => !EsAplicable ? "No aplicable" : _nivelLogro switch
     {
-        EstadoEntregaActividad.NoEntregada => "No entregada",
-        EstadoEntregaActividad.Pendiente => "Entrega pendiente de registro",
-        _ => _nivelLogro switch
-        {
-            NivelLogro.Pendiente => "Entregada, pendiente de evaluar",
-            NivelLogro.Domina => "Domina",
-            NivelLogro.Suficiente => "Suficiente",
-            NivelLogro.EnProceso => "En proceso",
-            NivelLogro.RequiereApoyo => "Requiere apoyo",
-            _ => "Nivel desconocido",
-        },
+        NivelLogro.Pendiente => "Pendiente",
+        NivelLogro.Domina => "Domina",
+        NivelLogro.Suficiente => "Suficiente",
+        NivelLogro.EnProceso => "En proceso",
+        NivelLogro.RequiereApoyo => "Requiere apoyo",
+        NivelLogro.NoEntrego => "No entregó",
+        _ => "Nivel desconocido",
     };
 
     public string DescripcionAccesible => TieneObservacion
         ? $"{NombreNivel}. Tiene observación."
         : NombreNivel;
 
-    internal void Confirmar(EstadoEntregaActividad estado, NivelLogro nivel, string observacion)
+    internal void Confirmar(NivelLogro nivel, string observacion)
     {
-        Normalizar(ref estado, ref nivel);
-        _estadoEntrega = estado;
         _nivelLogro = nivel;
         _observacion = observacion ?? string.Empty;
-        _estadoConfirmado = estado;
         _nivelConfirmado = nivel;
         _observacionConfirmada = _observacion;
         NotificarTodo();
     }
 
-    internal void Confirmar(NivelLogro nivel, string observacion) =>
-        Confirmar(EstadoDesdeNivelLegado(nivel), nivel == NivelLogro.NoEntrego ? NivelLogro.Pendiente : nivel, observacion);
-
     internal void Restaurar()
     {
-        _estadoEntrega = _estadoConfirmado;
         _nivelLogro = _nivelConfirmado;
         _observacion = _observacionConfirmada;
         NotificarTodo();
     }
 
-    private static EstadoEntregaActividad EstadoDesdeNivelLegado(NivelLogro nivel) => nivel switch
-    {
-        NivelLogro.NoEntrego => EstadoEntregaActividad.NoEntregada,
-        NivelLogro.Pendiente => EstadoEntregaActividad.Pendiente,
-        _ => EstadoEntregaActividad.Entregada,
-    };
-
-    private static void Normalizar(ref EstadoEntregaActividad estado, ref NivelLogro nivel)
-    {
-        if (!Enum.IsDefined(estado)) estado = EstadoEntregaActividad.Pendiente;
-        if (!Enum.IsDefined(nivel)) nivel = NivelLogro.Pendiente;
-        if (nivel == NivelLogro.NoEntrego)
-        {
-            estado = EstadoEntregaActividad.NoEntregada;
-            nivel = NivelLogro.Pendiente;
-        }
-        else if (estado == EstadoEntregaActividad.NoEntregada)
-        {
-            nivel = NivelLogro.Pendiente;
-        }
-        else if (nivel != NivelLogro.Pendiente)
-        {
-            estado = EstadoEntregaActividad.Entregada;
-        }
-    }
-
-    private void NotificarEstadoVisual()
-    {
-        OnPropertyChanged(nameof(EtiquetaNivel));
-        OnPropertyChanged(nameof(NombreNivel));
-        OnPropertyChanged(nameof(TieneCambios));
-        OnPropertyChanged(nameof(DescripcionAccesible));
-    }
-
     private void NotificarTodo()
     {
-        OnPropertyChanged(nameof(EstadoEntrega));
         OnPropertyChanged(nameof(NivelLogro));
         OnPropertyChanged(nameof(Observacion));
         OnPropertyChanged(nameof(EtiquetaNivel));
