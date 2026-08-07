@@ -4,7 +4,7 @@
         xmlns:controls="clr-namespace:SistemaDocente.App.Wpf.Controls"
         xml:lang="es-MX"
         Title="Editar evaluación"
-        Width="580" Height="590" MinWidth="520" MinHeight="500"
+        Width="580" Height="520" MinWidth="520" MinHeight="460"
         ResizeMode="CanResizeWithGrip"
         WindowStartupLocation="CenterOwner"
         ShowInTaskbar="False"
@@ -29,7 +29,7 @@
             <StackPanel>
                 <TextBlock x:Name="ActividadText" Style="{StaticResource PopupEyebrow}"/>
                 <TextBlock x:Name="EstudianteText" Style="{StaticResource PopupTitle}" Margin="0,4,0,4"/>
-                <TextBlock Text="Registra por separado la entrega, el nivel de logro y una observación pedagógica breve."
+                <TextBlock Text="Selecciona el resultado y agrega una observación cuando aporte información pedagógica útil."
                            Style="{StaticResource PopupSubtitle}"/>
             </StackPanel>
         </Border>
@@ -40,36 +40,22 @@
                       Padding="24,20">
             <Border Style="{StaticResource PopupCard}">
                 <StackPanel>
-                    <TextBlock Text="Evaluación de la actividad" Style="{StaticResource PopupSectionTitle}"/>
-                    <TextBlock Text="Los cambios se aplican primero a la matriz y se persisten cuando guardas Evaluación."
+                    <TextBlock Text="Resultado de la actividad" Style="{StaticResource PopupSectionTitle}"/>
+                    <TextBlock Text="El sistema actualiza automáticamente el estado de entrega según el resultado elegido."
                                Style="{StaticResource PopupSubtitle}" Margin="0,0,0,14"/>
 
-                    <controls:FormField Header="Estado de entrega *">
-                        <ComboBox ItemsSource="{Binding OpcionesEstadoEntrega}"
+                    <controls:FormField Header="Resultado *">
+                        <ComboBox ItemsSource="{Binding OpcionesResultado}"
                                   DisplayMemberPath="Texto"
-                                  SelectedValuePath="Estado"
-                                  SelectedValue="{Binding EstadoEntrega, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                  SelectedValuePath="Resultado"
+                                  SelectedValue="{Binding Resultado, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                                   MinHeight="38"
                                   Margin="0,4,0,10"
-                                  AutomationProperties.Name="Estado de entrega"
+                                  AutomationProperties.Name="Resultado de la evaluación"
                                   TabIndex="1"/>
                     </controls:FormField>
-                    <TextBlock Text="Una entrega puede registrarse primero y evaluarse después."
-                               Style="{StaticResource PopupSubtitle}" Margin="0,-6,0,12"/>
-
-                    <controls:FormField Header="Nivel de logro">
-                        <ComboBox ItemsSource="{Binding OpcionesNivel}"
-                                  DisplayMemberPath="Texto"
-                                  SelectedValuePath="Nivel"
-                                  SelectedValue="{Binding NivelLogro, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                                  IsEnabled="{Binding PuedeEvaluarLogro}"
-                                  MinHeight="38"
-                                  Margin="0,4,0,10"
-                                  AutomationProperties.Name="Nivel de logro"
-                                  TabIndex="2"/>
-                    </controls:FormField>
-                    <TextBlock Text="El nivel sólo se habilita cuando la actividad está marcada como entregada."
-                               Style="{StaticResource PopupSubtitle}" Margin="0,-6,0,12"/>
+                    <TextBlock Text="“Entregada · evaluar después” conserva la entrega sin asignar todavía un nivel de logro."
+                               Style="{StaticResource PopupSubtitle}" Margin="0,-6,0,14"/>
 
                     <controls:FormField Header="Observación pedagógica">
                         <TextBox Text="{Binding Observacion, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
@@ -77,10 +63,10 @@
                                  TextWrapping="Wrap"
                                  VerticalScrollBarVisibility="Auto"
                                  MaxLength="500"
-                                 MinHeight="150"
+                                 MinHeight="170"
                                  VerticalContentAlignment="Top"
                                  AutomationProperties.Name="Observación de la evaluación"
-                                 TabIndex="3"/>
+                                 TabIndex="2"/>
                     </controls:FormField>
 
                     <TextBlock Text="Máximo 500 caracteres. Describe evidencia observable o retroalimentación útil."
@@ -99,13 +85,13 @@
                             IsCancel="True"
                             Click="OnCancelar"
                             MinWidth="100"
-                            TabIndex="4"/>
+                            TabIndex="3"/>
                     <Button Style="{StaticResource PrimaryButton}"
                             Content="Aplicar a la matriz"
                             IsDefault="True"
                             Click="OnAceptar"
                             MinWidth="150"
-                            TabIndex="5"/>
+                            TabIndex="4"/>
                 </StackPanel>
             </Grid>
         </Border>
