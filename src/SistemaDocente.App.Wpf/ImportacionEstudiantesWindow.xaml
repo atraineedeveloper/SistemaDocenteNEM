@@ -11,6 +11,7 @@
 
     <Window.Resources>
         <ResourceDictionary>
+            <BooleanToVisibilityConverter x:Key="ImportBoolToVisibility"/>
             <ResourceDictionary.MergedDictionaries>
                 <ResourceDictionary Source="Styles/PopupStyles.xaml"/>
             </ResourceDictionary.MergedDictionaries>
@@ -44,8 +45,8 @@
 
         <Grid Grid.Row="1" Margin="24,20">
             <!-- Archivo -->
-            <Border Style="{StaticResource PopupCard}"
-                    Visibility="{Binding MostrarArchivo, Converter={StaticResource BoolToVisibility}}">
+            <Border x:Name="PasoArchivoPanel" Style="{StaticResource PopupCard}"
+                    Visibility="{Binding MostrarArchivo, Converter={StaticResource ImportBoolToVisibility}}">
                 <Grid>
                     <Grid.RowDefinitions>
                         <RowDefinition Height="*"/>
@@ -69,7 +70,7 @@
                         <Border Margin="0,14,0,0" Padding="14" CornerRadius="8"
                                 Background="{DynamicResource InfoBackgroundBrush}"
                                 BorderBrush="{DynamicResource InfoBrush}" BorderThickness="1"
-                                Visibility="{Binding RequiereDelimitadorCsv, Converter={StaticResource BoolToVisibility}}">
+                                Visibility="{Binding RequiereDelimitadorCsv, Converter={StaticResource ImportBoolToVisibility}}">
                             <StackPanel>
                                 <TextBlock Text="Selecciona el delimitador del CSV" FontWeight="SemiBold"/>
                                 <TextBlock Margin="0,4,0,10" TextWrapping="Wrap"
@@ -92,7 +93,7 @@
 
             <!-- Columnas -->
             <Border Style="{StaticResource PopupCard}"
-                    Visibility="{Binding MostrarColumnas, Converter={StaticResource BoolToVisibility}}">
+                    Visibility="{Binding MostrarColumnas, Converter={StaticResource ImportBoolToVisibility}}">
                 <Grid>
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto"/>
@@ -142,7 +143,7 @@
             </Border>
 
             <!-- Vista previa -->
-            <Grid Visibility="{Binding MostrarPrevia, Converter={StaticResource BoolToVisibility}}">
+            <Grid Visibility="{Binding MostrarPrevia, Converter={StaticResource ImportBoolToVisibility}}">
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto"/>
                     <RowDefinition Height="*"/>
@@ -243,7 +244,7 @@
 
             <!-- Confirmación -->
             <Border Style="{StaticResource PopupCard}"
-                    Visibility="{Binding MostrarConfirmacion, Converter={StaticResource BoolToVisibility}}">
+                    Visibility="{Binding MostrarConfirmacion, Converter={StaticResource ImportBoolToVisibility}}">
                 <StackPanel MaxWidth="720" HorizontalAlignment="Center" VerticalAlignment="Center">
                     <TextBlock Text="Confirma la importación" Style="{StaticResource PopupSectionTitle}"/>
                     <TextBlock Margin="0,8,0,18" TextWrapping="Wrap" Style="{StaticResource PopupSubtitle}"
@@ -266,8 +267,8 @@
             </Border>
 
             <!-- Resultado -->
-            <Border Style="{StaticResource PopupCard}"
-                    Visibility="{Binding MostrarResultado, Converter={StaticResource BoolToVisibility}}">
+            <Border x:Name="PasoResultadoPanel" Style="{StaticResource PopupCard}"
+                    Visibility="{Binding MostrarResultado, Converter={StaticResource ImportBoolToVisibility}}">
                 <StackPanel MaxWidth="620" HorizontalAlignment="Center" VerticalAlignment="Center">
                     <Border Width="64" Height="64" CornerRadius="32" Background="{DynamicResource SuccessBackgroundBrush}" Margin="0,0,0,16">
                         <TextBlock Text="✓" FontSize="30" Foreground="{DynamicResource SuccessBrush}" HorizontalAlignment="Center" VerticalAlignment="Center"/>
@@ -291,17 +292,17 @@
                 </Grid.ColumnDefinitions>
                 <TextBlock Text="{Binding Mensaje}" Foreground="{DynamicResource ErrorBrush}" TextWrapping="Wrap" VerticalAlignment="Center"/>
                 <StackPanel Grid.Column="1" Orientation="Horizontal">
-                    <Button Content="Volver" Command="{Binding VolverCommand}"/>
-                    <Button Style="{StaticResource PrimaryButton}" Content="Crear vista previa"
+                    <Button x:Name="VolverButton" Content="Volver" Command="{Binding VolverCommand}"/>
+                    <Button x:Name="CrearPreviaButton" Style="{StaticResource PrimaryButton}" Content="Crear vista previa"
                             Command="{Binding GenerarPreviaCommand}"
-                            Visibility="{Binding MostrarColumnas, Converter={StaticResource BoolToVisibility}}"/>
-                    <Button Style="{StaticResource PrimaryButton}" Content="Continuar"
+                            Visibility="{Binding MostrarColumnas, Converter={StaticResource ImportBoolToVisibility}}"/>
+                    <Button x:Name="ContinuarButton" Style="{StaticResource PrimaryButton}" Content="Continuar"
                             Command="{Binding PrepararConfirmacionCommand}"
-                            Visibility="{Binding MostrarPrevia, Converter={StaticResource BoolToVisibility}}"/>
-                    <Button Style="{StaticResource PrimaryButton}" Content="Importar alumnos"
+                            Visibility="{Binding MostrarPrevia, Converter={StaticResource ImportBoolToVisibility}}"/>
+                    <Button x:Name="ImportarButton" Style="{StaticResource PrimaryButton}" Content="Importar alumnos"
                             Command="{Binding ConfirmarCommand}"
-                            Visibility="{Binding MostrarConfirmacion, Converter={StaticResource BoolToVisibility}}"/>
-                    <Button Content="Cerrar" Click="OnCerrarClic"/>
+                            Visibility="{Binding MostrarConfirmacion, Converter={StaticResource ImportBoolToVisibility}}"/>
+                    <Button x:Name="CerrarButton" Content="Cerrar" Click="OnCerrarClic"/>
                 </StackPanel>
             </Grid>
         </Border>
