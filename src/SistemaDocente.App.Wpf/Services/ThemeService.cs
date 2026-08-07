@@ -50,7 +50,7 @@ public static class ThemeService
     {
         var source = dictionary.Source?.ToString();
         return source is not null
-            && source.Contains("/Themes/", StringComparison.OrdinalIgnoreCase)
-            && !source.EndsWith("/DesignTokens.xaml", StringComparison.OrdinalIgnoreCase);
+            && source.Contains("Themes/", StringComparison.OrdinalIgnoreCase)
+            && !source.EndsWith("DesignTokens.xaml", StringComparison.OrdinalIgnoreCase);
     }
 }
