@@ -889,7 +889,7 @@ public sealed class GestionProyectosViewModel : ViewModelBase
         OnPropertyChanged(nameof(GradosActividadSeleccionados));
     }
 
-    private IReadOnlyList<SeleccionGradoPlaneacion> CrearSelecciones(
+    private SeleccionGradoPlaneacion[] CrearSelecciones(
         IEnumerable<GradoPrimaria> seleccionados,
         Action alCambiar)
     {
@@ -925,7 +925,7 @@ public sealed class GestionProyectosViewModel : ViewModelBase
         return proyecto.Count > 0 ? proyecto : _gradosConfigurados;
     }
 
-    private static IReadOnlyList<GradoPrimaria> ObtenerSeleccionados(
+    private static GradoPrimaria[] ObtenerSeleccionados(
         IEnumerable<SeleccionGradoPlaneacion> opciones) =>
         opciones.Where(x => x.Seleccionado).Select(x => x.Grado).OrderBy(x => (int)x).ToArray();
 
