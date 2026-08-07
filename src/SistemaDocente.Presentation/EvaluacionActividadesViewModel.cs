@@ -189,7 +189,7 @@ public sealed class EvaluacionActividadesViewModel : ViewModelBase
 
     public bool TieneCambios => Filas.Any(fila => fila.Celdas.Any(celda => celda.TieneCambios));
 
-    public int Total => CeldasActividadSeleccionada().Count;
+    public int Total => CeldasActividadSeleccionada().Length;
     public int Pendientes => Contar(NivelLogro.Pendiente);
     public int Domina => Contar(NivelLogro.Domina);
     public int Suficiente => Contar(NivelLogro.Suficiente);
@@ -519,7 +519,7 @@ public sealed class EvaluacionActividadesViewModel : ViewModelBase
         NotificarEstadisticas();
     }
 
-    private IReadOnlyList<EvaluacionCeldaVisual> CeldasActividadSeleccionada()
+    private EvaluacionCeldaVisual[] CeldasActividadSeleccionada()
     {
         var indice = _indiceActividadSeleccionada;
         if (indice < 0 || indice >= ColumnasActividades.Count) return [];
