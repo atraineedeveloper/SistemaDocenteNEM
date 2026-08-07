@@ -5,7 +5,7 @@
         xmlns:controls="clr-namespace:SistemaDocente.App.Wpf.Controls"
         xmlns:views="clr-namespace:SistemaDocente.App.Wpf.Views"
         xml:lang="es-MX"
-        Title="{Binding TituloVentana}" Height="780" Width="1280" MinHeight="640" MinWidth="1000"
+        Title="{Binding TituloVentana}" Height="780" Width="1280" MinHeight="640" MinWidth="1040"
         WindowStartupLocation="CenterScreen" Closing="OnClosing">
     <Grid Background="{DynamicResource WindowBackgroundBrush}">
         <Grid.RowDefinitions>
