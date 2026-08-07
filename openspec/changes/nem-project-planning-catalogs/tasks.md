@@ -32,5 +32,5 @@
 - [x] 19. Add Application tests for grade-targeted activity rosters.
 - [x] 20. Add Data tests for extension migration and round-trip persistence.
 - [x] 21. Add Presentation/WPF regressions for project/activity catalog editing.
-- [ ] 22. Run Windows CI: format, Release build, tests, OpenSpec and whitespace.
+- [x] 22. Run Windows CI: format, Release build, tests, OpenSpec and whitespace.
 - [ ] 23. Perform manual Demo validation for unigrade and multigrade planning flows.
