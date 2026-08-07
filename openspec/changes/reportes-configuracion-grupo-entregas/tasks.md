@@ -21,7 +21,7 @@
 - [x] 14. Adaptar Evaluación para estado explícito sin reintroducir selector de actividad; matriz, guardado, filtros, editor y atajos ya conservan entrega/nivel de forma separada.
 
 ## Calidad
-- [ ] 15. Agregar pruebas Core/Application/Data/Reporting/Presentation/WPF. (Data, Presentation y WPF ya tienen regresiones específicas de este cambio; faltan completar Core/Application/Reporting.)
-- [ ] 16. Actualizar arquitectura y guía de reportes/configuración.
+- [x] 15. Agregar pruebas Core/Application/Data/Reporting/Presentation/WPF para invariantes, compatibilidad legacy, extensión SQLite, cálculos, matriz y composición.
+- [x] 16. Actualizar arquitectura y guía de reportes/configuración, incluida documentación de demo y persistencia aditiva.
 - [ ] 17. Ejecutar format/build/test/OpenSpec/diff-check en Windows.
 - [ ] 18. Validar manualmente reportes, configuración, temas y escalado.
