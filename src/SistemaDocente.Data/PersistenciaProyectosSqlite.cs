@@ -439,7 +439,7 @@ public sealed class PersistenciaProyectosSqlite : IAlmacenamientoProyectos, IAlm
         return conexion;
     }
 
-    private static IReadOnlyList<GradoPrimaria> LeerGradosProyecto(
+    private static GradoPrimaria[] LeerGradosProyecto(
         SqliteConnection conexion,
         ProyectoId proyectoId)
     {
@@ -455,7 +455,7 @@ public sealed class PersistenciaProyectosSqlite : IAlmacenamientoProyectos, IAlm
         return grados.ToArray();
     }
 
-    private static IReadOnlyList<GradoPrimaria> LeerGradosActividad(
+    private static GradoPrimaria[] LeerGradosActividad(
         SqliteConnection conexion,
         ActividadId actividadId)
     {
