@@ -33,4 +33,4 @@
 - [x] 20. Add Data tests for extension migration and round-trip persistence.
 - [x] 21. Add Presentation/WPF regressions for project/activity catalog editing.
 - [x] 22. Run Windows CI: format, Release build, tests, OpenSpec and whitespace.
-- [ ] 23. Perform manual Demo validation for unigrade and multigrade planning flows.
+- [x] 23. Perform manual Demo validation for unigrade and multigrade planning flows.
