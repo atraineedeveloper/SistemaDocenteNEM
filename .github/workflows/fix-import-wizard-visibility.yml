@@ -1,0 +1,92 @@
+name: Fix import wizard visibility
+
+on:
+  push:
+    branches:
+      - feature/student-import-xlsx-csv
+
+permissions:
+  contents: write
+
+jobs:
+  fix:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: feature/student-import-xlsx-csv
+          fetch-depth: 0
+
+      - name: Apply focused XAML fix
+        shell: bash
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+
+          path = Path('src/SistemaDocente.App.Wpf/ImportacionEstudiantesWindow.xaml')
+          text = path.read_text(encoding='utf-8')
+
+          text = text.replace(
+              '<ResourceDictionary>\n            <ResourceDictionary.MergedDictionaries>',
+              '<ResourceDictionary>\n            <BooleanToVisibilityConverter x:Key="ImportBoolToVisibility"/>\n            <ResourceDictionary.MergedDictionaries>',
+              1)
+          text = text.replace(
+              'Converter={StaticResource BoolToVisibility}',
+              'Converter={StaticResource ImportBoolToVisibility}')
+          text = text.replace(
+              '<!-- Archivo -->\n            <Border Style="{StaticResource PopupCard}"',
+              '<!-- Archivo -->\n            <Border x:Name="PasoArchivoPanel" Style="{StaticResource PopupCard}"',
+              1)
+          text = text.replace(
+              '<!-- Resultado -->\n            <Border Style="{StaticResource PopupCard}"',
+              '<!-- Resultado -->\n            <Border x:Name="PasoResultadoPanel" Style="{StaticResource PopupCard}"',
+              1)
+          text = text.replace(
+              '<Button Content="Volver" Command="{Binding VolverCommand}"/>',
+              '<Button x:Name="VolverButton" Content="Volver" Command="{Binding VolverCommand}"/>',
+              1)
+          text = text.replace(
+              '<Button Style="{StaticResource PrimaryButton}" Content="Crear vista previa"',
+              '<Button x:Name="CrearPreviaButton" Style="{StaticResource PrimaryButton}" Content="Crear vista previa"',
+              1)
+          text = text.replace(
+              '<Button Style="{StaticResource PrimaryButton}" Content="Continuar"',
+              '<Button x:Name="ContinuarButton" Style="{StaticResource PrimaryButton}" Content="Continuar"',
+              1)
+          text = text.replace(
+              '<Button Style="{StaticResource PrimaryButton}" Content="Importar alumnos"',
+              '<Button x:Name="ImportarButton" Style="{StaticResource PrimaryButton}" Content="Importar alumnos"',
+              1)
+          text = text.replace(
+              '<Button Content="Cerrar" Click="OnCerrarClic"/>',
+              '<Button x:Name="CerrarButton" Content="Cerrar" Click="OnCerrarClic"/>',
+              1)
+
+          required = [
+              'ImportBoolToVisibility',
+              'PasoArchivoPanel',
+              'PasoResultadoPanel',
+              'CrearPreviaButton',
+              'ContinuarButton',
+              'ImportarButton',
+              'VolverButton',
+              'CerrarButton',
+          ]
+          missing = [item for item in required if item not in text]
+          if missing:
+              raise SystemExit(f'Missing expected replacements: {missing}')
+
+          path.write_text(text, encoding='utf-8')
+          Path('.github/workflows/fix-import-wizard-visibility.yml').unlink()
+          PY
+
+      - name: Commit fix
+        shell: bash
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git diff --cached --check
+          git commit -m "fix: correct import wizard initial visibility"
+          git push origin HEAD:feature/student-import-xlsx-csv
