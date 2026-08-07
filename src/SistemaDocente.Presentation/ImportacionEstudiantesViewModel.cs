@@ -214,7 +214,7 @@ public sealed class FilaImportacionVisual : ViewModelBase
         Estado = fila.Estado;
         ResumenProblemas = string.Join(" · ", fila.Problemas.Select(problema => problema.Mensaje));
         GradoResuelto = CatalogoNemPrimaria.EsGradoReal(fila.Grado)
-            ? CatalogoNemPrimaria.ObtenerEtiqueta(fila.Grado)
+            ? CatalogoNemPrimaria.FormatearGrado(fila.Grado)
             : string.Empty;
     }
 
@@ -243,6 +243,7 @@ public sealed class ImportacionEstudiantesViewModel : ViewModelBase
 
     private readonly ILectorImportacionTabular _lector;
     private readonly ImportacionEstudiantesCasosUso _casosUso;
+    private readonly IReadOnlyList<OpcionCampoImportacion> _opcionesCampos = OpcionesCamposInternas;
     private readonly ObservableCollection<ColumnaImportacionVisual> _columnas = [];
     private readonly ObservableCollection<FilaImportacionVisual> _filas = [];
     private GrupoId? _grupoId;
@@ -288,7 +289,7 @@ public sealed class ImportacionEstudiantesViewModel : ViewModelBase
 
     public RelayCommand AutorizarDuplicadoCommand { get; }
 
-    public IReadOnlyList<OpcionCampoImportacion> OpcionesCampos => OpcionesCamposInternas;
+    public IReadOnlyList<OpcionCampoImportacion> OpcionesCampos => _opcionesCampos;
 
     public IReadOnlyList<ColumnaImportacionVisual> Columnas => _columnas;
 
@@ -422,6 +423,11 @@ public sealed class ImportacionEstudiantesViewModel : ViewModelBase
         ExcluidosResultado = 0;
         Paso = PasoImportacionEstudiantes.Archivo;
         NotificarConteos();
+        OnPropertyChanged(nameof(Hojas));
+        OnPropertyChanged(nameof(Columnas));
+        OnPropertyChanged(nameof(Filas));
+        OnPropertyChanged(nameof(FilasVisibles));
+        NotificarEstado();
     }
 
     public bool CargarArchivo(string rutaArchivo)
@@ -437,7 +443,9 @@ public sealed class ImportacionEstudiantesViewModel : ViewModelBase
             _documento = _lector.Leer(rutaArchivo);
             NombreArchivo = _documento.NombreArchivo;
             OnPropertyChanged(nameof(Hojas));
-            HojaSeleccionada = _documento.Hojas.FirstOrDefault();
+            HojaSeleccionada = _documento.Hojas.Count > 0
+                ? _documento.Hojas[0]
+                : null;
             Mensaje = string.Empty;
             Paso = PasoImportacionEstudiantes.Columnas;
             return true;
@@ -586,8 +594,8 @@ public sealed class ImportacionEstudiantesViewModel : ViewModelBase
         }
 
         FilaSeleccionada = seleccionOrigen is null
-            ? _filas.FirstOrDefault()
-            : _filas.FirstOrDefault(fila => fila.NumeroOrigen == seleccionOrigen) ?? _filas.FirstOrDefault();
+            ? (_filas.Count > 0 ? _filas[0] : null)
+            : _filas.FirstOrDefault(fila => fila.NumeroOrigen == seleccionOrigen) ?? (_filas.Count > 0 ? _filas[0] : null);
         OnPropertyChanged(nameof(Filas));
         OnPropertyChanged(nameof(FilasVisibles));
         NotificarConteos();
