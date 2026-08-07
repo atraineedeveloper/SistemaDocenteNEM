@@ -34,4 +34,4 @@
 - [x] 21. Add Data tests for extension migration and round-trip persistence.
 - [x] 22. Add Presentation/WPF regressions for structured configuration and student grade.
 - [x] 23. Run Windows CI: format, Release build, tests, OpenSpec and whitespace.
-- [ ] 24. Perform manual Demo validation for unigrade and multigrade groups, Light/Dark/High Contrast, and 100/125/150% scaling.
+- [x] 24. Perform manual Demo validation for unigrade and multigrade groups, Light/Dark/High Contrast, and 100/125/150% scaling.
