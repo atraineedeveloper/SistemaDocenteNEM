@@ -1,580 +1,186 @@
-# UI-GUIDELINES.md
-## Sistema Docente NEM — Guía de diseño de interfaz y experiencia de usuario
+# UI and UX guidelines
 
-**Estado:** norma interna de UI/UX  
-**Ámbito:** `SistemaDocente.App.Wpf` y toda pantalla futura de la aplicación  
-**Plataforma:** Windows Desktop / WPF / .NET  
-**Objetivo:** mantener una interfaz moderna, consistente, accesible, rápida de operar y predecible durante el trabajo docente cotidiano.
+**Status:** internal product standard  
+**Scope:** `SistemaDocente.App.Wpf` and every future desktop workflow  
+**Platform:** Windows Desktop / WPF / .NET  
+**Goal:** keep the application modern, consistent, accessible, fast to operate and predictable during everyday teaching work.
 
----
+## 1. Guiding principle
 
-## 1. Principio rector
+The application should feel like a purpose-built modern Windows tool, not an old administrative form and not a spreadsheet disguised as an application.
 
-La interfaz debe sentirse como una aplicación moderna de Windows, no como un formulario administrativo antiguo ni como una hoja de cálculo disfrazada.
+When priorities conflict, use this order:
 
-Toda decisión visual debe priorizar, en este orden:
+1. Immediate comprehension.
+2. Error prevention.
+3. Operational speed.
+4. Consistency.
+5. Accessibility.
+6. Visual refinement.
+7. Information density.
 
-1. Comprensión inmediata.
-2. Prevención de errores.
-3. Rapidez de uso.
-4. Consistencia.
-5. Accesibilidad.
-6. Estética.
-7. Densidad de información.
+If a visually attractive choice makes the workflow slower, less clear or less safe, choose clarity and safety.
 
-Cuando exista conflicto entre «se ve bonito» y «es claro, rápido, consistente y seguro», debe ganar la segunda opción.
+## 2. Design references
 
----
+The product draws from:
 
-## 2. Referencias de diseño
+- Microsoft Fluent 2 principles;
+- contemporary Windows desktop interaction patterns;
+- Windows/WPF accessibility behavior;
+- WCAG 2.2 as an additional accessibility reference;
+- general usability principles: visible system state, consistency, error prevention, recognition over recall and user control.
 
-La aplicación adopta como referencias:
+WPF does not need to imitate WinUI component-for-component. Use the interaction and visual language that is practical without adding unnecessary UI dependencies.
 
-- Microsoft Fluent 2;
-- patrones actuales de aplicaciones Windows;
-- accesibilidad de Windows y WPF;
-- WCAG 2.2 como referencia adicional;
-- principios de usabilidad: visibilidad del estado, consistencia, prevención de errores, reconocimiento antes que memoria y control del usuario.
+## 3. Information architecture
 
-WPF no tiene que reproducir WinUI exactamente. Debe adoptar el lenguaje visual y de interacción que resulte viable sin añadir dependencias UI innecesarias.
+- Global navigation appears only once.
+- `Mis grupos` is the group-context entry point.
+- A group is a workspace/context, not a secondary filter.
+- Complex editing remains in focused windows rather than oversized master-detail screens.
+- Reports are outputs/summaries; editable longitudinal evidence stays in `Expediente`.
+- Domain hierarchy does not automatically become visual hierarchy.
 
----
+## 4. Forms and configuration
 
-## 3. Personalidad visual
+Prefer structured controls when the value comes from a stable catalog or deterministic rule:
 
-La aplicación debe sentirse profesional, tranquila, clara, moderna, confiable y académica sin ser burocrática.
+- entity/municipality → catalog selection;
+- primary grade → structured grade selection;
+- NEM phase → derived, read-only information;
+- unigrade/multigrade → derived from grades served;
+- school organization → explicit catalog;
+- NEM methodology/formative field → future structured catalogs.
 
-Evitar:
+Keep teacher-authored content free enough for professional judgment. Do not turn pedagogical guidance into an arbitrary mandatory form.
 
-- exceso de color;
-- degradados decorativos;
-- sombras grandes;
-- bordes oscuros pesados;
-- tarjetas dentro de tarjetas sin necesidad;
-- controles gigantes;
-- iconos decorativos que no aporten significado;
-- patrones visuales distintos para acciones equivalentes.
+### Field behavior
 
----
+- Labels remain visible; do not use placeholder-only forms.
+- Required fields are explicit.
+- Validation appears next to or near the action/field and uses actionable language.
+- Preserve the user's input after a correctable validation error.
+- Use sensible defaults only when the result is deterministic.
+- Never silently infer ambiguous pedagogical data.
 
-## 4. Sistema de diseño y tokens
+## 5. Operational matrices
 
-Los valores visuales deben centralizarse en recursos WPF y reutilizarse. La implementación vigente usa `DesignTokens.xaml` y temas claro, oscuro y alto contraste; las vistas nuevas deben consumir esos recursos en lugar de introducir colores aislados.
+Attendance and Evaluation are high-density workflows and should behave as visual siblings.
 
-### Espaciado
+- Freeze identifying columns when horizontal scrolling is required.
+- Keep row/column headers visually distinct.
+- Use hover, current-cell and focus affordances.
+- Do not communicate state by color alone; include text/symbols.
+- A normal cell click may open a compact action menu.
+- Keyboard shortcuts remain available for high-speed capture.
+- Full/detail editors are reserved for information that does not fit safely in the quick menu.
+- Keep virtualized grid scrolling; never wrap a large operational `DataGrid` in an outer scrolling surface that defeats virtualization.
 
-Usar una escala base de 4 px, priorizando múltiplos de 8:
+## 6. Keyboard behavior
 
-| Token conceptual | Valor | Uso |
-| --- | ---: | --- |
-| XXS | 4 | ajustes mínimos |
-| XS | 8 | controles relacionados |
-| S | 12 | label ↔ control |
-| M | 16 | padding de panel |
-| L | 24 | separación de secciones |
-| XL | 32 | bloques principales |
-| XXL | 48 | casos especiales |
+Every frequent workflow should be usable without a mouse where practical.
 
-Reglas:
+- `Tab` order follows visual/logical order.
+- `Esc` cancels/dismisses focused editing where safe.
+- `Ctrl+S` saves when the window/module supports editable pending state.
+- Contextual grid shortcuts run only while focus belongs to the intended grid and never while typing in a text editor.
+- Visible keyboard focus is mandatory.
 
-- controles relacionados: 8–12 px;
-- secciones distintas: 16–24 px;
-- padding habitual de panel/tarjeta: 16 px;
-- padding exterior de vistas: 20–24 px;
-- evitar valores arbitrarios repetidos como 13, 17, 19 o 27 px.
-
-### Tipografía
-
-Fuente principal: `Segoe UI Variable` cuando esté disponible; fallback `Segoe UI`.
-
-| Rol | Tamaño orientativo | Peso |
-| --- | ---: | --- |
-| Título de pantalla | 24–28 | SemiBold |
-| Título de sección | 18–20 | SemiBold |
-| Subtítulo | 15–16 | SemiBold |
-| Texto normal | 13–14 | Regular |
-| Texto secundario | 12–13 | Regular |
-| Etiqueta compacta | 12 | Medium |
-
-Usar sentence case. Evitar mayúsculas completas, exceso de negritas y texto centrado cuando deba leerse rápidamente.
-
-### Color
-
-Usar recursos semánticos, no colores físicos repartidos por XAML. Ejemplos:
-
-- `PrimaryBrush`;
-- `CardBackgroundBrush`;
-- `SectionBackgroundBrush`;
-- `TextPrimaryBrush`;
-- `TextSecondaryBrush`;
-- `BorderDefaultBrush`;
-- `ErrorBrush`;
-- recursos de éxito, advertencia, selección y foco.
-
-La paleta institucional puede evolucionar; las vistas no deben acoplarse a hexadecimales concretos.
-
-No transmitir un estado únicamente mediante color.
-
----
-
-## 5. Geometría y tamaños
-
-Radios recomendados:
-
-- controles pequeños: 4–6 px;
-- tarjetas/paneles: 8 px;
-- diálogos/ventanas de detalle: 8–12 px cuando aplique.
-
-Preferir separación por espacio y superficie antes que sombras.
-
-Alturas orientativas:
-
-- botón estándar: 36–40 px;
-- campo de texto/selector: 36–40 px;
-- fila de `DataGrid`: 38–44 px;
-- botón iconográfico: objetivo cómodo de 32–36 px como mínimo visual.
-
-Los controles de una misma barra deben compartir altura.
-
----
-
-## 6. Layout WPF
-
-Usar `Grid` como sistema principal de layout.
-
-Evitar:
-
-- `Canvas` para formularios normales;
-- tamaños rígidos innecesarios;
-- márgenes usados para simular columnas;
-- `StackPanel` gigantes que impidan redimensionamiento correcto;
-- varias zonas con scroll independiente cuando una sola superficie de trabajo sería más clara.
-
-Usar:
-
-- ancho fijo sólo para paneles que realmente necesiten estabilidad;
-- `Auto` para contenido pequeño;
-- `*` para contenido que debe crecer.
-
-La interfaz debe soportar redimensionamiento sin solapamientos, recortes, pérdida de acciones ni scroll horizontal general innecesario.
-
----
-
-## 7. Navegación principal
-
-La navegación de `MainWindow` debe ser estable, predecible, persistente y de baja profundidad.
-
-Módulos principales actuales incluyen:
-
-- Grupo;
-- Asistencia;
-- Proyectos;
-- Evaluación.
-
-Los módulos futuros deben integrarse sin mover arbitrariamente los existentes.
-
-Reglas:
-
-- mostrar claramente el módulo activo;
-- conservar el contexto al volver a un módulo cuando sea razonable;
-- no duplicar la navegación global dentro de ventanas de detalle;
-- no crear ventanas innecesarias;
-- sí usar ventanas dedicadas cuando aíslen una tarea compleja y reduzcan carga cognitiva.
-
----
-
-## 8. Selección del patrón de interacción
-
-### 8.1 Lista principal
-
-Usar una vista amplia dentro de `MainWindow` cuando la tarea sea principalmente buscar, filtrar, comparar, seleccionar o consultar un panorama general.
-
-Ejemplos vigentes:
-
-- Grupo → lista de estudiantes;
-- Proyectos → lista de proyectos;
-- Asistencia → grilla mensual;
-- Evaluación → superficie completa de evaluación.
-
-La lista principal no debe contener además un formulario extenso y otras jerarquías editables si eso reduce el espacio útil.
-
-### 8.2 Ventana dedicada de detalle
-
-Usar una ventana dedicada cuando la entidad requiera varios campos editables, validación, acciones de ciclo de vida, contenido secundario o concentración del usuario.
-
-Ejemplos vigentes:
-
-- `EditorEstudianteWindow`;
-- `DetalleProyectoWindow`;
-- `DetalleActividadWindow`;
-- `ExpedienteEstudianteWindow`.
-
-Las ventanas de detalle deben:
-
-- tener `Owner`;
-- abrir centradas respecto de su propietario cuando corresponda;
-- normalmente usar `ShowInTaskbar=False`;
-- proteger cambios pendientes;
-- conservar el contexto de la pantalla que las abrió;
-- tener un propósito principal claro;
-- evitar duplicar la navegación global;
-- ser redimensionables si el contenido lo justifica.
-
-### 8.3 Pantalla principal especializada
-
-Usar una superficie principal amplia cuando la tarea sea frecuente, intensiva o necesite mucho espacio.
-
-Ejemplos: asistencia mensual y evaluación de estudiantes.
-
-No comprimir esas tareas dentro de una ventana pequeña o una columna lateral estrecha.
-
-### 8.4 Master-detail
-
-Master-detail es opcional, no una regla del sistema.
-
-Puede usarse sólo cuando lista y detalle necesiten verse simultáneamente, el detalle sea breve, exista poca edición y ambos paneles mantengan espacio suficiente.
-
-No usar master-detail cuando:
-
-- comprima formularios;
-- produzca tres zonas estrechas;
-- obligue a varios scrolls simultáneos;
-- reduzca una grilla operativa importante;
-- mezcle planeación, edición y evaluación en el mismo espacio;
-- aumente la carga cognitiva frente a ventanas enfocadas.
-
-**Regla:** la jerarquía del dominio no obliga a copiarse literalmente en el layout visual.
-
----
-
-## 9. Encabezados, acciones y command bars
-
-Cada vista principal debe tener título, contexto relevante y una acción primaria clara cuando exista.
-
-Por zona debe existir normalmente una sola acción primaria visual.
-
-Preferir etiquetas que describan el resultado:
-
-- `Guardar proyecto`;
-- `Nueva actividad`;
-- `Agregar estudiante`;
-- `Marcar entregada`.
-
-Evitar etiquetas vagas como `Aceptar`, `Procesar` o `Ejecutar`.
-
-Acciones destructivas deben diferenciarse visualmente y requerir confirmación sólo cuando el daño no sea fácil de revertir.
-
----
-
-## 10. Formularios
-
-- label visible encima del control en formularios verticales;
-- no usar placeholder como sustituto de label;
-- agrupar campos relacionados;
-- mostrar el formato esperado cuando pueda haber duda;
-- validar sin destruir la captura;
-- conservar los valores ante error;
-- separar formularios largos en secciones coherentes;
-- evitar formularios con demasiados campos en una sola fila.
-
-El control `FormField` y los patrones de validación existentes deben reutilizarse cuando correspondan.
-
----
-
-## 11. DataGrid y tablas
-
-Las tablas son componentes de primera clase del sistema.
-
-Reglas:
-
-- encabezados claros;
-- identidad del estudiante siempre fácil de localizar;
-- selección evidente;
-- virtualización cuando la lista pueda crecer;
-- scroll horizontal sólo cuando la tabla realmente lo exija;
-- columna de alumno flexible;
-- columnas de estado compactas;
-- observaciones con espacio suficiente;
-- evitar exceso de líneas verticales.
-
-No usar `ComboBox` permanente en todas las celdas cuando un selector temporal o teclado sea más rápido.
-
-Estado = color + texto/letra/icono; nunca sólo color.
-
----
-
-## 12. Grillas temporales
-
-Para asistencia u otros datos calendario:
-
-- mostrar sólo fechas relevantes;
-- conservar fecha real;
-- usar encabezados compactos;
-- indicar agrupación temporal con espacio o separador;
-- no crear columnas vacías decorativas.
-
-La grilla mensual de asistencia debe conservar su separación semanal real y sus días lectivos visibles.
-
----
-
-## 13. Teclado y foco
-
-Patrones base:
-
-- `Tab`: siguiente control;
-- `Shift+Tab`: anterior;
-- flechas: navegación dentro de listas/grillas;
-- `Enter`: activar o confirmar;
-- `Escape`: cancelar edición contextual;
-- `Ctrl+S`: guardar cuando corresponda.
-
-### Regla crítica
-
-Atajos de una sola letra como `P/F/R/J/E/N` sólo pueden funcionar cuando el foco está en el componente operativo correspondiente.
-
-Nunca deben interceptar escritura en `TextBox`, `RichTextBox`, editores de `DataGrid` u otros controles de texto.
-
-Todo control interactivo debe tener foco visible. No eliminar `FocusVisualStyle` sin un reemplazo accesible.
-
----
-
-## 14. Accesibilidad
-
-Objetivo interno: experiencia equivalente a un nivel AA razonable.
-
-Requisitos:
-
-- navegación por teclado;
-- foco visible;
-- contraste suficiente;
-- estados no expresados sólo por color;
-- `AutomationProperties.Name` donde aporte accesibilidad;
-- controles estándar cuando sea posible;
-- texto escalable;
-- mensajes comprensibles;
-- prueba con tema de alto contraste.
-
-No crear controles custom cuando uno estándar resuelva adecuadamente la necesidad.
-
----
-
-## 15. Feedback, errores y cambios pendientes
-
-Toda operación importante debe comunicar estado:
-
-- Sin cambios;
-- Cambios sin guardar;
-- Guardando…;
-- Guardado;
-- Error al guardar.
-
-No usar ventanas emergentes para cada guardado correcto; preferir feedback discreto o notificación.
-
-Nunca mostrar al usuario SQL, stack traces, rutas internas, `InnerException` ni códigos técnicos sin significado.
-
-Patrón obligatorio cuando se va a perder una edición:
+Existing domain-specific shortcuts include:
 
 ```text
-Tienes cambios sin guardar.
-
-[Guardar] [Descartar] [Cancelar]
+Attendance: P / F / R / J
+Evaluation: D / S / E / R / T / N / P
+Evaluation detail: Enter / F2
+Save: Ctrl+S
 ```
 
-`Cancelar` debe dejar al usuario exactamente donde estaba.
+## 7. Themes and semantic resources
 
----
+The supported themes are Light, Dark and High Contrast.
 
-## 16. Estados vacíos
+- Use semantic `DynamicResource` brushes/tokens.
+- Avoid hardcoded foreground/background colors in views unless a documented technical reason requires them.
+- Ensure contrast in every supported theme.
+- Selected/hover/disabled/error/success states must remain distinguishable without relying only on hue.
+- Shared popup patterns belong in shared style resources.
 
-Una pantalla vacía debe explicar:
+## 8. Typography and spacing
 
-1. qué falta;
-2. para qué sirve;
-3. cuál es el siguiente paso.
+Use a small, deliberate hierarchy:
 
-Usar el patrón `EmptyState` existente cuando corresponda. No mostrar únicamente una tabla vacía.
+- page/window title;
+- section title;
+- form label;
+- body/supporting text;
+- compact metadata/eyebrow.
 
----
+Do not make every container a card. Use grouping only when it clarifies structure. Prefer consistent spacing increments and align related controls.
 
-## 17. Temas e internacionalización
+## 9. Windows and dialogs
 
-La interfaz vigente soporta temas claro, oscuro y alto contraste. Las vistas nuevas deben usar `DynamicResource` para recursos susceptibles de cambio de tema.
+A dedicated window should have:
 
-Las cadenas de UI reutilizables deben preferir recursos localizados cuando el patrón existente así lo haga. Las ventanas deben conservar `xml:lang="es-MX"`.
+- clear title/purpose;
+- concise supporting explanation where necessary;
+- one visually dominant primary action;
+- a predictable Cancel/Close action;
+- reasonable minimum dimensions;
+- scrolling only in the content region when needed;
+- footer actions that remain reachable;
+- accessible names for non-obvious controls.
 
-No hardcodear colores que sólo funcionen en tema claro.
+Avoid opening a second dialog for a simple one-click state change when a contextual menu is safer and faster.
 
----
+## 10. Accessibility
 
-## 18. Rendimiento percibido y escalado
+- Set `xml:lang="es-MX"` for Spanish UI surfaces.
+- Provide `AutomationProperties.Name` when the visual label is insufficient for assistive technology.
+- Ensure controls can be reached by keyboard.
+- Maintain focus after operations where possible.
+- Do not encode meaning only in color.
+- Use plain, respectful language and avoid diagnostic labels not supported by the product's role.
+- Piaget/developmental references are general pedagogical context, never an individual diagnosis.
 
-Aunque la aplicación sea local:
+## 11. Scaling and window sizes
 
-- evitar congelar la interfaz sin feedback;
-- virtualizar listas y `DataGrid` grandes;
-- evitar reconstrucciones visuales innecesarias;
-- no cargar recursos pesados antes de necesitarlos.
+Manual acceptance should cover at least:
 
-Probar visualmente a 100 %, 125 % y 150 % de escalado; 200 % cuando sea razonable.
+- 100% scaling;
+- 125% scaling;
+- 150% scaling;
+- Light theme;
+- Dark theme;
+- High Contrast.
 
-Comprobar texto no cortado, botones visibles, tablas utilizables, diálogos completos y ausencia de solapamientos.
+Text must not clip at supported scaling. Operational content should reflow or scroll rather than overlap.
 
----
+## 12. Feedback and errors
 
-## 19. Organización de XAML
+- Show saving/loading state for operations that are not effectively instantaneous.
+- Success feedback should be quiet and non-blocking unless confirmation matters.
+- Errors should explain what the user can do next.
+- Never expose SQL, stack traces or local sensitive paths in user-facing messages.
+- Unsaved-change guards must protect group switching, navigation and window close where edits could otherwise be lost.
 
-Los estilos comunes deben centralizarse. La estructura actual de `Themes/` y `DesignTokens.xaml` debe reutilizarse antes de crear nuevos diccionarios.
+## 13. Data privacy in UI
 
-`MainWindow.xaml` actúa como shell y sólo ensambla el encabezado de navegación global, las vistas de módulos y el feedback global. Cada módulo vive en su propio `UserControl` de `Views/` y es responsable exclusivo de su presentación; el encabezado global vive en `Controls/`. Extraer áreas funcionales grandes a vistas dedicadas cuando su tamaño dificulte mantenimiento, sin introducir un framework de navegación ni mover lógica de negocio a code-behind. Cada vista recibe su `DataContext` por binding simple, evitando `DataContext.DataContext...`.
+- Display only data needed for the current task.
+- Avoid unnecessarily duplicating sensitive data across screens.
+- Do not add fields merely because they exist on external institutional lists.
+- Exports and future attachments must distinguish ordinary classroom information from sensitive information.
+- Demo screenshots/test fixtures use fictitious data only.
 
-El code-behind puede manejar comportamiento propio de WPF —foco, apertura de ventanas, interacción visual, routing de teclado contextual— pero no reglas de dominio ni SQL.
+## 14. Definition of UI done
 
----
+A meaningful UI change is not ready to merge until applicable checks pass:
 
-## 20. Prohibiciones para agentes de UI
-
-Un agente NO DEBE:
-
-- rediseñar una pantalla aprobada sin autorización;
-- imponer master-detail porque la jerarquía de dominio tenga varios niveles;
-- inventar colores por pantalla;
-- introducir tamaños arbitrarios repetidos;
-- crear estilos inline duplicados;
-- usar ancho fijo para todo;
-- usar `Canvas` para layout normal;
-- añadir librerías UI sin aprobación;
-- usar globalmente atajos de una letra;
-- esconder información crítica sólo en tooltip;
-- usar placeholders como labels;
-- eliminar foco visual;
-- mostrar IDs internos;
-- mostrar errores técnicos;
-- colocar lógica de negocio en code-behind;
-- crear SQL en ViewModels;
-- cambiar reglas funcionales para mejorar la estética.
-
----
-
-## 21. Proceso obligatorio para nuevas pantallas
-
-### Paso 1 — Wireframe
-
-Antes de escribir XAML, el agente debe presentar:
-
-- jerarquía;
-- layout;
-- dimensiones relativas;
-- controles;
-- acciones;
-- scroll;
-- comportamiento al redimensionar;
-- estado vacío;
-- errores;
-- navegación por teclado.
-
-### Paso 2 — Aprobación
-
-El wireframe se corrige hasta quedar aprobado.
-
-### Paso 3 — Implementación
-
-Implementar exactamente el wireframe aprobado y reutilizar recursos existentes.
-
-### Paso 4 — Prueba funcional
-
-Comprobar bindings, comandos, cambios pendientes, teclado y apertura real de la ventana.
-
-### Paso 5 — Auditoría visual
-
-Revisar la ventana real buscando alineación, densidad, jerarquía, recortes, espacios muertos, scroll incorrecto, inconsistencia, foco y escalado.
-
----
-
-## 22. Prompt base para agentes
-
-Antes de modificar WPF:
-
-```text
-Lee docs/UI-GUIDELINES.md completo.
-
-Estas reglas son obligatorias.
-
-No implementes todavía.
-
-Primero presenta un wireframe textual con:
-- jerarquía;
-- layout;
-- dimensiones relativas;
-- espaciado;
-- controles;
-- estados;
-- teclado;
-- scroll;
-- redimensionamiento;
-- estado vacío;
-- errores;
-- acciones principales y secundarias.
-
-No asumas master-detail.
-Elige lista principal, ventana dedicada o pantalla especializada según la tarea.
-Reutiliza los recursos y patrones existentes.
-Espera aprobación antes de modificar XAML.
-```
-
-Después de aprobarlo:
-
-```text
-Implementa exactamente el wireframe aprobado y docs/UI-GUIDELINES.md.
-No rediseñes.
-No cambies reglas funcionales.
-Centraliza estilos reutilizables.
-Ejecuta build y pruebas.
-Reporta cualquier aspecto visual que no pueda validarse automáticamente.
-```
-
----
-
-## 23. Checklist de auditoría visual
-
-- [ ] ¿Se entiende en pocos segundos qué pantalla es y qué acción es principal?
-- [ ] ¿Los controles están alineados y usan espaciado consistente?
-- [ ] ¿No hay espacios muertos o zonas comprimidas sin justificación?
-- [ ] ¿No hay texto truncado?
-- [ ] ¿Controles equivalentes comparten tamaño y estilo?
-- [ ] ¿Los campos editables parecen editables?
-- [ ] ¿Las tablas muestran claramente al estudiante y sus estados?
-- [ ] ¿`Tab` sigue un orden lógico?
-- [ ] ¿`Ctrl+S` funciona donde corresponde?
-- [ ] ¿Los atajos de letras no interfieren con escritura?
-- [ ] ¿El foco es visible?
-- [ ] ¿Hay estados vacío, error, guardado y cambios pendientes?
-- [ ] ¿La ventana funciona al redimensionar?
-- [ ] ¿Funciona razonablemente a 125–150 % de escalado?
-- [ ] ¿Los temas claro, oscuro y alto contraste mantienen legibilidad?
-
----
-
-## 24. Definition of Done de UI
-
-Una pantalla no se considera terminada hasta que:
-
-- [ ] existe wireframe aprobado;
-- [ ] cumple esta guía;
-- [ ] reutiliza estilos y tokens;
-- [ ] no contiene bindings que fallen al abrir;
-- [ ] la ventana puede abrirse realmente;
-- [ ] teclado y foco funcionan;
-- [ ] los atajos no interfieren con escritura;
-- [ ] los cambios pendientes están protegidos;
-- [ ] existen estados vacíos y de error;
-- [ ] funciona al redimensionar;
-- [ ] se revisó el escalado;
-- [ ] no hay IDs ni errores técnicos visibles;
-- [ ] build y pruebas pasan;
-- [ ] se realizó auditoría visual manual.
-
----
-
-## 25. Regla final
-
-El diseño moderno del Sistema Docente NEM no depende de efectos visuales. Depende de jerarquía clara, interacción predecible, excelentes estados, espaciado consistente, accesibilidad y velocidad de trabajo.
+- behavior is covered by Presentation/WPF tests where stable structural assertions are useful;
+- Windows Release build has zero warnings/errors;
+- full tests pass;
+- OpenSpec validates;
+- whitespace check passes;
+- no regression in keyboard shortcuts/unsaved-change protection;
+- required Light/Dark/High Contrast and scaling checks are completed manually;
+- the workflow is understandable without knowledge of the application's internal data model.
