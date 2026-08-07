@@ -1,45 +1,34 @@
-# Proposal: Refactor MainWindow a vistas WPF
+# Change: Refactor MainWindow a vistas WPF
 
-## Summary
-Refactor estructural de la capa Presentation/WPF: convertir `MainWindow` en un shell visual pequeño y extraer la presentación de cada módulo (Grupo, Asistencia, Proyectos y Evaluación) a `UserControl` dedicados bajo `Views/`, y el encabezado global a `Controls/MainNavigationHeader`. No se introducen frameworks de navegación ni contenedor de DI. Cada vista recibe una frontera de presentación explícita por binding; Asistencia incorpora `ModuloAsistenciaViewModel` para agrupar sus vistas diaria y mensual sin depender del `MainWindowViewModel` completo.
+## Why
 
-## Intent
-- Reducir el tamaño y la responsabilidad de `MainWindow.xaml`/`.cs`.
-- Disminuir el riesgo de romper una pantalla al modificar otra.
-- Facilitar cambios aislados y auditables por módulo.
-- Conservar el comportamiento, navegación funcional, reglas de dominio y escala de niveles de logro vigentes.
-- Mantener temas, accesibilidad, teclado contextual y virtualización después de separar las vistas.
+`MainWindow` concentraba demasiadas responsabilidades visuales y de composición para Grupo, Asistencia, Proyectos y Evaluación. Separar las superficies por módulo reduce acoplamiento, permite cambios auditables y conserva el shell como coordinador visual pequeño sin introducir un framework de navegación ni un contenedor DI.
 
-## Proposed Changes
+## What Changes
 
-### `SistemaDocente.Presentation`
-- Añadir `ModuloAsistenciaViewModel` como frontera de presentación que agrupa `GestionAsistenciaViewModel`, `GestionAsistenciaMensualViewModel` y el cambio entre vista diaria/mensual.
-- Mantener `MainWindowViewModel` como coordinador de navegación global, conservando aliases de compatibilidad para los ViewModels de asistencia existentes.
+- Extraer Grupo, Asistencia, Proyectos y Evaluación a `UserControl` dedicados bajo `Views/`.
+- Extraer el encabezado global a `Controls/MainNavigationHeader`.
+- Mantener `MainWindow` como shell que ensambla navegación, vistas, feedback global y cierre.
+- Añadir `ModuloAsistenciaViewModel` como frontera explícita para las vistas diaria y mensual de Asistencia.
+- Pasar dependencias específicas de una vista mediante bindings o propiedades dedicadas en vez de resolver el `MainWindowViewModel` concreto desde code-behind.
+- Conservar temas, accesibilidad, teclado contextual y virtualización de las grillas después de separar las vistas.
+- Mantener las tareas complejas en ventanas dedicadas y no reintroducir master-detail obligatorio.
+- Mantener fuera de alcance cambios de Core, reglas de negocio, ORM, framework de navegación, Prism, ReactiveUI, CommunityToolkit o contenedor DI.
 
-### `SistemaDocente.App.Wpf`
-- Extraer `Views/GrupoView.xaml(.cs)`, `Views/AsistenciaView.xaml(.cs)`, `Views/ProyectosView.xaml(.cs)` y `Views/EvaluacionView.xaml(.cs)` desde `MainWindow`.
-- Extraer `Controls/MainNavigationHeader.xaml(.cs)` para branding, selector de grupo, navegación, selector de tema e indicador de módulo activo.
-- Reducir `MainWindow.xaml` a ensamblar encabezado, cuatro vistas, toast global e indicador de progreso.
-- Reducir `MainWindow.xaml.cs` a cierre y feedback global.
-- Mantener atajos simples únicamente dentro de sus grillas operativas.
-- Mantener la gestión normal de Grupo fuera de un `ScrollViewer` exterior para preservar virtualización del `DataGrid`.
-- Consumir colores semánticos mediante recursos compartidos compatibles con Light/Dark/HighContrast.
-- Gestionar suscripciones a eventos de manera idempotente y liberarlas en `Unloaded` cuando corresponda.
-- Pasar `GestionExpedienteViewModel` a `GrupoView` mediante propiedad de dependencia en lugar de resolver el `MainWindowViewModel` concreto.
+## Capabilities
 
-### `SistemaDocente.App.Wpf.Tests`
-- Verificar que MainWindow ensambla vistas separadas y no contiene las principales grillas internas de los módulos.
-- Verificar la frontera propia de Asistencia.
-- Verificar teclado contextual, ausencia de colores físicos en las vistas extraídas, virtualización y suscripciones idempotentes.
-- Mantener smoke test STA de construcción/layout de MainWindow.
+### New Capabilities
 
-## Non-goals
-- No se rediseñan los flujos funcionales ni se reintroduce master-detail.
-- No se modifica Core, Application ni Data.
-- No se cambia `NivelLogro` ni reglas de asistencia/proyectos/evaluación.
-- No se introducen Prism, ReactiveUI, CommunityToolkit, framework de navegación ni contenedor DI.
-- No se convierten las ventanas dedicadas en paneles inline.
+- `shell-wpf-modular`: composición visual por vistas especializadas, encabezado global reutilizable y fronteras de módulo explícitas.
 
-## System Capability Impact
-- **Capabilities Added:** separación de responsabilidades visuales y una frontera explícita para el módulo de Asistencia. No añade capacidad pedagógica nueva.
-- **User Experience:** se conserva la navegación y funcionalidad; las correcciones mejoran consistencia de temas, teclado y rendimiento de listas sin alterar el flujo docente.
+### Modified Capabilities
+
+- Ninguna. El cambio reorganiza Presentation/WPF sin alterar capacidades pedagógicas ni reglas de dominio.
+
+## Impact
+
+- **Presentation:** `ModuloAsistenciaViewModel` y coordinación de navegación conservada en `MainWindowViewModel`.
+- **App.Wpf:** `MainWindow` reducido, vistas dedicadas por módulo y encabezado global extraído.
+- **Arquitectura:** code-behind de vistas no accede a SQLite ni replica reglas de negocio; las dependencias se entregan explícitamente.
+- **Rendimiento:** las grillas operativas conservan virtualización y control de su propio desplazamiento.
+- **Pruebas:** regresiones de composición, bindings, teclado contextual, recursos semánticos y smoke test STA del shell.
