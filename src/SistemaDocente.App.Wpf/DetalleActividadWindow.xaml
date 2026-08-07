@@ -4,62 +4,169 @@
         xmlns:controls="clr-namespace:SistemaDocente.App.Wpf.Controls"
         xmlns:prop="clr-namespace:SistemaDocente.App.Wpf.Properties"
         xml:lang="es-MX"
-        Title="{x:Static prop:Resources.DetalleActividadTitle}" Height="500" Width="580" MinHeight="420" MinWidth="480"
-        WindowStartupLocation="CenterOwner" ShowInTaskbar="False">
-    <Grid Background="{DynamicResource SectionBackgroundBrush}" Margin="{DynamicResource MarginXXXLarge}">
+        Title="{x:Static prop:Resources.DetalleActividadTitle}"
+        Height="620" Width="700" MinHeight="520" MinWidth="600"
+        WindowStartupLocation="CenterOwner" ShowInTaskbar="False"
+        ResizeMode="CanResizeWithGrip"
+        Background="{DynamicResource WindowBackgroundBrush}">
+
+    <Window.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="Styles/PopupStyles.xaml"/>
+            </ResourceDictionary.MergedDictionaries>
+        </ResourceDictionary>
+    </Window.Resources>
+
+    <Window.InputBindings>
+        <KeyBinding Modifiers="Control" Key="S" Command="{Binding GuardarActividadCommand}"/>
+    </Window.InputBindings>
+
+    <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
 
-        <StackPanel><TextBlock Foreground="{DynamicResource TextSecondaryBrush}" Style="{StaticResource Caption}" Margin="0,0,0,6" AutomationProperties.Name="Ruta de navegacion: Proyecto a Actividad"><TextBlock.Text><MultiBinding StringFormat="Proyecto: {0} -&gt; Actividad"><Binding Path="NombreProyecto"/><Binding Path="TituloActividad"/></MultiBinding></TextBlock.Text></TextBlock><DockPanel Margin="0,0,0,14">
-            <StackPanel DockPanel.Dock="Left" VerticalAlignment="Center">
-                <TextBlock Text="Actividad de Proyecto" Foreground="#64748B" FontSize="13" FontWeight="SemiBold"/>
-                <TextBlock Text="{Binding TituloActividad}" FontSize="20" FontWeight="Bold" Foreground="#0F172A"/>
-            </StackPanel>
-            <Border DockPanel.Dock="Right" HorizontalAlignment="Right" CornerRadius="16" Padding="12,5" VerticalAlignment="Center" Background="#ECFDF3" BorderBrush="#ABE5C6" BorderThickness="1">
-                <TextBlock Text="{Binding ActividadSeleccionada.Estado}" FontWeight="SemiBold" Foreground="#027A48"/>
-            </Border>
-        </DockPanel></StackPanel>
+        <Border Grid.Row="0" Style="{StaticResource PopupHeader}">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
 
-        <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" Margin="0,0,0,10">
-            <Border Background="White" CornerRadius="8" Padding="16" BorderBrush="#E2E8F0" BorderThickness="1">
                 <StackPanel>
-                    <Grid>
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="2*"/>
-                            <ColumnDefinition Width="12"/>
-                            <ColumnDefinition Width="*"/>
-                        </Grid.ColumnDefinitions>
-                        <controls:FormField Grid.Column="0" Header="Título de la Actividad">
-                            <TextBox Text="{Binding TituloActividad, UpdateSourceTrigger=PropertyChanged}" TabIndex="10" AutomationProperties.Name="Título de la actividad"/>
-                        </controls:FormField>
-                        <controls:FormField Grid.Column="2" Header="Fecha de Realización">
-                            <DatePicker SelectedDate="{Binding FechaActividad, Mode=TwoWay}" TabIndex="11" AutomationProperties.Name="Fecha de realización de la actividad"/>
-                        </controls:FormField>
-                    </Grid>
-
-                    <controls:FormField Header="Descripción">
-                        <TextBox Text="{Binding DescripcionActividad, UpdateSourceTrigger=PropertyChanged}" AcceptsReturn="True" Height="75" TextWrapping="Wrap" TabIndex="12" AutomationProperties.Name="Descripción de la actividad"/>
-                    </controls:FormField>
-
-                    <controls:FormField Header="Observaciones Generales">
-                        <TextBox Text="{Binding ObservacionesActividad, UpdateSourceTrigger=PropertyChanged}" AcceptsReturn="True" Height="65" TextWrapping="Wrap" TabIndex="13" AutomationProperties.Name="Observaciones generales de la actividad"/>
-                    </controls:FormField>
-
-                    <WrapPanel Margin="0,10,0,0">
-                        <Button Style="{StaticResource PrimaryButton}" Content="Guardar actividad" Command="{Binding GuardarActividadCommand}" TabIndex="20" IsDefault="True"/>
-                        <Button Content="Descartar cambios" Command="{Binding DescartarActividadCommand}" TabIndex="21"/>
-                        <Button Content="Anular actividad" Command="{Binding AnularActividadCommand}" TabIndex="22"/>
-                        <Button Content="Eliminar sin seguimiento" Command="{Binding EliminarActividadCommand}" TabIndex="23"/>
-                    </WrapPanel>
+                    <TextBlock Style="{StaticResource PopupEyebrow}">
+                        <TextBlock.Text>
+                            <MultiBinding StringFormat="PROYECTO · {0}">
+                                <Binding Path="NombreProyecto"/>
+                            </MultiBinding>
+                        </TextBlock.Text>
+                    </TextBlock>
+                    <TextBlock Text="{Binding TituloActividad}" Style="{StaticResource PopupTitle}" Margin="0,4,0,4"/>
+                    <TextBlock Text="Edita la actividad y conserva su seguimiento separado de la planeación general."
+                               Style="{StaticResource PopupSubtitle}"/>
                 </StackPanel>
-            </Border>
+
+                <Border Grid.Column="1"
+                        Style="{StaticResource PopupSuccessPill}"
+                        VerticalAlignment="Center"
+                        Margin="20,0,0,0">
+                    <TextBlock Text="{Binding ActividadSeleccionada.Estado}"
+                               Foreground="{DynamicResource SuccessBrush}"
+                               FontWeight="SemiBold"/>
+                </Border>
+            </Grid>
+        </Border>
+
+        <ScrollViewer Grid.Row="1"
+                      VerticalScrollBarVisibility="Auto"
+                      HorizontalScrollBarVisibility="Disabled"
+                      Padding="24,20">
+            <StackPanel>
+                <Border Style="{StaticResource PopupCard}">
+                    <StackPanel>
+                        <TextBlock Text="Datos de la actividad" Style="{StaticResource PopupSectionTitle}"/>
+                        <TextBlock Text="Define qué se realizará, cuándo y qué observaciones generales deben conservarse."
+                                   Style="{StaticResource PopupSubtitle}" Margin="0,0,0,14"/>
+
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="2*"/>
+                                <ColumnDefinition Width="16"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+
+                            <controls:FormField Grid.Column="0" Header="Título de la actividad *">
+                                <TextBox Text="{Binding TituloActividad, UpdateSourceTrigger=PropertyChanged}"
+                                         MinHeight="38"
+                                         TabIndex="10"
+                                         AutomationProperties.Name="Título de la actividad"/>
+                            </controls:FormField>
+
+                            <controls:FormField Grid.Column="2" Header="Fecha de realización *">
+                                <DatePicker SelectedDate="{Binding FechaActividad, Mode=TwoWay}"
+                                            Style="{StaticResource PopupDatePicker}"
+                                            TabIndex="11"
+                                            AutomationProperties.Name="Fecha de realización de la actividad"/>
+                            </controls:FormField>
+                        </Grid>
+
+                        <controls:FormField Header="Descripción">
+                            <TextBox Text="{Binding DescripcionActividad, UpdateSourceTrigger=PropertyChanged}"
+                                     AcceptsReturn="True"
+                                     MinHeight="100"
+                                     TextWrapping="Wrap"
+                                     VerticalScrollBarVisibility="Auto"
+                                     VerticalContentAlignment="Top"
+                                     TabIndex="12"
+                                     AutomationProperties.Name="Descripción de la actividad"/>
+                        </controls:FormField>
+
+                        <controls:FormField Header="Observaciones generales">
+                            <TextBox Text="{Binding ObservacionesActividad, UpdateSourceTrigger=PropertyChanged}"
+                                     AcceptsReturn="True"
+                                     MinHeight="90"
+                                     TextWrapping="Wrap"
+                                     VerticalScrollBarVisibility="Auto"
+                                     VerticalContentAlignment="Top"
+                                     TabIndex="13"
+                                     AutomationProperties.Name="Observaciones generales de la actividad"/>
+                        </controls:FormField>
+
+                        <Border Background="{DynamicResource SectionBackgroundBrush}"
+                                BorderBrush="{DynamicResource BorderLightBrush}"
+                                BorderThickness="1"
+                                CornerRadius="{DynamicResource CornerRadiusMedium}"
+                                Padding="14"
+                                Margin="0,8,0,0">
+                            <StackPanel>
+                                <TextBlock Text="Acciones de la actividad"
+                                           FontWeight="SemiBold"
+                                           Foreground="{DynamicResource TextPrimaryBrush}"/>
+                                <TextBlock Text="Descartar revierte la edición local. Anular o eliminar requieren una decisión explícita."
+                                           Style="{StaticResource PopupSubtitle}"
+                                           Margin="0,2,0,8"/>
+                                <WrapPanel>
+                                    <Button Content="Descartar cambios"
+                                            Command="{Binding DescartarActividadCommand}"
+                                            TabIndex="20"/>
+                                    <Button Content="Anular actividad"
+                                            Command="{Binding AnularActividadCommand}"
+                                            TabIndex="21"/>
+                                    <Button Style="{StaticResource PopupDestructiveButton}"
+                                            Content="Eliminar sin seguimiento"
+                                            Command="{Binding EliminarActividadCommand}"
+                                            TabIndex="22"/>
+                                </WrapPanel>
+                            </StackPanel>
+                        </Border>
+                    </StackPanel>
+                </Border>
+            </StackPanel>
         </ScrollViewer>
 
-        <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,10,0,0">
-            <Button Content="Cerrar" Click="OnCerrarClic" IsCancel="True" MinWidth="110" TabIndex="90" AutomationProperties.Name="Cerrar ventana de actividad"/>
-        </StackPanel>
+        <Border Grid.Row="2" Style="{StaticResource PopupFooter}">
+            <Grid>
+                <TextBlock Text="Ctrl+S para guardar · Esc para cerrar"
+                           Style="{StaticResource PopupSubtitle}"
+                           VerticalAlignment="Center"/>
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                    <Button Content="Cerrar"
+                            Click="OnCerrarClic"
+                            IsCancel="True"
+                            MinWidth="100"
+                            TabIndex="90"
+                            AutomationProperties.Name="Cerrar ventana de actividad"/>
+                    <Button Style="{StaticResource PrimaryButton}"
+                            Content="Guardar actividad"
+                            Command="{Binding GuardarActividadCommand}"
+                            IsDefault="True"
+                            MinWidth="140"
+                            TabIndex="89"/>
+                </StackPanel>
+            </Grid>
+        </Border>
     </Grid>
 </Window>
