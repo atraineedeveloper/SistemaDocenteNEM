@@ -24,14 +24,14 @@
             </Border>
             <StackPanel VerticalAlignment="Center">
                 <TextBlock Text="Sistema Docente Local" Foreground="{DynamicResource TextOnPrimaryBrush}" Style="{StaticResource Heading3}" FontWeight="Bold"/>
-                <TextBlock Text="Gestión de Aula" Foreground="{DynamicResource TextOnDarkBrush}" Style="{StaticResource Caption}"/>
+                <TextBlock Text="Gestión de Aula" Foreground="{DynamicResource TextOnPrimaryBrush}" Style="{StaticResource Caption}"/>
             </StackPanel>
         </StackPanel>
 
         <!-- Selector de grupo -->
         <StackPanel Grid.Column="2" Orientation="Horizontal" VerticalAlignment="Center"
                     DataContext="{Binding Grupo}" Margin="0,10,16,10">
-            <TextBlock Text="Grupo:" Foreground="{DynamicResource TextOnDarkBrush}" VerticalAlignment="Center" Margin="0,0,8,0" Style="{StaticResource Caption}"/>
+            <TextBlock Text="Grupo:" Foreground="{DynamicResource TextOnPrimaryBrush}" VerticalAlignment="Center" Margin="0,0,8,0" Style="{StaticResource Caption}"/>
             <ComboBox Width="150" MinWidth="120" VerticalAlignment="Center" Margin="0,0,8,0" TabIndex="1"
                       ItemsSource="{Binding GruposDisponibles}"
                       SelectedItem="{Binding GrupoSeleccionadoCombo, Mode=TwoWay}"
@@ -42,10 +42,10 @@
 
         <!-- Navegación principal -->
         <StackPanel Grid.Column="3" Orientation="Horizontal" VerticalAlignment="Stretch">
-            <Button x:Name="NavBtnGrupo" Style="{StaticResource NavTabButton}" Content="🏫 Grupo" Command="{Binding IrAGrupoCommand}" TabIndex="3" AutomationProperties.Name="Navegar a Grupo"/>
-            <Button x:Name="NavBtnAsistencia" Style="{StaticResource NavTabButton}" Content="📋 Asistencia" Command="{Binding IrAAsistenciaCommand}" TabIndex="4" AutomationProperties.Name="Navegar a Asistencia"/>
-            <Button x:Name="NavBtnProyectos" Style="{StaticResource NavTabButton}" Content="📁 Proyectos" Command="{Binding IrAProyectosCommand}" TabIndex="5" AutomationProperties.Name="Navegar a Proyectos"/>
-            <Button x:Name="NavBtnEvaluacion" Style="{StaticResource NavTabButton}" Content="⭐ Evaluación" Command="{Binding IrAEvaluacionCommand}" TabIndex="6" AutomationProperties.Name="Navegar a Evaluación"/>
+            <Button x:Name="NavBtnGrupo" Style="{StaticResource NavTabButton}" Foreground="{DynamicResource TextOnPrimaryBrush}" Content="🏫 Grupo" Command="{Binding IrAGrupoCommand}" TabIndex="3" AutomationProperties.Name="Navegar a Grupo"/>
+            <Button x:Name="NavBtnAsistencia" Style="{StaticResource NavTabButton}" Foreground="{DynamicResource TextOnPrimaryBrush}" Content="📋 Asistencia" Command="{Binding IrAAsistenciaCommand}" TabIndex="4" AutomationProperties.Name="Navegar a Asistencia"/>
+            <Button x:Name="NavBtnProyectos" Style="{StaticResource NavTabButton}" Foreground="{DynamicResource TextOnPrimaryBrush}" Content="📁 Proyectos" Command="{Binding IrAProyectosCommand}" TabIndex="5" AutomationProperties.Name="Navegar a Proyectos"/>
+            <Button x:Name="NavBtnEvaluacion" Style="{StaticResource NavTabButton}" Foreground="{DynamicResource TextOnPrimaryBrush}" Content="⭐ Evaluación" Command="{Binding IrAEvaluacionCommand}" TabIndex="6" AutomationProperties.Name="Navegar a Evaluación"/>
         </StackPanel>
 
         <!-- Selector de tema -->
