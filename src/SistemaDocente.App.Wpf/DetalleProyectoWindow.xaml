@@ -4,113 +4,260 @@
         xmlns:controls="clr-namespace:SistemaDocente.App.Wpf.Controls"
         xmlns:prop="clr-namespace:SistemaDocente.App.Wpf.Properties"
         xml:lang="es-MX"
-        Title="{x:Static prop:Resources.DetalleProyectoTitle}" Height="620" Width="720" MinHeight="500" MinWidth="580"
-        WindowStartupLocation="CenterOwner" ShowInTaskbar="False">
-    <Grid Background="{DynamicResource SectionBackgroundBrush}" Margin="{DynamicResource MarginXXXLarge}">
+        Title="{x:Static prop:Resources.DetalleProyectoTitle}"
+        Height="720" Width="820" MinHeight="600" MinWidth="700"
+        WindowStartupLocation="CenterOwner" ShowInTaskbar="False"
+        ResizeMode="CanResizeWithGrip"
+        Background="{DynamicResource WindowBackgroundBrush}">
+
+    <Window.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="Styles/PopupStyles.xaml"/>
+            </ResourceDictionary.MergedDictionaries>
+        </ResourceDictionary>
+    </Window.Resources>
+
+    <Window.InputBindings>
+        <KeyBinding Modifiers="Control" Key="S" Command="{Binding GuardarProyectoCommand}"/>
+    </Window.InputBindings>
+
+    <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
 
-        <StackPanel><TextBlock Text="Proyectos -> Detalle" Foreground="{DynamicResource TextSecondaryBrush}" Style="{StaticResource Caption}" Margin="0,0,0,6" AutomationProperties.Name="Ruta de navegacion: Proyectos a Detalle"/><DockPanel Margin="0,0,0,14">
-            <StackPanel DockPanel.Dock="Left" VerticalAlignment="Center">
-                <TextBlock Text="Proyecto Didáctico" Foreground="#64748B" FontSize="13" FontWeight="SemiBold"/>
-                <TextBlock Text="{Binding NombreProyecto}" FontSize="22" FontWeight="Bold" Foreground="#0F172A"/>
-            </StackPanel>
-            <Border DockPanel.Dock="Right" HorizontalAlignment="Right" CornerRadius="16" Padding="12,5" VerticalAlignment="Center" Background="#EFF8FF" BorderBrush="#B2DDFF" BorderThickness="1">
-                <TextBlock Text="{Binding ProyectoSeleccionado.Estado}" FontWeight="SemiBold" Foreground="#175CD3"/>
-            </Border>
-        </DockPanel></StackPanel>
+        <Border Grid.Row="0" Style="{StaticResource PopupHeader}">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
 
-        <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" Margin="0,0,0,10">
+                <StackPanel>
+                    <TextBlock Text="PLANEACIÓN DIDÁCTICA · PROYECTO" Style="{StaticResource PopupEyebrow}"/>
+                    <TextBlock Text="{Binding NombreProyecto}" Style="{StaticResource PopupTitle}" Margin="0,4,0,4"/>
+                    <TextBlock Text="Edita la planeación y administra las actividades sin salir del contexto del proyecto."
+                               Style="{StaticResource PopupSubtitle}"/>
+                </StackPanel>
+
+                <Border Grid.Column="1"
+                        Style="{StaticResource PopupInfoPill}"
+                        VerticalAlignment="Center"
+                        Margin="20,0,0,0">
+                    <TextBlock Text="{Binding ProyectoSeleccionado.Estado}"
+                               Foreground="{DynamicResource InfoBrush}"
+                               FontWeight="SemiBold"/>
+                </Border>
+            </Grid>
+        </Border>
+
+        <ScrollViewer Grid.Row="1"
+                      VerticalScrollBarVisibility="Auto"
+                      HorizontalScrollBarVisibility="Disabled"
+                      Padding="24,20">
             <StackPanel>
-                <Border Background="White" CornerRadius="8" Padding="16" Margin="0,0,0,14" BorderBrush="#E2E8F0" BorderThickness="1">
+                <Border Style="{StaticResource PopupCard}" Margin="0,0,0,16">
                     <StackPanel>
-                        <TextBlock Text="Información del Proyecto" FontSize="16" FontWeight="SemiBold" Foreground="#1E293B" Margin="0,0,0,10"/>
+                        <TextBlock Text="Datos del proyecto" Style="{StaticResource PopupSectionTitle}"/>
+                        <TextBlock Text="Mantén una descripción breve y un periodo coherente con la intención didáctica."
+                                   Style="{StaticResource PopupSubtitle}" Margin="0,0,0,14"/>
 
                         <controls:FormField Header="{x:Static prop:Resources.NombreProyecto}">
-                            <TextBox Text="{Binding NombreProyecto, UpdateSourceTrigger=PropertyChanged}" TabIndex="10" AutomationProperties.Name="Nombre del proyecto"/>
+                            <TextBox Text="{Binding NombreProyecto, UpdateSourceTrigger=PropertyChanged}"
+                                     MinHeight="38"
+                                     TabIndex="10"
+                                     AutomationProperties.Name="Nombre del proyecto"/>
                         </controls:FormField>
 
                         <controls:FormField Header="{x:Static prop:Resources.Descripcion}">
-                            <TextBox Text="{Binding DescripcionProyecto, UpdateSourceTrigger=PropertyChanged}" AcceptsReturn="True" Height="65" TextWrapping="Wrap" TabIndex="11" AutomationProperties.Name="Descripción del proyecto"/>
+                            <TextBox Text="{Binding DescripcionProyecto, UpdateSourceTrigger=PropertyChanged}"
+                                     AcceptsReturn="True"
+                                     MinHeight="90"
+                                     VerticalScrollBarVisibility="Auto"
+                                     VerticalContentAlignment="Top"
+                                     TextWrapping="Wrap"
+                                     TabIndex="11"
+                                     AutomationProperties.Name="Descripción del proyecto"/>
                         </controls:FormField>
 
-                        <Grid Margin="0,0,0,0">
+                        <Grid>
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="*"/>
-                                <ColumnDefinition Width="12"/>
+                                <ColumnDefinition Width="16"/>
                                 <ColumnDefinition Width="*"/>
                             </Grid.ColumnDefinitions>
+
                             <controls:FormField Grid.Column="0" Header="{x:Static prop:Resources.FechaInicio}">
-                                <DatePicker SelectedDate="{Binding FechaInicio, Mode=TwoWay}" TabIndex="12" AutomationProperties.Name="Fecha de inicio del proyecto"/>
+                                <DatePicker SelectedDate="{Binding FechaInicio, Mode=TwoWay}"
+                                            Style="{StaticResource PopupDatePicker}"
+                                            TabIndex="12"
+                                            AutomationProperties.Name="Fecha de inicio del proyecto"/>
                             </controls:FormField>
+
                             <controls:FormField Grid.Column="2" Header="{x:Static prop:Resources.FechaTermino}">
-                                <DatePicker SelectedDate="{Binding FechaTermino, Mode=TwoWay}" TabIndex="13" AutomationProperties.Name="Fecha de término del proyecto"/>
+                                <DatePicker SelectedDate="{Binding FechaTermino, Mode=TwoWay}"
+                                            Style="{StaticResource PopupDatePicker}"
+                                            TabIndex="13"
+                                            AutomationProperties.Name="Fecha de término del proyecto"/>
                             </controls:FormField>
                         </Grid>
 
-                        <Border Background="#FFFAEB" BorderBrush="#FEF0C7" BorderThickness="1" CornerRadius="6" Padding="12,8" Margin="0,4,0,12"
+                        <Border Style="{StaticResource AlertWarningBanner}"
                                 Visibility="{Binding DuracionAtipica, Converter={StaticResource BoolToVisibility}}">
-                            <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                                <TextBlock Text="⚠️ " Foreground="#B54708" FontSize="14"/>
-                                <TextBlock Foreground="#B54708" FontWeight="Medium" TextWrapping="Wrap"
-                                           Text="Duración fuera del rango estándar (14–31 días). Puedes guardar si es intencional."/>
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock Text="⚠" Foreground="{DynamicResource WarningBrush}" Margin="0,0,8,0"/>
+                                <TextBlock Foreground="{DynamicResource WarningBrush}"
+                                           FontWeight="Medium"
+                                           TextWrapping="Wrap"
+                                           Text="Duración fuera del rango orientativo de 14–31 días. Puedes guardar si es intencional."/>
                             </StackPanel>
                         </Border>
 
-                        <TextBlock Text="{x:Static prop:Resources.Observaciones}" FontWeight="SemiBold"/>
-                        <TextBox Text="{Binding ObservacionesProyecto, UpdateSourceTrigger=PropertyChanged}" AcceptsReturn="True" Height="55" TextWrapping="Wrap" TabIndex="14" AutomationProperties.Name="Observaciones del proyecto"/>
+                        <controls:FormField Header="{x:Static prop:Resources.Observaciones}">
+                            <TextBox Text="{Binding ObservacionesProyecto, UpdateSourceTrigger=PropertyChanged}"
+                                     AcceptsReturn="True"
+                                     MinHeight="80"
+                                     VerticalScrollBarVisibility="Auto"
+                                     VerticalContentAlignment="Top"
+                                     TextWrapping="Wrap"
+                                     TabIndex="14"
+                                     AutomationProperties.Name="Observaciones del proyecto"/>
+                        </controls:FormField>
 
-                        <WrapPanel Margin="0,8,0,0">
-                            <Button Style="{StaticResource PrimaryButton}" Content="Guardar cambios" Command="{Binding GuardarProyectoCommand}" TabIndex="20" IsDefault="True"/>
-                            <Button Content="Iniciar" Command="{Binding IniciarProyectoCommand}" TabIndex="21"/>
-                            <Button Content="Finalizar" Command="{Binding FinalizarProyectoCommand}" TabIndex="22"/>
-                            <Button Content="Reabrir" Command="{Binding ReabrirProyectoCommand}" TabIndex="23"/>
-                            <Button Content="Eliminar borrador" Command="{Binding EliminarProyectoCommand}" TabIndex="24"/>
-                        </WrapPanel>
+                        <Border Background="{DynamicResource SectionBackgroundBrush}"
+                                BorderBrush="{DynamicResource BorderLightBrush}"
+                                BorderThickness="1"
+                                CornerRadius="{DynamicResource CornerRadiusMedium}"
+                                Padding="14"
+                                Margin="0,8,0,0">
+                            <Grid>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="Auto"/>
+                                </Grid.RowDefinitions>
+                                <StackPanel>
+                                    <TextBlock Text="Estado del proyecto" FontWeight="SemiBold" Foreground="{DynamicResource TextPrimaryBrush}"/>
+                                    <TextBlock Text="Estas acciones cambian el ciclo de vida del proyecto."
+                                               Style="{StaticResource PopupSubtitle}" Margin="0,2,0,8"/>
+                                </StackPanel>
+                                <WrapPanel Grid.Row="1">
+                                    <Button Content="Iniciar proyecto" Command="{Binding IniciarProyectoCommand}" TabIndex="20"/>
+                                    <Button Content="Finalizar proyecto" Command="{Binding FinalizarProyectoCommand}" TabIndex="21"/>
+                                    <Button Content="Reabrir proyecto" Command="{Binding ReabrirProyectoCommand}" TabIndex="22"/>
+                                    <Button Style="{StaticResource PopupDestructiveButton}"
+                                            Content="Eliminar borrador"
+                                            Command="{Binding EliminarProyectoCommand}"
+                                            TabIndex="23"/>
+                                </WrapPanel>
+                            </Grid>
+                        </Border>
                     </StackPanel>
                 </Border>
 
-                <Border Background="White" CornerRadius="8" Padding="16" BorderBrush="#E2E8F0" BorderThickness="1">
+                <Border Style="{StaticResource PopupCard}">
                     <StackPanel>
-                        <DockPanel Margin="0,0,0,10">
-                            <TextBlock DockPanel.Dock="Left" Text="Actividades del Proyecto" FontSize="16" FontWeight="SemiBold" Foreground="#1E293B" VerticalAlignment="Center"/>
-                            <Button DockPanel.Dock="Right" HorizontalAlignment="Right" Style="{StaticResource PrimaryButton}" Content="+ Nueva Actividad" Click="OnNuevaActividadClic" TabIndex="30" AutomationProperties.Name="Crear nueva actividad"/>
-                        </DockPanel>
+                        <Grid Margin="0,0,0,12">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+                            <StackPanel>
+                                <TextBlock Text="Actividades del proyecto" Style="{StaticResource PopupSectionTitle}"/>
+                                <TextBlock Text="Abre una actividad para editar su información y seguimiento."
+                                           Style="{StaticResource PopupSubtitle}"/>
+                            </StackPanel>
+                            <Button Grid.Column="1"
+                                    Style="{StaticResource PrimaryButton}"
+                                    Content="Nueva actividad"
+                                    Click="OnNuevaActividadClic"
+                                    TabIndex="30"
+                                    AutomationProperties.Name="Crear nueva actividad"/>
+                        </Grid>
 
-                        <TextBox Text="{Binding BusquedaActividad, UpdateSourceTrigger=PropertyChanged}" ToolTip="Buscar actividad..." Margin="0,0,0,10" TabIndex="31" AutomationProperties.Name="Buscar actividad"/>
+                        <controls:FormField Header="Buscar actividad">
+                            <TextBox Text="{Binding BusquedaActividad, UpdateSourceTrigger=PropertyChanged}"
+                                     MinHeight="38"
+                                     TabIndex="31"
+                                     AutomationProperties.Name="Buscar actividad"/>
+                        </controls:FormField>
 
-                        <Grid Height="170">
-                            <ListBox ItemsSource="{Binding Actividades}" SelectedItem="{Binding ActividadSeleccionada}" MouseDoubleClick="OnActividadDobleClic" TabIndex="32" AutomationProperties.Name="Lista de actividades del proyecto">
+                        <Grid MinHeight="190" Height="220">
+                            <ListBox ItemsSource="{Binding Actividades}"
+                                     SelectedItem="{Binding ActividadSeleccionada}"
+                                     MouseDoubleClick="OnActividadDobleClic"
+                                     BorderBrush="{DynamicResource BorderLightBrush}"
+                                     BorderThickness="1"
+                                     Background="{DynamicResource CardBackgroundBrush}"
+                                     TabIndex="32"
+                                     AutomationProperties.Name="Lista de actividades del proyecto">
                                 <ListBox.ItemTemplate>
                                     <DataTemplate>
-                                        <DockPanel Margin="4">
-                                            <Border DockPanel.Dock="Right" Background="#F1F5F9" CornerRadius="4" Padding="6,2" VerticalAlignment="Center">
-                                                <TextBlock Text="{Binding Estado}" Foreground="#475569" FontSize="12" FontWeight="SemiBold"/>
-                                            </Border>
-                                            <StackPanel DockPanel.Dock="Left">
-                                                <TextBlock Text="{Binding Titulo}" FontWeight="SemiBold" FontSize="14" Foreground="#0F172A"/>
-                                                <TextBlock Text="{Binding FechaRealizacion, StringFormat=Fecha: {0:dd/MM/yyyy}}" Foreground="#64748B" FontSize="12"/>
+                                        <Grid Margin="8,6">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="*"/>
+                                                <ColumnDefinition Width="Auto"/>
+                                            </Grid.ColumnDefinitions>
+                                            <StackPanel>
+                                                <TextBlock Text="{Binding Titulo}"
+                                                           FontWeight="SemiBold"
+                                                           Foreground="{DynamicResource TextPrimaryBrush}"/>
+                                                <TextBlock Text="{Binding FechaRealizacion, StringFormat=Fecha: {0:dd/MM/yyyy}}"
+                                                           Style="{StaticResource PopupSubtitle}"
+                                                           Margin="0,2,0,0"/>
                                             </StackPanel>
-                                        </DockPanel>
+                                            <Border Grid.Column="1"
+                                                    Style="{StaticResource PopupNeutralPill}"
+                                                    VerticalAlignment="Center"
+                                                    Margin="16,0,0,0">
+                                                <TextBlock Text="{Binding Estado}"
+                                                           Foreground="{DynamicResource TextSecondaryBrush}"
+                                                           FontSize="12"
+                                                           FontWeight="SemiBold"/>
+                                            </Border>
+                                        </Grid>
                                     </DataTemplate>
                                 </ListBox.ItemTemplate>
                             </ListBox>
-                            <controls:EmptyState Icon="📋" Title="Sin actividades" Message="Este proyecto aún no tiene actividades registradas." Visibility="{Binding Actividades.Count, Converter={StaticResource CountToVisibility}}"/>
+
+                            <controls:EmptyState Icon="📋"
+                                                 Title="Sin actividades"
+                                                 Message="Este proyecto aún no tiene actividades registradas."
+                                                 Visibility="{Binding Actividades.Count, Converter={StaticResource CountToVisibility}}"/>
                         </Grid>
-                        
-                        <WrapPanel Margin="0,8,0,0" HorizontalAlignment="Right">
-                            <Button Content="✏️ Editar actividad seleccionada" Click="OnEditarActividadClic" TabIndex="33"/>
-                        </WrapPanel>
+
+                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,12,0,0">
+                            <Button Content="Editar actividad seleccionada"
+                                    Click="OnEditarActividadClic"
+                                    TabIndex="33"/>
+                        </StackPanel>
                     </StackPanel>
                 </Border>
             </StackPanel>
         </ScrollViewer>
 
-        <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,10,0,0">
-            <Button Content="Cerrar" Click="OnCerrarClic" IsCancel="True" MinWidth="110" TabIndex="90" AutomationProperties.Name="Cerrar ventana de detalle"/>
-        </StackPanel>
+        <Border Grid.Row="2" Style="{StaticResource PopupFooter}">
+            <Grid>
+                <TextBlock Text="Ctrl+S para guardar · doble clic para abrir una actividad"
+                           Style="{StaticResource PopupSubtitle}"
+                           VerticalAlignment="Center"/>
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                    <Button Content="Cerrar"
+                            Click="OnCerrarClic"
+                            IsCancel="True"
+                            MinWidth="100"
+                            TabIndex="90"
+                            AutomationProperties.Name="Cerrar ventana de detalle"/>
+                    <Button Style="{StaticResource PrimaryButton}"
+                            Content="Guardar cambios"
+                            Command="{Binding GuardarProyectoCommand}"
+                            IsDefault="True"
+                            MinWidth="140"
+                            TabIndex="89"/>
+                </StackPanel>
+            </Grid>
+        </Border>
     </Grid>
 </Window>
