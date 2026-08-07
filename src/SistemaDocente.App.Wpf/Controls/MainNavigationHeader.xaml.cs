@@ -8,7 +8,7 @@ using SistemaDocente.Presentation;
 namespace SistemaDocente.App.Wpf.Controls;
 
 /// <summary>
-/// Encabezado global del shell: branding, selector de grupo, navegación principal
+/// Encabezado global del shell: branding, contexto de grupo, navegación principal
 /// y selector de tema. No contiene lógica de módulos.
 /// </summary>
 public partial class MainNavigationHeader : UserControl
@@ -29,6 +29,7 @@ public partial class MainNavigationHeader : UserControl
     {
         CambiarSuscripcion(ViewModel);
         ActualizarPestañaActiva();
+        ActualizarSelectorGrupo();
     }
 
     private void OnUnloaded(object sender, RoutedEventArgs e) => CambiarSuscripcion(null);
@@ -37,6 +38,7 @@ public partial class MainNavigationHeader : UserControl
     {
         CambiarSuscripcion(e.NewValue as MainWindowViewModel);
         ActualizarPestañaActiva();
+        ActualizarSelectorGrupo();
     }
 
     private void CambiarSuscripcion(MainWindowViewModel? nuevo)
@@ -46,6 +48,7 @@ public partial class MainNavigationHeader : UserControl
         if (_viewModelSuscrito is not null)
         {
             _viewModelSuscrito.PropertyChanged -= OnViewModelPropertyChanged;
+            _viewModelSuscrito.Grupo.PropertyChanged -= OnGrupoPropertyChanged;
         }
 
         _viewModelSuscrito = nuevo;
@@ -53,6 +56,7 @@ public partial class MainNavigationHeader : UserControl
         if (_viewModelSuscrito is not null)
         {
             _viewModelSuscrito.PropertyChanged += OnViewModelPropertyChanged;
+            _viewModelSuscrito.Grupo.PropertyChanged += OnGrupoPropertyChanged;
         }
     }
 
@@ -69,6 +73,16 @@ public partial class MainNavigationHeader : UserControl
         }
     }
 
+    private void OnGrupoPropertyChanged(object? sender, PropertyChangedEventArgs e)
+    {
+        if (e.PropertyName is nameof(GestionGrupoViewModel.GrupoIdActual)
+            or nameof(GestionGrupoViewModel.GruposDisponibles)
+            or nameof(GestionGrupoViewModel.NombreGrupo))
+        {
+            ActualizarSelectorGrupo();
+        }
+    }
+
     private void ActualizarPestañaActiva()
     {
         if (ViewModel is not { } vm) return;
@@ -78,6 +92,41 @@ public partial class MainNavigationHeader : UserControl
         NavBtnProyectos.Tag = vm.MostrarProyectos ? "activo" : string.Empty;
         NavBtnEvaluacion.Tag = vm.MostrarEvaluacion ? "activo" : string.Empty;
         NavBtnReportes.Tag = vm.MostrarReportes ? "activo" : string.Empty;
+    }
+
+    private void ActualizarSelectorGrupo()
+    {
+        if (ViewModel is not { } vm || GrupoContextMenu is null) return;
+
+        GrupoContextMenu.Items.Clear();
+        foreach (var grupo in vm.Grupo.GruposDisponibles)
+        {
+            var opcion = new MenuItem
+            {
+                Header = grupo.NombreVisible,
+                IsCheckable = true,
+                IsChecked = grupo.GrupoId == vm.Grupo.GrupoIdActual,
+            };
+            AutomationProperties.SetName(opcion, $"Cambiar al grupo {grupo.NombreVisible}");
+            opcion.Click += (_, _) => vm.CambiarGrupo(grupo.GrupoId);
+            GrupoContextMenu.Items.Add(opcion);
+        }
+
+        if (vm.Grupo.GruposDisponibles.Count > 0)
+        {
+            GrupoContextMenu.Items.Add(new Separator());
+        }
+
+        GrupoContextMenu.Items.Add(new MenuItem
+        {
+            Header = "Mis grupos",
+            Command = vm.IrAInicioCommand,
+        });
+        GrupoContextMenu.Items.Add(new MenuItem
+        {
+            Header = "Crear grupo…",
+            Command = vm.CrearGrupoDesdeInicioCommand,
+        });
     }
 
     private void TemaClaro_Click(object sender, RoutedEventArgs e) =>
