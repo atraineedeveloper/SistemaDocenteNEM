@@ -3,7 +3,7 @@
 ## Dominio y persistencia
 - [x] 1. Definir semántica de `EstadoEntregaActividad` separada de `NivelLogro`.
 - [x] 2. Implementar estado explícito de entrega en Core y contratos Application.
-- [ ] 3. Resolver y documentar la estrategia SQLite definitiva: migración v6→v7 o extensión aditiva versionada, conservando compatibilidad y separación entre entrega/nivel.
+- [x] 3. Adoptar y documentar la estrategia SQLite definitiva: extensión aditiva versionada `reportes-contexto-entregas` v1 sobre `user_version = 6`, con conversión legacy y sin reconstruir la tabla base.
 - [x] 4. Agregar configuración contextual 1:1 por grupo y persistencia.
 - [x] 5. Adaptar demo a contexto de grupo y estados de entrega.
 
@@ -21,7 +21,7 @@
 - [x] 14. Adaptar Evaluación para estado explícito sin reintroducir selector de actividad; matriz, guardado, filtros, editor y atajos ya conservan entrega/nivel de forma separada.
 
 ## Calidad
-- [ ] 15. Agregar pruebas Core/Application/Data/Reporting/Presentation/WPF. (Ya hay regresiones Presentation/WPF para la matriz; faltan coberturas completas de las demás capas.)
+- [ ] 15. Agregar pruebas Core/Application/Data/Reporting/Presentation/WPF. (Data, Presentation y WPF ya tienen regresiones específicas de este cambio; faltan completar Core/Application/Reporting.)
 - [ ] 16. Actualizar arquitectura y guía de reportes/configuración.
 - [ ] 17. Ejecutar format/build/test/OpenSpec/diff-check en Windows.
 - [ ] 18. Validar manualmente reportes, configuración, temas y escalado.
