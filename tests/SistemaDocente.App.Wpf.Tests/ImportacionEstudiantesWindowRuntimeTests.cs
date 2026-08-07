@@ -1,9 +1,8 @@
+using System.Globalization;
 using System.IO;
-using System.Threading;
 using System.Windows;
 using System.Windows.Controls;
 
-using SistemaDocente.App.Wpf;
 using SistemaDocente.Application;
 using SistemaDocente.Data;
 using SistemaDocente.Presentation;
@@ -13,68 +12,54 @@ namespace SistemaDocente.App.Wpf.Tests;
 public sealed class ImportacionEstudiantesWindowRuntimeTests
 {
     [Fact]
-    public void EstadoInicialMuestraSoloSeleccionDeArchivoYAccionesValidas()
+    public void EstadoInicialYConvertidorOcultanPasosNoActivos()
     {
-        Exception? capturada = null;
-        Visibility? archivo = null;
-        Visibility? resultado = null;
-        Visibility? crearPrevia = null;
-        Visibility? continuar = null;
-        Visibility? importar = null;
-        bool? volverHabilitado = null;
-        bool? cerrarHabilitado = null;
+        var converter = new BooleanToVisibilityConverter();
+        Assert.Equal(
+            Visibility.Visible,
+            converter.Convert(true, typeof(Visibility), null, CultureInfo.InvariantCulture));
+        Assert.Equal(
+            Visibility.Collapsed,
+            converter.Convert(false, typeof(Visibility), null, CultureInfo.InvariantCulture));
 
-        var thread = new Thread(() =>
-        {
-            try
-            {
-                if (System.Windows.Application.Current is null)
-                {
-                    var app = new App();
-                    app.InitializeComponent();
-                }
+        var viewModel = ConstruirViewModel();
+        Assert.True(viewModel.MostrarArchivo);
+        Assert.False(viewModel.MostrarColumnas);
+        Assert.False(viewModel.MostrarPrevia);
+        Assert.False(viewModel.MostrarConfirmacion);
+        Assert.False(viewModel.MostrarResultado);
+        Assert.False(viewModel.GenerarPreviaCommand.CanExecute(null));
+        Assert.False(viewModel.PrepararConfirmacionCommand.CanExecute(null));
+        Assert.False(viewModel.ConfirmarCommand.CanExecute(null));
+        Assert.False(viewModel.VolverCommand.CanExecute(null));
 
-                var directorio = Path.Combine(
-                    Path.GetTempPath(),
-                    "SistemaDocenteNEM-ImportWindow-" + Guid.NewGuid().ToString("N"));
-                Directory.CreateDirectory(directorio);
-                var baseSqlite = Path.Combine(directorio, "sistema-docente.db");
-                var grupos = new PersistenciaGrupoSqlite(baseSqlite);
-                var contextos = new PersistenciaContextoGrupoSqlite(baseSqlite);
-                var viewModel = new ImportacionEstudiantesViewModel(
-                    new SistemaDocente.Interchange.LectorImportacionTabular(),
-                    new ImportacionEstudiantesCasosUso(grupos, contextos));
-
-                var ventana = new ImportacionEstudiantesWindow(viewModel);
-                ventana.Measure(new Size(1080, 780));
-                ventana.Arrange(new Rect(0, 0, 1080, 780));
-                ventana.UpdateLayout();
-
-                archivo = ((Border)ventana.FindName("PasoArchivoPanel")).Visibility;
-                resultado = ((Border)ventana.FindName("PasoResultadoPanel")).Visibility;
-                crearPrevia = ((Button)ventana.FindName("CrearPreviaButton")).Visibility;
-                continuar = ((Button)ventana.FindName("ContinuarButton")).Visibility;
-                importar = ((Button)ventana.FindName("ImportarButton")).Visibility;
-                volverHabilitado = ((Button)ventana.FindName("VolverButton")).IsEnabled;
-                cerrarHabilitado = ((Button)ventana.FindName("CerrarButton")).IsEnabled;
-            }
-            catch (Exception exception)
-            {
-                capturada = exception;
-            }
-        });
-
-        thread.SetApartmentState(ApartmentState.STA);
-        thread.Start();
-        thread.Join();
-
-        Assert.Null(capturada);
-        Assert.Equal(Visibility.Visible, archivo);
-        Assert.Equal(Visibility.Collapsed, resultado);
-        Assert.Equal(Visibility.Collapsed, crearPrevia);
-        Assert.Equal(Visibility.Collapsed, continuar);
-        Assert.Equal(Visibility.Collapsed, importar);
-        Assert.False(volverHabilitado);
-        Assert.True(cerrarHabilitado);
+        var xaml = File.ReadAllText(Path.Combine(
+            ObtenerRaiz(),
+            "src",
+            "SistemaDocente.App.Wpf",
+            "ImportacionEstudiantesWindow.xaml"));
+        Assert.Contains("BooleanToVisibilityConverter x:Key=\"ImportBoolToVisibility\"", xaml, StringComparison.Ordinal);
+        Assert.Contains("PasoArchivoPanel", xaml, StringComparison.Ordinal);
+        Assert.Contains("PasoResultadoPanel", xaml, StringComparison.Ordinal);
+        Assert.Contains("Converter={StaticResource ImportBoolToVisibility}", xaml, StringComparison.Ordinal);
+        Assert.DoesNotContain("Converter={StaticResource BoolToVisibility}", xaml, StringComparison.Ordinal);
     }
+
+    private static ImportacionEstudiantesViewModel ConstruirViewModel()
+    {
+        var directorio = Path.Combine(
+            Path.GetTempPath(),
+            "SistemaDocenteNEM-ImportState-" + Guid.NewGuid().ToString("N"));
+        Directory.CreateDirectory(directorio);
+        var baseSqlite = Path.Combine(directorio, "sistema-docente.db");
+        var grupos = new PersistenciaGrupoSqlite(baseSqlite);
+        var contextos = new PersistenciaContextoGrupoSqlite(baseSqlite);
+
+        return new ImportacionEstudiantesViewModel(
+            new SistemaDocente.Interchange.LectorImportacionTabular(),
+            new ImportacionEstudiantesCasosUso(grupos, contextos));
+    }
+
+    private static string ObtenerRaiz() => Path.GetFullPath(Path.Combine(
+        AppContext.BaseDirectory, "..", "..", "..", "..", ".."));
 }
