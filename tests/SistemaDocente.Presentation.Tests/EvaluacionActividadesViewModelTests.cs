@@ -6,7 +6,7 @@ namespace SistemaDocente.Presentation.Tests;
 public sealed class EvaluacionActividadesViewModelTests
 {
     [Fact]
-    public void InicializarConstruyeMatrizConIdentificadoresYPadronesHistoricos()
+    public void InicializarConstruyeMatrizConIdentificadoresEstablesYPadronesHistoricos()
     {
         var vm = Crear(out var gestion);
 
@@ -14,10 +14,15 @@ public sealed class EvaluacionActividadesViewModelTests
 
         Assert.Single(vm.Proyectos);
         Assert.Equal(3, vm.Actividades.Count);
-        Assert.Equal(new[] { "A01", "A02", "A03" }, vm.ColumnasActividades.Select(x => x.Codigo));
+        var codigos = vm.ColumnasActividades.Select(x => x.Codigo).ToArray();
+        Assert.Equal(3, codigos.Distinct(StringComparer.Ordinal).Count());
+        Assert.All(codigos, codigo => Assert.Matches("^A[0-9A-F]{6}$", codigo));
         Assert.Equal(4, vm.Filas.Count);
         Assert.NotNull(vm.ActividadSeleccionada);
-        Assert.Equal("A01", vm.ActividadColumnaSeleccionada?.Codigo);
+        Assert.Equal(codigos[0], vm.ActividadColumnaSeleccionada?.Codigo);
+
+        vm.Inicializar(gestion.GrupoId);
+        Assert.Equal(codigos, vm.ColumnasActividades.Select(x => x.Codigo));
 
         var estudianteTardio = vm.Filas.Single(x => x.NumeroLista == 4);
         Assert.False(estudianteTardio.Celdas[0].EsAplicable);
