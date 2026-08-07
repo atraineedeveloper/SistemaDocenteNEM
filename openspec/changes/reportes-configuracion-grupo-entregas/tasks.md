@@ -2,23 +2,23 @@
 
 ## Dominio y persistencia
 - [x] 1. Definir semántica de `EstadoEntregaActividad` separada de `NivelLogro`.
-- [ ] 2. Implementar estado explícito de entrega en Core y contratos Application.
-- [ ] 3. Migrar SQLite v6→v7 separando `estado_entrega` y `nivel_logro`.
-- [ ] 4. Agregar configuración contextual 1:1 por grupo y persistencia.
-- [ ] 5. Adaptar demo a contexto de grupo y estados de entrega.
+- [x] 2. Implementar estado explícito de entrega en Core y contratos Application.
+- [ ] 3. Resolver y documentar la estrategia SQLite definitiva: migración v6→v7 o extensión aditiva versionada, conservando compatibilidad y separación entre entrega/nivel.
+- [x] 4. Agregar configuración contextual 1:1 por grupo y persistencia.
+- [x] 5. Adaptar demo a contexto de grupo y estados de entrega.
 
 ## Reporting
-- [ ] 6. Activar `SistemaDocente.Reporting` con modelos/cálculos puros.
-- [ ] 7. Implementar reporte individual.
-- [ ] 8. Implementar reporte grupal.
-- [ ] 9. Cubrir cumplimiento real: entregadas/no entregadas/pendientes.
+- [x] 6. Activar `SistemaDocente.Reporting` con modelos/cálculos puros.
+- [x] 7. Implementar reporte individual.
+- [x] 8. Implementar reporte grupal.
+- [x] 9. Cubrir cumplimiento real: entregadas/no entregadas/pendientes.
 
 ## Presentación y WPF
-- [ ] 10. Agregar `GestionReportesViewModel` y navegación global Reportes.
-- [ ] 11. Crear vista Reportes con modos Individual/Grupal según wireframe aprobado.
-- [ ] 12. Crear ventana Configuración del grupo con etapa cognoscitiva grupal de Piaget.
-- [ ] 13. Integrar configuración desde Grupo/Reportes sin alterar las vistas aprobadas más de lo necesario.
-- [ ] 14. Adaptar Evaluación para estado explícito sin reintroducir selector de actividad.
+- [x] 10. Agregar `GestionReportesViewModel` y navegación global Reportes.
+- [x] 11. Crear vista Reportes con modos Individual/Grupal según wireframe aprobado.
+- [x] 12. Crear ventana Configuración del grupo con etapa cognoscitiva grupal de Piaget.
+- [ ] 13. Integrar configuración desde Grupo y Reportes sin alterar las vistas aprobadas más de lo necesario. (Reportes ya integrado; acceso desde Grupo pendiente.)
+- [ ] 14. Adaptar Evaluación para estado explícito sin reintroducir selector de actividad; actualizar matriz, guardado, filtros y editor de forma atómica.
 
 ## Calidad
 - [ ] 15. Agregar pruebas Core/Application/Data/Reporting/Presentation/WPF.
