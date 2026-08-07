@@ -31,10 +31,29 @@ public sealed class GestionProyectosViewModelTests
     {
         var vm = Crear(out var gestion);
         vm.Inicializar(gestion.GrupoId);
+        vm.ConfigurarGradosDisponibles([GradoPrimaria.Cuarto]);
 
         vm.NuevoProyectoCommand.Execute(null);
 
         Assert.True(vm.TieneCambiosProyecto);
+    }
+
+    [Fact]
+    public void ProyectoNuevoUnigradoPreseleccionaGradoYRequiereMetodologia()
+    {
+        var vm = Crear(out var gestion);
+        vm.Inicializar(gestion.GrupoId);
+        vm.ConfigurarGradosDisponibles([GradoPrimaria.Cuarto]);
+
+        vm.NuevoProyectoCommand.Execute(null);
+        vm.NombreProyecto = "Proyecto NEM";
+
+        Assert.Equal([GradoPrimaria.Cuarto], vm.GradosProyectoSeleccionados);
+        Assert.False(vm.GuardarProyectoCommand.CanExecute(null));
+
+        vm.MetodologiaProyecto = MetodologiaProyectoNem.ProyectosComunitarios;
+
+        Assert.True(vm.GuardarProyectoCommand.CanExecute(null));
     }
 
     [Fact]
@@ -171,6 +190,7 @@ public sealed class GestionProyectosViewModelTests
         var vm = Crear(out var gestion);
         SeleccionarPrimero(vm, gestion);
         vm.NuevaActividadCommand.Execute(null);
+        vm.CampoFormativoActividad = CampoFormativoNem.Lenguajes;
         vm.Entregas[0].Seleccionada = true;
 
         vm.MarcarDominaCommand.Execute(null);
@@ -189,6 +209,7 @@ public sealed class GestionProyectosViewModelTests
         gestion.FallarActividad = true;
         SeleccionarPrimero(vm, gestion);
         vm.NuevaActividadCommand.Execute(null);
+        vm.CampoFormativoActividad = CampoFormativoNem.Lenguajes;
         vm.TituloActividad = "Editada";
 
         vm.GuardarActividadCommand.Execute(null);
@@ -196,6 +217,26 @@ public sealed class GestionProyectosViewModelTests
         Assert.Equal("Editada", vm.TituloActividad);
         Assert.True(vm.TieneCambiosActividad);
         Assert.True(vm.GuardarActividadCommand.CanExecute(null));
+    }
+
+    [Fact]
+    public void ActividadLegacyPuedeEditarCampoSinInventarGrados()
+    {
+        var vm = Crear(out var gestion);
+        gestion.UsarActividadLegacy = true;
+        SeleccionarPrimero(vm, gestion);
+        vm.ActividadSeleccionada = Assert.Single(vm.Actividades);
+
+        Assert.Empty(vm.GradosActividadSeleccionados);
+        Assert.False(vm.PuedeEditarGradosActividad);
+
+        vm.CampoFormativoActividad = CampoFormativoNem.Lenguajes;
+
+        Assert.True(vm.GuardarActividadCommand.CanExecute(null));
+        vm.GuardarActividadCommand.Execute(null);
+
+        Assert.NotNull(gestion.UltimaEntradaActividad);
+        Assert.Empty(gestion.UltimaEntradaActividad.GradosObjetivo ?? []);
     }
 
     [Fact]
@@ -225,6 +266,7 @@ public sealed class GestionProyectosViewModelTests
     private static void SeleccionarPrimero(GestionProyectosViewModel vm, GestionDoble gestion)
     {
         vm.Inicializar(gestion.GrupoId);
+        vm.ConfigurarGradosDisponibles([GradoPrimaria.Cuarto]);
         vm.ProyectoSeleccionado = vm.ProyectosVisibles[0];
     }
 
@@ -256,9 +298,11 @@ public sealed class GestionProyectosViewModelTests
         internal GrupoId GrupoId { get; }
         internal bool FallarProyecto { get; set; }
         internal bool FallarActividad { get; set; }
+        internal bool UsarActividadLegacy { get; set; }
         internal int CantidadEstudiantes { get; set; } = 1;
         internal int ProyectosGuardados { get; private set; }
         internal int ActividadesGuardadas { get; private set; }
+        internal EntradaActividad? UltimaEntradaActividad { get; private set; }
 
         public IReadOnlyList<ProyectoResumen> ListarProyectos(GrupoId grupoId) =>
             _proyectos.Values.Select(Resumir).OrderBy(x => x.Nombre).ToArray();
@@ -297,23 +341,35 @@ public sealed class GestionProyectosViewModelTests
         public void EliminarProyecto(ProyectoId id, int version) => _proyectos.Remove(id);
 
         public IReadOnlyList<ActividadProyectoResumen> ListarActividades(ProyectoId proyectoId) =>
-            [Resumir(Actividad("Actividad", 1))];
+            [Resumir(Actividad("Actividad", 1, legacy: UsarActividadLegacy))];
 
         public ActividadProyectoDetalle PrepararActividad(
             ProyectoId proyectoId,
             string titulo,
             string descripcion,
             DateOnly fecha,
-            string observaciones) => Actividad(titulo, 1);
+            string observaciones) => Actividad(
+                titulo,
+                1,
+                CampoFormativoNem.NoEspecificado,
+                [],
+                legacy: true);
 
         public ActividadProyectoDetalle CrearActividad(ProyectoId proyectoId, EntradaActividad entrada)
         {
             FallarSiCorresponde(FallarActividad);
+            UltimaEntradaActividad = entrada;
             ActividadesGuardadas++;
-            return Actividad(entrada.Titulo, 2);
+            return Actividad(
+                entrada.Titulo,
+                2,
+                entrada.CampoFormativo,
+                entrada.GradosObjetivo?.ToArray() ?? [],
+                legacy: false);
         }
 
-        public ActividadProyectoDetalle ObtenerActividad(ActividadId id) => Actividad("Actividad", 1);
+        public ActividadProyectoDetalle ObtenerActividad(ActividadId id) =>
+            Actividad("Actividad", 1, legacy: UsarActividadLegacy);
 
         public ActividadProyectoDetalle ActualizarActividad(
             ActividadId id,
@@ -331,23 +387,75 @@ public sealed class GestionProyectosViewModelTests
         public void EliminarActividad(ActividadId id, int version) { }
 
         private ProyectoDetalle Proyecto(ProyectoId id, string nombre) => new(
-            id, GrupoId, nombre, "Descripción", new DateOnly(2026, 1, 1),
-            new DateOnly(2026, 1, 31), EstadoProyecto.Borrador, "Observaciones", 1, 1, false);
+            id,
+            GrupoId,
+            nombre,
+            "Descripción",
+            new DateOnly(2026, 1, 1),
+            new DateOnly(2026, 1, 31),
+            EstadoProyecto.Borrador,
+            "Observaciones",
+            1,
+            1,
+            false,
+            MetodologiaProyectoNem.ProyectosComunitarios,
+            [GradoPrimaria.Cuarto]);
 
         private ProyectoDetalle CrearDetalle(ProyectoId id, EntradaProyecto entrada, int version) => new(
-            id, GrupoId, entrada.Nombre, entrada.Descripcion, entrada.FechaInicio,
-            entrada.FechaTermino, EstadoProyecto.Borrador, entrada.Observaciones, 1, version, false);
+            id,
+            GrupoId,
+            entrada.Nombre,
+            entrada.Descripcion,
+            entrada.FechaInicio,
+            entrada.FechaTermino,
+            EstadoProyecto.Borrador,
+            entrada.Observaciones,
+            1,
+            version,
+            false,
+            entrada.Metodologia,
+            entrada.GradosObjetivo?.ToArray() ?? []);
 
-        private ActividadProyectoDetalle Actividad(string titulo, int version)
+        private ActividadProyectoDetalle Actividad(
+            string titulo,
+            int version,
+            CampoFormativoNem campo = CampoFormativoNem.Lenguajes,
+            IReadOnlyList<GradoPrimaria>? grados = null,
+            bool legacy = false)
         {
             var entregas = Enumerable.Range(1, CantidadEstudiantes)
                 .Select(numero => new EntregaActividadDetalle(
-                    EstudianteId.DesdeGuid(GuidUtility(numero)), numero, $"Estudiante {numero}",
-                    true, NivelLogro.Pendiente, ""))
+                    EstudianteId.DesdeGuid(GuidUtility(numero)),
+                    numero,
+                    $"Estudiante {numero}",
+                    true,
+                    EstadoEntregaActividad.Pendiente,
+                    NivelLogro.Pendiente,
+                    "",
+                    GradoPrimaria.Cuarto))
                 .ToArray();
+            var campoReal = legacy ? CampoFormativoNem.NoEspecificado : campo;
+            var gradosReales = legacy ? Array.Empty<GradoPrimaria>() : grados ?? [GradoPrimaria.Cuarto];
             return new(
-                _actividadId, _proyecto1, GrupoId, titulo, "", new DateOnly(2026, 1, 2), "",
-                EstadoActividad.Activa, entregas, entregas.Length, entregas.Length, 0, 0, 0, 0, 0, version);
+                _actividadId,
+                _proyecto1,
+                GrupoId,
+                titulo,
+                "",
+                new DateOnly(2026, 1, 2),
+                "",
+                EstadoActividad.Activa,
+                entregas,
+                entregas.Length,
+                entregas.Length,
+                0,
+                0,
+                0,
+                0,
+                0,
+                version,
+                campoReal,
+                gradosReales);
         }
 
         private static Guid GuidUtility(int numero)
@@ -358,13 +466,32 @@ public sealed class GestionProyectosViewModelTests
         }
 
         private static ProyectoResumen Resumir(ProyectoDetalle proyecto) => new(
-            proyecto.ProyectoId, proyecto.Nombre, proyecto.FechaInicio, proyecto.FechaTermino,
-            proyecto.Estado, proyecto.NumeroActividades, proyecto.Version);
+            proyecto.ProyectoId,
+            proyecto.Nombre,
+            proyecto.FechaInicio,
+            proyecto.FechaTermino,
+            proyecto.Estado,
+            proyecto.NumeroActividades,
+            proyecto.Version,
+            proyecto.Metodologia,
+            proyecto.GradosObjetivo);
 
         private static ActividadProyectoResumen Resumir(ActividadProyectoDetalle actividad) => new(
-            actividad.ActividadId, actividad.ProyectoId, actividad.Titulo, actividad.FechaRealizacion,
-            actividad.Estado, actividad.Total, actividad.Pendientes, actividad.Domina,
-            actividad.Suficiente, actividad.EnProceso, actividad.RequiereApoyo, actividad.NoEntrego, actividad.Version);
+            actividad.ActividadId,
+            actividad.ProyectoId,
+            actividad.Titulo,
+            actividad.FechaRealizacion,
+            actividad.Estado,
+            actividad.Total,
+            actividad.Pendientes,
+            actividad.Domina,
+            actividad.Suficiente,
+            actividad.EnProceso,
+            actividad.RequiereApoyo,
+            actividad.NoEntrego,
+            actividad.Version,
+            actividad.CampoFormativo,
+            actividad.GradosObjetivo);
 
         private static void FallarSiCorresponde(bool fallar)
         {
