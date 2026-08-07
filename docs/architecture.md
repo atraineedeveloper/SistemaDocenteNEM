@@ -91,7 +91,7 @@ celda    = entrega/evaluación de ese estudiante en esa actividad
 
 Una celda inexistente en el padrón histórico se representa como `—` y no puede editarse. Así, una alta posterior no se agrega retroactivamente a actividades previas y un estudiante inactivo puede conservarse en el historial.
 
-Las columnas reciben códigos visuales `A01`, `A02`, ... según el orden determinista de las actividades entregado por Application. El código es sólo una referencia de interfaz; `ActividadId` sigue siendo la identidad real.
+Cada columna recibe un código visual estable con formato `A` + seis caracteres hexadecimales derivados de la identidad inmutable `ActividadId`, por ejemplo `A4F2C91`. El código no depende del orden, fecha ni título de la actividad y por tanto no se renumera cuando otras actividades cambian. Es sólo una referencia de interfaz; `ActividadId` continúa siendo la identidad real y no se requiere una migración SQLite para el código visual.
 
 Guardar la matriz no crea una transacción de proyecto. Presentation detecta las actividades con cambios y llama secuencialmente al caso de uso existente para guardar el padrón completo de cada actividad. Cada actividad conserva su propia atomicidad y concurrencia optimista. Si una actividad posterior falla, las anteriores ya confirmadas permanecen guardadas y el resto conserva la edición local.
 
@@ -192,7 +192,7 @@ Cada módulo recibe una frontera explícita por binding:
 
 `ProyectosView` funciona como superficie de consulta y entrada; la edición sigue en ventanas dedicadas.
 
-`EvaluacionView` funciona como matriz estudiante × actividad y congela `Núm.` + `Estudiante`. Los encabezados dinámicos `Axx` muestran nombre y fecha mediante tooltip/nombre accesible. La columna de la celda actual define la actividad seleccionada para métricas y acciones masivas.
+`EvaluacionView` funciona como matriz estudiante × actividad y congela `Núm.` + `Estudiante`. Los encabezados dinámicos muestran el código visual estable y exponen nombre + fecha mediante tooltip/nombre accesible. La columna de la celda actual define la actividad seleccionada para métricas y acciones masivas.
 
 ### Ventanas dedicadas
 
@@ -259,7 +259,7 @@ Desde Grupo se abre la ventana de expediente. Application consolida asistencia, 
 - **Core:** invariantes, transiciones y comportamiento de agregados.
 - **Application:** casos de uso, snapshots y conflictos.
 - **Data:** SQLite temporal real, migraciones, restricciones, rollback y reapertura.
-- **Presentation:** ViewModels, matriz, filtros, cambios pendientes y guardado secuencial sin WPF.
+- **Presentation:** ViewModels, matriz, filtros, cambios pendientes, códigos visuales estables y guardado secuencial sin WPF.
 - **App.Wpf:** composición, bindings, rutas demo, recursos semánticos, teclado contextual y límites del code-behind.
 - **Prueba manual:** apertura real, modo demo, redimensionamiento, foco, teclado, temas, scroll horizontal/vertical y ventanas dedicadas.
 - **Auditoría independiente:** arquitectura, persistencia, UX y regresiones antes de cerrar cambios relevantes.
@@ -273,7 +273,7 @@ Desde Grupo se abre la ventana de expediente. Application consolida asistencia, 
 - `ProyectoDidactico` y `ActividadProyecto` son agregados separados.
 - La actividad es la unidad atómica para su padrón de entregas/evaluación.
 - La matriz de evaluación es una proyección de Presentation, no un nuevo agregado ni una tabla SQLite.
-- Los códigos `Axx` son identificadores visuales; la identidad real sigue siendo `ActividadId`.
+- Los códigos visuales de actividad son estables porque se derivan de `ActividadId`; la identidad real sigue siendo `ActividadId`.
 - Guardar varias columnas modificadas significa operaciones atómicas por actividad ejecutadas secuencialmente.
 - Presentation es portable y usa MVVM propio.
 - WPF queda aislado en `SistemaDocente.App.Wpf`.
