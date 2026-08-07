@@ -28,7 +28,7 @@ public sealed class ImportacionEstudiantesUiTests
     {
         var xaml = Leer("src/SistemaDocente.App.Wpf/ImportacionEstudiantesWindow.xaml");
 
-        Assert.Contains("Selecciona el archivo", xaml, StringComparison.Ordinal);
+        Assert.Contains("Selecciona una lista de alumnos", xaml, StringComparison.Ordinal);
         Assert.Contains("Relaciona las columnas", xaml, StringComparison.Ordinal);
         Assert.Contains("Vista previa", xaml, StringComparison.Ordinal);
         Assert.Contains("Confirma la importación", xaml, StringComparison.Ordinal);

@@ -81,7 +81,7 @@ public sealed class LectorXlsxTabular : ILectorImportacionTabular
             throw;
         }
         catch (Exception exception) when (
-            exception is IOException or UnauthorizedAccessException or OpenXmlPackageException or InvalidDataException)
+            exception is IOException or UnauthorizedAccessException or OpenXmlPackageException or InvalidDataException or FileFormatException)
         {
             throw new ImportacionTabularException("No se pudo leer el archivo XLSX seleccionado.", exception);
         }
