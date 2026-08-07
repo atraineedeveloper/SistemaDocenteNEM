@@ -189,7 +189,7 @@ public sealed class ImportacionEstudiantesCasosUso
 
     private static int? NormalizarNumeroLista(
         string texto,
-        ICollection<ProblemaImportacion> problemas)
+        List<ProblemaImportacion> problemas)
     {
         var valor = texto.Trim();
         if (int.TryParse(valor, NumberStyles.Integer, CultureInfo.InvariantCulture, out var entero) && entero > 0)
@@ -214,7 +214,7 @@ public sealed class ImportacionEstudiantesCasosUso
 
     private static string ResolverNombreVisible(
         FilaImportacionEstudiante fila,
-        ICollection<ProblemaImportacion> problemas)
+        List<ProblemaImportacion> problemas)
     {
         var nombreExplicito = fila.NombreCompleto.Trim();
         if (nombreExplicito.Length > 0)
@@ -244,7 +244,7 @@ public sealed class ImportacionEstudiantesCasosUso
     private static DateOnly? NormalizarFecha(
         string texto,
         CampoImportacionEstudiante campo,
-        ICollection<ProblemaImportacion> problemas)
+        List<ProblemaImportacion> problemas)
     {
         var valor = texto.Trim();
         if (valor.Length == 0)
@@ -272,7 +272,7 @@ public sealed class ImportacionEstudiantesCasosUso
 
     private static GeneroEstudiante NormalizarGenero(
         string texto,
-        ICollection<ProblemaImportacion> problemas)
+        List<ProblemaImportacion> problemas)
     {
         var valor = NormalizarClave(texto);
         if (valor.Length == 0)
@@ -303,7 +303,7 @@ public sealed class ImportacionEstudiantesCasosUso
     private static (GradoPrimaria Grado, bool Predeterminado) NormalizarGrado(
         FilaImportacionEstudiante fila,
         IReadOnlyList<GradoPrimaria> gradosAtendidos,
-        ICollection<ProblemaImportacion> problemas)
+        List<ProblemaImportacion> problemas)
     {
         var texto = fila.GradoTexto.Trim();
         if (texto.Length == 0)
@@ -495,7 +495,7 @@ public sealed class ImportacionEstudiantesCasosUso
         FilaImportacionEstudiante fila,
         ProblemaImportacion problema)
     {
-        var indice = Array.IndexOf(filas, fila);
+        var indice = Array.FindIndex(filas, candidata => ReferenceEquals(candidata, fila));
         if (indice < 0)
         {
             return;
