@@ -74,6 +74,7 @@ public partial class App : System.Windows.Application
                     persistenciaAsistencia,
                     persistenciaProyectos,
                     persistenciaExpediente);
+                DemoContextSeeder.AsegurarContexto(persistenciaContexto, grupoDemo);
                 estado.Guardar(grupoDemo);
             }
 
