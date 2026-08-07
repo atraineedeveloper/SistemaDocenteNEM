@@ -1,0 +1,32 @@
+name: Normalize NEM planning branch
+
+on:
+  push:
+    branches:
+      - normalize/nem-project-planning-catalogs
+
+permissions:
+  contents: write
+
+jobs:
+  normalize:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout normalization branch
+        uses: actions/checkout@v7
+        with:
+          ref: normalize/nem-project-planning-catalogs
+          fetch-depth: 0
+          persist-credentials: true
+
+      - name: Replay PR 12 squash on current main
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git fetch origin feature/nem-multigrade-catalogs
+          git cherry-pick bd0d15e264ba5ab6c9f09e05c4fa4722f278d75c
+          git rm .github/workflows/normalize-nem-planning.yml
+          git commit -m "chore: remove temporary normalization workflow"
+          git push origin HEAD:normalize/nem-project-planning-catalogs
