@@ -56,13 +56,29 @@ public sealed class RefactorMainWindowVistasTests
     }
 
     [Fact]
+    public void BindingsDeModuloSeAnclanAlShellRaiz()
+    {
+        var xaml = LeerAplicacion("MainWindow.xaml");
+
+        Assert.Contains("x:Name=\"RootWindow\"", xaml, StringComparison.Ordinal);
+        Assert.Contains("DataContext=\"{Binding DataContext.Grupo, ElementName=RootWindow}\"", xaml, StringComparison.Ordinal);
+        Assert.Contains("DataContext=\"{Binding DataContext.ModuloAsistencia, ElementName=RootWindow}\"", xaml, StringComparison.Ordinal);
+        Assert.Contains("DataContext=\"{Binding DataContext.Proyectos, ElementName=RootWindow}\"", xaml, StringComparison.Ordinal);
+        Assert.Contains("DataContext=\"{Binding DataContext.Evaluacion, ElementName=RootWindow}\"", xaml, StringComparison.Ordinal);
+        Assert.Contains("Visibility=\"{Binding DataContext.MostrarGrupo, ElementName=RootWindow", xaml, StringComparison.Ordinal);
+        Assert.Contains("Visibility=\"{Binding DataContext.MostrarAsistencia, ElementName=RootWindow", xaml, StringComparison.Ordinal);
+        Assert.Contains("Visibility=\"{Binding DataContext.MostrarProyectos, ElementName=RootWindow", xaml, StringComparison.Ordinal);
+        Assert.Contains("Visibility=\"{Binding DataContext.MostrarEvaluacion, ElementName=RootWindow", xaml, StringComparison.Ordinal);
+    }
+
+    [Fact]
     public void AsistenciaUsaFronteraPropiaDeModulo()
     {
         var mainWindow = LeerAplicacion("MainWindow.xaml");
         var codeBehind = LeerVista("AsistenciaView.xaml.cs");
         var modulo = LeerPresentacion("ModuloAsistenciaViewModel.cs");
 
-        Assert.Contains("views:AsistenciaView DataContext=\"{Binding ModuloAsistencia}\"", mainWindow, StringComparison.Ordinal);
+        Assert.Contains("DataContext=\"{Binding DataContext.ModuloAsistencia, ElementName=RootWindow}\"", mainWindow, StringComparison.Ordinal);
         Assert.Contains(nameof(ModuloAsistenciaViewModel), codeBehind, StringComparison.Ordinal);
         Assert.DoesNotContain(nameof(MainWindowViewModel), codeBehind, StringComparison.Ordinal);
         Assert.Contains("GestionAsistenciaViewModel Diaria", modulo, StringComparison.Ordinal);
@@ -75,7 +91,7 @@ public sealed class RefactorMainWindowVistasTests
         var mainWindow = LeerAplicacion("MainWindow.xaml");
         var grupoCs = LeerVista("GrupoView.xaml.cs");
 
-        Assert.Contains("Expediente=\"{Binding Expediente}\"", mainWindow, StringComparison.Ordinal);
+        Assert.Contains("Expediente=\"{Binding DataContext.Expediente, ElementName=RootWindow}\"", mainWindow, StringComparison.Ordinal);
         Assert.Contains("DependencyProperty.Register", grupoCs, StringComparison.Ordinal);
         Assert.DoesNotContain("is MainWindow", grupoCs, StringComparison.Ordinal);
         Assert.DoesNotContain("MainWindowViewModel", grupoCs, StringComparison.Ordinal);
@@ -144,7 +160,7 @@ public sealed class RefactorMainWindowVistasTests
         var grupoXaml = LeerVista("GrupoView.xaml");
         var grupoCs = LeerVista("GrupoView.xaml.cs");
 
-        Assert.Contains("views:GrupoView DataContext=\"{Binding Grupo}\"", mainWindow, StringComparison.Ordinal);
+        Assert.Contains("DataContext=\"{Binding DataContext.Grupo, ElementName=RootWindow}\"", mainWindow, StringComparison.Ordinal);
         Assert.Contains("xmlns:controls=\"clr-namespace:SistemaDocente.App.Wpf.Controls\"", grupoXaml, StringComparison.Ordinal);
         Assert.Contains(nameof(GestionGrupoViewModel), grupoCs, StringComparison.Ordinal);
         Assert.Contains("OnVerExpedienteEstudianteClic", grupoXaml, StringComparison.Ordinal);
