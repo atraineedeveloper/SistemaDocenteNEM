@@ -1,6 +1,6 @@
-# Sistema Docente NEM module roadmap
+# AulaRaíz module roadmap
 
-**Product:** offline Windows desktop application for a Mexican public-primary-school teacher, built with C#/.NET 10, WPF and SQLite.
+**Product:** AulaRaíz — offline Windows desktop application for a Mexican public-primary-school teacher, built with C#/.NET 10, WPF and SQLite.
 
 This checklist reflects the current product state rather than the original prototype plan. A checked item means the capability is implemented in `main` unless it is explicitly marked as part of the current feature branch.
 
@@ -12,6 +12,7 @@ This checklist reflects the current product state rather than the original proto
   - Automated tests by layer.
   - OpenSpec-driven changes.
   - Windows GitHub Actions CI: format, Release build, tests, OpenSpec and whitespace.
+  - AulaRaíz visible product identity with legacy technical identifiers preserved for compatibility.
 
 - [x] **Group and students**
   - Multiple groups.
@@ -57,6 +58,7 @@ This checklist reflects the current product state rather than the original proto
   - Attendance, delivery/compliance and achievement summaries.
   - Group context and student-record evidence.
   - No competitive student ranking.
+  - [~] Teacher-initiated PDF output for the existing individual/group reports is the current feature change (PR #21).
 
 - [x] **Demo mode and UX foundation**
   - Isolated Demo/production data paths.
@@ -154,13 +156,13 @@ The current `Expediente` already stores tutor agreements. A future dedicated wor
 
 ## 7. Reports and output formats
 
-The report calculation/model foundation already exists. Remaining work includes:
+The report calculation/model foundation already exists. The current PDF change exports only those established report models rather than inventing new reporting semantics.
 
-- [ ] Printable attendance report.
+- [ ] Printable attendance-only report.
 - [ ] Project completion report.
 - [ ] Family-meeting summary.
-- [ ] Print preview.
-- [ ] PDF output.
+- [ ] In-app print preview / direct print workflow.
+- [~] PDF output for the existing individual and group reports (PR #21).
 - [ ] Period/formative-field reports once those modules exist.
 
 ## 8. Digital evidence attachments
@@ -224,22 +226,22 @@ The report calculation/model foundation already exists. Remaining work includes:
 
 ## 12. Backup and restore
 
-**Current feature branch:** `feature/local-backup-restore` / PR #18. Version 1 focuses on safe manual recovery. Automatic scheduling, encryption, cloud integration and future evidence-file recovery remain separate work.
+**Status:** manual recovery version 1 merged in `main` via PR #18 after automated and manual Demo validation. Automatic scheduling, encryption, cloud integration and future evidence-file recovery remain separate work.
 
-- [~] Create a manual `.sdocbackup` for the complete current Production or Demo storage profile.
-- [~] Snapshot SQLite through its online backup API rather than copying a live DB/WAL directly.
-- [~] Include valid application reopen state when available and warn/omit it when invalid or absent.
-- [~] Version and validate backup packages with manifest metadata, bounded components and SHA-256 corruption checks.
-- [~] Inspect/extract/prepare a selected package entirely outside live storage before restore.
-- [~] Reject unsafe ZIP paths, duplicates, checksum mismatch, wrong Demo/Production mode and future/incompatible schema versions.
-- [~] Prepare supported older database versions through current schema/additive-extension migration paths on an isolated copy.
-- [~] Require the typed confirmation `RESTAURAR` before destructive work.
-- [~] Create a mandatory safety backup of current live state before moving or deleting live files.
-- [~] Stage live database/state/WAL/SHM under rollback names and attempt rollback on publication failure.
-- [~] Display backup date, source mode, application/database version, included components and size before restore.
-- [~] Shut down the application after successful restore so stale in-memory state cannot overwrite restored data.
-- [~] Keep managed safety backups under the active Production/Demo application profile.
-- [~] Warn that version 1 backups contain sensitive personal/pedagogical data and are not encrypted.
+- [x] Create a manual `.sdocbackup` for the complete current Production or Demo storage profile.
+- [x] Snapshot SQLite through its online backup API rather than copying a live DB/WAL directly.
+- [x] Include valid application reopen state when available and warn/omit it when invalid or absent.
+- [x] Version and validate backup packages with manifest metadata, bounded components and SHA-256 corruption checks.
+- [x] Inspect/extract/prepare a selected package entirely outside live storage before restore.
+- [x] Reject unsafe ZIP paths, duplicates, checksum mismatch, wrong Demo/Production mode and future/incompatible schema versions.
+- [x] Prepare supported older database versions through current schema/additive-extension migration paths on an isolated copy.
+- [x] Require the typed confirmation `RESTAURAR` before destructive work.
+- [x] Create a mandatory safety backup of current live state before moving or deleting live files.
+- [x] Stage live database/state/WAL/SHM under rollback names and attempt rollback on publication failure.
+- [x] Display backup date, source mode, application/database version, included components and size before restore.
+- [x] Shut down the application after successful restore so stale in-memory state cannot overwrite restored data.
+- [x] Keep managed safety backups under the active Production/Demo application profile.
+- [x] Warn that version 1 backups contain sensitive personal/pedagogical data and are not encrypted.
 - [ ] Add an optional automatic backup policy in a later change.
 - [ ] Add backup encryption/key-management strategy in a later privacy/security change.
 - [ ] Include future external evidence files once the evidence module exists.
@@ -258,7 +260,7 @@ The report calculation/model foundation already exists. Remaining work includes:
 ## 14. Privacy and local security
 
 - [ ] Personal-data inventory and classification.
-- [~] Sensitive-information warnings in relevant workflows.
+- [~] Sensitive-information warnings in relevant workflows, now including sensitive export/PDF/recovery boundaries.
 - [ ] Optional local application lock.
 - [ ] Backup protection/encryption strategy.
 - [ ] Safe error logging without leaking student data.
@@ -296,11 +298,12 @@ The report calculation/model foundation already exists. Remaining work includes:
 2. [x] Merge structured NEM project/activity metadata.
 3. [x] Merge safe student XLSX/CSV import after functional manual validation (PR #15).
 4. [x] Merge group data XLSX/CSV export after manual file-opening validation (PR #17).
-5. [~] Complete and manually validate safe local backup/restore (PR #18).
-6. [ ] Extend richer NEM planning fields, evaluation criteria/rubrics and reporting periods.
-7. [ ] Add PDF/print report outputs.
-8. [ ] Add teacher journal, family workflow, evidence attachments and calendar as prioritized.
-9. [ ] Harden privacy, installer/update and long-term support workflows.
+5. [x] Merge safe local backup/restore after manual recovery validation (PR #18).
+6. [~] Complete PDF output for the existing individual/group reports (PR #21).
+7. [ ] Harden privacy and local security (module 14).
+8. [ ] Add installation/update packaging and clean-machine validation (module 15).
+9. [ ] Return to richer NEM planning fields, evaluation criteria/rubrics and reporting periods.
+10. [ ] Add teacher journal, family workflow, evidence attachments and calendar as prioritized.
 
 # Definition of done for a significant module/change
 
