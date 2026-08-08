@@ -21,13 +21,13 @@ env:
   DOTNET_NOLOGO: "1"
   INNO_VERSION: "7.0.2"
   INNO_TAG: "is-7_0_2"
-  UPGRADE_BASELINE_VERSION: "0.0.9"
+  UPGRADE_BASELINE_VERSION: "0.1.0"
 
 jobs:
   package:
     name: Windows · publish · install · upgrade · uninstall
     runs-on: windows-latest
-    timeout-minutes: 40
+    timeout-minutes: 45
 
     steps:
       - name: Checkout
@@ -88,11 +88,11 @@ jobs:
           Copy-Item -LiteralPath $baseline.Path -Destination $preserved -Force
           "BASELINE_INSTALLER=$preserved" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
 
-      - name: Build current self-contained app and installer
+      - name: Build current self-contained app, CLI and installer
         shell: pwsh
         run: .\scripts\build-installer.ps1 -IsccPath "$env:INNO_ISCC"
 
-      - name: Smoke-test install, real upgrade and uninstall
+      - name: Smoke-test install, real upgrade, CLI and uninstall
         shell: pwsh
         run: |
           [xml]$props = Get-Content -LiteralPath ".\Directory.Build.props" -Raw
@@ -101,6 +101,7 @@ jobs:
           $baselineInstaller = Resolve-Path $env:BASELINE_INSTALLER
           $installDir = Join-Path $env:LOCALAPPDATA "Programs\AulaRaiz"
           $appExe = Join-Path $installDir "SistemaDocente.App.Wpf.exe"
+          $cliExe = Join-Path $installDir "aularaiz.exe"
           $sentinelDir = Join-Path $env:LOCALAPPDATA "SistemaDocenteNEM"
           $sentinel = Join-Path $sentinelDir "installer-ci-sentinel.txt"
           $uninstallKey = "HKCU:\Software\Microsoft\Windows\CurrentVersion\Uninstall\{7A2B71C7-3BC4-4D54-A7A2-97A0D56D4E5B}_is1"
@@ -121,10 +122,17 @@ jobs:
             if (-not (Test-Path -LiteralPath $appExe -PathType Leaf)) {
               throw "Installed AulaRaíz executable was not found."
             }
+            if (-not (Test-Path -LiteralPath $cliExe -PathType Leaf)) {
+              throw "Installed AulaRaíz CLI executable was not found."
+            }
 
             $fileVersion = [System.Diagnostics.FileVersionInfo]::GetVersionInfo($appExe)
             if (-not $fileVersion.ProductVersion.StartsWith($ExpectedVersion, [StringComparison]::Ordinal)) {
               throw "Installed ProductVersion '$($fileVersion.ProductVersion)' does not match '$ExpectedVersion'."
+            }
+            $cliVersion = [System.Diagnostics.FileVersionInfo]::GetVersionInfo($cliExe)
+            if (-not $cliVersion.ProductVersion.StartsWith($ExpectedVersion, [StringComparison]::Ordinal)) {
+              throw "Installed CLI ProductVersion '$($cliVersion.ProductVersion)' does not match '$ExpectedVersion'."
             }
 
             if (-not (Test-Path -LiteralPath $uninstallKey)) {
@@ -136,14 +144,33 @@ jobs:
             }
           }
 
+          function Assert-CliStatus([string]$ExpectedVersion) {
+            $raw = & $cliExe status --json
+            if ($LASTEXITCODE -ne 0) {
+              throw "Installed AulaRaíz CLI status command failed with exit code $LASTEXITCODE."
+            }
+            $status = $raw | ConvertFrom-Json
+            if (-not $status.success -or $status.schemaVersion -ne "1") {
+              throw "Installed AulaRaíz CLI did not return the expected JSON envelope."
+            }
+            if ($status.data.version -ne $ExpectedVersion) {
+              throw "Installed AulaRaíz CLI reported version '$($status.data.version)' instead of '$ExpectedVersion'."
+            }
+            if ($status.privacy.networkAccess) {
+              throw "Installed AulaRaíz CLI unexpectedly reports network access."
+            }
+          }
+
           Invoke-Setup $baselineInstaller.Path
           Assert-InstalledVersion $env:UPGRADE_BASELINE_VERSION
+          Assert-CliStatus $env:UPGRADE_BASELINE_VERSION
 
           New-Item -ItemType Directory -Path $sentinelDir -Force | Out-Null
           Set-Content -LiteralPath $sentinel -Value "preserve-me" -Encoding utf8
 
           Invoke-Setup $installer.Path
           Assert-InstalledVersion $version
+          Assert-CliStatus $version
 
           $aulaRaizEntries = @(
             Get-ChildItem "HKCU:\Software\Microsoft\Windows\CurrentVersion\Uninstall" |
@@ -173,14 +200,14 @@ jobs:
           if (Test-Path -LiteralPath $appExe) {
             throw "AulaRaíz program files remain after uninstall."
           }
+          if (Test-Path -LiteralPath $cliExe) {
+            throw "AulaRaíz CLI remains after uninstall."
+          }
           if (-not (Test-Path -LiteralPath $sentinel -PathType Leaf)) {
             throw "Uninstall deleted the legacy user-data sentinel."
           }
 
           Remove-Item -LiteralPath $sentinel -Force
-          if ((Test-Path -LiteralPath $sentinelDir) -and -not (Get-ChildItem -LiteralPath $sentinelDir -Force)) {
-            Remove-Item -LiteralPath $sentinelDir -Force
-          }
 
       - name: Show installer checksum
         shell: pwsh
