@@ -23,5 +23,5 @@
 - [x] 14. Add Presentation tests for active-report dispatch and filename sanitization.
 - [x] 15. Add WPF structural regression coverage for the PDF action/privacy boundary.
 - [x] 16. Add maintained PDF-report documentation and update README/roadmap architecture notes.
-- [ ] 17. Run Windows CI: format, Release build, full tests, OpenSpec and whitespace.
-- [ ] 18. Manually generate Demo individual/group PDFs, open/render them and inspect page layout before merge.
+- [x] 17. Run Windows CI: format, Release build, full tests, OpenSpec and whitespace.
+- [x] 18. Manually generate Demo individual/group PDFs, open/render them and inspect page layout before merge.
