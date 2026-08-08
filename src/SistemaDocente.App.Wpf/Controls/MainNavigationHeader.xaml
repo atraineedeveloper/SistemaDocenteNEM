@@ -73,7 +73,7 @@
                         BorderBrush="{DynamicResource HeaderIconBackgroundBrush}" BorderThickness="1"
                         CornerRadius="10" Margin="0,0,11,0"
                         AutomationProperties.Name="AulaRaíz">
-                    <TextBlock Text="AR" Foreground="White" FontSize="15" FontWeight="Bold"
+                    <TextBlock Text="AR" Foreground="{DynamicResource HeaderIconBackgroundBrush}" FontSize="15" FontWeight="Bold"
                                HorizontalAlignment="Center" VerticalAlignment="Center"/>
                 </Border>
                 <StackPanel VerticalAlignment="Center">
