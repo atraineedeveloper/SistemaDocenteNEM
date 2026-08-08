@@ -35,9 +35,11 @@ public partial class App : System.Windows.Application
     {
         try
         {
+            // Se conserva la carpeta técnica legacy para no separar los logs de una
+            // instalación existente durante el cambio de marca a AulaRaíz.
             var logPath = Path.Combine(
                 Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
-                "SistemaDocenteNEM", "crash.log");
+                IdentidadProducto.IdentificadorTecnicoLegado, "crash.log");
             Directory.CreateDirectory(Path.GetDirectoryName(logPath)!);
             File.AppendAllText(logPath, $"[{DateTime.Now:O}] {exception}\n\n");
         }
@@ -186,7 +188,7 @@ public partial class App : System.Windows.Application
             Debug.WriteLine($"Fallo de inicio de almacenamiento: {exception}");
             MessageBox.Show(
                 "No fue posible iniciar el almacenamiento local. Cierra la aplicación e intenta nuevamente.",
-                "Sistema Docente Local", MessageBoxButton.OK, MessageBoxImage.Error);
+                IdentidadProducto.Nombre, MessageBoxButton.OK, MessageBoxImage.Error);
             Shutdown(1);
         }
     }
