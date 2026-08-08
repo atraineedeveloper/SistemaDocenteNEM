@@ -1,5 +1,7 @@
 using System.Text.Json;
 
+using Microsoft.Data.Sqlite;
+
 using SistemaDocente.Application;
 using SistemaDocente.Cli;
 using SistemaDocente.Core;
@@ -30,13 +32,13 @@ public sealed class CliAgentTests
     public void DefaultStudentOutputOmitsNamesAndPersonalOptInIncludesThem()
     {
         using var entorno = EntornoCliTemporal.Crear();
-        var (grupoId, _) = entorno.CrearGrupoConEstudiante("GRUPO_SECRETO", "ALUMNA_SECRETA");
+        var (grupoId, estudianteId) = entorno.CrearGrupoConEstudiante("GRUPO_SECRETO", "ALUMNA_SECRETA");
 
         var minimo = entorno.Ejecutar(
             "students", "list", "--group", grupoId.ToString(), "--json");
         Assert.Equal(0, minimo.ExitCode);
         Assert.DoesNotContain("ALUMNA_SECRETA", minimo.Stdout, StringComparison.Ordinal);
-        Assert.Contains(grupoId.ToString(), minimo.Stdout, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains(estudianteId.ToString(), minimo.Stdout, StringComparison.OrdinalIgnoreCase);
 
         var personal = entorno.Ejecutar(
             "students", "list", "--group", grupoId.ToString(),
@@ -177,6 +179,7 @@ public sealed class CliAgentTests
 
         public void Dispose()
         {
+            SqliteConnection.ClearAllPools();
             if (Directory.Exists(Raiz)) Directory.Delete(Raiz, true);
         }
     }
