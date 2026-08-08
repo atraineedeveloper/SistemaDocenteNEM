@@ -3,7 +3,7 @@ namespace SistemaDocente.Application.Tests;
 public sealed class RecuperacionLocalCasosUsoTests
 {
     [Fact]
-    public void NombreSugeridoIncluyeModoYFecha()
+    public void NombreSugeridoIncluyeMarcaModoYFecha()
     {
         var servicio = new ServicioRecuperacionFalso
         {
@@ -14,7 +14,7 @@ public sealed class RecuperacionLocalCasosUsoTests
         var nombre = casosUso.CrearNombreArchivoSugerido(
             new DateTimeOffset(2026, 8, 8, 2, 15, 0, TimeSpan.Zero));
 
-        Assert.Equal("SistemaDocenteNEM_Respaldo_Demo_2026-08-08_0215.sdocbackup", nombre);
+        Assert.Equal("AulaRaiz_Respaldo_Demo_2026-08-08_0215.sdocbackup", nombre);
     }
 
     [Fact]

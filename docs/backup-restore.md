@@ -1,6 +1,6 @@
 # Local backup and restore
 
-Sistema Docente Local keeps classroom information on the teacher's computer. XLSX/CSV export produces teacher-readable subsets of that information, but an export is not a recovery image of the application. The local backup/restore workflow exists to recover the complete application state after accidental deletion, storage failure, computer migration or another local-data incident.
+AulaRaíz keeps classroom information on the teacher's computer. XLSX/CSV export produces teacher-readable subsets of that information, but an export is not a recovery image of the application. The local backup/restore workflow exists to recover the complete application state after accidental deletion, storage failure, computer migration or another local-data incident.
 
 ## Version 1 scope
 
@@ -39,6 +39,8 @@ data/app-state.json       # optional
 
 `manifest.json` identifies the product and package format independently from the SQLite database version. It stores the creation timestamp, application version, Production/Demo source mode, database `PRAGMA user_version`, component sizes and SHA-256 checksums.
 
+The version-1 package identifier remains `SistemaDocenteNEM.Backup` for backward compatibility with backups created before the AulaRaíz branding change. The product rename does not invalidate existing packages.
+
 Checksums detect accidental corruption. They are **not** a digital signature and do not prove that a package was not deliberately modified by someone who can rewrite both the component and the manifest.
 
 ## Privacy and security limit
@@ -70,6 +72,8 @@ The backup workflow is global to the application, not tied to the currently open
 6. SHA-256 checksums and manifest metadata are calculated.
 7. The package is written to a temporary sibling file.
 8. Only after the archive closes successfully is the requested destination published/replaced.
+
+New suggested filenames use the ASCII-safe AulaRaíz brand form, for example `AulaRaiz_Respaldo_Produccion_...sdocbackup`. Existing backup filenames do not need to be renamed.
 
 The live SQLite file, WAL and SHM files are never copied directly as the backup representation.
 
@@ -110,6 +114,8 @@ Production
 Demo
 %LOCALAPPDATA%\SistemaDocenteNEM-Demo\backups\safety\
 ```
+
+These directories intentionally keep the historical technical identifier during the branding change. Renaming/migrating them belongs to the future installation/update work because a cosmetic path change could make existing data appear missing.
 
 If that mandatory safety backup cannot be created, restore does not begin.
 

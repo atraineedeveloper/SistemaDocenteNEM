@@ -33,7 +33,7 @@
                 <StackPanel>
                     <TextBlock Text="RECUPERACIÓN LOCAL" Style="{StaticResource PopupEyebrow}"/>
                     <TextBlock Text="Respaldo y restauración" Style="{StaticResource PopupTitle}" Margin="0,4,0,4"/>
-                    <TextBlock Text="Protege o recupera el estado completo de Sistema Docente. Esta función es distinta de exportar datos a Excel o CSV."
+                    <TextBlock Text="Protege o recupera el estado completo de AulaRaíz. Esta función es distinta de exportar datos a Excel o CSV."
                                Style="{StaticResource PopupSubtitle}" TextWrapping="Wrap"/>
                 </StackPanel>
                 <Border Grid.Column="1" Style="{StaticResource PopupInfoPill}" VerticalAlignment="Center" Margin="20,0,0,0">

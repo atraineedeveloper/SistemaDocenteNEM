@@ -1,6 +1,10 @@
-# Sistema Docente Local
+# AulaRaíz
 
-Sistema Docente Local is an offline-first Windows desktop application for the everyday work of a Mexican public-primary-school teacher. The product is being designed around classroom workflows and the Nueva Escuela Mexicana (NEM), while keeping student data local to the teacher's computer.
+**Gestión docente para la Nueva Escuela Mexicana**
+
+AulaRaíz is an offline-first Windows desktop application for the everyday work of a Mexican public-primary-school teacher. The product is designed around classroom workflows and the Nueva Escuela Mexicana (NEM), while keeping student data local to the teacher's computer.
+
+The commercial product name is **AulaRaíz**. Existing technical solution/project names, local-storage folders and backup-format identifiers still use the historical `SistemaDocente*` / `SistemaDocenteNEM` identity where changing them would risk data or backup compatibility. See [`docs/branding.md`](docs/branding.md).
 
 ## Current product scope
 
@@ -15,12 +19,12 @@ The application already includes working modules for:
 - group/school context;
 - safe student import from XLSX/CSV with preview, correction and atomic commit;
 - teacher-controlled group export to multi-sheet XLSX or focused CSV;
-- the current safe local backup/restore feature branch, which adds versioned recovery packages, pre-restore inspection and mandatory safety backup;
+- safe local backup/restore with versioned recovery packages, pre-restore inspection and mandatory safety backup;
 - Demo mode with isolated fictitious data;
 - Light, Dark and High Contrast themes;
 - automated Windows CI for formatting, Release build, tests, OpenSpec and whitespace validation.
 
-The current product includes structured primary grades, automatic NEM phases, multigrade support, school organization, student grade, offline Mexico entity/municipality catalogs and structured NEM project planning. Projects can carry a NEM methodology and target grades; activities can carry one formative field and an explicit grade scope while preserving their historical student roster. Safe XLSX/CSV student import and group-data export are merged in `main`. The active recovery change keeps `.sdocbackup` recovery separate from teacher-readable spreadsheet export and validates restore packages before any live data is replaced. See [`docs/nem-project-planning.md`](docs/nem-project-planning.md), [`docs/student-import.md`](docs/student-import.md), [`docs/group-export.md`](docs/group-export.md) and [`docs/backup-restore.md`](docs/backup-restore.md).
+The current product includes structured primary grades, automatic NEM phases, multigrade support, school organization, student grade, offline Mexico entity/municipality catalogs and structured NEM project planning. Projects can carry a NEM methodology and target grades; activities can carry one formative field and an explicit grade scope while preserving their historical student roster. Safe XLSX/CSV student import, group-data export and local backup/restore are merged in `main`. See [`docs/nem-project-planning.md`](docs/nem-project-planning.md), [`docs/student-import.md`](docs/student-import.md), [`docs/group-export.md`](docs/group-export.md) and [`docs/backup-restore.md`](docs/backup-restore.md).
 
 ## Product principles
 
@@ -31,6 +35,26 @@ The current product includes structured primary grades, automatic NEM phases, mu
 - **Privacy by design:** real student information must never be committed to the repository.
 - **Accessible desktop UX:** keyboard operation, semantic themes, high contrast and common display scaling are part of acceptance criteria.
 - **Spec-driven development:** meaningful changes are defined in OpenSpec before implementation and validated before merge.
+
+## Branding
+
+The visible product identity is:
+
+```text
+AulaRaíz
+Gestión docente para la Nueva Escuela Mexicana
+```
+
+The UI uses the compact `AR` monogram where an image asset is unnecessary. File-system-safe user-facing names use `AulaRaiz` without the accent, for example `AulaRaiz_Respaldo_Demo_...sdocbackup`.
+
+The historical technical identity remains intentionally stable for now:
+
+- solution/project namespaces: `SistemaDocente.*`;
+- production data folder: `%LOCALAPPDATA%\SistemaDocenteNEM\...`;
+- Demo data folder: `%LOCALAPPDATA%\SistemaDocenteNEM-Demo\...`;
+- backup package format id: `SistemaDocenteNEM.Backup`.
+
+Those identifiers are compatibility contracts, not user-facing branding. Any later rename must include an explicit migration and backward-compatibility plan.
 
 ## Technology
 
@@ -58,7 +82,7 @@ Feature work follows this sequence:
 8. perform required manual UX validation;
 9. use Squash and merge once the change is accepted.
 
-New technical documentation, OpenSpec content, branch names, pull-request text and commit messages are written in English. Existing Spanish UI/domain identifiers are preserved where renaming them would add risk without product value.
+New technical documentation, OpenSpec content, branch names, pull-request text and commit messages are written in English. Existing Spanish UI/domain identifiers and historical technical names are preserved where renaming them would add risk without product value.
 
 ## Running Demo mode
 
@@ -85,7 +109,7 @@ git diff --check
 
 ## Roadmap
 
-The maintained roadmap is [`checklist_modulos_sistema_docente_nem.md`](checklist_modulos_sistema_docente_nem.md). Student import and XLSX/CSV group-data export are merged. The active major change is versioned manual local backup/restore; automatic backup policy, encryption and cloud/evidence recovery remain deliberately separate future work.
+The maintained roadmap is [`checklist_modulos_sistema_docente_nem.md`](checklist_modulos_sistema_docente_nem.md). The current foundation includes NEM/multigrade context, student import, group-data export and safe local backup/restore. Near-term hardening priorities include privacy/local security and installation/update workflows before broader production use.
 
 ## Data policy
 
