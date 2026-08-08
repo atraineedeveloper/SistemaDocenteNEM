@@ -346,7 +346,7 @@ public sealed class ServicioRecuperacionLocalSqlite : IServicioRecuperacionLocal
         }
     }
 
-    private InspeccionRespaldoLocal CrearInspeccion(PreparacionRestauracion preparacion)
+    private static InspeccionRespaldoLocal CrearInspeccion(PreparacionRestauracion preparacion)
     {
         var manifiesto = preparacion.Manifiesto;
         return new InspeccionRespaldoLocal(
@@ -471,7 +471,7 @@ public sealed class ServicioRecuperacionLocalSqlite : IServicioRecuperacionLocal
         }
     }
 
-    private IReadOnlyList<Exception> RestaurarRollback(
+    private List<Exception> RestaurarRollback(
         string rollbackBase,
         string rollbackEstado,
         string rollbackWal,
@@ -964,7 +964,7 @@ public sealed class ServicioRecuperacionLocalSqlite : IServicioRecuperacionLocal
         }
     }
 
-    private static IReadOnlyList<ComponenteRespaldoLocal> CrearComponentes(
+    private static List<ComponenteRespaldoLocal> CrearComponentes(
         BackupManifest manifiesto)
     {
         var componentes = new List<ComponenteRespaldoLocal>
