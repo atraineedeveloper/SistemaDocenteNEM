@@ -10,4 +10,11 @@ public sealed class IdentidadProductoTests
         Assert.Equal("Gestión docente para la Nueva Escuela Mexicana", IdentidadProducto.Subtitulo);
         Assert.Equal("SistemaDocenteNEM", IdentidadProducto.IdentificadorTecnicoLegado);
     }
+
+    [Fact]
+    public void VersionVisibleProvieneDeMetadatosCompartidosDelProducto()
+    {
+        Assert.Equal("0.1.0", IdentidadProducto.Version);
+        Assert.Equal("v0.1.0", IdentidadProducto.VersionVisible);
+    }
 }
