@@ -17,7 +17,7 @@ public sealed class GestionReportesViewModel : ViewModelBase
 {
     private readonly GestionGrupoCasosUso _grupos;
     private readonly GestionReportesCasosUso _reportes;
-    private readonly IExportadorReportesPdf? _exportadorPdf;
+    private readonly ExportacionReportesPdfPresentacion? _exportacionPdf;
     private GrupoId? _grupoId;
     private IReadOnlyList<EstudianteReporteVisual> _estudiantes = Array.Empty<EstudianteReporteVisual>();
     private EstudianteReporteVisual? _estudianteSeleccionado;
@@ -33,7 +33,7 @@ public sealed class GestionReportesViewModel : ViewModelBase
     {
         _grupos = grupos ?? throw new ArgumentNullException(nameof(grupos));
         _reportes = reportes ?? throw new ArgumentNullException(nameof(reportes));
-        _exportadorPdf = exportadorPdf;
+        _exportacionPdf = exportadorPdf is null ? null : new ExportacionReportesPdfPresentacion(exportadorPdf);
         MostrarIndividualCommand = new RelayCommand(MostrarIndividual);
         MostrarGrupalCommand = new RelayCommand(MostrarGrupal);
         RefrescarCommand = new RelayCommand(Refrescar, () => _grupoId is not null);
@@ -102,11 +102,10 @@ public sealed class GestionReportesViewModel : ViewModelBase
     public bool MostrarGrupalActivo => !MostrarIndividualActivo;
 
     public bool PuedeExportarPdf =>
-        _exportadorPdf is not null
+        _exportacionPdf is not null
         && (MostrarIndividualActivo ? ReporteIndividual is not null : ReporteGrupal is not null);
 
-    public string AdvertenciaPdf =>
-        "El PDF puede contener datos personales, pedagógicos y de seguimiento. Guárdalo y compártelo sólo en ubicaciones y canales autorizados para tu contexto escolar.";
+    public string AdvertenciaPdf => _exportacionPdf?.AdvertenciaPrivacidad ?? string.Empty;
 
     public string Mensaje
     {
@@ -150,20 +149,22 @@ public sealed class GestionReportesViewModel : ViewModelBase
 
     public string CrearNombrePdfSugerido(DateOnly fecha)
     {
-        var tipo = MostrarIndividualActivo ? "Individual" : "Grupal";
-        var sujeto = MostrarIndividualActivo
-            ? ReporteIndividual is { } individual
-                ? $"{individual.NumeroLista}_{individual.Nombre}"
-                : "Alumno"
-            : ReporteGrupal?.NombreGrupo ?? "Grupo";
-        var bruto = $"{IdentidadProducto.NombreSeguroArchivo}_Reporte_{tipo}_{sujeto}_{fecha:yyyy-MM-dd}.pdf";
-        return SanitizarNombreArchivo(bruto);
+        if (_exportacionPdf is null) return $"{IdentidadProducto.NombreSeguroArchivo}_Reporte_{fecha:yyyy-MM-dd}.pdf";
+        if (MostrarIndividualActivo && ReporteIndividual is { } individual)
+        {
+            return _exportacionPdf.CrearNombreArchivo(individual, fecha);
+        }
+        if (!MostrarIndividualActivo && ReporteGrupal is { } grupal)
+        {
+            return _exportacionPdf.CrearNombreArchivo(grupal, fecha);
+        }
+        return $"{IdentidadProducto.NombreSeguroArchivo}_Reporte_{fecha:yyyy-MM-dd}.pdf";
     }
 
     public bool ExportarPdf(string rutaArchivo)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(rutaArchivo);
-        if (_exportadorPdf is null)
+        if (_exportacionPdf is null)
         {
             Mensaje = "La exportación PDF no está disponible en esta instalación.";
             return false;
@@ -173,11 +174,11 @@ public sealed class GestionReportesViewModel : ViewModelBase
         {
             if (MostrarIndividualActivo && ReporteIndividual is { } individual)
             {
-                _exportadorPdf.Exportar(individual, rutaArchivo);
+                _exportacionPdf.Exportar(individual, rutaArchivo);
             }
             else if (!MostrarIndividualActivo && ReporteGrupal is { } grupal)
             {
-                _exportadorPdf.Exportar(grupal, rutaArchivo);
+                _exportacionPdf.Exportar(grupal, rutaArchivo);
             }
             else
             {
@@ -222,14 +223,5 @@ public sealed class GestionReportesViewModel : ViewModelBase
         {
             Mensaje = "No fue posible generar el reporte individual seleccionado.";
         }
-    }
-
-    private static string SanitizarNombreArchivo(string valor)
-    {
-        var invalidos = Path.GetInvalidFileNameChars().ToHashSet();
-        var caracteres = valor.Select(caracter => invalidos.Contains(caracter) ? '_' : caracter).ToArray();
-        return new string(caracteres)
-            .Replace(' ', '_')
-            .Replace("__", "_", StringComparison.Ordinal);
     }
 }
