@@ -364,7 +364,7 @@ public sealed class ExportadorTabularArchivo : IExportadorTabular
 
     private static string CrearNombreHojaSeguro(
         string nombre,
-        ISet<string> nombresUsados)
+        HashSet<string> nombresUsados)
     {
         var invalido = new HashSet<char>(['[', ']', ':', '*', '?', '/', '\\']);
         var baseNombre = new string(
