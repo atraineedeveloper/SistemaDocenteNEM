@@ -35,4 +35,7 @@
 - [x] 24. Add Data/integration tests proving one confirmed import is all-or-nothing through the existing group transaction.
 - [x] 25. Add Presentation/WPF regressions for correction/exclusion, commit gating, accessibility and result counts.
 - [x] 26. Run Windows CI: format, Release build, full tests, OpenSpec and whitespace.
-- [ ] 27. Manually validate fictitious unigrade/multigrade XLSX and CSV imports in Light/Dark/High Contrast and 100/125/150% scaling.
+- [x] 27. Manually validate fictitious XLSX/CSV imports covering the normal flow, duplicate conflicts, invalid/review rows, multigrade grade resolution and explicit ambiguous-CSV delimiter selection.
+
+## Follow-up visual QA
+- [ ] 28. Recheck the import wizard in Light/Dark/High Contrast and at 100/125/150% scaling as part of the broader UI visual QA pass; this is not a functional merge blocker.
