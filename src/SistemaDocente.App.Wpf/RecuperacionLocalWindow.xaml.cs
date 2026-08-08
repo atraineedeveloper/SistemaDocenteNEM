@@ -23,8 +23,8 @@ public partial class RecuperacionLocalWindow : Window
     {
         var dialogo = new SaveFileDialog
         {
-            Title = "Crear respaldo de Sistema Docente",
-            Filter = "Respaldo de Sistema Docente (*.sdocbackup)|*.sdocbackup",
+            Title = $"Crear respaldo de {IdentidadProducto.Nombre}",
+            Filter = $"Respaldo de {IdentidadProducto.Nombre} (*.sdocbackup)|*.sdocbackup",
             DefaultExt = ".sdocbackup",
             AddExtension = true,
             FileName = ViewModel.CrearNombreArchivoSugerido(DateTimeOffset.Now),
@@ -58,8 +58,8 @@ public partial class RecuperacionLocalWindow : Window
     {
         var dialogo = new OpenFileDialog
         {
-            Title = "Seleccionar respaldo de Sistema Docente",
-            Filter = "Respaldo de Sistema Docente (*.sdocbackup)|*.sdocbackup|Todos los archivos (*.*)|*.*",
+            Title = $"Seleccionar respaldo de {IdentidadProducto.Nombre}",
+            Filter = $"Respaldo de {IdentidadProducto.Nombre} (*.sdocbackup)|*.sdocbackup|Todos los archivos (*.*)|*.*",
             CheckFileExists = true,
             Multiselect = false,
         };
