@@ -12,7 +12,7 @@ namespace SistemaDocente.App.Wpf;
 
 public partial class App : System.Windows.Application
 {
-    private static IRegistroDiagnosticoSeguro? _registroDiagnostico;
+    private static RegistroDiagnosticoSeguroArchivo? _registroDiagnostico;
 
     public App()
     {
