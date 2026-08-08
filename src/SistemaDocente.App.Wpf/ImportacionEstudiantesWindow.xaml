@@ -258,10 +258,10 @@
                         </StackPanel>
                     </Border>
                     <TextBlock FontSize="18">
-                        <Run Text="Alumnos a importar: "/><Run Text="{Binding Listas}" FontWeight="Bold"/>
+                        <Run Text="Alumnos a importar: "/><Run Text="{Binding Listas, Mode=OneWay}" FontWeight="Bold"/>
                     </TextBlock>
                     <TextBlock Margin="0,5,0,0">
-                        <Run Text="Filas excluidas: "/><Run Text="{Binding Excluidas}" FontWeight="Bold"/>
+                        <Run Text="Filas excluidas: "/><Run Text="{Binding Excluidas, Mode=OneWay}" FontWeight="Bold"/>
                     </TextBlock>
                 </StackPanel>
             </Border>
@@ -277,8 +277,8 @@
                     <TextBlock Margin="0,8,0,20" TextWrapping="Wrap" TextAlignment="Center" Style="{StaticResource PopupSubtitle}"
                                Text="El padrón del grupo se guardó en una sola operación y la lista se actualizará al cerrar esta ventana."/>
                     <TextBlock FontSize="18" HorizontalAlignment="Center">
-                        <Run Text="Importados: "/><Run Text="{Binding Importados}" FontWeight="Bold"/>
-                        <Run Text="   ·   Excluidos: "/><Run Text="{Binding ExcluidosResultado}" FontWeight="Bold"/>
+                        <Run Text="Importados: "/><Run Text="{Binding Importados, Mode=OneWay}" FontWeight="Bold"/>
+                        <Run Text="   ·   Excluidos: "/><Run Text="{Binding ExcluidosResultado, Mode=OneWay}" FontWeight="Bold"/>
                     </TextBlock>
                 </StackPanel>
             </Border>
