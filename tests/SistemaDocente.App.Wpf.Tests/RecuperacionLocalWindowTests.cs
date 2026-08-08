@@ -81,11 +81,17 @@ public sealed class RecuperacionLocalWindowTests
             "SistemaDocente.App.Wpf",
             "MainWindow.xaml.cs"));
 
-        Assert.Contains("Respaldo", header, StringComparison.Ordinal);
+        Assert.Contains("Header=\"↺  Respaldo\"", header, StringComparison.Ordinal);
+        Assert.Equal(
+            2,
+            header.Split(
+                "Visibility=\"{Binding MostrarNavegacion",
+                StringSplitOptions.None).Length - 1);
         Assert.Contains("RespaldoRestauracion_Click", header, StringComparison.Ordinal);
         Assert.Contains("RecuperacionSolicitada", headerCode, StringComparison.Ordinal);
         Assert.Contains("RecuperacionSolicitada=\"OnRecuperacionSolicitada\"", mainWindow, StringComparison.Ordinal);
         Assert.Contains(nameof(RecuperacionLocalWindow), mainCode, StringComparison.Ordinal);
+        Assert.Contains("ViewModel.SolicitarCerrar()", mainCode, StringComparison.Ordinal);
     }
 
     private sealed class ServicioRecuperacionFalso : IServicioRecuperacionLocal
