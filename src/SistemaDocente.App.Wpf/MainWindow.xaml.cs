@@ -18,21 +18,26 @@ public partial class MainWindow : Window
     public MainWindow(
         MainWindowViewModel viewModel,
         ConfiguracionGrupoViewModel configuracionGrupo,
-        ImportacionEstudiantesViewModel importacionEstudiantes)
+        ImportacionEstudiantesViewModel importacionEstudiantes,
+        ExportacionGrupoViewModel exportacionGrupo)
     {
         ArgumentNullException.ThrowIfNull(viewModel);
         ArgumentNullException.ThrowIfNull(configuracionGrupo);
         ArgumentNullException.ThrowIfNull(importacionEstudiantes);
+        ArgumentNullException.ThrowIfNull(exportacionGrupo);
         ConfiguracionGrupo = configuracionGrupo;
         ImportacionEstudiantes = importacionEstudiantes;
+        ExportacionGrupo = exportacionGrupo;
         InitializeComponent();
         GrupoModule.Importacion = importacionEstudiantes;
+        GrupoModule.Exportacion = exportacionGrupo;
         DataContext = viewModel;
     }
 
     public MainWindowViewModel ViewModel => (MainWindowViewModel)DataContext;
     public ConfiguracionGrupoViewModel ConfiguracionGrupo { get; }
     public ImportacionEstudiantesViewModel ImportacionEstudiantes { get; }
+    public ExportacionGrupoViewModel ExportacionGrupo { get; }
 
     private void OnClosing(object? sender, CancelEventArgs e)
     {

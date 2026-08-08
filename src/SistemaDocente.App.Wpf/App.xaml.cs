@@ -105,6 +105,15 @@ public partial class App : System.Windows.Application
             var importacionEstudiantesCasosUso = new ImportacionEstudiantesCasosUso(
                 persistencia,
                 persistenciaContexto);
+            var exportacionGrupoCasosUso = new ExportacionGrupoCasosUso(
+                persistencia,
+                persistenciaAsistencia,
+                persistenciaProyectos,
+                persistenciaProyectos,
+                persistenciaExpediente,
+                persistenciaContexto,
+                new ExportadorTabularArchivo());
+            var consultaExportacionGrupo = new ConsultaExportacionGrupoCasosUso(persistenciaProyectos);
 
             var mensajes = new WpfNotificationService();
             var viewModelGrupo = new GestionGrupoViewModel(
@@ -139,6 +148,9 @@ public partial class App : System.Windows.Application
             var viewModelImportacion = new ImportacionEstudiantesViewModel(
                 new LectorImportacionTabular(),
                 importacionEstudiantesCasosUso);
+            var viewModelExportacion = new ExportacionGrupoViewModel(
+                exportacionGrupoCasosUso,
+                consultaExportacionGrupo);
 
             var viewModel = new MainWindowViewModel(
                 viewModelGrupo,
@@ -152,7 +164,8 @@ public partial class App : System.Windows.Application
             var ventana = new MainWindow(
                 viewModel,
                 viewModelConfiguracion,
-                viewModelImportacion);
+                viewModelImportacion,
+                viewModelExportacion);
             MainWindow = ventana;
             ventana.Show();
             viewModelGrupo.Inicializar();

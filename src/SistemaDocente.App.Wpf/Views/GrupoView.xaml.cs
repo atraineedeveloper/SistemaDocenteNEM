@@ -60,6 +60,18 @@ public partial class GrupoView : UserControl
         set => SetValue(ImportacionProperty, value);
     }
 
+    public static readonly DependencyProperty ExportacionProperty = DependencyProperty.Register(
+        nameof(Exportacion),
+        typeof(ExportacionGrupoViewModel),
+        typeof(GrupoView),
+        new PropertyMetadata(null));
+
+    public ExportacionGrupoViewModel? Exportacion
+    {
+        get => (ExportacionGrupoViewModel?)GetValue(ExportacionProperty);
+        set => SetValue(ExportacionProperty, value);
+    }
+
     private GestionGrupoViewModel? ViewModel => DataContext as GestionGrupoViewModel;
 
     private void OnLoaded(object sender, RoutedEventArgs e)
@@ -147,6 +159,21 @@ public partial class GrupoView : UserControl
         {
             grupo.CargarGrupoPorId(grupoId);
         }
+    }
+
+    private void OnExportarDatosClic(object sender, RoutedEventArgs e)
+    {
+        if (ViewModel?.GrupoIdActual is not { } grupoId || Exportacion is not { } exportacion)
+        {
+            return;
+        }
+
+        exportacion.Inicializar(grupoId, DateOnly.FromDateTime(DateTime.Today));
+        var ventana = new ExportacionGrupoWindow(exportacion)
+        {
+            Owner = Window.GetWindow(this),
+        };
+        ventana.ShowDialog();
     }
 
     private void AbrirExpedienteEstudiante()
