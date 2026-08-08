@@ -125,7 +125,7 @@ public sealed class ExportacionGrupoCasosUsoTests
         var seguimiento = plan.Documento.Hojas.Single(x => x.Nombre == "Seguimiento");
         Assert.Single(seguimiento.Filas);
         Assert.Equal("Fortaleza", seguimiento.Filas[0].Celdas[3].Texto);
-        Assert.Equal(estudiante.NumeroLista, seguimiento.Filas[0].Celdas[0].Numero);
+        Assert.Equal((decimal)estudiante.NumeroLista, seguimiento.Filas[0].Celdas[0].Numero);
     }
 
     [Fact]
@@ -272,6 +272,7 @@ public sealed class ExportacionGrupoCasosUsoTests
 
     private sealed class AlmacenamientoExpedientesPrueba(Grupo grupo) : IAlmacenamientoExpedientes
     {
+        public Grupo GrupoOrigen { get; } = grupo;
         public NotaPedagogica? Nota { get; set; }
 
         public ExpedienteEstudiante ObtenerExpediente(EstudianteId estudianteId, GrupoId grupoId) =>
