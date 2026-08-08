@@ -33,7 +33,7 @@ public sealed class RecuperacionLocalDemoIntegrationTests
                 proyectos,
                 expedientes);
             DemoContextSeeder.AsegurarContexto(contextos, grupoId);
-            File.WriteAllText(estado, $"{{\"grupoId\":\"{grupoId.Valor}\"}}");
+            File.WriteAllText(estado, $"{{\"GrupoId\":\"{grupoId.Valor}\"}}");
 
             var grupoOriginal = grupos.Cargar(grupoId)!;
             var nombreOriginal = grupoOriginal.NombreVisible;
