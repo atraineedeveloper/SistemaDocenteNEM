@@ -90,6 +90,9 @@ public sealed class ExportacionGrupoDemoIntegrationTests
         Assert.Equal(31, hoja.Filas.Count);
         Assert.Equal("Número de lista", hoja.Encabezados[0].Texto);
         Assert.Equal("Nombre", hoja.Encabezados[1].Texto);
-        Assert.Contains(hoja.Filas, fila => fila.Celdas[1].Texto == "Ximena Torres Vidal");
+        var ximena = Assert.Single(hoja.Filas.Where(fila => fila.Celdas[0].Texto == "31"));
+        Assert.Equal("Torres", ximena.Celdas[2].Texto);
+        Assert.Equal("Vidal", ximena.Celdas[3].Texto);
+        Assert.Equal("Ximena", ximena.Celdas[4].Texto);
     }
 }
