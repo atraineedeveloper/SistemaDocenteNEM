@@ -97,7 +97,7 @@ public sealed class GestionRespaldoCasosUso
     public string CrearNombreArchivoSugerido(DateTimeOffset fechaLocal)
     {
         var modo = ModoActual == ModoAlmacenamientoLocal.Demostracion ? "Demo" : "Produccion";
-        return $"SistemaDocenteNEM_Respaldo_{modo}_{fechaLocal:yyyy-MM-dd_HHmm}.sdocbackup";
+        return $"{IdentidadProducto.NombreSeguroArchivo}_Respaldo_{modo}_{fechaLocal:yyyy-MM-dd_HHmm}.sdocbackup";
     }
 
     public ResultadoRespaldoLocal CrearRespaldo(
