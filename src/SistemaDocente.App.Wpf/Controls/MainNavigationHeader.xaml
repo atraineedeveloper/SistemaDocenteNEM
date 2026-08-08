@@ -6,7 +6,6 @@
              mc:Ignorable="d"
              d:DesignHeight="76" d:DesignWidth="1280"
              Background="{DynamicResource CardBackgroundBrush}"
-             Visibility="{Binding MostrarNavegacion, Converter={StaticResource BoolToVisibility}}"
              xml:lang="es-MX">
     <UserControl.Resources>
         <Style x:Key="ModernHeaderNavButton" TargetType="Button">
@@ -88,7 +87,8 @@
                 </StackPanel>
             </StackPanel>
 
-            <Menu Grid.Column="2" VerticalAlignment="Center" Margin="14,0,8,0" Background="Transparent">
+            <Menu Grid.Column="2" VerticalAlignment="Center" Margin="14,0,8,0" Background="Transparent"
+                  Visibility="{Binding MostrarNavegacion, Converter={StaticResource BoolToVisibility}}">
                 <MenuItem x:Name="GrupoContextMenu"
                           Padding="8,5"
                           AutomationProperties.Name="Cambiar contexto de grupo">
@@ -113,7 +113,8 @@
                 </MenuItem>
             </Menu>
 
-            <StackPanel Grid.Column="3" Orientation="Horizontal" VerticalAlignment="Stretch">
+            <StackPanel Grid.Column="3" Orientation="Horizontal" VerticalAlignment="Stretch"
+                        Visibility="{Binding MostrarNavegacion, Converter={StaticResource BoolToVisibility}}">
                 <Button x:Name="NavBtnGrupo" Style="{StaticResource ModernHeaderNavButton}" Content="👥  Grupo" Command="{Binding IrAGrupoCommand}" TabIndex="3" AutomationProperties.Name="Navegar a Grupo"/>
                 <Button x:Name="NavBtnAsistencia" Style="{StaticResource ModernHeaderNavButton}" Content="✓  Asistencia" Command="{Binding IrAAsistenciaCommand}" TabIndex="4" AutomationProperties.Name="Navegar a Asistencia"/>
                 <Button x:Name="NavBtnProyectos" Style="{StaticResource ModernHeaderNavButton}" Content="▱  Proyectos" Command="{Binding IrAProyectosCommand}" TabIndex="5" AutomationProperties.Name="Navegar a Proyectos"/>
