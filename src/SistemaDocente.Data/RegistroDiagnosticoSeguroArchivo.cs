@@ -8,6 +8,7 @@ namespace SistemaDocente.Data;
 
 public sealed class RegistroDiagnosticoSeguroArchivo : IRegistroDiagnosticoSeguro
 {
+    private static readonly object Sincronizacion = new();
     private static readonly UTF8Encoding Utf8SinBom = new(false);
     private static readonly JsonSerializerOptions OpcionesJson = new()
     {
@@ -49,9 +50,13 @@ public sealed class RegistroDiagnosticoSeguroArchivo : IRegistroDiagnosticoSegur
             var evento = DiagnosticoSeguro.CrearEvento(exception, categoria, _modo);
             var directorio = Path.GetDirectoryName(_rutaArchivo)
                 ?? throw new InvalidOperationException("La ruta de diagnóstico no tiene directorio contenedor.");
-            Directory.CreateDirectory(directorio);
             var linea = JsonSerializer.Serialize(evento, OpcionesJson) + Environment.NewLine;
-            File.AppendAllText(_rutaArchivo, linea, Utf8SinBom);
+
+            lock (Sincronizacion)
+            {
+                Directory.CreateDirectory(directorio);
+                File.AppendAllText(_rutaArchivo, linea, Utf8SinBom);
+            }
         }
         catch
         {
