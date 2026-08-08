@@ -183,7 +183,7 @@ The report calculation/model foundation already exists. Remaining work includes:
 
 ## 10. Student import
 
-**Current feature branch:** `feature/student-import-xlsx-csv` / PR #15. Automated implementation is complete pending final CI/manual acceptance.
+**Status:** merged in `main` via PR #15 after manual functional validation.
 
 - [x] Import `.xlsx` and UTF-8 `.csv`.
 - [x] Preview before any SQLite write.
@@ -201,18 +201,26 @@ The report calculation/model foundation already exists. Remaining work includes:
 - [x] Never overwrite, reactivate or deactivate existing students implicitly.
 - [x] Keep imported students out of historical attendance/activity/evaluation rosters.
 - [x] Keep raw workbook rows out of technical logs.
-- [ ] Complete manual XLSX/CSV validation in supported themes and scaling before merge.
+- [x] Manual functional validation completed with normal XLSX/CSV import, duplicate conflicts, invalid/review rows, multigrade resolution and ambiguous CSV delimiter selection.
+- [~] Theme/scaling rechecks remain part of continuous UI quality rather than an import-specific merge blocker.
 
 ## 11. Data export
 
-- [ ] Export students to XLSX/CSV.
-- [ ] Export attendance to XLSX/CSV.
-- [ ] Export projects and activities.
-- [ ] Export delivery/evaluation data.
-- [ ] Export student follow-up where appropriate and authorized.
-- [ ] Select period/content before export.
-- [ ] Support a multi-sheet workbook for a complete group export.
-- [ ] Exclude sensitive fields when the selected output purpose does not require them.
+**Current feature branch:** `feature/group-export-xlsx-csv` / PR #17. Implementation is in progress and remains unmerged until final automated and manual file-opening validation succeeds.
+
+- [~] Export students to XLSX/CSV.
+- [~] Export attendance to XLSX/CSV.
+- [~] Export projects and activities.
+- [~] Export delivery/evaluation data.
+- [~] Export student follow-up only through an explicit sensitive-content opt-in.
+- [~] Select attendance period and project/content scope before export.
+- [~] Support a multi-sheet workbook for a complete group export.
+- [~] Exclude sensitive observations/follow-up by default and display a warning when enabled.
+- [~] Write macro-free/value-only XLSX and formula-safe UTF-8 CSV.
+- [~] Publish through a temporary sibling file so failed exports do not leave misleading partial destinations.
+- [~] Reuse `SistemaDocente.Interchange` rather than putting XLSX/CSV syntax in WPF or SQLite.
+- [~] Generate deterministic Windows-safe file-name suggestions from structured group context.
+- [~] Validate representative Demo exports automatically and manually open generated XLSX/CSV before merge.
 
 ## 12. Backup and restore
 
@@ -277,8 +285,8 @@ Backup is intentionally separate from export.
 
 1. [x] Merge structured school-context/multigrade foundation.
 2. [x] Merge structured NEM project/activity metadata.
-3. [~] Complete manual validation and merge student XLSX/CSV import (PR #15).
-4. [ ] Implement data XLSX/CSV export.
+3. [x] Merge safe student XLSX/CSV import after functional manual validation (PR #15).
+4. [~] Complete and manually validate group data XLSX/CSV export (PR #17).
 5. [ ] Implement backup/restore before production use with irreplaceable real data.
 6. [ ] Extend richer NEM planning fields, evaluation criteria/rubrics and reporting periods.
 7. [ ] Add PDF/print report outputs.
