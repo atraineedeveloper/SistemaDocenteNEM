@@ -1,0 +1,45 @@
+name: Apply import wizard binding fix
+
+on:
+  push:
+    branches:
+      - feature/student-import-xlsx-csv
+    paths:
+      - .github/workflows/fix-import-run-bindings.yml
+
+permissions:
+  contents: write
+
+jobs:
+  fix:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: feature/student-import-xlsx-csv
+      - name: Fix read-only Run bindings
+        shell: python
+        run: |
+          from pathlib import Path
+          path = Path('src/SistemaDocente.App.Wpf/ImportacionEstudiantesWindow.xaml')
+          text = path.read_text(encoding='utf-8')
+          replacements = {
+              '<Run Text="{Binding Listas}" FontWeight="Bold"/>': '<Run Text="{Binding Listas, Mode=OneWay}" FontWeight="Bold"/>',
+              '<Run Text="{Binding Excluidas}" FontWeight="Bold"/>': '<Run Text="{Binding Excluidas, Mode=OneWay}" FontWeight="Bold"/>',
+              '<Run Text="{Binding Importados}" FontWeight="Bold"/>': '<Run Text="{Binding Importados, Mode=OneWay}" FontWeight="Bold"/>',
+              '<Run Text="{Binding ExcluidosResultado}" FontWeight="Bold"/>': '<Run Text="{Binding ExcluidosResultado, Mode=OneWay}" FontWeight="Bold"/>',
+          }
+          for old, new in replacements.items():
+              if old not in text:
+                  raise SystemExit(f'Missing expected binding: {old}')
+              text = text.replace(old, new)
+          path.write_text(text, encoding='utf-8')
+      - name: Commit fix and remove temporary workflow
+        shell: bash
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git rm .github/workflows/fix-import-run-bindings.yml
+          git add src/SistemaDocente.App.Wpf/ImportacionEstudiantesWindow.xaml
+          git commit -m "fix: make import summary bindings one-way"
+          git push
