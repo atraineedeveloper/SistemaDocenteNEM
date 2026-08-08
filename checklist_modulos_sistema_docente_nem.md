@@ -206,35 +206,44 @@ The report calculation/model foundation already exists. Remaining work includes:
 
 ## 11. Data export
 
-**Current feature branch:** `feature/group-export-xlsx-csv` / PR #17. Implementation is in progress and remains unmerged until final automated and manual file-opening validation succeeds.
+**Status:** merged in `main` via PR #17 after automated validation and manual opening of generated XLSX/CSV files.
 
-- [~] Export students to XLSX/CSV.
-- [~] Export attendance to XLSX/CSV.
-- [~] Export projects and activities.
-- [~] Export delivery/evaluation data.
-- [~] Export student follow-up only through an explicit sensitive-content opt-in.
-- [~] Select attendance period and project/content scope before export.
-- [~] Support a multi-sheet workbook for a complete group export.
-- [~] Exclude sensitive observations/follow-up by default and display a warning when enabled.
-- [~] Write macro-free/value-only XLSX and formula-safe UTF-8 CSV.
-- [~] Publish through a temporary sibling file so failed exports do not leave misleading partial destinations.
-- [~] Reuse `SistemaDocente.Interchange` rather than putting XLSX/CSV syntax in WPF or SQLite.
-- [~] Generate deterministic Windows-safe file-name suggestions from structured group context.
-- [~] Validate representative Demo exports automatically and manually open generated XLSX/CSV before merge.
+- [x] Export students to XLSX/CSV.
+- [x] Export attendance to XLSX/CSV.
+- [x] Export projects and activities.
+- [x] Export delivery/evaluation data.
+- [x] Export student follow-up only through an explicit sensitive-content opt-in.
+- [x] Select attendance period and project/content scope before export.
+- [x] Support a multi-sheet workbook for a complete group export.
+- [x] Exclude sensitive observations/follow-up by default and display a warning when enabled.
+- [x] Write macro-free/value-only XLSX and formula-safe UTF-8 CSV.
+- [x] Publish through a temporary sibling file so failed exports do not leave misleading partial destinations.
+- [x] Reuse `SistemaDocente.Interchange` rather than putting XLSX/CSV syntax in WPF or SQLite.
+- [x] Generate deterministic Windows-safe file-name suggestions from structured group context.
+- [x] Validate representative Demo exports automatically and manually open generated XLSX/CSV before merge.
 
 ## 12. Backup and restore
 
-Backup is intentionally separate from export.
+**Current feature branch:** `feature/local-backup-restore` / PR #18. Version 1 focuses on safe manual recovery. Automatic scheduling, encryption, cloud integration and future evidence-file recovery remain separate work.
 
-- [ ] Manual backup.
-- [ ] Optional automatic backup policy.
-- [ ] Include SQLite database, application configuration and later evidence files.
-- [ ] Version/validate backup packages.
-- [ ] Restore only after explicit confirmation.
-- [ ] Create a safety backup before restore.
-- [ ] Display backup date/version/size.
-- [ ] Detect incompatible or damaged backups.
-- [ ] Preserve data across application upgrades.
+- [~] Create a manual `.sdocbackup` for the complete current Production or Demo storage profile.
+- [~] Snapshot SQLite through its online backup API rather than copying a live DB/WAL directly.
+- [~] Include valid application reopen state when available and warn/omit it when invalid or absent.
+- [~] Version and validate backup packages with manifest metadata, bounded components and SHA-256 corruption checks.
+- [~] Inspect/extract/prepare a selected package entirely outside live storage before restore.
+- [~] Reject unsafe ZIP paths, duplicates, checksum mismatch, wrong Demo/Production mode and future/incompatible schema versions.
+- [~] Prepare supported older database versions through current schema/additive-extension migration paths on an isolated copy.
+- [~] Require the typed confirmation `RESTAURAR` before destructive work.
+- [~] Create a mandatory safety backup of current live state before moving or deleting live files.
+- [~] Stage live database/state/WAL/SHM under rollback names and attempt rollback on publication failure.
+- [~] Display backup date, source mode, application/database version, included components and size before restore.
+- [~] Shut down the application after successful restore so stale in-memory state cannot overwrite restored data.
+- [~] Keep managed safety backups under the active Production/Demo application profile.
+- [~] Warn that version 1 backups contain sensitive personal/pedagogical data and are not encrypted.
+- [ ] Add an optional automatic backup policy in a later change.
+- [ ] Add backup encryption/key-management strategy in a later privacy/security change.
+- [ ] Include future external evidence files once the evidence module exists.
+- [ ] Define an automatic retention/deletion policy for safety backups.
 
 ## 13. Application settings
 
@@ -249,7 +258,7 @@ Backup is intentionally separate from export.
 ## 14. Privacy and local security
 
 - [ ] Personal-data inventory and classification.
-- [ ] Sensitive-information warnings in relevant workflows.
+- [~] Sensitive-information warnings in relevant workflows.
 - [ ] Optional local application lock.
 - [ ] Backup protection/encryption strategy.
 - [ ] Safe error logging without leaking student data.
@@ -286,8 +295,8 @@ Backup is intentionally separate from export.
 1. [x] Merge structured school-context/multigrade foundation.
 2. [x] Merge structured NEM project/activity metadata.
 3. [x] Merge safe student XLSX/CSV import after functional manual validation (PR #15).
-4. [~] Complete and manually validate group data XLSX/CSV export (PR #17).
-5. [ ] Implement backup/restore before production use with irreplaceable real data.
+4. [x] Merge group data XLSX/CSV export after manual file-opening validation (PR #17).
+5. [~] Complete and manually validate safe local backup/restore (PR #18).
 6. [ ] Extend richer NEM planning fields, evaluation criteria/rubrics and reporting periods.
 7. [ ] Add PDF/print report outputs.
 8. [ ] Add teacher journal, family workflow, evidence attachments and calendar as prioritized.

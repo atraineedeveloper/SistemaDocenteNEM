@@ -11,12 +11,12 @@ The solution targets .NET 10. Portable production projects use `net10.0`; the WP
 | Project | Responsibility |
 | --- | --- |
 | `SistemaDocente.Core` | Domain entities, identities, invariants and domain exceptions. Includes groups/students, attendance, projects/activities, delivery/achievement, school context, NEM primary-grade/planning rules and student-record concepts. |
-| `SistemaDocente.Application` | Use cases, persistence/interchange ports, snapshots and orchestration between aggregates. |
+| `SistemaDocente.Application` | Use cases, persistence/interchange/recovery ports, snapshots and orchestration between aggregates. |
 | `SistemaDocente.Interchange` | File-format adapters for neutral tabular interchange. It reads XLSX/UTF-8 CSV for student import and writes value-only XLSX/formula-safe UTF-8 CSV for teacher-controlled export without depending on WPF or SQLite. |
-| `SistemaDocente.Data` | SQLite adapters, base-schema initialization, additive versioned extensions, queries and transactions. Technical exceptions are translated at the infrastructure boundary. |
+| `SistemaDocente.Data` | SQLite adapters, base-schema initialization, additive versioned extensions, queries, transactions and the concrete local backup/restore package service. Technical exceptions are translated at the infrastructure boundary. |
 | `SistemaDocente.Presentation` | Portable MVVM: ViewModels, commands, visual models, editable snapshots, filters, module boundaries and local catalog services. It does not reference WPF or SQLite. |
 | `SistemaDocente.Reporting` | Pure report models and calculations for individual/group reports, attendance, delivery compliance and achievement distribution. |
-| `SistemaDocente.App.Wpf` | WPF shell, module views, dedicated windows, themes, WPF services, application composition and isolated Demo mode. |
+| `SistemaDocente.App.Wpf` | WPF shell, module views, dedicated windows, themes, native file dialogs, application composition and isolated Demo mode. |
 
 Test projects mirror Core, Application, Data, Presentation and WPF. Reporting tests and Interchange adapter tests currently live in Application tests.
 
@@ -169,6 +169,28 @@ The initial export datasets are structured group context, students, normalized a
 
 Presentation owns the export stages (`Contenido → Alcance → Archivo → Resultado`). WPF owns only the native Windows save dialog and window behavior. Sensitive student observations, evaluation observations and student follow-up are excluded by default and require explicit opt-in. Export is intentionally distinct from backup/restore. See [`group-export.md`](group-export.md).
 
+## Local backup and restore
+
+Local recovery is a separate application-global workflow because its purpose and safety boundary differ from spreadsheet export. Application owns `IServicioRecuperacionLocal`, recovery result/inspection models and the exact destructive confirmation rule. Presentation exposes a portable recovery ViewModel. Data owns the concrete SQLite/ZIP/file-system operations. WPF owns only native open/save dialogs, the global recovery window and process shutdown after successful restore.
+
+Version 1 packages use the `.sdocbackup` extension and a versioned ZIP container:
+
+```text
+manifest.json
+data/sistema-docente.db
+data/app-state.json       # optional
+```
+
+The manifest records an independent package format version, creation time, application version, Production/Demo source mode, database version, component sizes and SHA-256 checksums. Checksums detect accidental corruption; they are not signatures. Version 1 packages are intentionally not encrypted and the UI identifies them as sensitive files.
+
+Manual backup creates a consistent temporary SQLite snapshot with `SqliteConnection.BackupDatabase`, then validates SQLite integrity/foreign keys before packaging. The live database/WAL/SHM files are not copied directly. Valid application reopen state is included when available; missing/invalid state may be omitted with a warning.
+
+Inspection never changes live storage. Archive paths/sizes/checksums are validated, components are extracted only to application-chosen temporary locations, the database passes integrity checks and a copied database is prepared through the current base-schema plus all additive-extension initializers. Supported older versions may migrate on that copy; future/incompatible versions are rejected before destructive confirmation.
+
+Restore requires the teacher to type `RESTAURAR`. Before any live file is moved, Data creates a normal `.sdocbackup` of the current state in the managed safety directory. If that mandatory safety backup fails, restore stops. Live database/state/WAL/SHM files are then staged under rollback names and only the previously validated/prepared database is installed. Publication failure triggers a best-effort rollback and the safety backup is retained.
+
+A successful restore returns `ReinicioRequerido = true`. WPF reports the safety-backup path and shuts down because existing ViewModels/aggregates may still represent the pre-restore database. See [`backup-restore.md`](backup-restore.md).
+
 ## SQLite persistence
 
 The base schema remains:
@@ -218,7 +240,7 @@ grados_proyecto
 grados_actividad
 ```
 
-Project methodology/grades and activity formative-field/grades are stored in side tables and written in the same transaction as their base aggregate. Legacy rows are initialized with unspecified metadata and empty grade sets; later legacy inserts are self-healed without guessing grades.
+Project methodology/grades and activity formative-field/grades are stored in side tables and written in the same transaction as their base aggregate. Legacy rows are initialized with unspecified metadata and empty target-grade sets; later legacy inserts are self-healed without guessing grades.
 
 ### SQLite principles
 
@@ -241,11 +263,11 @@ Presentation embeds a local Mexico entity/municipality catalog. Entity selection
 
 Presentation uses portable MVVM. ViewModels own selection, filters, editable state, confirmation boundaries and unsaved-change logic without WPF dependencies.
 
-`MainWindowViewModel` coordinates global navigation. `App.xaml.cs` is the composition root: it creates SQLite adapters, interchange adapters, use cases, ViewModels and WPF services; interprets Demo arguments; and wires shared group context across Group, Projects, Reports and interchange workflows.
+`MainWindowViewModel` coordinates classroom-module navigation. `App.xaml.cs` is the composition root: it creates SQLite adapters, interchange/recovery adapters, use cases, ViewModels and WPF services; interprets Demo arguments; and wires shared group context across Group, Projects, Reports and interchange workflows.
 
-The shell uses one top navigation surface. Current modules are Group, Attendance, Projects, Evaluation and Reports. `Mis grupos` is the explicit group workspace; after opening a group, a compact context switcher allows fast changes while preserving unsaved-change guards.
+The shell uses one top navigation surface. Current modules are Group, Attendance, Projects, Evaluation and Reports. `Mis grupos` is the explicit group workspace; after opening a group, a compact context switcher allows fast changes while preserving unsaved-change guards. Application-global recovery is surfaced independently from those module tabs so it does not inherit current-group scope.
 
-Complex tasks remain in dedicated windows, including student editing, student import, group-data export, project/activity detail, student record, evaluation-cell detail and structured group configuration. Project/activity editors expose structured NEM planning catalogs and grade scope while project/activity summaries surface compact planning metadata.
+Complex tasks remain in dedicated windows, including student editing, student import, group-data export, local backup/restore, project/activity detail, student record, evaluation-cell detail and structured group configuration. Project/activity editors expose structured NEM planning catalogs and grade scope while project/activity summaries surface compact planning metadata.
 
 ## Themes, accessibility and density
 
@@ -263,13 +285,15 @@ Production and Demo data never share files:
 Production
 %LOCALAPPDATA%\SistemaDocenteNEM\data\sistema-docente.db
 %LOCALAPPDATA%\SistemaDocenteNEM\data\app-state.json
+%LOCALAPPDATA%\SistemaDocenteNEM\backups\safety\
 
 Demo
 %LOCALAPPDATA%\SistemaDocenteNEM-Demo\data\sistema-docente.db
 %LOCALAPPDATA%\SistemaDocenteNEM-Demo\data\app-state.json
+%LOCALAPPDATA%\SistemaDocenteNEM-Demo\backups\safety\
 ```
 
-`--demo-reset` deletes/recreates only Demo storage. The Demo dataset contains structured student grades plus representative project methodologies, formative fields, target grades, attendance/evaluation history and follow-up data. Import/export integration tests use only fictitious Demo or temporary records.
+`--demo-reset` deletes/recreates only Demo database/application-state storage. The Demo dataset contains structured student grades plus representative project methodologies, formative fields, target grades, attendance/evaluation history and follow-up data. Import/export/recovery integration tests use only fictitious Demo or temporary records. Backup restore additionally rejects a package whose Production/Demo mode does not match the current process.
 
 ## Engineering invariants
 
@@ -277,11 +301,12 @@ Every significant change should preserve these boundaries:
 
 - Core does not know SQLite, WPF or file-system UI details.
 - Application orchestrates use cases through ports.
-- Data owns SQLite implementation details.
+- Data owns SQLite and local recovery package/file-system implementation details.
 - Interchange owns spreadsheet/CSV file syntax and does not own domain meaning.
 - Presentation stays portable.
 - Reporting remains pure and infrastructure-independent.
 - WPF owns desktop-specific interaction and composition.
 - Database upgrades are conservative, tested and versioned.
+- Destructive restore validates/prepares outside live storage and requires a safety backup before replacement.
 - Pedagogical references do not become diagnoses.
 - Official/stable NEM concepts may be structured; teacher-authored pedagogical content should not be over-constrained.

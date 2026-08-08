@@ -114,6 +114,14 @@ public partial class App : System.Windows.Application
                 persistenciaContexto,
                 new ExportadorTabularArchivo());
             var consultaExportacionGrupo = new ConsultaExportacionGrupoCasosUso(persistenciaProyectos);
+            var servicioRecuperacion = new ServicioRecuperacionLocalSqlite(
+                rutas.BaseSqlite,
+                rutas.EstadoAplicacion,
+                rutas.DirectorioRespaldosSeguridad,
+                modoDemo
+                    ? ModoAlmacenamientoLocal.Demostracion
+                    : ModoAlmacenamientoLocal.Produccion);
+            var gestionRespaldo = new GestionRespaldoCasosUso(servicioRecuperacion);
 
             var mensajes = new WpfNotificationService();
             var viewModelGrupo = new GestionGrupoViewModel(
@@ -151,6 +159,7 @@ public partial class App : System.Windows.Application
             var viewModelExportacion = new ExportacionGrupoViewModel(
                 exportacionGrupoCasosUso,
                 consultaExportacionGrupo);
+            var viewModelRecuperacion = new RecuperacionLocalViewModel(gestionRespaldo);
 
             var viewModel = new MainWindowViewModel(
                 viewModelGrupo,
@@ -165,7 +174,8 @@ public partial class App : System.Windows.Application
                 viewModel,
                 viewModelConfiguracion,
                 viewModelImportacion,
-                viewModelExportacion);
+                viewModelExportacion,
+                viewModelRecuperacion);
             MainWindow = ventana;
             ventana.Show();
             viewModelGrupo.Inicializar();

@@ -258,7 +258,8 @@ public sealed class RefactorMainWindowVistasTests
                     viewModel,
                     ConstruirConfiguracionGrupo(),
                     ConstruirImportacionEstudiantes(),
-                    ConstruirExportacionGrupo());
+                    ConstruirExportacionGrupo(),
+                    ConstruirRecuperacionLocal());
                 ventana.Measure(new System.Windows.Size(1280, 780));
                 ventana.Arrange(new System.Windows.Rect(0, 0, 1280, 780));
                 ventana.UpdateLayout();
@@ -307,6 +308,20 @@ public sealed class RefactorMainWindowVistasTests
                 contextos,
                 new SistemaDocente.Interchange.ExportadorTabularArchivo()),
             new ConsultaExportacionGrupoCasosUso(proyectos));
+    }
+
+    private static RecuperacionLocalViewModel ConstruirRecuperacionLocal()
+    {
+        var directorio = Path.Combine(Path.GetTempPath(), "SistemaDocenteNEM-RecoverySmoke-" + Guid.NewGuid().ToString("N"));
+        Directory.CreateDirectory(directorio);
+        var baseSqlite = Path.Combine(directorio, "sistema-docente.db");
+        return new RecuperacionLocalViewModel(
+            new GestionRespaldoCasosUso(
+                new ServicioRecuperacionLocalSqlite(
+                    baseSqlite,
+                    Path.Combine(directorio, "app-state.json"),
+                    Path.Combine(directorio, "backups", "safety"),
+                    ModoAlmacenamientoLocal.Produccion)));
     }
 
     private static MainWindowViewModel ConstruirViewModel()

@@ -23,6 +23,8 @@ public partial class MainNavigationHeader : UserControl
         DataContextChanged += OnDataContextChanged;
     }
 
+    public event EventHandler? RecuperacionSolicitada;
+
     private MainWindowViewModel? ViewModel => DataContext as MainWindowViewModel;
 
     private void OnLoaded(object sender, RoutedEventArgs e)
@@ -128,6 +130,9 @@ public partial class MainNavigationHeader : UserControl
             Command = vm.CrearGrupoDesdeInicioCommand,
         });
     }
+
+    private void RespaldoRestauracion_Click(object sender, RoutedEventArgs e) =>
+        RecuperacionSolicitada?.Invoke(this, EventArgs.Empty);
 
     private void TemaClaro_Click(object sender, RoutedEventArgs e) =>
         ThemeService.ApplyTheme(ThemeService.Light);
