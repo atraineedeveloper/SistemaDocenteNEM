@@ -2,7 +2,9 @@ param(
     [Parameter(Mandatory = $true)]
     [string]$IsccPath,
 
-    [string]$Configuration = "Release"
+    [string]$Configuration = "Release",
+
+    [string]$VersionOverride = ""
 )
 
 $ErrorActionPreference = "Stop"
@@ -20,10 +22,22 @@ if (-not (Test-Path -LiteralPath $IsccPath -PathType Leaf)) {
 }
 
 [xml]$props = Get-Content -LiteralPath $propsPath -Raw
-$version = [string]$props.Project.PropertyGroup.VersionPrefix
-if ([string]::IsNullOrWhiteSpace($version)) {
+$repositoryVersion = [string]$props.Project.PropertyGroup.VersionPrefix
+if ([string]::IsNullOrWhiteSpace($repositoryVersion)) {
     throw "Directory.Build.props no contiene VersionPrefix."
 }
+
+$version = if ([string]::IsNullOrWhiteSpace($VersionOverride)) {
+    $repositoryVersion
+} else {
+    $VersionOverride.Trim()
+}
+
+if ($version -notmatch '^\d+\.\d+\.\d+$') {
+    throw "La versión '$version' debe tener formato numérico mayor.menor.parche."
+}
+
+$assemblyVersion = "$version.0"
 
 Remove-Item -LiteralPath $publishDir -Recurse -Force -ErrorAction SilentlyContinue
 Remove-Item -LiteralPath $installerDir -Recurse -Force -ErrorAction SilentlyContinue
@@ -35,7 +49,11 @@ New-Item -ItemType Directory -Path $installerDir -Force | Out-Null
     --runtime win-x64 `
     --self-contained true `
     -p:PublishProfile=win-x64-self-contained `
-    -p:PublishDir="$publishDir\"
+    -p:PublishDir="$publishDir\" `
+    -p:VersionPrefix=$version `
+    -p:AssemblyVersion=$assemblyVersion `
+    -p:FileVersion=$assemblyVersion `
+    -p:InformationalVersion=$version
 if ($LASTEXITCODE -ne 0) {
     throw "dotnet publish falló con código $LASTEXITCODE."
 }
