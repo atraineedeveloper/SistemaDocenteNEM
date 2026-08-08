@@ -102,6 +102,7 @@ public sealed class ExportacionGrupoViewModel : ViewModelBase
     public bool MostrarAlcance => PasoActual == PasoExportacionGrupo.Alcance;
     public bool MostrarArchivo => PasoActual == PasoExportacionGrupo.Archivo;
     public bool MostrarResultado => PasoActual == PasoExportacionGrupo.Resultado;
+    public bool MostrarSiguiente => PasoActual is PasoExportacionGrupo.Contenido or PasoExportacionGrupo.Alcance;
 
     public FormatoExportacionTabular Formato
     {
@@ -404,7 +405,7 @@ public sealed class ExportacionGrupoViewModel : ViewModelBase
         IncluirObservacionesEstudiante,
         IncluirObservacionesEvaluacion);
 
-    private IReadOnlyList<ConjuntoExportacionGrupo> ConjuntosSeleccionados()
+    private List<ConjuntoExportacionGrupo> ConjuntosSeleccionados()
     {
         if (EsCsv)
         {
@@ -438,6 +439,7 @@ public sealed class ExportacionGrupoViewModel : ViewModelBase
         OnPropertyChanged(nameof(MostrarAlcance));
         OnPropertyChanged(nameof(MostrarArchivo));
         OnPropertyChanged(nameof(MostrarResultado));
+        OnPropertyChanged(nameof(MostrarSiguiente));
         SiguienteCommand.NotifyCanExecuteChanged();
         VolverCommand.NotifyCanExecuteChanged();
     }
