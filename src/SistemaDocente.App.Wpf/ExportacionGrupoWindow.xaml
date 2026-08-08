@@ -1,0 +1,206 @@
+<Window x:Class="SistemaDocente.App.Wpf.ExportacionGrupoWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:controls="clr-namespace:SistemaDocente.App.Wpf.Controls"
+        xml:lang="es-MX"
+        Title="Exportar datos del grupo"
+        Height="720" Width="940" MinHeight="640" MinWidth="820"
+        WindowStartupLocation="CenterOwner" ShowInTaskbar="False"
+        ResizeMode="CanResizeWithGrip"
+        Background="{DynamicResource WindowBackgroundBrush}">
+
+    <Window.Resources>
+        <ResourceDictionary>
+            <BooleanToVisibilityConverter x:Key="ExportBoolToVisibility"/>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="Styles/PopupStyles.xaml"/>
+            </ResourceDictionary.MergedDictionaries>
+        </ResourceDictionary>
+    </Window.Resources>
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <Border Grid.Row="0" Style="{StaticResource PopupHeader}">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+                <StackPanel>
+                    <TextBlock Text="EXPORTACIÓN DE DATOS" Style="{StaticResource PopupEyebrow}"/>
+                    <TextBlock Text="Exportar datos del grupo" Style="{StaticResource PopupTitle}" Margin="0,4,0,4"/>
+                    <TextBlock Text="Elige qué información llevar a Excel o CSV. Exportar no modifica el sistema y no sustituye un respaldo."
+                               Style="{StaticResource PopupSubtitle}" TextWrapping="Wrap"/>
+                </StackPanel>
+                <Border Grid.Column="1" Style="{StaticResource PopupInfoPill}" VerticalAlignment="Center" Margin="20,0,0,0">
+                    <TextBlock Text="{Binding TituloPaso, Mode=OneWay}" Foreground="{DynamicResource InfoBrush}" FontWeight="SemiBold"/>
+                </Border>
+            </Grid>
+        </Border>
+
+        <Grid Grid.Row="1" Margin="24,20">
+            <!-- Contenido -->
+            <Border Style="{StaticResource PopupCard}"
+                    Visibility="{Binding MostrarContenido, Converter={StaticResource ExportBoolToVisibility}}">
+                <ScrollViewer VerticalScrollBarVisibility="Auto">
+                    <StackPanel MaxWidth="760">
+                        <TextBlock Text="Formato y contenido" Style="{StaticResource PopupSectionTitle}"/>
+                        <TextBlock Text="Excel permite varias hojas. CSV exporta un solo conjunto por archivo."
+                                   Style="{StaticResource PopupSubtitle}" Margin="0,0,0,16"/>
+
+                        <controls:FormField Header="Formato">
+                            <ComboBox ItemsSource="{Binding Formatos}"
+                                      DisplayMemberPath="Etiqueta"
+                                      SelectedValuePath="Formato"
+                                      SelectedValue="{Binding Formato, Mode=TwoWay}"/>
+                        </controls:FormField>
+
+                        <Border Margin="0,14,0,0" Padding="16" CornerRadius="8"
+                                Background="{DynamicResource SectionBackgroundBrush}"
+                                Visibility="{Binding EsXlsx, Converter={StaticResource ExportBoolToVisibility}}">
+                            <StackPanel>
+                                <TextBlock Text="Hojas del libro Excel" FontWeight="SemiBold" Margin="0,0,0,8"/>
+                                <WrapPanel>
+                                    <CheckBox Content="Contexto" IsChecked="{Binding IncluirContexto}" Margin="0,0,20,10"/>
+                                    <CheckBox Content="Alumnos" IsChecked="{Binding IncluirAlumnos}" Margin="0,0,20,10"/>
+                                    <CheckBox Content="Asistencia" IsChecked="{Binding IncluirAsistencia}" Margin="0,0,20,10"/>
+                                    <CheckBox Content="Proyectos" IsChecked="{Binding IncluirProyectos}" Margin="0,0,20,10"/>
+                                    <CheckBox Content="Actividades" IsChecked="{Binding IncluirActividades}" Margin="0,0,20,10"/>
+                                    <CheckBox Content="Evaluación" IsChecked="{Binding IncluirEvaluacion}" Margin="0,0,20,10"/>
+                                    <CheckBox Content="Seguimiento (sensible)" IsChecked="{Binding IncluirSeguimiento}" Margin="0,0,20,10"/>
+                                </WrapPanel>
+                            </StackPanel>
+                        </Border>
+
+                        <controls:FormField Header="Conjunto CSV" Margin="0,14,0,0"
+                                            Visibility="{Binding EsCsv, Converter={StaticResource ExportBoolToVisibility}}">
+                            <ComboBox ItemsSource="{Binding ConjuntosCsv}"
+                                      DisplayMemberPath="Etiqueta"
+                                      SelectedValuePath="Conjunto"
+                                      SelectedValue="{Binding ConjuntoCsv, Mode=TwoWay}"/>
+                        </controls:FormField>
+
+                        <Border Margin="0,14,0,0" Padding="16" CornerRadius="8"
+                                BorderBrush="{DynamicResource BorderLightBrush}" BorderThickness="1">
+                            <StackPanel>
+                                <TextBlock Text="Campos sensibles opcionales" FontWeight="SemiBold"/>
+                                <TextBlock Text="Permanecen desactivados salvo que realmente los necesites."
+                                           Foreground="{DynamicResource TextSecondaryBrush}" Margin="0,4,0,10"/>
+                                <CheckBox Content="Incluir observaciones pedagógicas de alumnos"
+                                          IsChecked="{Binding IncluirObservacionesEstudiante}" Margin="0,0,0,8"/>
+                                <CheckBox Content="Incluir observaciones de evaluación"
+                                          IsChecked="{Binding IncluirObservacionesEvaluacion}"/>
+                            </StackPanel>
+                        </Border>
+                    </StackPanel>
+                </ScrollViewer>
+            </Border>
+
+            <!-- Alcance -->
+            <Border Style="{StaticResource PopupCard}"
+                    Visibility="{Binding MostrarAlcance, Converter={StaticResource ExportBoolToVisibility}}">
+                <StackPanel MaxWidth="720" HorizontalAlignment="Center" VerticalAlignment="Center">
+                    <TextBlock Text="Alcance de la exportación" Style="{StaticResource PopupSectionTitle}"/>
+                    <TextBlock Text="Ajusta sólo los filtros que corresponden al contenido elegido."
+                               Style="{StaticResource PopupSubtitle}" Margin="0,0,0,18"/>
+
+                    <Border Padding="16" Margin="0,0,0,14" CornerRadius="8"
+                            Background="{DynamicResource SectionBackgroundBrush}"
+                            Visibility="{Binding MostrarPeriodoAsistencia, Converter={StaticResource ExportBoolToVisibility}}">
+                        <StackPanel>
+                            <TextBlock Text="Periodo de asistencia" FontWeight="SemiBold" Margin="0,0,0,10"/>
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="16"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+                                <controls:FormField Header="Desde">
+                                    <DatePicker SelectedDate="{Binding AsistenciaDesde, Mode=TwoWay}"/>
+                                </controls:FormField>
+                                <controls:FormField Grid.Column="2" Header="Hasta">
+                                    <DatePicker SelectedDate="{Binding AsistenciaHasta, Mode=TwoWay}"/>
+                                </controls:FormField>
+                            </Grid>
+                        </StackPanel>
+                    </Border>
+
+                    <controls:FormField Header="Proyecto"
+                                        Visibility="{Binding MostrarAlcanceProyecto, Converter={StaticResource ExportBoolToVisibility}}">
+                        <ComboBox ItemsSource="{Binding Proyectos}"
+                                  DisplayMemberPath="Etiqueta"
+                                  SelectedItem="{Binding ProyectoSeleccionado, Mode=TwoWay}"/>
+                    </controls:FormField>
+
+                    <Border Margin="0,14,0,0" Padding="14" CornerRadius="8"
+                            Background="{DynamicResource WarningBackgroundBrush}"
+                            BorderBrush="{DynamicResource WarningBrush}" BorderThickness="1"
+                            Visibility="{Binding ContieneSeleccionSensible, Converter={StaticResource ExportBoolToVisibility}}">
+                        <TextBlock Text="{Binding AdvertenciaPrivacidad, Mode=OneWay}" TextWrapping="Wrap"
+                                   Foreground="{DynamicResource TextPrimaryBrush}"/>
+                    </Border>
+                </StackPanel>
+            </Border>
+
+            <!-- Archivo -->
+            <Border Style="{StaticResource PopupCard}"
+                    Visibility="{Binding MostrarArchivo, Converter={StaticResource ExportBoolToVisibility}}">
+                <StackPanel MaxWidth="700" HorizontalAlignment="Center" VerticalAlignment="Center">
+                    <TextBlock Text="Archivo listo para guardar" Style="{StaticResource PopupSectionTitle}"/>
+                    <TextBlock Text="El archivo se escribirá primero de forma temporal y sólo se publicará cuando termine correctamente."
+                               Style="{StaticResource PopupSubtitle}" TextWrapping="Wrap" Margin="0,0,0,16"/>
+                    <Border Background="{DynamicResource SectionBackgroundBrush}" CornerRadius="8" Padding="16" Margin="0,0,0,14">
+                        <StackPanel>
+                            <TextBlock Text="Nombre sugerido" FontWeight="SemiBold"/>
+                            <TextBlock Text="{Binding NombreArchivoSugerido, Mode=OneWay}" Margin="0,5,0,12" TextWrapping="Wrap"/>
+                            <TextBlock Text="Contenido" FontWeight="SemiBold"/>
+                            <TextBlock Text="{Binding ResumenPlan, Mode=OneWay}" Margin="0,5,0,0" TextWrapping="Wrap"
+                                       Foreground="{DynamicResource TextSecondaryBrush}"/>
+                        </StackPanel>
+                    </Border>
+                    <Button Style="{StaticResource PrimaryButton}" Content="Elegir ubicación y exportar…"
+                            Click="OnGuardarArchivoClic" HorizontalAlignment="Left"
+                            AutomationProperties.Name="Elegir ubicación y exportar archivo"/>
+                </StackPanel>
+            </Border>
+
+            <!-- Resultado -->
+            <Border Style="{StaticResource PopupCard}"
+                    Visibility="{Binding MostrarResultado, Converter={StaticResource ExportBoolToVisibility}}">
+                <StackPanel MaxWidth="680" HorizontalAlignment="Center" VerticalAlignment="Center">
+                    <Border Width="64" Height="64" CornerRadius="32" Background="{DynamicResource SuccessBackgroundBrush}" Margin="0,0,0,16">
+                        <TextBlock Text="✓" FontSize="30" Foreground="{DynamicResource SuccessBrush}"
+                                   HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                    </Border>
+                    <TextBlock Text="Exportación completada" Style="{StaticResource PopupTitle}" HorizontalAlignment="Center"/>
+                    <TextBlock Text="{Binding RutaResultado, Mode=OneWay}" Margin="0,10,0,8" TextWrapping="Wrap"
+                               TextAlignment="Center" FontWeight="SemiBold"/>
+                    <TextBlock Text="{Binding ResumenResultado, Mode=OneWay}" TextWrapping="Wrap" TextAlignment="Center"
+                               Foreground="{DynamicResource TextSecondaryBrush}"/>
+                </StackPanel>
+            </Border>
+        </Grid>
+
+        <Border Grid.Row="2" Style="{StaticResource PopupFooter}">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+                <TextBlock Text="{Binding Mensaje, Mode=OneWay}" Foreground="{DynamicResource ErrorBrush}"
+                           TextWrapping="Wrap" VerticalAlignment="Center"/>
+                <StackPanel Grid.Column="1" Orientation="Horizontal">
+                    <Button Content="Volver" Command="{Binding VolverCommand}"/>
+                    <Button Style="{StaticResource PrimaryButton}" Content="Siguiente" Command="{Binding SiguienteCommand}"
+                            Visibility="{Binding MostrarResultado, Converter={StaticResource InverseBoolToVisibility}}"/>
+                    <Button Content="Cerrar" Click="OnCerrarClic"/>
+                </StackPanel>
+            </Grid>
+        </Border>
+    </Grid>
+</Window>
