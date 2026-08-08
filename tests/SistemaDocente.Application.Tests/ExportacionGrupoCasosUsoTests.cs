@@ -90,7 +90,7 @@ public sealed class ExportacionGrupoCasosUsoTests
     }
 
     [Fact]
-    public void ObservacionesYSemguimientoSonOptInYSensibles()
+    public void ObservacionesYSeguimientoSonOptInYSensibles()
     {
         var grupo = CrearGrupoCuarto();
         var contexto = ContextoGrupo.Crear(grupo.Id, gradosAtendidos: [GradoPrimaria.Cuarto]);
