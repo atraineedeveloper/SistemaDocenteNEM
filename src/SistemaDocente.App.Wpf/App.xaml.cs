@@ -174,7 +174,7 @@ public partial class App : System.Windows.Application
         catch (Exception exception) when (
             exception is IOException or UnauthorizedAccessException or ErrorPersistenciaAplicacionException)
         {
-            _registroDiagnostico.Registrar(
+            _registroDiagnostico?.Registrar(
                 exception,
                 CategoriaEventoDiagnostico.FalloInicioAlmacenamiento);
             MessageBox.Show(
