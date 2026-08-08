@@ -254,7 +254,11 @@ public sealed class RefactorMainWindowVistasTests
                 }
 
                 var viewModel = ConstruirViewModel();
-                var ventana = new MainWindow(viewModel, ConstruirConfiguracionGrupo(), ConstruirImportacionEstudiantes());
+                var ventana = new MainWindow(
+                    viewModel,
+                    ConstruirConfiguracionGrupo(),
+                    ConstruirImportacionEstudiantes(),
+                    ConstruirExportacionGrupo());
                 ventana.Measure(new System.Windows.Size(1280, 780));
                 ventana.Arrange(new System.Windows.Rect(0, 0, 1280, 780));
                 ventana.UpdateLayout();
@@ -281,6 +285,28 @@ public sealed class RefactorMainWindowVistasTests
         return new ImportacionEstudiantesViewModel(
             new SistemaDocente.Interchange.LectorImportacionTabular(),
             new ImportacionEstudiantesCasosUso(grupos, contextos));
+    }
+
+    private static ExportacionGrupoViewModel ConstruirExportacionGrupo()
+    {
+        var directorio = Path.Combine(Path.GetTempPath(), "SistemaDocenteNEM-ExportSmoke-" + Guid.NewGuid().ToString("N"));
+        Directory.CreateDirectory(directorio);
+        var baseSqlite = Path.Combine(directorio, "sistema-docente.db");
+        var grupos = new PersistenciaGrupoSqlite(baseSqlite);
+        var asistencias = new PersistenciaAsistenciaSqlite(baseSqlite);
+        var proyectos = new PersistenciaProyectosSqlite(baseSqlite);
+        var expedientes = new PersistenciaExpedienteSqlite(baseSqlite);
+        var contextos = new PersistenciaContextoGrupoSqlite(baseSqlite);
+        return new ExportacionGrupoViewModel(
+            new ExportacionGrupoCasosUso(
+                grupos,
+                asistencias,
+                proyectos,
+                proyectos,
+                expedientes,
+                contextos,
+                new SistemaDocente.Interchange.ExportadorTabularArchivo()),
+            new ConsultaExportacionGrupoCasosUso(proyectos));
     }
 
     private static MainWindowViewModel ConstruirViewModel()
