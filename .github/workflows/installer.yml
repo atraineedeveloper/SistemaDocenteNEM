@@ -1,0 +1,167 @@
+name: Installer
+
+on:
+  pull_request:
+    branches:
+      - main
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: installer-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  DOTNET_CLI_TELEMETRY_OPTOUT: "1"
+  DOTNET_NOLOGO: "1"
+  INNO_VERSION: "7.0.2"
+  INNO_TAG: "is-7_0_2"
+
+jobs:
+  package:
+    name: Windows · publish · install · upgrade · uninstall
+    runs-on: windows-latest
+    timeout-minutes: 35
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Setup .NET 10
+        uses: actions/setup-dotnet@v6
+        with:
+          dotnet-version: 10.0.x
+
+      - name: Acquire verified Inno Setup compiler
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          $downloadDir = Join-Path $env:RUNNER_TEMP "inno-download"
+          $installDir = Join-Path $env:RUNNER_TEMP "InnoSetup7"
+          New-Item -ItemType Directory -Path $downloadDir -Force | Out-Null
+
+          gh release download $env:INNO_TAG `
+            --repo jrsoftware/issrc `
+            --pattern "innosetup-$($env:INNO_VERSION)-x64.exe" `
+            --dir $downloadDir `
+            --clobber
+
+          $asset = Join-Path $downloadDir "innosetup-$($env:INNO_VERSION)-x64.exe"
+          gh release verify-asset $asset --repo jrsoftware/issrc
+
+          $process = Start-Process -FilePath $asset -ArgumentList @(
+            "/VERYSILENT",
+            "/SUPPRESSMSGBOXES",
+            "/NORESTART",
+            "/SP-",
+            "/CURRENTUSER",
+            "/DIR=$installDir"
+          ) -Wait -PassThru
+          if ($process.ExitCode -ne 0) {
+            throw "Inno Setup installation failed with exit code $($process.ExitCode)."
+          }
+
+          $iscc = Join-Path $installDir "ISCC.exe"
+          if (-not (Test-Path -LiteralPath $iscc -PathType Leaf)) {
+            throw "ISCC.exe was not installed at $iscc."
+          }
+          "INNO_ISCC=$iscc" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
+
+      - name: Build self-contained app and installer
+        shell: pwsh
+        run: .\scripts\build-installer.ps1 -IsccPath "$env:INNO_ISCC"
+
+      - name: Smoke-test install, upgrade and uninstall
+        shell: pwsh
+        run: |
+          [xml]$props = Get-Content -LiteralPath ".\Directory.Build.props" -Raw
+          $version = [string]$props.Project.PropertyGroup.VersionPrefix
+          $installer = Resolve-Path ".\artifacts\installer\AulaRaiz-Setup-$version-win-x64.exe"
+          $installDir = Join-Path $env:LOCALAPPDATA "Programs\AulaRaiz"
+          $appExe = Join-Path $installDir "SistemaDocente.App.Wpf.exe"
+          $sentinelDir = Join-Path $env:LOCALAPPDATA "SistemaDocenteNEM"
+          $sentinel = Join-Path $sentinelDir "installer-ci-sentinel.txt"
+
+          function Invoke-Setup([string]$Path) {
+            $process = Start-Process -FilePath $Path -ArgumentList @(
+              "/VERYSILENT",
+              "/SUPPRESSMSGBOXES",
+              "/NORESTART",
+              "/SP-"
+            ) -Wait -PassThru
+            if ($process.ExitCode -ne 0) {
+              throw "AulaRaíz installer failed with exit code $($process.ExitCode)."
+            }
+          }
+
+          Invoke-Setup $installer.Path
+          if (-not (Test-Path -LiteralPath $appExe -PathType Leaf)) {
+            throw "Installed AulaRaíz executable was not found."
+          }
+
+          $fileVersion = [System.Diagnostics.FileVersionInfo]::GetVersionInfo($appExe)
+          if (-not $fileVersion.ProductVersion.StartsWith($version, [StringComparison]::Ordinal)) {
+            throw "Installed ProductVersion '$($fileVersion.ProductVersion)' does not match '$version'."
+          }
+
+          $uninstallKey = "HKCU:\Software\Microsoft\Windows\CurrentVersion\Uninstall\{7A2B71C7-3BC4-4D54-A7A2-97A0D56D4E5B}_is1"
+          if (-not (Test-Path -LiteralPath $uninstallKey)) {
+            throw "AulaRaíz uninstall registration was not found."
+          }
+          $displayVersion = (Get-ItemProperty -LiteralPath $uninstallKey).DisplayVersion
+          if ($displayVersion -ne $version) {
+            throw "Installed DisplayVersion '$displayVersion' does not match '$version'."
+          }
+
+          New-Item -ItemType Directory -Path $sentinelDir -Force | Out-Null
+          Set-Content -LiteralPath $sentinel -Value "preserve-me" -Encoding utf8
+
+          Invoke-Setup $installer.Path
+          if (-not (Test-Path -LiteralPath $appExe -PathType Leaf)) {
+            throw "AulaRaíz disappeared after the upgrade smoke test."
+          }
+          if (-not (Test-Path -LiteralPath $sentinel -PathType Leaf)) {
+            throw "The legacy user-data sentinel disappeared during upgrade."
+          }
+
+          $uninstaller = Get-ChildItem -LiteralPath $installDir -Filter "unins*.exe" | Select-Object -First 1
+          if ($null -eq $uninstaller) {
+            throw "AulaRaíz uninstaller was not found."
+          }
+          $uninstallProcess = Start-Process -FilePath $uninstaller.FullName -ArgumentList @(
+            "/VERYSILENT",
+            "/SUPPRESSMSGBOXES",
+            "/NORESTART"
+          ) -Wait -PassThru
+          if ($uninstallProcess.ExitCode -ne 0) {
+            throw "AulaRaíz uninstall failed with exit code $($uninstallProcess.ExitCode)."
+          }
+
+          if (Test-Path -LiteralPath $appExe) {
+            throw "AulaRaíz program files remain after uninstall."
+          }
+          if (-not (Test-Path -LiteralPath $sentinel -PathType Leaf)) {
+            throw "Uninstall deleted the legacy user-data sentinel."
+          }
+
+          Remove-Item -LiteralPath $sentinel -Force
+          if ((Test-Path -LiteralPath $sentinelDir) -and -not (Get-ChildItem -LiteralPath $sentinelDir -Force)) {
+            Remove-Item -LiteralPath $sentinelDir -Force
+          }
+
+      - name: Show installer checksum
+        shell: pwsh
+        run: Get-FileHash .\artifacts\installer\AulaRaiz-Setup-*-win-x64.exe -Algorithm SHA256 | Format-List
+
+      - name: Upload development installer
+        uses: actions/upload-artifact@v7
+        with:
+          name: AulaRaiz-windows-installer
+          path: artifacts/installer/AulaRaiz-Setup-*-win-x64.exe
+          if-no-files-found: error
