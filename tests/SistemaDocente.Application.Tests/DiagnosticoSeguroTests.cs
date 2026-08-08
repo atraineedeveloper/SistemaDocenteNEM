@@ -25,7 +25,7 @@ public sealed class DiagnosticoSeguroTests
         Assert.Equal(CategoriaEventoDiagnostico.FalloNoControlado, evento.Categoria);
         Assert.Equal(typeof(InvalidOperationException).FullName, evento.TipoExcepcion);
         Assert.Equal(
-            [typeof(InvalidOperationException).FullName, typeof(IOException).FullName],
+            [typeof(InvalidOperationException).FullName!, typeof(IOException).FullName!],
             evento.CadenaTiposExcepcion);
         Assert.Equal(64, evento.HuellaTecnica.Length);
         Assert.Equal(IdentidadProducto.Version, evento.VersionAplicacion);
