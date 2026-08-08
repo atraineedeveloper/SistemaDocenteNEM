@@ -100,7 +100,7 @@ installer/AulaRaiz.iss
 scripts/build-installer.ps1
 ```
 
-The build script expects Inno Setup 7 `ISCC.exe`, reads the product version from `Directory.Build.props`, publishes the WPF application self-contained and compiles the installer.
+The build script expects Inno Setup 7 `ISCC.exe`, reads the product version from `Directory.Build.props`, publishes the WPF application self-contained and compiles the installer. `VersionOverride` exists only to create explicit test fixtures such as the older installer used by upgrade CI; normal builds use the repository version.
 
 Example:
 
@@ -115,23 +115,28 @@ Expected output:
 artifacts\installer\AulaRaiz-Setup-0.1.0-win-x64.exe
 ```
 
-## CI supply-chain check
+## CI supply-chain and lifecycle checks
 
 The installer workflow pins Inno Setup 7.0.2. CI downloads the official immutable GitHub release asset and verifies its GitHub release attestation before running the compiler.
 
-After building AulaRaíz, CI performs a lifecycle smoke test:
+CI then proves a real version transition rather than merely reinstalling the same version:
 
-1. silent current-user install;
-2. verify installed executable and product version;
-3. create a sentinel under the historical Production data directory;
-4. run the same installer again as an upgrade/reinstall smoke test;
-5. verify both program and sentinel remain;
-6. silent uninstall;
-7. verify program files are removed;
-8. verify the user-data sentinel survives;
-9. upload the development installer as a workflow artifact.
+1. build an ephemeral `0.0.9` upgrade fixture from the current source with overridden assembly/installer metadata;
+2. build the repository's real `0.1.0` installer;
+3. silently install `0.0.9` for the current user;
+4. verify the executable and Add/Remove Programs entry report `0.0.9`;
+5. create a sentinel under the historical Production data directory;
+6. run the `0.1.0` installer with the same stable AppId;
+7. verify executable and uninstall metadata now report `0.1.0`;
+8. verify exactly one normal AulaRaíz uninstall entry remains;
+9. verify the user-data sentinel survived the version upgrade;
+10. silently uninstall AulaRaíz;
+11. verify program files are removed and the sentinel still survives;
+12. upload the current development installer and a paired `0.0.9 → 0.1.0` manual-validation artifact.
 
-This test protects the most important installer contract: installation lifecycle operations must not accidentally take ownership of classroom data.
+The `0.0.9` package is a **test fixture only**, not a historical release and not a distribution candidate. Its purpose is to exercise Inno Setup's real version-upgrade path with the same product identity.
+
+This lifecycle test protects the most important installer contract: installation and update operations must not accidentally take ownership of classroom data.
 
 ## Code signing and production distribution
 
@@ -143,14 +148,15 @@ A production signing workflow should use an appropriate protected signing servic
 
 ## Manual clean-machine acceptance
 
-Before the installer is considered production-ready, validate on a clean/non-development Windows user or VM:
+Before the installer is considered production-ready, validate on a clean/non-development Windows user or VM. The CI artifact `AulaRaiz-upgrade-validation` contains both installers required for an explicit manual update path.
 
 1. confirm no .NET SDK is required;
-2. install without administrator credentials using the default path;
-3. launch AulaRaíz and confirm `v0.1.0` is visible;
+2. install the `0.0.9` **test fixture** without administrator credentials using the default path;
+3. launch AulaRaíz and confirm `v0.0.9` is visible;
 4. run Demo mode and create/reopen fictitious data;
-5. install a newer test build over the existing installation;
-6. confirm the same data reopens;
-7. uninstall AulaRaíz;
-8. confirm program shortcuts/files are removed;
-9. reinstall AulaRaíz and confirm the preserved local data can still be opened.
+5. install `0.1.0` over the existing installation;
+6. confirm `v0.1.0` is visible and the same Demo data reopens;
+7. confirm Windows shows one AulaRaíz installation at version `0.1.0`;
+8. uninstall AulaRaíz;
+9. confirm program shortcuts/files are removed;
+10. reinstall `0.1.0` and confirm the preserved local Demo data can still be opened.
