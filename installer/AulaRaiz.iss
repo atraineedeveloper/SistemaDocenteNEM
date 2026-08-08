@@ -9,10 +9,9 @@
 #define MyAppName "AulaRaíz"
 #define MyAppExeName "SistemaDocente.App.Wpf.exe"
 #define MyAppPublisher "AulaRaíz"
-#define MyAppId "{7A2B71C7-3BC4-4D54-A7A2-97A0D56D4E5B}"
 
 [Setup]
-AppId={{#MyAppId}
+AppId={{7A2B71C7-3BC4-4D54-A7A2-97A0D56D4E5B}
 AppName={#MyAppName}
 AppVersion={#MyAppVersion}
 AppVerName={#MyAppName} {#MyAppVersion}
