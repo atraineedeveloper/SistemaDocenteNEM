@@ -13,6 +13,12 @@ public enum ConjuntoExportacionGrupo
     Seguimiento = 7,
 }
 
+public sealed record OpcionProyectoExportacion(
+    ProyectoId ProyectoId,
+    string Nombre,
+    DateOnly FechaInicio,
+    DateOnly FechaTermino);
+
 public sealed record SolicitudExportacionGrupo(
     GrupoId GrupoId,
     FormatoExportacionTabular Formato,
