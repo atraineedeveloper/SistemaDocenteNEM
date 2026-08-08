@@ -1,0 +1,186 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - "v*.*.*"
+
+permissions:
+  contents: write
+
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
+
+env:
+  DOTNET_CLI_TELEMETRY_OPTOUT: "1"
+  DOTNET_NOLOGO: "1"
+  OPENSPEC_TELEMETRY: "0"
+  INNO_VERSION: "7.0.2"
+  INNO_TAG: "is-7_0_2"
+
+jobs:
+  release:
+    name: Windows · validate · package · release
+    runs-on: windows-latest
+    timeout-minutes: 45
+
+    steps:
+      - name: Checkout tagged source
+        uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+
+      - name: Validate release tag and repository version
+        shell: pwsh
+        run: |
+          $tag = $env:GITHUB_REF_NAME
+          $match = [regex]::Match($tag, '^v(?<version>\d+\.\d+\.\d+)$')
+          if (-not $match.Success) {
+            throw "Release tag '$tag' must match vMAJOR.MINOR.PATCH."
+          }
+
+          $tagVersion = $match.Groups['version'].Value
+          [xml]$props = Get-Content -LiteralPath '.\Directory.Build.props' -Raw
+          $repositoryVersion = [string]$props.Project.PropertyGroup.VersionPrefix
+          if ($tagVersion -ne $repositoryVersion) {
+            throw "Release tag '$tag' does not match repository VersionPrefix '$repositoryVersion'."
+          }
+
+          $major = [int]($tagVersion.Split('.')[0])
+          $isPrerelease = $major -eq 0
+
+          "RELEASE_TAG=$tag" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
+          "RELEASE_VERSION=$tagVersion" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
+          "RELEASE_IS_PRERELEASE=$($isPrerelease.ToString().ToLowerInvariant())" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
+
+      - name: Setup .NET 10
+        uses: actions/setup-dotnet@v6
+        with:
+          dotnet-version: 10.0.x
+
+      - name: Restore
+        shell: pwsh
+        run: dotnet restore SistemaDocente.sln
+
+      - name: Verify formatting
+        shell: pwsh
+        run: dotnet format SistemaDocente.sln --verify-no-changes --no-restore
+
+      - name: Build
+        shell: pwsh
+        run: dotnet build SistemaDocente.sln --configuration Release --no-restore
+
+      - name: Test
+        shell: pwsh
+        run: dotnet test SistemaDocente.sln --configuration Release --no-build
+
+      - name: Setup Node.js 24
+        uses: actions/setup-node@v6
+        with:
+          node-version: 24.x
+          package-manager-cache: false
+
+      - name: Install OpenSpec
+        shell: pwsh
+        run: npm install --global @fission-ai/openspec@1.6.0
+
+      - name: Validate OpenSpec
+        shell: pwsh
+        run: openspec validate --all
+
+      - name: Check whitespace errors
+        shell: pwsh
+        run: git diff --check HEAD^
+
+      - name: Acquire verified Inno Setup compiler
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          $downloadDir = Join-Path $env:RUNNER_TEMP 'inno-download'
+          $installDir = Join-Path $env:RUNNER_TEMP 'InnoSetup7'
+          New-Item -ItemType Directory -Path $downloadDir -Force | Out-Null
+
+          gh release download $env:INNO_TAG `
+            --repo jrsoftware/issrc `
+            --pattern "innosetup-$($env:INNO_VERSION)-x64.exe" `
+            --dir $downloadDir `
+            --clobber
+
+          $asset = Join-Path $downloadDir "innosetup-$($env:INNO_VERSION)-x64.exe"
+          gh release verify-asset $asset --repo jrsoftware/issrc
+
+          $process = Start-Process -FilePath $asset -ArgumentList @(
+            '/VERYSILENT',
+            '/SUPPRESSMSGBOXES',
+            '/NORESTART',
+            '/SP-',
+            '/CURRENTUSER',
+            "/DIR=$installDir"
+          ) -Wait -PassThru
+          if ($process.ExitCode -ne 0) {
+            throw "Inno Setup installation failed with exit code $($process.ExitCode)."
+          }
+
+          $iscc = Join-Path $installDir 'ISCC.exe'
+          if (-not (Test-Path -LiteralPath $iscc -PathType Leaf)) {
+            throw "ISCC.exe was not installed at $iscc."
+          }
+          "INNO_ISCC=$iscc" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
+
+      - name: Build release installer
+        shell: pwsh
+        run: .\scripts\build-installer.ps1 -IsccPath "$env:INNO_ISCC"
+
+      - name: Generate SHA-256 checksum
+        shell: pwsh
+        run: |
+          $installer = Resolve-Path ".\artifacts\installer\AulaRaiz-Setup-$env:RELEASE_VERSION-win-x64.exe"
+          $hash = (Get-FileHash -LiteralPath $installer.Path -Algorithm SHA256).Hash.ToLowerInvariant()
+          $fileName = Split-Path -Leaf $installer.Path
+          "$hash  $fileName" | Set-Content -LiteralPath '.\artifacts\installer\SHA256SUMS.txt' -Encoding ascii
+
+      - name: Verify release assets
+        shell: pwsh
+        run: |
+          $installer = Resolve-Path ".\artifacts\installer\AulaRaiz-Setup-$env:RELEASE_VERSION-win-x64.exe"
+          $checksumFile = Resolve-Path '.\artifacts\installer\SHA256SUMS.txt'
+          $expected = (Get-Content -LiteralPath $checksumFile.Path -Raw).Trim().Split(' ')[0]
+          $actual = (Get-FileHash -LiteralPath $installer.Path -Algorithm SHA256).Hash.ToLowerInvariant()
+          if ($expected -ne $actual) {
+            throw "SHA256SUMS.txt does not match the release installer."
+          }
+
+      - name: Publish GitHub Release
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          $installer = Resolve-Path ".\artifacts\installer\AulaRaiz-Setup-$env:RELEASE_VERSION-win-x64.exe"
+          $checksum = Resolve-Path '.\artifacts\installer\SHA256SUMS.txt'
+          $warning = @"
+          > [!WARNING]
+          > Esta versión de AulaRaíz es una compilación de desarrollo todavía sin firma Authenticode. Windows puede mostrar al editor como desconocido. Verifica `SHA256SUMS.txt` antes de distribuir el instalador.
+          "@
+
+          $arguments = @(
+            'release', 'create', $env:RELEASE_TAG,
+            $installer.Path,
+            $checksum.Path,
+            '--verify-tag',
+            '--title', "AulaRaíz $env:RELEASE_TAG",
+            '--generate-notes',
+            '--notes', $warning,
+            '--fail-on-no-commits'
+          )
+
+          if ($env:RELEASE_IS_PRERELEASE -eq 'true') {
+            $arguments += '--prerelease'
+            $arguments += '--latest=false'
+          }
+
+          & gh @arguments
+          if ($LASTEXITCODE -ne 0) {
+            throw "GitHub Release publication failed with exit code $LASTEXITCODE."
+          }
