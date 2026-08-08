@@ -19,15 +19,18 @@ public partial class MainWindow : Window
         MainWindowViewModel viewModel,
         ConfiguracionGrupoViewModel configuracionGrupo,
         ImportacionEstudiantesViewModel importacionEstudiantes,
-        ExportacionGrupoViewModel exportacionGrupo)
+        ExportacionGrupoViewModel exportacionGrupo,
+        RecuperacionLocalViewModel recuperacionLocal)
     {
         ArgumentNullException.ThrowIfNull(viewModel);
         ArgumentNullException.ThrowIfNull(configuracionGrupo);
         ArgumentNullException.ThrowIfNull(importacionEstudiantes);
         ArgumentNullException.ThrowIfNull(exportacionGrupo);
+        ArgumentNullException.ThrowIfNull(recuperacionLocal);
         ConfiguracionGrupo = configuracionGrupo;
         ImportacionEstudiantes = importacionEstudiantes;
         ExportacionGrupo = exportacionGrupo;
+        RecuperacionLocal = recuperacionLocal;
         InitializeComponent();
         GrupoModule.Importacion = importacionEstudiantes;
         GrupoModule.Exportacion = exportacionGrupo;
@@ -38,6 +41,7 @@ public partial class MainWindow : Window
     public ConfiguracionGrupoViewModel ConfiguracionGrupo { get; }
     public ImportacionEstudiantesViewModel ImportacionEstudiantes { get; }
     public ExportacionGrupoViewModel ExportacionGrupo { get; }
+    public RecuperacionLocalViewModel RecuperacionLocal { get; }
 
     private void OnClosing(object? sender, CancelEventArgs e)
     {
@@ -48,6 +52,15 @@ public partial class MainWindow : Window
         }
 
         _toastTimer?.Stop();
+    }
+
+    private void OnRecuperacionSolicitada(object? sender, EventArgs e)
+    {
+        var ventana = new RecuperacionLocalWindow(RecuperacionLocal)
+        {
+            Owner = this,
+        };
+        ventana.ShowDialog();
     }
 
     /// <summary>Muestra un toast flotante con auto-dismiss.</summary>
