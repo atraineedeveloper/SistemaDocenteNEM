@@ -22,5 +22,5 @@
 - [x] 13. Add a maintained branding/compatibility document.
 - [x] 14. Add Application tests for the branding contract and backup filename.
 - [x] 15. Add WPF structural regressions for visible branding and legacy recovery identity.
-- [ ] 16. Run Windows CI: format, Release build, full tests, OpenSpec and whitespace.
+- [x] 16. Run Windows CI: format, Release build, full tests, OpenSpec and whitespace.
 - [x] 17. Manually open Demo mode and confirm header, title, recovery dialogs, Light/Dark/High Contrast rendering and no obvious old visible brand remains.
