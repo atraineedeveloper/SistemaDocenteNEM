@@ -128,7 +128,7 @@ public sealed class CliAgentTests
 
         Assert.NotEqual(0, resultado.ExitCode);
         Assert.Contains("not_found", resultado.Stdout, StringComparison.Ordinal);
-        Assert.DoesNotContain("El grupo", resultado.Stdout, StringComparison.Ordinal);
+        Assert.DoesNotContain("No existe el grupo", resultado.Stdout, StringComparison.Ordinal);
         Assert.DoesNotContain("stackTrace", resultado.Stdout, StringComparison.OrdinalIgnoreCase);
     }
 
@@ -159,8 +159,12 @@ public sealed class CliAgentTests
         {
             var casos = new GestionGrupoCasosUso(Grupos);
             var creado = casos.CrearGrupo(grupo);
-            var alumno = casos.AgregarEstudiante(creado.Id, estudiante, 1, grado: GradoPrimaria.Tercero);
-            return (creado.Id.Valor, alumno.Id.Valor);
+            var alumno = casos.AgregarEstudiante(
+                creado.GrupoId,
+                estudiante,
+                1,
+                grado: GradoPrimaria.Tercero);
+            return (creado.GrupoId.Valor, alumno.EstudianteId.Valor);
         }
 
         public ResultadoCli Ejecutar(params string[] args)
