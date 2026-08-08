@@ -36,4 +36,4 @@
 - [x] 25. Add Presentation/WPF regressions for format gating, sensitive-content warnings, export-window construction and save integration.
 - [x] 26. Stress representative Demo exports with 30–40 students and attendance/evaluation rows.
 - [x] 27. Run Windows CI: format, Release build, full tests, OpenSpec and whitespace.
-- [ ] 28. Manually export fictitious Demo data to XLSX/CSV and open the generated files in Excel-compatible software before merge.
+- [x] 28. Manually export fictitious Demo data to XLSX/CSV and open the generated files in Excel-compatible software before merge.
