@@ -1,6 +1,7 @@
 using System.IO;
 using System.Threading;
 using System.Windows;
+using System.Windows.Controls;
 
 using SistemaDocente.Application;
 using SistemaDocente.Data;
@@ -14,6 +15,9 @@ public sealed class ImportacionEstudiantesWindowConstructionTests
     public void AsistentePuedeConstruirseConRecursosWpfCargados()
     {
         Exception? capturada = null;
+        Visibility? archivo = null;
+        Visibility? resultado = null;
+        Visibility? importar = null;
 
         var thread = new Thread(() =>
         {
@@ -40,6 +44,10 @@ public sealed class ImportacionEstudiantesWindowConstructionTests
                 ventana.Measure(new Size(1080, 780));
                 ventana.Arrange(new Rect(0, 0, 1080, 780));
                 ventana.UpdateLayout();
+
+                archivo = ((Border)ventana.FindName("PasoArchivoPanel")).Visibility;
+                resultado = ((Border)ventana.FindName("PasoResultadoPanel")).Visibility;
+                importar = ((Button)ventana.FindName("ImportarButton")).Visibility;
                 ventana.Close();
             }
             catch (Exception exception)
@@ -53,5 +61,8 @@ public sealed class ImportacionEstudiantesWindowConstructionTests
         thread.Join();
 
         Assert.Null(capturada);
+        Assert.Equal(Visibility.Visible, archivo);
+        Assert.Equal(Visibility.Collapsed, resultado);
+        Assert.Equal(Visibility.Collapsed, importar);
     }
 }
