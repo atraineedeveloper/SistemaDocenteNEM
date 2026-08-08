@@ -74,25 +74,51 @@ jobs:
           }
           "INNO_ISCC=$iscc" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
 
-      - name: Build older upgrade fixture
+      - name: Acquire published upgrade baseline
         shell: pwsh
+        env:
+          GH_TOKEN: ${{ github.token }}
         run: |
-          .\scripts\build-installer.ps1 `
-            -IsccPath "$env:INNO_ISCC" `
-            -VersionOverride $env:UPGRADE_BASELINE_VERSION
-
-          $baseline = Resolve-Path ".\artifacts\installer\AulaRaiz-Setup-$($env:UPGRADE_BASELINE_VERSION)-win-x64.exe"
           $fixtureDir = Join-Path $PWD "artifacts\upgrade-fixture"
           New-Item -ItemType Directory -Path $fixtureDir -Force | Out-Null
-          $preserved = Join-Path $fixtureDir $baseline.Path.Split([IO.Path]::DirectorySeparatorChar)[-1]
-          Copy-Item -LiteralPath $baseline.Path -Destination $preserved -Force
-          "BASELINE_INSTALLER=$preserved" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
+          $tag = "v$env:UPGRADE_BASELINE_VERSION"
+          $installerName = "AulaRaiz-Setup-$env:UPGRADE_BASELINE_VERSION-win-x64.exe"
+
+          gh release download $tag `
+            --repo $env:GITHUB_REPOSITORY `
+            --pattern $installerName `
+            --pattern "SHA256SUMS.txt" `
+            --dir $fixtureDir `
+            --clobber
+
+          $baseline = Join-Path $fixtureDir $installerName
+          $checksums = Join-Path $fixtureDir "SHA256SUMS.txt"
+          if (-not (Test-Path -LiteralPath $baseline -PathType Leaf)) {
+            throw "Published AulaRaíz baseline installer was not downloaded."
+          }
+          if (-not (Test-Path -LiteralPath $checksums -PathType Leaf)) {
+            throw "Published AulaRaíz baseline checksum file was not downloaded."
+          }
+
+          $checksumLine = Get-Content -LiteralPath $checksums |
+            Where-Object { $_ -match [regex]::Escape($installerName) } |
+            Select-Object -First 1
+          if ([string]::IsNullOrWhiteSpace($checksumLine)) {
+            throw "SHA256SUMS.txt does not contain the published baseline installer."
+          }
+          $expected = ($checksumLine -split '\s+')[0].ToLowerInvariant()
+          $actual = (Get-FileHash -LiteralPath $baseline -Algorithm SHA256).Hash.ToLowerInvariant()
+          if ($expected -ne $actual) {
+            throw "Published AulaRaíz baseline checksum does not match."
+          }
+
+          "BASELINE_INSTALLER=$baseline" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
 
       - name: Build current self-contained app, CLI and installer
         shell: pwsh
         run: .\scripts\build-installer.ps1 -IsccPath "$env:INNO_ISCC"
 
-      - name: Smoke-test install, real upgrade, CLI and uninstall
+      - name: Smoke-test published upgrade, CLI and uninstall
         shell: pwsh
         run: |
           [xml]$props = Get-Content -LiteralPath ".\Directory.Build.props" -Raw
@@ -118,23 +144,14 @@ jobs:
             }
           }
 
-          function Assert-InstalledVersion([string]$ExpectedVersion) {
+          function Assert-WpfInstalledVersion([string]$ExpectedVersion) {
             if (-not (Test-Path -LiteralPath $appExe -PathType Leaf)) {
               throw "Installed AulaRaíz executable was not found."
             }
-            if (-not (Test-Path -LiteralPath $cliExe -PathType Leaf)) {
-              throw "Installed AulaRaíz CLI executable was not found."
-            }
-
             $fileVersion = [System.Diagnostics.FileVersionInfo]::GetVersionInfo($appExe)
             if (-not $fileVersion.ProductVersion.StartsWith($ExpectedVersion, [StringComparison]::Ordinal)) {
               throw "Installed ProductVersion '$($fileVersion.ProductVersion)' does not match '$ExpectedVersion'."
             }
-            $cliVersion = [System.Diagnostics.FileVersionInfo]::GetVersionInfo($cliExe)
-            if (-not $cliVersion.ProductVersion.StartsWith($ExpectedVersion, [StringComparison]::Ordinal)) {
-              throw "Installed CLI ProductVersion '$($cliVersion.ProductVersion)' does not match '$ExpectedVersion'."
-            }
-
             if (-not (Test-Path -LiteralPath $uninstallKey)) {
               throw "AulaRaíz uninstall registration was not found."
             }
@@ -145,6 +162,13 @@ jobs:
           }
 
           function Assert-CliStatus([string]$ExpectedVersion) {
+            if (-not (Test-Path -LiteralPath $cliExe -PathType Leaf)) {
+              throw "Installed AulaRaíz CLI executable was not found."
+            }
+            $cliVersion = [System.Diagnostics.FileVersionInfo]::GetVersionInfo($cliExe)
+            if (-not $cliVersion.ProductVersion.StartsWith($ExpectedVersion, [StringComparison]::Ordinal)) {
+              throw "Installed CLI ProductVersion '$($cliVersion.ProductVersion)' does not match '$ExpectedVersion'."
+            }
             $raw = & $cliExe status --json
             if ($LASTEXITCODE -ne 0) {
               throw "Installed AulaRaíz CLI status command failed with exit code $LASTEXITCODE."
@@ -162,14 +186,16 @@ jobs:
           }
 
           Invoke-Setup $baselineInstaller.Path
-          Assert-InstalledVersion $env:UPGRADE_BASELINE_VERSION
-          Assert-CliStatus $env:UPGRADE_BASELINE_VERSION
+          Assert-WpfInstalledVersion $env:UPGRADE_BASELINE_VERSION
+          if (Test-Path -LiteralPath $cliExe) {
+            throw "Published v$env:UPGRADE_BASELINE_VERSION unexpectedly contains the future AulaRaíz CLI."
+          }
 
           New-Item -ItemType Directory -Path $sentinelDir -Force | Out-Null
           Set-Content -LiteralPath $sentinel -Value "preserve-me" -Encoding utf8
 
           Invoke-Setup $installer.Path
-          Assert-InstalledVersion $version
+          Assert-WpfInstalledVersion $version
           Assert-CliStatus $version
 
           $aulaRaizEntries = @(
