@@ -15,7 +15,7 @@ The application already includes working modules for:
 - projects and activities;
 - formative evaluation with explicit delivery semantics and a matrix workflow;
 - longitudinal student records (`Expediente`);
-- individual and group reports;
+- individual and group reports with teacher-initiated PDF output;
 - group/school context;
 - safe student import from XLSX/CSV with preview, correction and atomic commit;
 - teacher-controlled group export to multi-sheet XLSX or focused CSV;
@@ -24,7 +24,7 @@ The application already includes working modules for:
 - Light, Dark and High Contrast themes;
 - automated Windows CI for formatting, Release build, tests, OpenSpec and whitespace validation.
 
-The current product includes structured primary grades, automatic NEM phases, multigrade support, school organization, student grade, offline Mexico entity/municipality catalogs and structured NEM project planning. Projects can carry a NEM methodology and target grades; activities can carry one formative field and an explicit grade scope while preserving their historical student roster. Safe XLSX/CSV student import, group-data export and local backup/restore are merged in `main`. See [`docs/nem-project-planning.md`](docs/nem-project-planning.md), [`docs/student-import.md`](docs/student-import.md), [`docs/group-export.md`](docs/group-export.md) and [`docs/backup-restore.md`](docs/backup-restore.md).
+The current product includes structured primary grades, automatic NEM phases, multigrade support, school organization, student grade, offline Mexico entity/municipality catalogs and structured NEM project planning. Projects can carry a NEM methodology and target grades; activities can carry one formative field and an explicit grade scope while preserving their historical student roster. Safe XLSX/CSV student import, group-data export and local backup/restore are merged in `main`; PDF report output is the active feature change. See [`docs/nem-project-planning.md`](docs/nem-project-planning.md), [`docs/student-import.md`](docs/student-import.md), [`docs/group-export.md`](docs/group-export.md), [`docs/backup-restore.md`](docs/backup-restore.md) and [`docs/pdf-reports.md`](docs/pdf-reports.md).
 
 ## Product principles
 
@@ -64,9 +64,10 @@ Those identifiers are compatibility contracts, not user-facing branding. Any lat
 - xUnit
 - OpenSpec
 - Open XML SDK for XLSX interchange
+- PDFsharp / MigraDoc for PDF report rendering
 - Git / GitHub Actions
 
-The solution is intentionally layered into Core, Application, Data, Presentation, Reporting and WPF projects so domain rules remain independent from SQLite and the desktop UI. The `SistemaDocente.Interchange` adapter project isolates XLSX/CSV syntax from Application and WPF for import/export workflows, while local recovery remains a separate SQLite/storage concern behind an Application recovery port.
+The solution is intentionally layered into Core, Application, Data, Presentation, Reporting and WPF projects so domain rules remain independent from SQLite and the desktop UI. The `SistemaDocente.Interchange` adapter project isolates XLSX/CSV syntax and PDF rendering from Application and WPF, while local recovery remains a separate SQLite/storage concern behind an Application recovery port.
 
 ## Repository workflow
 
@@ -92,7 +93,7 @@ From the repository root on Windows:
 dotnet run --project .\src\SistemaDocente.App.Wpf\SistemaDocente.App.Wpf.csproj -- --demo-reset
 ```
 
-`--demo-reset` recreates the isolated fictitious Demo dataset. Production and Demo SQLite/application-state paths are separate. The Demo dataset includes structured grades, representative NEM project/activity metadata and enough attendance/evaluation history to validate import/export and recovery workflows without real student data.
+`--demo-reset` recreates the isolated fictitious Demo dataset. Production and Demo SQLite/application-state paths are separate. The Demo dataset includes structured grades, representative NEM project/activity metadata and enough attendance/evaluation history to validate import/export, PDF reporting and recovery workflows without real student data.
 
 ## Automated validation
 
@@ -109,8 +110,8 @@ git diff --check
 
 ## Roadmap
 
-The maintained roadmap is [`checklist_modulos_sistema_docente_nem.md`](checklist_modulos_sistema_docente_nem.md). The current foundation includes NEM/multigrade context, student import, group-data export and safe local backup/restore. Near-term hardening priorities include privacy/local security and installation/update workflows before broader production use.
+The maintained roadmap is [`checklist_modulos_sistema_docente_nem.md`](checklist_modulos_sistema_docente_nem.md). The current foundation includes NEM/multigrade context, student import, group-data export and safe local backup/restore. PDF output for the existing individual/group reports is the current feature; privacy/local security and installation/update remain the next hardening priorities before broader production use.
 
 ## Data policy
 
-Do not commit real student names, identifiers, health information, family information or other personal data. Tests and Demo mode use fictitious records only. Export files containing pedagogical observations or follow-up data are intentionally opt-in and should be stored/shared according to applicable personal-data handling requirements. `.sdocbackup` version 1 files can contain the complete local dataset and are not encrypted, so they must also be treated as sensitive files and stored only in appropriately protected locations.
+Do not commit real student names, identifiers, health information, family information or other personal data. Tests and Demo mode use fictitious records only. Export files and PDF reports containing pedagogical observations or follow-up data must be stored/shared according to applicable personal-data handling requirements. `.sdocbackup` version 1 files can contain the complete local dataset and are not encrypted, so they must also be treated as sensitive files and stored only in appropriately protected locations.
