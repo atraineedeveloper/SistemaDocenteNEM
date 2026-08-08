@@ -18,9 +18,9 @@
 - [x] 11. Add Application tests for message-free diagnostic projection and stable fingerprints.
 - [x] 12. Add Data tests proving sensitive sentinel text, paths and stack methods are not persisted.
 - [x] 13. Add a WPF structural regression test preventing restoration of raw crash logging.
-- [ ] 14. Run Windows CI: format, Release build, full tests, OpenSpec and whitespace.
+- [x] 14. Run Windows CI: format, Release build, full tests, OpenSpec and whitespace.
 
 ## Acceptance
-- [ ] 15. Review the data inventory against the implemented product surfaces.
+- [x] 15. Review the data inventory against the implemented product surfaces.
 - [ ] 16. Squash-merge after CI is green.
 - [ ] 17. Clean the feature branch after merge.
