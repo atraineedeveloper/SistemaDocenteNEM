@@ -17,5 +17,15 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          git push "https://x-access-token:${GH_TOKEN}@github.com/${{ github.repository }}.git" --delete feature/student-import-xlsx-csv || true
-          git push "https://x-access-token:${GH_TOKEN}@github.com/${{ github.repository }}.git" --delete chore/cleanup-student-import-branch || true
+          curl --fail-with-body --silent --show-error \
+            --request DELETE \
+            --header "Accept: application/vnd.github+json" \
+            --header "Authorization: Bearer ${GH_TOKEN}" \
+            --header "X-GitHub-Api-Version: 2022-11-28" \
+            "https://api.github.com/repos/${{ github.repository }}/git/refs/heads/feature%2Fstudent-import-xlsx-csv"
+          curl --fail-with-body --silent --show-error \
+            --request DELETE \
+            --header "Accept: application/vnd.github+json" \
+            --header "Authorization: Bearer ${GH_TOKEN}" \
+            --header "X-GitHub-Api-Version: 2022-11-28" \
+            "https://api.github.com/repos/${{ github.repository }}/git/refs/heads/chore%2Fcleanup-student-import-branch"
