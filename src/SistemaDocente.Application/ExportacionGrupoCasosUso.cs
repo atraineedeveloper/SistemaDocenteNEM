@@ -150,7 +150,7 @@ public sealed class ExportacionGrupoCasosUso
         }
     }
 
-    private IReadOnlyList<ProyectoDidactico> FiltrarProyectos(
+    private ProyectoDidactico[] FiltrarProyectos(
         GrupoId grupoId,
         ProyectoId? proyectoId)
     {
@@ -257,7 +257,7 @@ public sealed class ExportacionGrupoCasosUso
 
     private HojaTabularSalida CrearAsistencia(
         Grupo grupo,
-        IReadOnlyDictionary<EstudianteId, Estudiante> estudiantes,
+        Dictionary<EstudianteId, Estudiante> estudiantes,
         DateOnly desde,
         DateOnly hasta)
     {
@@ -334,7 +334,7 @@ public sealed class ExportacionGrupoCasosUso
 
     private HojaTabularSalida CrearEvaluacion(
         IReadOnlyList<ProyectoDidactico> proyectos,
-        IReadOnlyDictionary<EstudianteId, Estudiante> estudiantes,
+        Dictionary<EstudianteId, Estudiante> estudiantes,
         bool incluirObservaciones)
     {
         var columnas = new List<ColumnaTabularSalida>
