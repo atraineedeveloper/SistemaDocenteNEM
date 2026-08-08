@@ -121,7 +121,7 @@ openspec validate --all
 git diff --check
 ```
 
-The installer workflow additionally publishes the self-contained WPF application, verifies/acquires the pinned Inno Setup compiler, builds a development installer, performs silent install/reinstall/uninstall lifecycle checks and verifies that a sentinel in the historical user-data directory survives uninstall.
+The installer workflow additionally publishes the self-contained WPF application, verifies/acquires the pinned Inno Setup compiler, builds an ephemeral older-version fixture plus the current development installer, performs a real version-to-version install/update/uninstall lifecycle check, proves that a sentinel in the historical user-data directory survives update and uninstall, and uploads both the normal installer artifact and a paired manual-upgrade validation artifact.
 
 ## Roadmap
 
