@@ -94,6 +94,13 @@ public partial class RecuperacionLocalWindow : Window
         catch (Exception exception) when (EsErrorOperacional(exception))
         {
             MostrarError(exception, "No fue posible completar la restauración");
+            if (exception is RecuperacionLocalException
+                {
+                    Categoria: CategoriaErrorRecuperacionLocal.Publicacion,
+                })
+            {
+                System.Windows.Application.Current.Shutdown();
+            }
         }
     }
 
