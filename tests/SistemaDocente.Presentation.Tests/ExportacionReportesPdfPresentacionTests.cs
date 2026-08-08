@@ -13,7 +13,9 @@ public sealed class ExportacionReportesPdfPresentacionTests
         var presentacion = new ExportacionReportesPdfPresentacion(exportador);
         var reporte = CrearIndividual("Ana: Pérez/Prueba");
 
-        var nombre = presentacion.CrearNombreArchivo(reporte, new DateOnly(2026, 8, 8));
+        var nombre = ExportacionReportesPdfPresentacion.CrearNombreArchivo(
+            reporte,
+            new DateOnly(2026, 8, 8));
         presentacion.Exportar(reporte, "individual.pdf");
 
         Assert.StartsWith("AulaRaiz_Reporte_Individual_1_", nombre, StringComparison.Ordinal);
@@ -32,7 +34,9 @@ public sealed class ExportacionReportesPdfPresentacionTests
         var presentacion = new ExportacionReportesPdfPresentacion(exportador);
         var reporte = CrearGrupal("Multigrado A/B");
 
-        var nombre = presentacion.CrearNombreArchivo(reporte, new DateOnly(2026, 8, 8));
+        var nombre = ExportacionReportesPdfPresentacion.CrearNombreArchivo(
+            reporte,
+            new DateOnly(2026, 8, 8));
         presentacion.Exportar(reporte, "grupal.pdf");
 
         Assert.StartsWith("AulaRaiz_Reporte_Grupal_", nombre, StringComparison.Ordinal);
