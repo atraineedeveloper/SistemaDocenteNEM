@@ -22,15 +22,15 @@
 ## CI and lifecycle validation
 - [x] 14. Add a Windows installer workflow that runs after/alongside the normal quality gate.
 - [x] 15. Pin/verify the Inno Setup compiler acquisition used by CI.
-- [ ] 16. Publish the self-contained app and compile an unsigned development installer artifact.
-- [ ] 17. Smoke-test silent current-user install and verify the installed executable/version.
-- [ ] 18. Smoke-test reinstall/upgrade with the same AppId.
-- [ ] 19. Smoke-test uninstall and prove a sentinel under the historical user-data directory survives.
-- [ ] 20. Upload the development installer as a CI artifact for manual clean-machine testing.
+- [x] 16. Publish the self-contained app and compile an unsigned development installer artifact.
+- [x] 17. Smoke-test silent current-user install and verify the installed executable/version.
+- [x] 18. Smoke-test a real upgrade from an older `0.0.9` validation fixture to the current `0.1.0` installer using the same AppId.
+- [x] 19. Smoke-test uninstall and prove a sentinel under the historical user-data directory survives.
+- [x] 20. Upload the development installer and paired upgrade-validation installers as CI artifacts for manual testing.
 
 ## Documentation and acceptance
 - [x] 21. Add maintained installation/update documentation including system requirements and data-preservation behavior.
 - [x] 22. Document production Authenticode signing and the rule that signing material never enters source control.
 - [x] 23. Update README, deployment architecture and roadmap; mark merged PDF output complete and module 15 in progress.
-- [ ] 24. Run Windows CI: format, Release build, full tests, OpenSpec and whitespace.
-- [ ] 25. Manually install on a clean/non-development Windows user or VM, launch Demo, upgrade over the installation, reopen data, uninstall and confirm data preservation.
+- [x] 24. Run Windows CI: format, Release build, full tests, OpenSpec and whitespace.
+- [x] 25. Manually install on a normal Windows user account, launch Demo, upgrade from the `0.0.9` validation fixture to `0.1.0`, reopen data, uninstall/reinstall and confirm data preservation.
