@@ -40,6 +40,8 @@ public sealed class ImportacionEstudiantesWindowConstructionTests
                     new SistemaDocente.Interchange.LectorImportacionTabular(),
                     new ImportacionEstudiantesCasosUso(grupos, contextos));
 
+                // This must exercise real BAML/resource loading. Static XAML assertions did not catch
+                // the read-only Run.Text binding failure found during manual validation.
                 var ventana = new ImportacionEstudiantesWindow(viewModel);
                 ventana.Measure(new Size(1080, 780));
                 ventana.Arrange(new Rect(0, 0, 1080, 780));
