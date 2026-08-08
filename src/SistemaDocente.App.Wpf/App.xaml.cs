@@ -1,4 +1,3 @@
-using System.Diagnostics;
 using System.IO;
 using System.Windows;
 using System.Windows.Threading;
@@ -13,6 +12,8 @@ namespace SistemaDocente.App.Wpf;
 
 public partial class App : System.Windows.Application
 {
+    private static RegistroDiagnosticoSeguroArchivo? _registroDiagnostico;
+
     public App()
     {
         DispatcherUnhandledException += OnDispatcherUnhandledException;
@@ -21,46 +22,33 @@ public partial class App : System.Windows.Application
 
     private static void OnDispatcherUnhandledException(object sender, DispatcherUnhandledExceptionEventArgs e)
     {
-        LogException(e.Exception);
+        _registroDiagnostico?.Registrar(e.Exception, CategoriaEventoDiagnostico.FalloNoControlado);
         e.Handled = true;
     }
 
     private static void OnCurrentDomainUnhandledException(object sender, UnhandledExceptionEventArgs e)
     {
-        if (e.ExceptionObject is Exception ex)
-            LogException(ex);
-    }
-
-    private static void LogException(Exception exception)
-    {
-        try
+        if (e.ExceptionObject is Exception exception)
         {
-            // Se conserva la carpeta técnica legacy para no separar los logs de una
-            // instalación existente durante el cambio de marca a AulaRaíz.
-            var logPath = Path.Combine(
-                Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
-                IdentidadProducto.IdentificadorTecnicoLegado, "crash.log");
-            Directory.CreateDirectory(Path.GetDirectoryName(logPath)!);
-            File.AppendAllText(logPath, $"[{DateTime.Now:O}] {exception}\n\n");
-        }
-        catch
-        {
-            // Ignorar fallos de logging.
+            _registroDiagnostico?.Registrar(exception, CategoriaEventoDiagnostico.FalloNoControlado);
         }
     }
 
     protected override void OnStartup(StartupEventArgs e)
     {
         base.OnStartup(e);
+
+        var reiniciarDemo = e.Args.Any(x => string.Equals(x, "--demo-reset", StringComparison.OrdinalIgnoreCase));
+        var modoDemo = reiniciarDemo
+            || e.Args.Any(x => string.Equals(x, "--demo", StringComparison.OrdinalIgnoreCase));
+        var localApplicationData = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
+        _registroDiagnostico = RegistroDiagnosticoSeguroArchivo.DesdeLocalApplicationData(
+            localApplicationData,
+            modoDemo);
+
         try
         {
-            var reiniciarDemo = e.Args.Any(x => string.Equals(x, "--demo-reset", StringComparison.OrdinalIgnoreCase));
-            var modoDemo = reiniciarDemo
-                || e.Args.Any(x => string.Equals(x, "--demo", StringComparison.OrdinalIgnoreCase));
-
-            var rutas = RutasAplicacion.DesdeLocalApplicationData(
-                Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
-                modoDemo);
+            var rutas = RutasAplicacion.DesdeLocalApplicationData(localApplicationData, modoDemo);
             if (reiniciarDemo) rutas.ReiniciarDemostracion();
 
             var persistencia = new PersistenciaGrupoSqlite(rutas.BaseSqlite);
@@ -186,7 +174,9 @@ public partial class App : System.Windows.Application
         catch (Exception exception) when (
             exception is IOException or UnauthorizedAccessException or ErrorPersistenciaAplicacionException)
         {
-            Debug.WriteLine($"Fallo de inicio de almacenamiento: {exception}");
+            _registroDiagnostico?.Registrar(
+                exception,
+                CategoriaEventoDiagnostico.FalloInicioAlmacenamiento);
             MessageBox.Show(
                 "No fue posible iniciar el almacenamiento local. Cierra la aplicación e intenta nuevamente.",
                 IdentidadProducto.Nombre, MessageBoxButton.OK, MessageBoxImage.Error);
