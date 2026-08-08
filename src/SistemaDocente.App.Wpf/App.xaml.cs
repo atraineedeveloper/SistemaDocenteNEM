@@ -6,6 +6,7 @@ using System.Windows.Threading;
 using SistemaDocente.App.Wpf.Demo;
 using SistemaDocente.Application;
 using SistemaDocente.Data;
+using SistemaDocente.Interchange;
 using SistemaDocente.Presentation;
 
 namespace SistemaDocente.App.Wpf;
@@ -101,6 +102,9 @@ public partial class App : System.Windows.Application
                 persistenciaProyectos,
                 persistenciaExpediente,
                 persistenciaContexto);
+            var importacionEstudiantesCasosUso = new ImportacionEstudiantesCasosUso(
+                persistencia,
+                persistenciaContexto);
 
             var mensajes = new WpfNotificationService();
             var viewModelGrupo = new GestionGrupoViewModel(
@@ -132,6 +136,9 @@ public partial class App : System.Windows.Application
                 gestionReportesCasosUso);
             var viewModelConfiguracion = new ConfiguracionGrupoViewModel(
                 gestionContextoCasosUso);
+            var viewModelImportacion = new ImportacionEstudiantesViewModel(
+                new LectorImportacionTabular(),
+                importacionEstudiantesCasosUso);
 
             var viewModel = new MainWindowViewModel(
                 viewModelGrupo,
@@ -142,7 +149,10 @@ public partial class App : System.Windows.Application
                 viewModelExpediente,
                 modoDemo,
                 viewModelReportes);
-            var ventana = new MainWindow(viewModel, viewModelConfiguracion);
+            var ventana = new MainWindow(
+                viewModel,
+                viewModelConfiguracion,
+                viewModelImportacion);
             MainWindow = ventana;
             ventana.Show();
             viewModelGrupo.Inicializar();

@@ -13,11 +13,12 @@ The application already includes working modules for:
 - longitudinal student records (`Expediente`);
 - individual and group reports;
 - group/school context;
+- safe student import from XLSX/CSV with preview, correction and atomic commit;
 - Demo mode with isolated fictitious data;
 - Light, Dark and High Contrast themes;
 - automated Windows CI for formatting, Release build, tests, OpenSpec and whitespace validation.
 
-The current stacked development work adds structured primary grades, automatic NEM phases, multigrade support, school organization, student grade, offline Mexico entity/municipality catalogs and structured NEM project planning. Projects can carry a NEM methodology and target grades; activities can carry one formative field and an explicit grade scope while preserving their historical student roster. See [`docs/nem-project-planning.md`](docs/nem-project-planning.md).
+The current product includes structured primary grades, automatic NEM phases, multigrade support, school organization, student grade, offline Mexico entity/municipality catalogs and structured NEM project planning. Projects can carry a NEM methodology and target grades; activities can carry one formative field and an explicit grade scope while preserving their historical student roster. The current import workflow adds safe XLSX/CSV roster ingestion without overwriting existing students. See [`docs/nem-project-planning.md`](docs/nem-project-planning.md) and [`docs/student-import.md`](docs/student-import.md).
 
 ## Product principles
 
@@ -36,6 +37,7 @@ The current stacked development work adds structured primary grades, automatic N
 - SQLite
 - xUnit
 - OpenSpec
+- Open XML SDK for XLSX interchange
 - Git / GitHub Actions
 
 The solution is intentionally layered into Core, Application, Data, Presentation, Reporting and WPF projects so domain rules remain independent from SQLite and the desktop UI.
@@ -81,7 +83,7 @@ git diff --check
 
 ## Roadmap
 
-The maintained roadmap is [`checklist_modulos_sistema_docente_nem.md`](checklist_modulos_sistema_docente_nem.md). Major upcoming areas include XLSX/CSV import, exports, backup/restore and additional reporting outputs.
+The maintained roadmap is [`checklist_modulos_sistema_docente_nem.md`](checklist_modulos_sistema_docente_nem.md). Major upcoming areas after student import include XLSX/CSV exports, backup/restore and additional reporting outputs.
 
 ## Data policy
 

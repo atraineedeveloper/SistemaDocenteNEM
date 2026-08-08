@@ -19,7 +19,8 @@ public sealed class Estudiante
         string observaciones,
         int numeroLista,
         bool estaActivo,
-        GradoPrimaria grado = GradoPrimaria.NoEspecificado)
+        GradoPrimaria grado = GradoPrimaria.NoEspecificado,
+        bool preservarNombreVisible = false)
     {
         if (!string.IsNullOrWhiteSpace(observaciones))
         {
@@ -39,7 +40,9 @@ public sealed class Estudiante
         EstaActivo = estaActivo;
         Grado = grado;
 
-        NombreVisible = ConstruirNombreCompleto(nombreVisible, PrimerApellido, SegundoApellido, Nombres);
+        NombreVisible = preservarNombreVisible && !string.IsNullOrWhiteSpace(nombreVisible)
+            ? nombreVisible.Trim()
+            : ConstruirNombreCompleto(nombreVisible, PrimerApellido, SegundoApellido, Nombres);
     }
 
     public EstudianteId Id { get; }

@@ -99,7 +99,8 @@ public sealed class Grupo
                     datos.Observaciones,
                     datos.NumeroLista,
                     datos.EstaActivo,
-                    datos.Grado));
+                    datos.Grado,
+                    preservarNombreVisible: true));
         }
 
         return new Grupo(id, nombreValidado, estudiantesValidados);
@@ -125,7 +126,8 @@ public sealed class Grupo
         GeneroEstudiante genero = GeneroEstudiante.NoEspecificado,
         DateOnly? fechaIngreso = null,
         string observaciones = "",
-        GradoPrimaria grado = GradoPrimaria.NoEspecificado)
+        GradoPrimaria grado = GradoPrimaria.NoEspecificado,
+        bool preservarNombreVisible = false)
     {
         var nombreNormalizado = ValidarNombreEstudiante(nombreVisible);
         ValidarNumeroLista(numeroLista);
@@ -143,7 +145,8 @@ public sealed class Grupo
             observaciones,
             numeroLista,
             true,
-            grado);
+            grado,
+            preservarNombreVisible);
 
         _estudiantes.Add(estudiante);
 
