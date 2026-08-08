@@ -45,7 +45,7 @@
 
         <Grid Grid.Row="1" Margin="24,20">
             <!-- Contenido -->
-            <Border Style="{StaticResource PopupCard}"
+            <Border x:Name="PasoContenidoPanel" Style="{StaticResource PopupCard}"
                     Visibility="{Binding MostrarContenido, Converter={StaticResource ExportBoolToVisibility}}">
                 <ScrollViewer VerticalScrollBarVisibility="Auto">
                     <StackPanel MaxWidth="760">
@@ -102,7 +102,7 @@
             </Border>
 
             <!-- Alcance -->
-            <Border Style="{StaticResource PopupCard}"
+            <Border x:Name="PasoAlcancePanel" Style="{StaticResource PopupCard}"
                     Visibility="{Binding MostrarAlcance, Converter={StaticResource ExportBoolToVisibility}}">
                 <StackPanel MaxWidth="720" HorizontalAlignment="Center" VerticalAlignment="Center">
                     <TextBlock Text="Alcance de la exportación" Style="{StaticResource PopupSectionTitle}"/>
@@ -148,7 +148,7 @@
             </Border>
 
             <!-- Archivo -->
-            <Border Style="{StaticResource PopupCard}"
+            <Border x:Name="PasoArchivoPanel" Style="{StaticResource PopupCard}"
                     Visibility="{Binding MostrarArchivo, Converter={StaticResource ExportBoolToVisibility}}">
                 <StackPanel MaxWidth="700" HorizontalAlignment="Center" VerticalAlignment="Center">
                     <TextBlock Text="Archivo listo para guardar" Style="{StaticResource PopupSectionTitle}"/>
@@ -170,7 +170,7 @@
             </Border>
 
             <!-- Resultado -->
-            <Border Style="{StaticResource PopupCard}"
+            <Border x:Name="PasoResultadoPanel" Style="{StaticResource PopupCard}"
                     Visibility="{Binding MostrarResultado, Converter={StaticResource ExportBoolToVisibility}}">
                 <StackPanel MaxWidth="680" HorizontalAlignment="Center" VerticalAlignment="Center">
                     <Border Width="64" Height="64" CornerRadius="32" Background="{DynamicResource SuccessBackgroundBrush}" Margin="0,0,0,16">
@@ -196,8 +196,9 @@
                            TextWrapping="Wrap" VerticalAlignment="Center"/>
                 <StackPanel Grid.Column="1" Orientation="Horizontal">
                     <Button Content="Volver" Command="{Binding VolverCommand}"/>
-                    <Button Style="{StaticResource PrimaryButton}" Content="Siguiente" Command="{Binding SiguienteCommand}"
-                            Visibility="{Binding MostrarResultado, Converter={StaticResource InverseBoolToVisibility}}"/>
+                    <Button x:Name="SiguienteButton" Style="{StaticResource PrimaryButton}" Content="Siguiente"
+                            Command="{Binding SiguienteCommand}"
+                            Visibility="{Binding MostrarSiguiente, Converter={StaticResource ExportBoolToVisibility}}"/>
                     <Button Content="Cerrar" Click="OnCerrarClic"/>
                 </StackPanel>
             </Grid>
