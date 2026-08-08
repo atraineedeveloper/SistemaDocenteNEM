@@ -1,5 +1,6 @@
 using System.Text;
 using System.Text.Json;
+using System.Text.Json.Serialization;
 
 using SistemaDocente.Application;
 
@@ -11,6 +12,7 @@ public sealed class RegistroDiagnosticoSeguroArchivo : IRegistroDiagnosticoSegur
     private static readonly JsonSerializerOptions OpcionesJson = new()
     {
         PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+        Converters = { new JsonStringEnumConverter() },
     };
 
     private readonly string _rutaArchivo;
