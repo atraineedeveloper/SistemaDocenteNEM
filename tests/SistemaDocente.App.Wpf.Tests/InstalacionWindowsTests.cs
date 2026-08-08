@@ -46,14 +46,20 @@ public sealed class InstalacionWindowsTests
     }
 
     [Fact]
-    public void InstallerCiProvesUserDataSurvivesUninstall()
+    public void InstallerCiProvesRealVersionUpgradeAndUserDataSurvivesUninstall()
     {
         var workflow = Read(".github/workflows/installer.yml");
+        var buildScript = Read("scripts/build-installer.ps1");
 
         Assert.Contains("gh release verify-asset", workflow, StringComparison.Ordinal);
+        Assert.Contains("UPGRADE_BASELINE_VERSION: \"0.0.9\"", workflow, StringComparison.Ordinal);
+        Assert.Contains("Build older upgrade fixture", workflow, StringComparison.Ordinal);
+        Assert.Contains("Smoke-test install, real upgrade and uninstall", workflow, StringComparison.Ordinal);
+        Assert.Contains("Assert-InstalledVersion $env:UPGRADE_BASELINE_VERSION", workflow, StringComparison.Ordinal);
+        Assert.Contains("Assert-InstalledVersion $version", workflow, StringComparison.Ordinal);
         Assert.Contains("installer-ci-sentinel.txt", workflow, StringComparison.Ordinal);
-        Assert.Contains("Smoke-test install, upgrade and uninstall", workflow, StringComparison.Ordinal);
         Assert.Contains("Uninstall deleted the legacy user-data sentinel", workflow, StringComparison.Ordinal);
         Assert.Contains("actions/upload-artifact@v7", workflow, StringComparison.Ordinal);
+        Assert.Contains("[string]$VersionOverride", buildScript, StringComparison.Ordinal);
     }
 }
