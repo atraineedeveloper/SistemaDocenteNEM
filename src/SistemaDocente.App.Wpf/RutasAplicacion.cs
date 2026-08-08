@@ -7,6 +7,18 @@ public sealed record RutasAplicacion(
     string EstadoAplicacion,
     bool EsDemostracion = false)
 {
+    public string DirectorioRespaldosSeguridad
+    {
+        get
+        {
+            var directorioDatos = Path.GetDirectoryName(Path.GetFullPath(BaseSqlite))
+                ?? throw new InvalidOperationException("La ruta de la base SQLite no tiene directorio contenedor.");
+            var directorioAplicacion = Directory.GetParent(directorioDatos)?.FullName
+                ?? throw new InvalidOperationException("No fue posible determinar el directorio de la aplicación.");
+            return Path.Combine(directorioAplicacion, "backups", "safety");
+        }
+    }
+
     public static RutasAplicacion DesdeLocalApplicationData(
         string localApplicationData,
         bool modoDemostracion = false)
