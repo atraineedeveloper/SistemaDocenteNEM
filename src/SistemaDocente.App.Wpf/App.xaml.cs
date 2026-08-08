@@ -152,7 +152,8 @@ public partial class App : System.Windows.Application
                 mensajes);
             var viewModelReportes = new GestionReportesViewModel(
                 gestionGrupoCasosUso,
-                gestionReportesCasosUso);
+                gestionReportesCasosUso,
+                new ExportadorReportesPdf());
             var viewModelConfiguracion = new ConfiguracionGrupoViewModel(
                 gestionContextoCasosUso);
             var viewModelImportacion = new ImportacionEstudiantesViewModel(
