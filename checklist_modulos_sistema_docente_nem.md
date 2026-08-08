@@ -58,7 +58,7 @@ This checklist reflects the current product state rather than the original proto
   - Attendance, delivery/compliance and achievement summaries.
   - Group context and student-record evidence.
   - No competitive student ranking.
-  - [~] Teacher-initiated PDF output for the existing individual/group reports is the current feature change (PR #21).
+  - Teacher-initiated PDF output for existing individual/group reports, merged via PR #21 after automated and manual validation.
 
 - [x] **Demo mode and UX foundation**
   - Isolated Demo/production data paths.
@@ -156,13 +156,13 @@ The current `Expediente` already stores tutor agreements. A future dedicated wor
 
 ## 7. Reports and output formats
 
-The report calculation/model foundation already exists. The current PDF change exports only those established report models rather than inventing new reporting semantics.
+The report calculation/model foundation already exists. PDF output for the established individual/group report models is merged; remaining outputs should add explicit report semantics rather than infer unsupported data.
 
 - [ ] Printable attendance-only report.
 - [ ] Project completion report.
 - [ ] Family-meeting summary.
 - [ ] In-app print preview / direct print workflow.
-- [~] PDF output for the existing individual and group reports (PR #21).
+- [x] PDF output for the existing individual and group reports (PR #21).
 - [ ] Period/formative-field reports once those modules exist.
 
 ## 8. Digital evidence attachments
@@ -233,7 +233,7 @@ The report calculation/model foundation already exists. The current PDF change e
 - [x] Include valid application reopen state when available and warn/omit it when invalid or absent.
 - [x] Version and validate backup packages with manifest metadata, bounded components and SHA-256 corruption checks.
 - [x] Inspect/extract/prepare a selected package entirely outside live storage before restore.
-- [x] Reject unsafe ZIP paths, duplicates, checksum mismatch, wrong Demo/Production mode and future/incompatible schema versions.
+- [x] Reject unsafe ZIP paths, duplicates, checksum mismatch, wrong Production/Demo mode and future/incompatible schema versions.
 - [x] Prepare supported older database versions through current schema/additive-extension migration paths on an isolated copy.
 - [x] Require the typed confirmation `RESTAURAR` before destructive work.
 - [x] Create a mandatory safety backup of current live state before moving or deleting live files.
@@ -254,13 +254,13 @@ The report calculation/model foundation already exists. The current PDF change e
 - [ ] School-year defaults.
 - [ ] Date/format preferences where needed.
 - [ ] Evidence and backup folders.
-- [ ] Version/diagnostic information.
+- [ ] Version/diagnostic information beyond the installed-version display.
 - [ ] Configurable rules that never rewrite history silently.
 
 ## 14. Privacy and local security
 
 - [ ] Personal-data inventory and classification.
-- [~] Sensitive-information warnings in relevant workflows, now including sensitive export/PDF/recovery boundaries.
+- [~] Sensitive-information warnings in relevant workflows, including sensitive export/PDF/recovery boundaries.
 - [ ] Optional local application lock.
 - [ ] Backup protection/encryption strategy.
 - [ ] Safe error logging without leaking student data.
@@ -270,13 +270,17 @@ The report calculation/model foundation already exists. The current PDF change e
 
 ## 15. Installation and update
 
-- [ ] Windows installer/package.
-- [ ] Runtime/dependency strategy.
-- [ ] Shortcuts and application identity.
-- [ ] Safe SQLite migrations during updates.
-- [ ] Installed-version display.
-- [ ] Uninstall without accidental user-data deletion.
-- [ ] Clean-machine installation tests.
+**Current feature branch:** `feature/windows-installer-update` / PR #23. Version 1 uses a per-user Inno Setup package and an explicit run-a-newer-installer update model; automatic update discovery/download remains separate future work.
+
+- [~] Windows installer/package.
+- [~] Self-contained .NET 10 `win-x64` runtime/dependency strategy.
+- [~] Start Menu shortcut, optional desktop shortcut and stable installer identity.
+- [~] Safe update boundary: installer replaces program files while SQLite migration remains application-owned.
+- [~] Installed semantic-version display (`0.1.0` for the first installable line).
+- [~] Ordinary uninstall without accidental user-data deletion.
+- [~] Automated install/reinstall/uninstall lifecycle test with user-data preservation sentinel.
+- [ ] Manual clean/non-development-machine installation and update validation.
+- [ ] Production Authenticode signing workflow/certificate strategy before broad distribution.
 
 ## 16. Accessibility and UI quality — continuous work
 
@@ -299,9 +303,9 @@ The report calculation/model foundation already exists. The current PDF change e
 3. [x] Merge safe student XLSX/CSV import after functional manual validation (PR #15).
 4. [x] Merge group data XLSX/CSV export after manual file-opening validation (PR #17).
 5. [x] Merge safe local backup/restore after manual recovery validation (PR #18).
-6. [~] Complete PDF output for the existing individual/group reports (PR #21).
-7. [ ] Harden privacy and local security (module 14).
-8. [ ] Add installation/update packaging and clean-machine validation (module 15).
+6. [x] Merge PDF output for the existing individual/group reports after manual rendering validation (PR #21).
+7. [~] Complete Windows installation/update packaging and clean-machine validation (PR #23).
+8. [ ] Harden privacy and local security (module 14; deliberately deferred while module 15 is completed).
 9. [ ] Return to richer NEM planning fields, evaluation criteria/rubrics and reporting periods.
 10. [ ] Add teacher journal, family workflow, evidence attachments and calendar as prioritized.
 
@@ -321,7 +325,7 @@ A change is considered complete when applicable items are satisfied:
 - [ ] Full test suite passes.
 - [ ] `openspec validate --all` passes.
 - [ ] `git diff --check` passes.
-- [ ] Required manual UX validation is completed.
+- [ ] Required manual UX/operational validation is completed.
 - [ ] Architecture/documentation is updated when behavior changes.
 - [ ] The pull request is reviewed/audited as appropriate.
 - [ ] The feature branch is merged into `main` using the agreed merge strategy.
