@@ -546,9 +546,9 @@ public sealed class ServicioRecuperacionLocalSqlite : IServicioRecuperacionLocal
         foreach (var entrada in archivo.Entries)
         {
             if (string.IsNullOrWhiteSpace(entrada.FullName)
-                || entrada.FullName.EndsWith("/", StringComparison.Ordinal)
-                || entrada.FullName.Contains("\\", StringComparison.Ordinal)
-                || entrada.FullName.StartsWith("/", StringComparison.Ordinal)
+                || entrada.FullName.EndsWith('/')
+                || entrada.FullName.Contains('\\')
+                || entrada.FullName.StartsWith('/')
                 || entrada.FullName.Split('/').Any(segmento => segmento is "." or ".." or ""))
             {
                 throw PaqueteInvalido("El respaldo contiene una ruta de archivo no segura.");
