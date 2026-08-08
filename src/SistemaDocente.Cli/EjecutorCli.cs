@@ -139,7 +139,7 @@ public sealed class EjecutorCli
         var incluir = args.Tiene("--include-personal-data");
         var data = servicios.Grupos.ListarGrupos().Select(grupo => new
         {
-            groupId = grupo.Id.Valor,
+            groupId = grupo.GrupoId.Valor,
             name = incluir ? grupo.NombreVisible : null,
             studentCount = grupo.Estudiantes.Count,
             activeStudentCount = grupo.Estudiantes.Count(x => x.EstaActivo),
@@ -164,7 +164,7 @@ public sealed class EjecutorCli
         var incluir = args.Tiene("--include-personal-data");
         var data = servicios.Grupos.ObtenerTodosLosEstudiantes(grupoId).Select(estudiante => new
         {
-            studentId = estudiante.Id.Valor,
+            studentId = estudiante.EstudianteId.Valor,
             number = estudiante.NumeroLista,
             name = incluir ? estudiante.NombreVisible : null,
             active = estudiante.EstaActivo,
@@ -191,10 +191,11 @@ public sealed class EjecutorCli
         var estudianteId = LeerEstudianteId(args);
         var aplicar = args.Tiene("--apply");
         var estudiante = servicios.Grupos.ObtenerTodosLosEstudiantes(grupoId)
-            .SingleOrDefault(x => x.Id == estudianteId)
+            .SingleOrDefault(x => x.EstudianteId == estudianteId)
             ?? throw new DomainConflictException("El estudiante indicado no pertenece al grupo.");
+        var estadoAnterior = estudiante.EstaActivo;
 
-        if (aplicar && estudiante.EstaActivo != activar)
+        if (aplicar && estadoAnterior != activar)
         {
             estudiante = activar
                 ? servicios.Grupos.ReactivarEstudiante(grupoId, estudianteId)
@@ -206,7 +207,7 @@ public sealed class EjecutorCli
             dryRun = !aplicar,
             applied = aplicar,
             studentId = estudianteId.Valor,
-            previousActive = aplicar ? !estudiante.EstaActivo : estudiante.EstaActivo,
+            previousActive = estadoAnterior,
             targetActive = activar,
             resultingActive = aplicar ? estudiante.EstaActivo : activar,
         };
@@ -241,7 +242,7 @@ public sealed class EjecutorCli
                     number = x.NumeroLista,
                     name = incluir ? x.NombreVisible : null,
                     state = x.Estado,
-                    active = x.EstaActivo,
+                    active = x.EstaActivoActualmente,
                 }).ToArray(),
             };
         return Emitir(
