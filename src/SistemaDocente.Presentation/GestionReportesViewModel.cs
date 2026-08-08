@@ -17,6 +17,7 @@ public sealed class GestionReportesViewModel : ViewModelBase
 {
     private readonly GestionGrupoCasosUso _grupos;
     private readonly GestionReportesCasosUso _reportes;
+    private readonly IExportadorReportesPdf? _exportadorPdf;
     private GrupoId? _grupoId;
     private IReadOnlyList<EstudianteReporteVisual> _estudiantes = Array.Empty<EstudianteReporteVisual>();
     private EstudianteReporteVisual? _estudianteSeleccionado;
@@ -27,10 +28,12 @@ public sealed class GestionReportesViewModel : ViewModelBase
 
     public GestionReportesViewModel(
         GestionGrupoCasosUso grupos,
-        GestionReportesCasosUso reportes)
+        GestionReportesCasosUso reportes,
+        IExportadorReportesPdf? exportadorPdf = null)
     {
         _grupos = grupos ?? throw new ArgumentNullException(nameof(grupos));
         _reportes = reportes ?? throw new ArgumentNullException(nameof(reportes));
+        _exportadorPdf = exportadorPdf;
         MostrarIndividualCommand = new RelayCommand(MostrarIndividual);
         MostrarGrupalCommand = new RelayCommand(MostrarGrupal);
         RefrescarCommand = new RelayCommand(Refrescar, () => _grupoId is not null);
@@ -62,13 +65,25 @@ public sealed class GestionReportesViewModel : ViewModelBase
     public ReporteIndividualAlumno? ReporteIndividual
     {
         get => _reporteIndividual;
-        private set => SetProperty(ref _reporteIndividual, value);
+        private set
+        {
+            if (SetProperty(ref _reporteIndividual, value))
+            {
+                OnPropertyChanged(nameof(PuedeExportarPdf));
+            }
+        }
     }
 
     public ReporteGrupal? ReporteGrupal
     {
         get => _reporteGrupal;
-        private set => SetProperty(ref _reporteGrupal, value);
+        private set
+        {
+            if (SetProperty(ref _reporteGrupal, value))
+            {
+                OnPropertyChanged(nameof(PuedeExportarPdf));
+            }
+        }
     }
 
     public bool MostrarIndividualActivo
@@ -79,11 +94,19 @@ public sealed class GestionReportesViewModel : ViewModelBase
             if (SetProperty(ref _mostrarIndividual, value))
             {
                 OnPropertyChanged(nameof(MostrarGrupalActivo));
+                OnPropertyChanged(nameof(PuedeExportarPdf));
             }
         }
     }
 
     public bool MostrarGrupalActivo => !MostrarIndividualActivo;
+
+    public bool PuedeExportarPdf =>
+        _exportadorPdf is not null
+        && (MostrarIndividualActivo ? ReporteIndividual is not null : ReporteGrupal is not null);
+
+    public string AdvertenciaPdf =>
+        "El PDF puede contener datos personales, pedagógicos y de seguimiento. Guárdalo y compártelo sólo en ubicaciones y canales autorizados para tu contexto escolar.";
 
     public string Mensaje
     {
@@ -125,6 +148,56 @@ public sealed class GestionReportesViewModel : ViewModelBase
         }
     }
 
+    public string CrearNombrePdfSugerido(DateOnly fecha)
+    {
+        var tipo = MostrarIndividualActivo ? "Individual" : "Grupal";
+        var sujeto = MostrarIndividualActivo
+            ? ReporteIndividual is { } individual
+                ? $"{individual.NumeroLista}_{individual.Nombre}"
+                : "Alumno"
+            : ReporteGrupal?.NombreGrupo ?? "Grupo";
+        var bruto = $"{IdentidadProducto.NombreSeguroArchivo}_Reporte_{tipo}_{sujeto}_{fecha:yyyy-MM-dd}.pdf";
+        return SanitizarNombreArchivo(bruto);
+    }
+
+    public bool ExportarPdf(string rutaArchivo)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(rutaArchivo);
+        if (_exportadorPdf is null)
+        {
+            Mensaje = "La exportación PDF no está disponible en esta instalación.";
+            return false;
+        }
+
+        try
+        {
+            if (MostrarIndividualActivo && ReporteIndividual is { } individual)
+            {
+                _exportadorPdf.Exportar(individual, rutaArchivo);
+            }
+            else if (!MostrarIndividualActivo && ReporteGrupal is { } grupal)
+            {
+                _exportadorPdf.Exportar(grupal, rutaArchivo);
+            }
+            else
+            {
+                Mensaje = "Genera el reporte antes de guardarlo como PDF.";
+                return false;
+            }
+
+            Mensaje = "Reporte PDF guardado correctamente.";
+            return true;
+        }
+        catch (Exception exception) when (
+            exception is ExportacionReportePdfException
+                or IOException
+                or UnauthorizedAccessException)
+        {
+            Mensaje = "No fue posible guardar el reporte PDF. Verifica la ubicación e intenta nuevamente.";
+            return false;
+        }
+    }
+
     private void MostrarIndividual()
     {
         MostrarIndividualActivo = true;
@@ -149,5 +222,14 @@ public sealed class GestionReportesViewModel : ViewModelBase
         {
             Mensaje = "No fue posible generar el reporte individual seleccionado.";
         }
+    }
+
+    private static string SanitizarNombreArchivo(string valor)
+    {
+        var invalidos = Path.GetInvalidFileNameChars().ToHashSet();
+        var caracteres = valor.Select(caracter => invalidos.Contains(caracter) ? '_' : caracter).ToArray();
+        return new string(caracteres)
+            .Replace(' ', '_')
+            .Replace("__", "_", StringComparison.Ordinal);
     }
 }
