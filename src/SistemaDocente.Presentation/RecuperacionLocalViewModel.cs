@@ -1,9 +1,13 @@
+using System.Globalization;
+
 using SistemaDocente.Application;
 
 namespace SistemaDocente.Presentation;
 
 public sealed class RecuperacionLocalViewModel : ViewModelBase
 {
+    private static readonly CultureInfo CulturaEsMx = CultureInfo.GetCultureInfo("es-MX");
+
     private readonly GestionRespaldoCasosUso _casosUso;
     private InspeccionRespaldoLocal? _inspeccion;
     private ResultadoRespaldoLocal? _ultimoRespaldo;
@@ -21,7 +25,7 @@ public sealed class RecuperacionLocalViewModel : ViewModelBase
         : "Producción";
 
     public string AdvertenciaSeguridad =>
-        "El respaldo contiene datos personales y pedagógicos. La versión 1 no está cifrada; guárdala sólo en una ubicación segura.";
+        $"El respaldo de {ModoActual} contiene datos personales y pedagógicos. La versión 1 no está cifrada; guárdala sólo en una ubicación segura.";
 
     public string Confirmacion
     {
@@ -42,14 +46,14 @@ public sealed class RecuperacionLocalViewModel : ViewModelBase
             StringComparison.Ordinal);
 
     public string RutaInspeccion => _inspeccion?.RutaArchivo ?? string.Empty;
-    public string FechaRespaldo => _inspeccion?.CreadoUtc.ToLocalTime().ToString("g") ?? string.Empty;
+    public string FechaRespaldo => _inspeccion?.CreadoUtc.ToLocalTime().ToString("g", CulturaEsMx) ?? string.Empty;
     public string VersionAplicacionRespaldo => _inspeccion?.VersionAplicacion ?? string.Empty;
     public string ModoRespaldo => _inspeccion is null
         ? string.Empty
         : _inspeccion.ModoOrigen == ModoAlmacenamientoLocal.Demostracion
             ? "Demostración"
             : "Producción";
-    public string VersionBaseDatos => _inspeccion?.VersionBaseDatos.ToString() ?? string.Empty;
+    public string VersionBaseDatos => _inspeccion?.VersionBaseDatos.ToString(CultureInfo.InvariantCulture) ?? string.Empty;
     public string TamanoRespaldo => _inspeccion is null ? string.Empty : FormatearTamano(_inspeccion.TamanoBytes);
     public string ComponentesRespaldo => _inspeccion is null
         ? string.Empty
@@ -162,9 +166,9 @@ public sealed class RecuperacionLocalViewModel : ViewModelBase
 
     private static string FormatearTamano(long bytes)
     {
-        if (bytes < 1024) return $"{bytes} B";
-        if (bytes < 1024L * 1024) return $"{bytes / 1024d:0.#} KB";
-        if (bytes < 1024L * 1024 * 1024) return $"{bytes / (1024d * 1024):0.#} MB";
-        return $"{bytes / (1024d * 1024 * 1024):0.#} GB";
+        if (bytes < 1024) return FormattableString.Invariant($"{bytes} B");
+        if (bytes < 1024L * 1024) return FormattableString.Invariant($"{bytes / 1024d:0.#} KB");
+        if (bytes < 1024L * 1024 * 1024) return FormattableString.Invariant($"{bytes / (1024d * 1024):0.#} MB");
+        return FormattableString.Invariant($"{bytes / (1024d * 1024 * 1024):0.#} GB");
     }
 }
