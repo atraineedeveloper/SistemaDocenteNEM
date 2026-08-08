@@ -1,5 +1,6 @@
 using System.Globalization;
 
+using MigraDoc;
 using MigraDoc.DocumentObjectModel;
 using MigraDoc.DocumentObjectModel.Tables;
 using MigraDoc.Rendering;
@@ -134,18 +135,18 @@ public sealed class ExportadorReportesPdf : IExportadorReportesPdf
     private static Document CrearDocumentoBase(string tipoReporte)
     {
         var documento = new Document();
-        var normal = documento.Styles[StyleNames.Normal];
+        var normal = documento.Styles[StyleNames.Normal]!;
         normal.Font.Name = FamiliaFuente;
         normal.Font.Size = Unit.FromPoint(9.5);
         normal.ParagraphFormat.SpaceAfter = Unit.FromPoint(3);
 
-        var heading1 = documento.Styles[StyleNames.Heading1];
+        var heading1 = documento.Styles[StyleNames.Heading1]!;
         heading1.Font.Name = FamiliaFuente;
         heading1.Font.Size = Unit.FromPoint(18);
         heading1.Font.Bold = true;
         heading1.ParagraphFormat.SpaceAfter = Unit.FromPoint(4);
 
-        var heading2 = documento.Styles[StyleNames.Heading2];
+        var heading2 = documento.Styles[StyleNames.Heading2]!;
         heading2.Font.Name = FamiliaFuente;
         heading2.Font.Size = Unit.FromPoint(12);
         heading2.Font.Bold = true;
