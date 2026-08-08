@@ -12,17 +12,17 @@ public sealed class ExportacionReportesPdfPresentacion
         _exportador = exportador ?? throw new ArgumentNullException(nameof(exportador));
     }
 
-    public string AdvertenciaPrivacidad =>
+    public static string AdvertenciaPrivacidad =>
         "El PDF puede contener datos personales, pedagógicos y de seguimiento. Guárdalo y compártelo sólo en ubicaciones y canales autorizados para tu contexto escolar.";
 
-    public string CrearNombreArchivo(ReporteIndividualAlumno reporte, DateOnly fecha)
+    public static string CrearNombreArchivo(ReporteIndividualAlumno reporte, DateOnly fecha)
     {
         ArgumentNullException.ThrowIfNull(reporte);
         return SanitizarNombreArchivo(
             $"{IdentidadProducto.NombreSeguroArchivo}_Reporte_Individual_{reporte.NumeroLista}_{reporte.Nombre}_{fecha:yyyy-MM-dd}.pdf");
     }
 
-    public string CrearNombreArchivo(ReporteGrupal reporte, DateOnly fecha)
+    public static string CrearNombreArchivo(ReporteGrupal reporte, DateOnly fecha)
     {
         ArgumentNullException.ThrowIfNull(reporte);
         return SanitizarNombreArchivo(
