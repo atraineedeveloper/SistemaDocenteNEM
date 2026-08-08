@@ -86,6 +86,10 @@
                                 Visibility="{Binding ModoDemostracion, Converter={StaticResource BoolToVisibility}}">
                             <TextBlock Text="DEMO" Foreground="{DynamicResource WarningBrush}" FontSize="10" FontWeight="Bold"/>
                         </Border>
+                        <TextBlock Text="{x:Static application:IdentidadProducto.VersionVisible}"
+                                   Foreground="{DynamicResource TextMutedBrush}" FontSize="10"
+                                   Margin="8,0,0,0" VerticalAlignment="Center"
+                                   AutomationProperties.Name="Versión instalada de AulaRaíz"/>
                     </StackPanel>
                     <TextBlock Text="{x:Static application:IdentidadProducto.Subtitulo}"
                                Foreground="{DynamicResource TextMutedBrush}" Style="{StaticResource Caption}"
