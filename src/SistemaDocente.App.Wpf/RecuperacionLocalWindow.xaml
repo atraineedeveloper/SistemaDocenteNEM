@@ -1,0 +1,178 @@
+<Window x:Class="SistemaDocente.App.Wpf.RecuperacionLocalWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xml:lang="es-MX"
+        Title="Respaldo y restauración"
+        Height="760" Width="960" MinHeight="660" MinWidth="840"
+        WindowStartupLocation="CenterOwner" ShowInTaskbar="False"
+        ResizeMode="CanResizeWithGrip"
+        Background="{DynamicResource WindowBackgroundBrush}">
+
+    <Window.Resources>
+        <ResourceDictionary>
+            <BooleanToVisibilityConverter x:Key="RecoveryBoolToVisibility"/>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="Styles/PopupStyles.xaml"/>
+            </ResourceDictionary.MergedDictionaries>
+        </ResourceDictionary>
+    </Window.Resources>
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <Border Grid.Row="0" Style="{StaticResource PopupHeader}">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+                <StackPanel>
+                    <TextBlock Text="RECUPERACIÓN LOCAL" Style="{StaticResource PopupEyebrow}"/>
+                    <TextBlock Text="Respaldo y restauración" Style="{StaticResource PopupTitle}" Margin="0,4,0,4"/>
+                    <TextBlock Text="Protege o recupera el estado completo de Sistema Docente. Esta función es distinta de exportar datos a Excel o CSV."
+                               Style="{StaticResource PopupSubtitle}" TextWrapping="Wrap"/>
+                </StackPanel>
+                <Border Grid.Column="1" Style="{StaticResource PopupInfoPill}" VerticalAlignment="Center" Margin="20,0,0,0">
+                    <TextBlock Text="{Binding ModoActual, Mode=OneWay}" Foreground="{DynamicResource InfoBrush}" FontWeight="SemiBold"/>
+                </Border>
+            </Grid>
+        </Border>
+
+        <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
+            <StackPanel Margin="24,20" MaxWidth="860" HorizontalAlignment="Center">
+                <Border Padding="14" CornerRadius="8"
+                        Background="{DynamicResource WarningBackgroundBrush}"
+                        BorderBrush="{DynamicResource WarningBorderBrush}" BorderThickness="1"
+                        Margin="0,0,0,18">
+                    <StackPanel>
+                        <TextBlock Text="Archivo sensible sin cifrado" FontWeight="SemiBold"
+                                   Foreground="{DynamicResource WarningBrush}"/>
+                        <TextBlock Text="{Binding AdvertenciaSeguridad, Mode=OneWay}" TextWrapping="Wrap"
+                                   Foreground="{DynamicResource TextPrimaryBrush}" Margin="0,4,0,0"/>
+                    </StackPanel>
+                </Border>
+
+                <Border x:Name="BackupPanel" Style="{StaticResource PopupCard}" Margin="0,0,0,18">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+                        <StackPanel Margin="0,0,24,0">
+                            <TextBlock Text="Crear respaldo manual" Style="{StaticResource PopupSectionTitle}"/>
+                            <TextBlock Text="Guarda una copia completa de la base local y del estado válido de la aplicación en un archivo .sdocbackup."
+                                       Style="{StaticResource PopupSubtitle}"/>
+                            <TextBlock Text="{Binding UltimoRespaldoRuta, Mode=OneWay}" Margin="0,12,0,2"
+                                       TextWrapping="Wrap" FontWeight="SemiBold"/>
+                            <TextBlock Text="{Binding UltimoRespaldoResumen, Mode=OneWay}"
+                                       Foreground="{DynamicResource TextSecondaryBrush}"/>
+                            <TextBlock Text="{Binding UltimoRespaldoAdvertencias, Mode=OneWay}" Margin="0,5,0,0"
+                                       Foreground="{DynamicResource WarningBrush}" TextWrapping="Wrap"/>
+                        </StackPanel>
+                        <Button Grid.Column="1" Style="{StaticResource PrimaryButton}"
+                                Content="Crear respaldo…" Click="OnCrearRespaldoClic"
+                                VerticalAlignment="Top"
+                                AutomationProperties.Name="Crear respaldo completo de la aplicación"/>
+                    </Grid>
+                </Border>
+
+                <Border x:Name="RestorePanel" Style="{StaticResource PopupCard}">
+                    <StackPanel>
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+                            <StackPanel Margin="0,0,24,0">
+                                <TextBlock Text="Restaurar desde un respaldo" Style="{StaticResource PopupSectionTitle}"/>
+                                <TextBlock Text="Primero se inspecciona el paquete fuera de los archivos vivos. Nada se reemplaza al seleccionar un respaldo."
+                                           Style="{StaticResource PopupSubtitle}"/>
+                            </StackPanel>
+                            <Button Grid.Column="1" Content="Seleccionar respaldo…" Click="OnSeleccionarRespaldoClic"
+                                    VerticalAlignment="Top"
+                                    AutomationProperties.Name="Seleccionar e inspeccionar respaldo"/>
+                        </Grid>
+
+                        <Border Margin="0,18,0,0" Padding="16" CornerRadius="8"
+                                Background="{DynamicResource SectionBackgroundBrush}"
+                                Visibility="{Binding TieneInspeccion, Converter={StaticResource RecoveryBoolToVisibility}}">
+                            <StackPanel>
+                                <TextBlock Text="Respaldo validado" FontWeight="SemiBold" Margin="0,0,0,10"/>
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="160"/>
+                                        <ColumnDefinition Width="*"/>
+                                    </Grid.ColumnDefinitions>
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="Auto"/>
+                                    </Grid.RowDefinitions>
+                                    <TextBlock Text="Archivo" FontWeight="SemiBold"/>
+                                    <TextBlock Grid.Column="1" Text="{Binding RutaInspeccion, Mode=OneWay}" TextWrapping="Wrap"/>
+                                    <TextBlock Grid.Row="1" Text="Creado" FontWeight="SemiBold" Margin="0,7,0,0"/>
+                                    <TextBlock Grid.Row="1" Grid.Column="1" Text="{Binding FechaRespaldo, Mode=OneWay}" Margin="0,7,0,0"/>
+                                    <TextBlock Grid.Row="2" Text="Modo" FontWeight="SemiBold" Margin="0,7,0,0"/>
+                                    <TextBlock Grid.Row="2" Grid.Column="1" Text="{Binding ModoRespaldo, Mode=OneWay}" Margin="0,7,0,0"/>
+                                    <TextBlock Grid.Row="3" Text="Aplicación" FontWeight="SemiBold" Margin="0,7,0,0"/>
+                                    <TextBlock Grid.Row="3" Grid.Column="1" Text="{Binding VersionAplicacionRespaldo, Mode=OneWay}" Margin="0,7,0,0"/>
+                                    <TextBlock Grid.Row="4" Text="Base de datos" FontWeight="SemiBold" Margin="0,7,0,0"/>
+                                    <TextBlock Grid.Row="4" Grid.Column="1" Text="{Binding VersionBaseDatos, StringFormat=Versión {0}, Mode=OneWay}" Margin="0,7,0,0"/>
+                                    <TextBlock Grid.Row="5" Text="Tamaño" FontWeight="SemiBold" Margin="0,7,0,0"/>
+                                    <TextBlock Grid.Row="5" Grid.Column="1" Text="{Binding TamanoRespaldo, Mode=OneWay}" Margin="0,7,0,0"/>
+                                    <TextBlock Grid.Row="6" Text="Componentes" FontWeight="SemiBold" Margin="0,7,0,0"/>
+                                    <TextBlock Grid.Row="6" Grid.Column="1" Text="{Binding ComponentesRespaldo, Mode=OneWay}"
+                                               TextWrapping="Wrap" Margin="0,7,0,0"/>
+                                </Grid>
+                                <TextBlock Text="{Binding AdvertenciasInspeccion, Mode=OneWay}" Margin="0,10,0,0"
+                                           TextWrapping="Wrap" Foreground="{DynamicResource WarningBrush}"
+                                           Visibility="{Binding TieneAdvertenciasInspeccion, Converter={StaticResource RecoveryBoolToVisibility}}"/>
+                            </StackPanel>
+                        </Border>
+
+                        <Border Margin="0,16,0,0" Padding="16" CornerRadius="8"
+                                BorderBrush="{DynamicResource ErrorBorderBrush}" BorderThickness="1"
+                                Background="{DynamicResource ErrorBackgroundBrush}"
+                                Visibility="{Binding TieneInspeccion, Converter={StaticResource RecoveryBoolToVisibility}}">
+                            <StackPanel>
+                                <TextBlock Text="Restauración destructiva" FontWeight="SemiBold"
+                                           Foreground="{DynamicResource ErrorBrush}"/>
+                                <TextBlock Margin="0,5,0,10" TextWrapping="Wrap"
+                                           Text="Restaurar reemplazará la base local actual. Antes de hacerlo, el sistema debe crear automáticamente un respaldo de seguridad del estado presente. Después de una restauración correcta, la aplicación se cerrará."/>
+                                <TextBlock Text="Escribe RESTAURAR para continuar:" FontWeight="SemiBold"/>
+                                <TextBox Text="{Binding Confirmacion, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                         Margin="0,6,0,10" MaxWidth="280" HorizontalAlignment="Left"
+                                         AutomationProperties.Name="Confirmación de restauración"/>
+                                <Button Style="{StaticResource PopupDestructiveButton}"
+                                        Content="Restaurar y cerrar aplicación"
+                                        IsEnabled="{Binding PuedeRestaurar, Mode=OneWay}"
+                                        Click="OnRestaurarClic" HorizontalAlignment="Left"
+                                        AutomationProperties.Name="Restaurar respaldo validado y cerrar aplicación"/>
+                            </StackPanel>
+                        </Border>
+                    </StackPanel>
+                </Border>
+            </StackPanel>
+        </ScrollViewer>
+
+        <Border Grid.Row="2" Style="{StaticResource PopupFooter}">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+                <TextBlock Text="{Binding Mensaje, Mode=OneWay}" VerticalAlignment="Center"
+                           Foreground="{DynamicResource TextSecondaryBrush}" TextWrapping="Wrap"/>
+                <Button Grid.Column="1" Content="Cerrar" Click="OnCerrarClic"/>
+            </Grid>
+        </Border>
+    </Grid>
+</Window>
