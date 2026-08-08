@@ -182,9 +182,9 @@ public sealed class ServicioRecuperacionLocalSqlite : IServicioRecuperacionLocal
                 estadoBytes);
             PublicarTemporal(temporalPaquete, destino);
 
-            var componentes = componenteEstado is null
-                ? new[] { componenteBase }
-                : new[] { componenteBase, componenteEstado };
+            ComponenteRespaldoLocal[] componentes = componenteEstado is null
+                ? [componenteBase]
+                : [componenteBase, componenteEstado];
             return new ResultadoRespaldoLocal(
                 destino,
                 creadoUtc,
@@ -546,9 +546,9 @@ public sealed class ServicioRecuperacionLocalSqlite : IServicioRecuperacionLocal
         foreach (var entrada in archivo.Entries)
         {
             if (string.IsNullOrWhiteSpace(entrada.FullName)
-                || entrada.FullName.EndsWith('/', StringComparison.Ordinal)
-                || entrada.FullName.Contains('\\', StringComparison.Ordinal)
-                || entrada.FullName.StartsWith('/', StringComparison.Ordinal)
+                || entrada.FullName.EndsWith("/", StringComparison.Ordinal)
+                || entrada.FullName.Contains("\\", StringComparison.Ordinal)
+                || entrada.FullName.StartsWith("/", StringComparison.Ordinal)
                 || entrada.FullName.Split('/').Any(segmento => segmento is "." or ".." or ""))
             {
                 throw PaqueteInvalido("El respaldo contiene una ruta de archivo no segura.");
@@ -583,12 +583,25 @@ public sealed class ServicioRecuperacionLocalSqlite : IServicioRecuperacionLocal
             throw PaqueteInvalido("El respaldo no identifica la versión de aplicación que lo creó.");
         }
 
+        if (manifiesto.Database is null || manifiesto.ApplicationState is null)
+        {
+            throw PaqueteInvalido("El manifiesto no describe todos los componentes requeridos.");
+        }
+
+        if (string.IsNullOrWhiteSpace(manifiesto.Database.Path)
+            || string.IsNullOrWhiteSpace(manifiesto.Database.Sha256)
+            || manifiesto.Database.SizeBytes <= 0
+            || manifiesto.Database.UserVersion < 0)
+        {
+            throw PaqueteInvalido("El manifiesto de la base de datos es inválido.");
+        }
+
         var modoOrigen = ModoDesdeTexto(manifiesto.SourceMode);
         if (modoOrigen != ModoActual)
         {
             throw new RecuperacionLocalException(
                 CategoriaErrorRecuperacionLocal.PaqueteIncompatible,
-                "El respaldo pertenece a un modo de almacenamiento diferente (Producción/Demo)." );
+                "El respaldo pertenece a un modo de almacenamiento diferente (Producción/Demo).");
         }
 
         if (!string.Equals(
@@ -613,6 +626,7 @@ public sealed class ServicioRecuperacionLocalSqlite : IServicioRecuperacionLocal
                     manifiesto.ApplicationState.Path,
                     RutaEstadoPaquete,
                     StringComparison.Ordinal)
+                || manifiesto.ApplicationState.SizeBytes < 0
                 || string.IsNullOrWhiteSpace(manifiesto.ApplicationState.Sha256))
             {
                 throw PaqueteInvalido("El manifiesto del estado de aplicación es inválido.");
