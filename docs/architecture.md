@@ -12,7 +12,7 @@ The solution targets .NET 10. Portable production projects use `net10.0`; the WP
 | --- | --- |
 | `SistemaDocente.Core` | Domain entities, identities, invariants and domain exceptions. Includes groups/students, attendance, projects/activities, delivery/achievement, school context, NEM primary-grade/planning rules and student-record concepts. |
 | `SistemaDocente.Application` | Use cases, persistence/interchange ports, snapshots and orchestration between aggregates. |
-| `SistemaDocente.Interchange` | File-format adapters for neutral tabular interchange. It currently reads XLSX and UTF-8 CSV for student import without depending on WPF or SQLite. |
+| `SistemaDocente.Interchange` | File-format adapters for neutral tabular interchange. It reads XLSX/UTF-8 CSV for student import and writes value-only XLSX/formula-safe UTF-8 CSV for teacher-controlled export without depending on WPF or SQLite. |
 | `SistemaDocente.Data` | SQLite adapters, base-schema initialization, additive versioned extensions, queries and transactions. Technical exceptions are translated at the infrastructure boundary. |
 | `SistemaDocente.Presentation` | Portable MVVM: ViewModels, commands, visual models, editable snapshots, filters, module boundaries and local catalog services. It does not reference WPF or SQLite. |
 | `SistemaDocente.Reporting` | Pure report models and calculations for individual/group reports, attendance, delivery compliance and achievement distribution. |
@@ -147,13 +147,27 @@ Delivered / (Delivered + NotDelivered) × 100
 
 Pending delivery decisions are excluded from the denominator. No decided deliveries produces an undefined value (`—` in UI), not 0%.
 
-## Tabular interchange and student import
+## Tabular interchange, import and export
 
-Student import uses an explicit adapter boundary rather than putting spreadsheet parsing in WPF or SQLite. `SistemaDocente.Interchange` implements Application-owned neutral tabular contracts for `.xlsx` and UTF-8 `.csv`. XLSX parsing reads stored cell values only; CSV supports quoted fields plus comma, semicolon and tab delimiters, with explicit teacher resolution when delimiter detection is ambiguous.
+Spreadsheet syntax is isolated behind Application-owned neutral contracts rather than being implemented in WPF or SQLite. `SistemaDocente.Interchange` is the concrete file-format boundary.
+
+### Student import
+
+Student import reads `.xlsx` and UTF-8 `.csv`. XLSX parsing reads stored cell values only; CSV supports quoted fields plus comma, semicolon and tab delimiters, with explicit teacher resolution when delimiter detection is ambiguous.
 
 Application owns column mapping, deterministic normalization, unigrade/multigrade grade resolution, list-number conflicts, probable-duplicate review and the final commit boundary. Preview/corrections remain in memory and never rewrite the source file. Immediately before confirmation, Application reloads the current group/context, revalidates every included row, mutates a cloned `Grupo` aggregate and calls `IAlmacenamientoGrupos.Guardar` exactly once. The existing SQLite aggregate transaction therefore makes a confirmed multi-row import all-or-nothing.
 
 Presentation owns wizard state (`Archivo → Columnas → Vista previa → Confirmación → Resultado`) while WPF owns only desktop-specific file selection and window behavior. Existing students are never overwritten/reactivated implicitly, CURP is not an import destination and imported students do not enter historical attendance/activity/evaluation rosters retroactively. See [`student-import.md`](student-import.md).
+
+### Group data export
+
+Group export reverses the same architectural direction: Application reads existing domain/application stores and projects selected data into neutral `DocumentoTabularSalida` / worksheet / row / cell models. The writer never queries SQLite directly and never mutates application state.
+
+The initial export datasets are structured group context, students, normalized attendance, projects, activities, evaluation and optional sensitive follow-up. Application owns dataset selection, attendance/project scope, NEM labels, privacy-sensitive opt-ins and file-name suggestions. CSV is intentionally one dataset per file; XLSX can contain several selected worksheets.
+
+`SistemaDocente.Interchange` writes ordinary macro-free XLSX with values rather than formulas and UTF-8 CSV with deterministic quoting/date formatting plus formula-injection neutralization for formula-leading text. Both formats are written to a temporary sibling file first; the requested destination is published only after serialization completes successfully. A failed export therefore does not leave a new partial destination that looks complete.
+
+Presentation owns the export stages (`Contenido → Alcance → Archivo → Resultado`). WPF owns only the native Windows save dialog and window behavior. Sensitive student observations, evaluation observations and student follow-up are excluded by default and require explicit opt-in. Export is intentionally distinct from backup/restore. See [`group-export.md`](group-export.md).
 
 ## SQLite persistence
 
@@ -227,11 +241,11 @@ Presentation embeds a local Mexico entity/municipality catalog. Entity selection
 
 Presentation uses portable MVVM. ViewModels own selection, filters, editable state, confirmation boundaries and unsaved-change logic without WPF dependencies.
 
-`MainWindowViewModel` coordinates global navigation. `App.xaml.cs` is the composition root: it creates SQLite adapters, use cases, ViewModels and WPF services; interprets Demo arguments; and wires shared group context across Group, Projects and Reports.
+`MainWindowViewModel` coordinates global navigation. `App.xaml.cs` is the composition root: it creates SQLite adapters, interchange adapters, use cases, ViewModels and WPF services; interprets Demo arguments; and wires shared group context across Group, Projects, Reports and interchange workflows.
 
 The shell uses one top navigation surface. Current modules are Group, Attendance, Projects, Evaluation and Reports. `Mis grupos` is the explicit group workspace; after opening a group, a compact context switcher allows fast changes while preserving unsaved-change guards.
 
-Complex tasks remain in dedicated windows, including student editing, student import, project/activity detail, student record, evaluation-cell detail and structured group configuration. Project/activity editors expose structured NEM planning catalogs and grade scope while project/activity summaries surface compact planning metadata.
+Complex tasks remain in dedicated windows, including student editing, student import, group-data export, project/activity detail, student record, evaluation-cell detail and structured group configuration. Project/activity editors expose structured NEM planning catalogs and grade scope while project/activity summaries surface compact planning metadata.
 
 ## Themes, accessibility and density
 
@@ -255,7 +269,7 @@ Demo
 %LOCALAPPDATA%\SistemaDocenteNEM-Demo\data\app-state.json
 ```
 
-`--demo-reset` deletes/recreates only Demo storage. The Demo dataset contains structured student grades plus representative project methodologies, formative fields and target grades.
+`--demo-reset` deletes/recreates only Demo storage. The Demo dataset contains structured student grades plus representative project methodologies, formative fields, target grades, attendance/evaluation history and follow-up data. Import/export integration tests use only fictitious Demo or temporary records.
 
 ## Engineering invariants
 
@@ -264,6 +278,7 @@ Every significant change should preserve these boundaries:
 - Core does not know SQLite, WPF or file-system UI details.
 - Application orchestrates use cases through ports.
 - Data owns SQLite implementation details.
+- Interchange owns spreadsheet/CSV file syntax and does not own domain meaning.
 - Presentation stays portable.
 - Reporting remains pure and infrastructure-independent.
 - WPF owns desktop-specific interaction and composition.
