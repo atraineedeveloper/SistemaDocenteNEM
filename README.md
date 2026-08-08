@@ -24,7 +24,7 @@ The application already includes working modules for:
 - Light, Dark and High Contrast themes;
 - automated Windows CI for formatting, Release build, tests, OpenSpec and whitespace validation.
 
-The current product includes structured primary grades, automatic NEM phases, multigrade support, school organization, student grade, offline Mexico entity/municipality catalogs and structured NEM project planning. Projects can carry a NEM methodology and target grades; activities can carry one formative field and an explicit grade scope while preserving their historical student roster. Safe XLSX/CSV student import, group-data export and local backup/restore are merged in `main`; PDF report output is the active feature change. See [`docs/nem-project-planning.md`](docs/nem-project-planning.md), [`docs/student-import.md`](docs/student-import.md), [`docs/group-export.md`](docs/group-export.md), [`docs/backup-restore.md`](docs/backup-restore.md) and [`docs/pdf-reports.md`](docs/pdf-reports.md).
+The current product includes structured primary grades, automatic NEM phases, multigrade support, school organization, student grade, offline Mexico entity/municipality catalogs and structured NEM project planning. Projects can carry a NEM methodology and target grades; activities can carry one formative field and an explicit grade scope while preserving their historical student roster. Safe XLSX/CSV student import, group-data export, local backup/restore and PDF output for the existing individual/group reports are merged in `main`. Windows installation/update packaging is the current hardening change. See [`docs/nem-project-planning.md`](docs/nem-project-planning.md), [`docs/student-import.md`](docs/student-import.md), [`docs/group-export.md`](docs/group-export.md), [`docs/backup-restore.md`](docs/backup-restore.md), [`docs/pdf-reports.md`](docs/pdf-reports.md) and [`docs/installation-update.md`](docs/installation-update.md).
 
 ## Product principles
 
@@ -47,7 +47,7 @@ Gestión docente para la Nueva Escuela Mexicana
 
 The UI uses the compact `AR` monogram where an image asset is unnecessary. File-system-safe user-facing names use `AulaRaiz` without the accent, for example `AulaRaiz_Respaldo_Demo_...sdocbackup`.
 
-The historical technical identity remains intentionally stable for now:
+The historical technical identity remains intentionally stable for compatibility:
 
 - solution/project namespaces: `SistemaDocente.*`;
 - production data folder: `%LOCALAPPDATA%\SistemaDocenteNEM\...`;
@@ -65,9 +65,22 @@ Those identifiers are compatibility contracts, not user-facing branding. Any lat
 - OpenSpec
 - Open XML SDK for XLSX interchange
 - PDFsharp / MigraDoc for PDF report rendering
+- Inno Setup 7 for the Windows installer
 - Git / GitHub Actions
 
 The solution is intentionally layered into Core, Application, Data, Presentation, Reporting and WPF projects so domain rules remain independent from SQLite and the desktop UI. The `SistemaDocente.Interchange` adapter project isolates XLSX/CSV syntax and PDF rendering from Application and WPF, while local recovery remains a separate SQLite/storage concern behind an Application recovery port.
+
+## Windows delivery
+
+The current installer work publishes AulaRaíz as a self-contained .NET 10 `win-x64` application and packages it with Inno Setup 7. The default installation is per-user under:
+
+```text
+%LOCALAPPDATA%\Programs\AulaRaiz
+```
+
+The installer owns program files and shortcuts only. Existing classroom data continues to live in the historical Production/Demo folders and is intentionally preserved during update and ordinary uninstall. SQLite migration remains application-owned; the installer does not execute database SQL.
+
+The first installable semantic product version is `0.1.0`, and the same version metadata is shown in the AulaRaíz UI and consumed by the installer build. See [`docs/installation-update.md`](docs/installation-update.md) for the update, uninstall, signing and clean-machine validation contract.
 
 ## Repository workflow
 
@@ -80,7 +93,7 @@ Feature work follows this sequence:
 5. add or update automated tests;
 6. open a Draft pull request;
 7. run Windows CI;
-8. perform required manual UX validation;
+8. perform required manual UX/operational validation;
 9. use Squash and merge once the change is accepted.
 
 New technical documentation, OpenSpec content, branch names, pull-request text and commit messages are written in English. Existing Spanish UI/domain identifiers and historical technical names are preserved where renaming them would add risk without product value.
@@ -97,7 +110,7 @@ dotnet run --project .\src\SistemaDocente.App.Wpf\SistemaDocente.App.Wpf.csproj 
 
 ## Automated validation
 
-The repository CI runs on Windows and verifies:
+The normal repository CI runs on Windows and verifies:
 
 ```powershell
 dotnet restore SistemaDocente.sln
@@ -108,9 +121,11 @@ openspec validate --all
 git diff --check
 ```
 
+The installer workflow additionally publishes the self-contained WPF application, verifies/acquires the pinned Inno Setup compiler, builds a development installer, performs silent install/reinstall/uninstall lifecycle checks and verifies that a sentinel in the historical user-data directory survives uninstall.
+
 ## Roadmap
 
-The maintained roadmap is [`checklist_modulos_sistema_docente_nem.md`](checklist_modulos_sistema_docente_nem.md). The current foundation includes NEM/multigrade context, student import, group-data export and safe local backup/restore. PDF output for the existing individual/group reports is the current feature; privacy/local security and installation/update remain the next hardening priorities before broader production use.
+The maintained roadmap is [`checklist_modulos_sistema_docente_nem.md`](checklist_modulos_sistema_docente_nem.md). PDF output for the existing reports is merged. The active hardening change is Windows installation/update packaging; privacy/local-security work remains pending as a separate module before broader production use.
 
 ## Data policy
 
