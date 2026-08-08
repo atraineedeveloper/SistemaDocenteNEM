@@ -56,6 +56,8 @@ public partial class MainWindow : Window
 
     private void OnRecuperacionSolicitada(object? sender, EventArgs e)
     {
+        if (!ViewModel.SolicitarCerrar()) return;
+
         var ventana = new RecuperacionLocalWindow(RecuperacionLocal)
         {
             Owner = this,
