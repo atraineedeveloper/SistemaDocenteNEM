@@ -1,35 +1,27 @@
 using System.IO;
 
+using SistemaDocente.Data;
+
 namespace SistemaDocente.App.Wpf;
 
 public sealed record RutasAplicacion(
     string BaseSqlite,
     string EstadoAplicacion,
+    string DirectorioRespaldosSeguridad,
     bool EsDemostracion = false)
 {
-    public string DirectorioRespaldosSeguridad
-    {
-        get
-        {
-            var directorioDatos = Path.GetDirectoryName(Path.GetFullPath(BaseSqlite))
-                ?? throw new InvalidOperationException("La ruta de la base SQLite no tiene directorio contenedor.");
-            var directorioAplicacion = Directory.GetParent(directorioDatos)?.FullName
-                ?? throw new InvalidOperationException("No fue posible determinar el directorio de la aplicación.");
-            return Path.Combine(directorioAplicacion, "backups", "safety");
-        }
-    }
-
     public static RutasAplicacion DesdeLocalApplicationData(
         string localApplicationData,
         bool modoDemostracion = false)
     {
-        ArgumentException.ThrowIfNullOrWhiteSpace(localApplicationData);
-        var carpetaAplicacion = modoDemostracion ? "SistemaDocenteNEM-Demo" : "SistemaDocenteNEM";
-        var directorio = Path.Combine(localApplicationData, carpetaAplicacion, "data");
-        return new(
-            Path.Combine(directorio, "sistema-docente.db"),
-            Path.Combine(directorio, "app-state.json"),
+        var rutas = RutasAlmacenamientoLocal.DesdeLocalApplicationData(
+            localApplicationData,
             modoDemostracion);
+        return new(
+            rutas.BaseSqlite,
+            rutas.EstadoAplicacion,
+            rutas.DirectorioRespaldosSeguridad,
+            rutas.EsDemostracion);
     }
 
     /// <summary>
