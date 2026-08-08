@@ -22,9 +22,10 @@ The application already includes working modules for:
 - safe local backup/restore with versioned recovery packages, pre-restore inspection and mandatory safety backup;
 - Demo mode with isolated fictitious data;
 - Light, Dark and High Contrast themes;
+- self-contained Windows installation/update packaging with version-to-version lifecycle validation;
 - automated Windows CI for formatting, Release build, tests, OpenSpec and whitespace validation.
 
-The current product includes structured primary grades, automatic NEM phases, multigrade support, school organization, student grade, offline Mexico entity/municipality catalogs and structured NEM project planning. Projects can carry a NEM methodology and target grades; activities can carry one formative field and an explicit grade scope while preserving their historical student roster. Safe XLSX/CSV student import, group-data export, local backup/restore and PDF output for the existing individual/group reports are merged in `main`. Windows installation/update packaging is the current hardening change. See [`docs/nem-project-planning.md`](docs/nem-project-planning.md), [`docs/student-import.md`](docs/student-import.md), [`docs/group-export.md`](docs/group-export.md), [`docs/backup-restore.md`](docs/backup-restore.md), [`docs/pdf-reports.md`](docs/pdf-reports.md) and [`docs/installation-update.md`](docs/installation-update.md).
+The current product includes structured primary grades, automatic NEM phases, multigrade support, school organization, student grade, offline Mexico entity/municipality catalogs and structured NEM project planning. Projects can carry a NEM methodology and target grades; activities can carry one formative field and an explicit grade scope while preserving their historical student roster. Safe XLSX/CSV student import, group-data export, local backup/restore, PDF output and Windows installation/update packaging are merged in `main`. GitHub Release automation is the current distribution hardening change. See [`docs/nem-project-planning.md`](docs/nem-project-planning.md), [`docs/student-import.md`](docs/student-import.md), [`docs/group-export.md`](docs/group-export.md), [`docs/backup-restore.md`](docs/backup-restore.md), [`docs/pdf-reports.md`](docs/pdf-reports.md), [`docs/installation-update.md`](docs/installation-update.md) and [`docs/releases.md`](docs/releases.md).
 
 ## Product principles
 
@@ -66,13 +67,13 @@ Those identifiers are compatibility contracts, not user-facing branding. Any lat
 - Open XML SDK for XLSX interchange
 - PDFsharp / MigraDoc for PDF report rendering
 - Inno Setup 7 for the Windows installer
-- Git / GitHub Actions
+- Git / GitHub Actions / GitHub Releases
 
 The solution is intentionally layered into Core, Application, Data, Presentation, Reporting and WPF projects so domain rules remain independent from SQLite and the desktop UI. The `SistemaDocente.Interchange` adapter project isolates XLSX/CSV syntax and PDF rendering from Application and WPF, while local recovery remains a separate SQLite/storage concern behind an Application recovery port.
 
 ## Windows delivery
 
-The current installer work publishes AulaRaíz as a self-contained .NET 10 `win-x64` application and packages it with Inno Setup 7. The default installation is per-user under:
+AulaRaíz is published as a self-contained .NET 10 `win-x64` application and packaged with Inno Setup 7. The default installation is per-user under:
 
 ```text
 %LOCALAPPDATA%\Programs\AulaRaiz
@@ -81,6 +82,8 @@ The current installer work publishes AulaRaíz as a self-contained .NET 10 `win-
 The installer owns program files and shortcuts only. Existing classroom data continues to live in the historical Production/Demo folders and is intentionally preserved during update and ordinary uninstall. SQLite migration remains application-owned; the installer does not execute database SQL.
 
 The first installable semantic product version is `0.1.0`, and the same version metadata is shown in the AulaRaíz UI and consumed by the installer build. See [`docs/installation-update.md`](docs/installation-update.md) for the update, uninstall, signing and clean-machine validation contract.
+
+GitHub Releases are the durable versioned download surface for accepted application versions. A matching `vMAJOR.MINOR.PATCH` tag triggers a fresh quality gate, builds the validated installer, generates `SHA256SUMS.txt` and publishes both files to a GitHub Release. Versions with major version `0` are published as pre-releases. GitHub Actions artifacts remain temporary CI/manual-test outputs; GitHub Packages are not used merely to distribute the desktop installer. See [`docs/releases.md`](docs/releases.md).
 
 ## Repository workflow
 
@@ -123,9 +126,11 @@ git diff --check
 
 The installer workflow additionally publishes the self-contained WPF application, verifies/acquires the pinned Inno Setup compiler, builds an ephemeral older-version fixture plus the current development installer, performs a real version-to-version install/update/uninstall lifecycle check, proves that a sentinel in the historical user-data directory survives update and uninstall, and uploads both the normal installer artifact and a paired manual-upgrade validation artifact.
 
+The Release workflow starts only from a version tag, requires the tag to match `Directory.Build.props`, repeats the tagged-source quality gates, reuses the verified installer path, writes SHA-256 integrity metadata and publishes the installer/checksum pair through GitHub Releases. It uses GitHub-generated change notes and prepends an unsigned-development warning until Authenticode signing is implemented.
+
 ## Roadmap
 
-The maintained roadmap is [`checklist_modulos_sistema_docente_nem.md`](checklist_modulos_sistema_docente_nem.md). PDF output for the existing reports is merged. The active hardening change is Windows installation/update packaging; privacy/local-security work remains pending as a separate module before broader production use.
+The maintained roadmap is [`checklist_modulos_sistema_docente_nem.md`](checklist_modulos_sistema_docente_nem.md). PDF output and Windows installation/update packaging are merged. GitHub Release delivery is the active distribution-hardening change; privacy/local-security work remains pending as a separate module before broader production use.
 
 ## Data policy
 
