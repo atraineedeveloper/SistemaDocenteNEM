@@ -18,7 +18,7 @@ public sealed class ReportesPdfUxTests
         Assert.Contains("SaveFileDialog", code, StringComparison.Ordinal);
         Assert.Contains("AdvertenciaPdf", code, StringComparison.Ordinal);
         Assert.Contains("MessageBoxButton.YesNo", code, StringComparison.Ordinal);
-        Assert.Contains("ViewModel.ExportarPdf", code, StringComparison.Ordinal);
+        Assert.Contains("viewModel.ExportarPdf", code, StringComparison.Ordinal);
         Assert.DoesNotContain("PdfSharp", code, StringComparison.OrdinalIgnoreCase);
         Assert.DoesNotContain("MigraDoc", code, StringComparison.OrdinalIgnoreCase);
     }
