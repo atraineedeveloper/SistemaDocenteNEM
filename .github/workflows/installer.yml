@@ -82,7 +82,9 @@ jobs:
             -VersionOverride $env:UPGRADE_BASELINE_VERSION
 
           $baseline = Resolve-Path ".\artifacts\installer\AulaRaiz-Setup-$($env:UPGRADE_BASELINE_VERSION)-win-x64.exe"
-          $preserved = Join-Path $env:RUNNER_TEMP $baseline.Path.Split([IO.Path]::DirectorySeparatorChar)[-1]
+          $fixtureDir = Join-Path $PWD "artifacts\upgrade-fixture"
+          New-Item -ItemType Directory -Path $fixtureDir -Force | Out-Null
+          $preserved = Join-Path $fixtureDir $baseline.Path.Split([IO.Path]::DirectorySeparatorChar)[-1]
           Copy-Item -LiteralPath $baseline.Path -Destination $preserved -Force
           "BASELINE_INSTALLER=$preserved" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
 
@@ -189,4 +191,13 @@ jobs:
         with:
           name: AulaRaiz-windows-installer
           path: artifacts/installer/AulaRaiz-Setup-*-win-x64.exe
+          if-no-files-found: error
+
+      - name: Upload manual upgrade-validation pair
+        uses: actions/upload-artifact@v7
+        with:
+          name: AulaRaiz-upgrade-validation
+          path: |
+            artifacts/upgrade-fixture/AulaRaiz-Setup-*-win-x64.exe
+            artifacts/installer/AulaRaiz-Setup-*-win-x64.exe
           if-no-files-found: error
