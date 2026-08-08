@@ -1,3 +1,4 @@
+using SistemaDocente.Application;
 using SistemaDocente.Core;
 
 namespace SistemaDocente.Presentation;
@@ -244,7 +245,7 @@ public sealed class MainWindowViewModel : ViewModelBase
     {
         get
         {
-            var titulo = ModoDemostracion ? "Sistema Docente Local · DEMO" : "Sistema Docente Local";
+            var titulo = ModoDemostracion ? $"{IdentidadProducto.Nombre} · DEMO" : IdentidadProducto.Nombre;
             if (MostrarInicio) return titulo + " - Mis grupos";
             if (!string.IsNullOrWhiteSpace(Grupo.NombreGrupo)) titulo += " - " + Grupo.NombreGrupo;
             if (MostrarAsistenciaDiaria) titulo += " - Asistencia diaria";
