@@ -47,6 +47,8 @@ Consequences:
 
 The visible UI obtains its value from assembly informational metadata through `IdentidadProducto.VersionVisible`. Installer CI checks the installed executable and uninstall registration against the same `VersionPrefix`.
 
+`VersionOverride` in the installer build script is a validation-only escape hatch used to produce an older synthetic upgrade fixture. Normal product builds always use the repository version source.
+
 ## Update boundary
 
 Version 1 uses installer-over-installer updates. A stable Inno Setup AppId and the same default application directory identify subsequent packages as the same installed product.
@@ -75,17 +77,18 @@ Development CI produces unsigned installer artifacts. Production code signing is
 
 ## Automated lifecycle proof
 
-`.github/workflows/installer.yml` validates the deployment boundary on Windows:
+`.github/workflows/installer.yml` validates the deployment boundary on Windows with a real version transition:
 
 1. obtain and verify the pinned Inno compiler;
-2. publish the self-contained app;
-3. compile the installer;
-4. install for the current user;
-5. validate installed version metadata;
-6. create a sentinel under the legacy Production data path;
-7. run the installer again as an update/reinstall smoke test;
-8. uninstall;
-9. verify program removal;
-10. verify the legacy data sentinel remains.
+2. build an ephemeral `0.0.9` installer fixture using the same stable AppId;
+3. build the repository's actual `0.1.0` installer;
+4. install `0.0.9` for the current user and validate installed version metadata;
+5. create a sentinel under the legacy Production data path;
+6. install `0.1.0` over the older installation;
+7. verify executable/uninstall metadata changed to `0.1.0` and exactly one AulaRaíz uninstall entry remains;
+8. verify the legacy data sentinel survived the update;
+9. uninstall;
+10. verify program removal and verify the legacy data sentinel still remains;
+11. upload the current installer plus the paired upgrade-validation installers for manual acceptance.
 
-This lifecycle test complements, rather than replaces, the normal solution CI and Data-layer migration tests.
+The synthetic `0.0.9` package is not a product release; it exists only to prove version-to-version installer behavior. This lifecycle test complements, rather than replaces, the normal solution CI and Data-layer migration tests.
