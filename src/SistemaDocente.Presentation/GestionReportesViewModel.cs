@@ -105,7 +105,9 @@ public sealed class GestionReportesViewModel : ViewModelBase
         _exportacionPdf is not null
         && (MostrarIndividualActivo ? ReporteIndividual is not null : ReporteGrupal is not null);
 
-    public string AdvertenciaPdf => _exportacionPdf?.AdvertenciaPrivacidad ?? string.Empty;
+    public string AdvertenciaPdf => _exportacionPdf is null
+        ? string.Empty
+        : ExportacionReportesPdfPresentacion.AdvertenciaPrivacidad;
 
     public string Mensaje
     {
@@ -152,11 +154,11 @@ public sealed class GestionReportesViewModel : ViewModelBase
         if (_exportacionPdf is null) return $"{IdentidadProducto.NombreSeguroArchivo}_Reporte_{fecha:yyyy-MM-dd}.pdf";
         if (MostrarIndividualActivo && ReporteIndividual is { } individual)
         {
-            return _exportacionPdf.CrearNombreArchivo(individual, fecha);
+            return ExportacionReportesPdfPresentacion.CrearNombreArchivo(individual, fecha);
         }
         if (!MostrarIndividualActivo && ReporteGrupal is { } grupal)
         {
-            return _exportacionPdf.CrearNombreArchivo(grupal, fecha);
+            return ExportacionReportesPdfPresentacion.CrearNombreArchivo(grupal, fecha);
         }
         return $"{IdentidadProducto.NombreSeguroArchivo}_Reporte_{fecha:yyyy-MM-dd}.pdf";
     }
