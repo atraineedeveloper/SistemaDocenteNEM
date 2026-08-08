@@ -134,6 +134,28 @@ public sealed class ExportacionTabularEscritoresTests
         Assert.Empty(Directory.GetFiles(directorio, "*.tmp"));
     }
 
+    [Fact]
+    public void XlsxFallaDuranteSerializacionSinReemplazarDestinoExistente()
+    {
+        var directorio = CrearDirectorioTemporal();
+        var ruta = Path.Combine(directorio, "existente.xlsx");
+        File.WriteAllText(ruta, "ORIGINAL", Encoding.UTF8);
+        var documento = DocumentoTabularSalida.Crear(
+            new HojaTabularSalida(
+                "Datos",
+                [new ColumnaTabularSalida("Valor")],
+                [FilaTabularSalida.Crear(new CeldaTabularSalida((TipoCeldaTabularSalida)999))]));
+
+        Assert.Throws<ExportacionTabularException>(() =>
+            new ExportadorTabularArchivo().Exportar(
+                documento,
+                ruta,
+                FormatoExportacionTabular.Xlsx));
+
+        Assert.Equal("ORIGINAL", File.ReadAllText(ruta, Encoding.UTF8));
+        Assert.Empty(Directory.GetFiles(directorio, "*.tmp"));
+    }
+
     private static string CrearDirectorioTemporal()
     {
         var directorio = Path.Combine(
