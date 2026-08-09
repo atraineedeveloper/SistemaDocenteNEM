@@ -12,4 +12,8 @@
     <Description>Coordinador local de instalación y reinicio de actualizaciones de AulaRaíz</Description>
   </PropertyGroup>
 
+  <ItemGroup>
+    <InternalsVisibleTo Include="SistemaDocente.App.Wpf.Tests" />
+  </ItemGroup>
+
 </Project>
