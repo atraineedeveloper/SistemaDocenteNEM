@@ -147,28 +147,40 @@ The application does not silently delete an existing legacy `crash.log`; automat
 
 ## Installer, GitHub and release surfaces
 
-The installed program directory under `%LOCALAPPDATA%\Programs\AulaRaiz` contains application/runtime binaries, not normal classroom storage.
+The installed program directory under `%LOCALAPPDATA%\Programs\AulaRaiz` contains application/runtime binaries, including the 0.2-line `aularaiz.exe` terminal host, not normal classroom storage.
 
 GitHub source, CI, Actions artifacts and Releases must contain fictitious test/Demo data only. Real classroom databases, backups, exports, PDFs and diagnostics are never valid repository/release assets.
 
-## Data-flow rules for future terminal/agent access
+## Terminal and agent access
 
-The planned local CLI/agent boundary must follow this inventory rather than bypass it:
+The local CLI is an explicit privacy boundary. It follows this inventory rather than treating SQLite as an agent API:
 
-1. agents call Application use cases; they do not query SQLite directly;
+1. command handlers call Application use cases; they do not issue domain SQL directly;
 2. read-only/minimized output is the default;
 3. stable internal ids and aggregates are preferred over names;
-4. D2/D3 fields require an explicit command option when they are genuinely needed;
-5. writes require an explicit apply/confirmation switch and reuse domain validation;
-6. no CLI command sends data to a network service by itself;
-7. diagnostics from CLI commands use the same D0-only safe logging contract;
-8. recommendation outputs must identify their evidence/coverage and must not invent diagnoses or unsupported student facts.
+4. supported names require the explicit `--include-personal-data` option;
+5. D3 free-form expediente notes, family agreements and pedagogical/evaluation observations are not returned by V1 agent commands;
+6. writes require the explicit `--apply` switch and reuse domain validation; without it they are dry runs;
+7. V1 exposes no destructive delete commands;
+8. sensitive free-form mutation content is not accepted through argv because command lines can be retained in shell history/process listings;
+9. no CLI command sends data to a network service by itself;
+10. diagnostics from CLI commands use the same D0-only safe logging contract;
+11. recommendation outputs identify their evidence and coverage and do not invent diagnoses, causes or unsupported student facts.
 
-A future external AI connector would require its own explicit data-minimization/consent boundary. The local CLI does not imply permission to upload classroom data anywhere.
+### Classification of current CLI projections
 
-## Review checklist when adding a field
+- `capabilities` / `status`: D0.
+- group listing without display names: normally D1.
+- student listing: up to D2 because a stable internal id is combined with grade/active/list information; adding names makes the personal-data inclusion explicit.
+- attendance tied to an internal student id: D3 even when names are omitted.
+- `agent context`: D3 because it can include student-level attendance/completion/achievement evidence tied to stable internal ids. Pseudonymization is minimization, **not anonymization**.
+- aggregate `agent recommend` output: normally D1 when it contains no direct identifiers or student-level narrative content, but it remains internal classroom analysis.
 
-For every new persisted/exported/report field, answer before implementation:
+An external AI agent may execute/consume the CLI JSON, but any component that forwards that JSON to a cloud or other network service is a **separate privacy boundary**. The local CLI does not grant permission to upload classroom data and does not store API credentials. Prefer the minimized `agent context` projection; use personal-data opt-in only when genuinely necessary and institutionally authorized.
+
+## Review checklist when adding a field or agent projection
+
+For every new persisted/exported/report/CLI field, answer before implementation:
 
 - What classification does the field have?
 - Is it necessary for the teacher workflow?
@@ -177,5 +189,6 @@ For every new persisted/exported/report field, answer before implementation:
 - Could it enter diagnostics or error text?
 - Does a terminal/agent projection need it, and can that projection be aggregated or pseudonymized instead?
 - Does deletion/history behavior need to preserve it for an explicit pedagogical reason?
+- Would exposing it through argv, stdout or an external agent create a new copy or disclosure boundary?
 
-If those questions cannot be answered, the field is not ready to be added.
+If those questions cannot be answered, the field/projection is not ready to be added.

@@ -42,24 +42,30 @@ public sealed class InstalacionWindowsTests
 
         Assert.Contains("IdentidadProducto.VersionVisible", header, StringComparison.Ordinal);
         Assert.Contains("Versión instalada de AulaRaíz", header, StringComparison.Ordinal);
-        Assert.Contains("<VersionPrefix>0.1.0</VersionPrefix>", props, StringComparison.Ordinal);
+        Assert.Contains("<VersionPrefix>0.2.0</VersionPrefix>", props, StringComparison.Ordinal);
     }
 
     [Fact]
-    public void InstallerCiProvesRealVersionUpgradeAndUserDataSurvivesUninstall()
+    public void InstallerCiProvesPublishedUpgradeAddsCliAndPreservesUserData()
     {
         var workflow = Read(".github/workflows/installer.yml");
         var buildScript = Read("scripts/build-installer.ps1");
 
         Assert.Contains("gh release verify-asset", workflow, StringComparison.Ordinal);
-        Assert.Contains("UPGRADE_BASELINE_VERSION: \"0.0.9\"", workflow, StringComparison.Ordinal);
-        Assert.Contains("Build older upgrade fixture", workflow, StringComparison.Ordinal);
-        Assert.Contains("Smoke-test install, real upgrade and uninstall", workflow, StringComparison.Ordinal);
-        Assert.Contains("Assert-InstalledVersion $env:UPGRADE_BASELINE_VERSION", workflow, StringComparison.Ordinal);
-        Assert.Contains("Assert-InstalledVersion $version", workflow, StringComparison.Ordinal);
+        Assert.Contains("UPGRADE_BASELINE_VERSION: \"0.1.0\"", workflow, StringComparison.Ordinal);
+        Assert.Contains("Acquire published upgrade baseline", workflow, StringComparison.Ordinal);
+        Assert.Contains("gh release download $tag", workflow, StringComparison.Ordinal);
+        Assert.Contains("SHA256SUMS.txt", workflow, StringComparison.Ordinal);
+        Assert.Contains("Smoke-test published upgrade, CLI and uninstall", workflow, StringComparison.Ordinal);
+        Assert.Contains("Assert-WpfInstalledVersion $env:UPGRADE_BASELINE_VERSION", workflow, StringComparison.Ordinal);
+        Assert.Contains("Published v$env:UPGRADE_BASELINE_VERSION unexpectedly contains the future AulaRaíz CLI", workflow, StringComparison.Ordinal);
+        Assert.Contains("Assert-WpfInstalledVersion $version", workflow, StringComparison.Ordinal);
+        Assert.Contains("Assert-CliStatus $version", workflow, StringComparison.Ordinal);
+        Assert.Contains("aularaiz.exe", workflow, StringComparison.Ordinal);
         Assert.Contains("installer-ci-sentinel.txt", workflow, StringComparison.Ordinal);
         Assert.Contains("Uninstall deleted the legacy user-data sentinel", workflow, StringComparison.Ordinal);
         Assert.Contains("actions/upload-artifact@v7", workflow, StringComparison.Ordinal);
         Assert.Contains("[string]$VersionOverride", buildScript, StringComparison.Ordinal);
+        Assert.Contains("PublishSingleFile=true", buildScript, StringComparison.Ordinal);
     }
 }

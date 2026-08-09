@@ -8,6 +8,7 @@ public enum CategoriaEventoDiagnostico
     NoEspecificada = 0,
     FalloNoControlado = 1,
     FalloInicioAlmacenamiento = 2,
+    FalloComandoTerminal = 3,
 }
 
 public enum ModoDiagnosticoLocal

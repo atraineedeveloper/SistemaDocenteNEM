@@ -8,7 +8,7 @@ The commercial product name is **AulaRaíz**. Existing technical solution/projec
 
 ## Current product scope
 
-The application already includes working modules for:
+The application includes working modules for:
 
 - group and student management;
 - monthly attendance with keyboard and one-click cell capture;
@@ -23,17 +23,22 @@ The application already includes working modules for:
 - Demo mode with isolated fictitious data;
 - Light, Dark and High Contrast themes;
 - self-contained Windows installation/update packaging with version-to-version lifecycle validation;
+- automated GitHub Releases for accepted version tags;
+- a maintained privacy data inventory and message-free local diagnostic stream;
+- a local terminal/agent interface in the 0.2 line, with dry-run-by-default mutations and transparent pedagogical recommendations;
 - automated Windows CI for formatting, Release build, tests, OpenSpec and whitespace validation.
 
-The current product includes structured primary grades, automatic NEM phases, multigrade support, school organization, student grade, offline Mexico entity/municipality catalogs and structured NEM project planning. Projects can carry a NEM methodology and target grades; activities can carry one formative field and an explicit grade scope while preserving their historical student roster. Safe XLSX/CSV student import, group-data export, local backup/restore, PDF output and Windows installation/update packaging are merged in `main`. GitHub Release automation is the current distribution hardening change. See [`docs/nem-project-planning.md`](docs/nem-project-planning.md), [`docs/student-import.md`](docs/student-import.md), [`docs/group-export.md`](docs/group-export.md), [`docs/backup-restore.md`](docs/backup-restore.md), [`docs/pdf-reports.md`](docs/pdf-reports.md), [`docs/installation-update.md`](docs/installation-update.md) and [`docs/releases.md`](docs/releases.md).
+The NEM foundation includes structured primary grades, automatic phases, multigrade support, school organization, student grade, offline Mexico entity/municipality catalogs and structured project planning. Projects can carry a NEM methodology and target grades; activities can carry one formative field and an explicit grade scope while preserving their historical student roster.
+
+See [`docs/nem-project-planning.md`](docs/nem-project-planning.md), [`docs/student-import.md`](docs/student-import.md), [`docs/group-export.md`](docs/group-export.md), [`docs/backup-restore.md`](docs/backup-restore.md), [`docs/pdf-reports.md`](docs/pdf-reports.md), [`docs/installation-update.md`](docs/installation-update.md), [`docs/releases.md`](docs/releases.md), [`docs/privacy-data-inventory.md`](docs/privacy-data-inventory.md) and [`docs/terminal-agent-cli.md`](docs/terminal-agent-cli.md).
 
 ## Product principles
 
 - **Offline first:** core classroom work must not depend on Internet access.
-- **Teacher workflow first:** the UI should model the task a teacher performs rather than expose storage or implementation details.
+- **Teacher workflow first:** the UI and automation surfaces model teacher tasks rather than storage implementation details.
 - **NEM-aware without unnecessary rigidity:** official/stable concepts are structured; teacher-authored pedagogical content remains flexible.
-- **No invented educational data:** migrations do not guess pedagogical meaning for legacy records.
-- **Privacy by design:** real student information must never be committed to the repository.
+- **No invented educational data:** migrations and recommendations do not guess unsupported pedagogical meaning.
+- **Privacy by design:** real student information must never be committed to the repository, and automation output is minimized by default.
 - **Accessible desktop UX:** keyboard operation, semantic themes, high contrast and common display scaling are part of acceptance criteria.
 - **Spec-driven development:** meaningful changes are defined in OpenSpec before implementation and validated before merge.
 
@@ -69,7 +74,7 @@ Those identifiers are compatibility contracts, not user-facing branding. Any lat
 - Inno Setup 7 for the Windows installer
 - Git / GitHub Actions / GitHub Releases
 
-The solution is intentionally layered into Core, Application, Data, Presentation, Reporting and WPF projects so domain rules remain independent from SQLite and the desktop UI. The `SistemaDocente.Interchange` adapter project isolates XLSX/CSV syntax and PDF rendering from Application and WPF, while local recovery remains a separate SQLite/storage concern behind an Application recovery port.
+The product is layered into Core, Application, Data, Presentation, Reporting, Interchange, WPF and CLI hosts. Domain/application rules remain independent from SQLite and presentation hosts. `SistemaDocente.Cli` composes the same Application/Data contracts as WPF; its command handlers do not issue domain SQL directly.
 
 ## Windows delivery
 
@@ -81,9 +86,38 @@ AulaRaíz is published as a self-contained .NET 10 `win-x64` application and pac
 
 The installer owns program files and shortcuts only. Existing classroom data continues to live in the historical Production/Demo folders and is intentionally preserved during update and ordinary uninstall. SQLite migration remains application-owned; the installer does not execute database SQL.
 
-The first installable semantic product version is `0.1.0`, and the same version metadata is shown in the AulaRaíz UI and consumed by the installer build. See [`docs/installation-update.md`](docs/installation-update.md) for the update, uninstall, signing and clean-machine validation contract.
+`v0.1.0` is the first published pre-release. The active 0.2 development line adds the installed `aularaiz.exe` terminal/agent interface. The same semantic version metadata flows into the WPF application, CLI and installer.
 
 GitHub Releases are the durable versioned download surface for accepted application versions. A matching `vMAJOR.MINOR.PATCH` tag triggers a fresh quality gate, builds the validated installer, generates `SHA256SUMS.txt` and publishes both files to a GitHub Release. Versions with major version `0` are published as pre-releases. GitHub Actions artifacts remain temporary CI/manual-test outputs; GitHub Packages are not used merely to distribute the desktop installer. See [`docs/releases.md`](docs/releases.md).
+
+## Terminal and agent interface
+
+The installed CLI lives beside the desktop executable:
+
+```powershell
+$AulaRaiz = "$env:LOCALAPPDATA\Programs\AulaRaiz\aularaiz.exe"
+& $AulaRaiz capabilities --json
+& $AulaRaiz status --json
+```
+
+Agents should use `--json`. Personal names are omitted by default; supported read commands require `--include-personal-data` to include them. V1 agent context does not expose expediente notes, family agreements or other D3 free-form pedagogical text.
+
+Mutations such as attendance changes and student deactivate/reactivate are dry runs unless `--apply` is explicit. There are no delete commands in V1. The CLI itself has no network integration: an external AI agent may consume its minimized JSON, but forwarding that JSON to a cloud service is a separate privacy boundary.
+
+Transparent local recommendations are available through:
+
+```powershell
+& $AulaRaiz agent context --group <group-guid> --json
+& $AulaRaiz agent recommend --group <group-guid> --json
+```
+
+Recommendations include the evidence and coverage/caveat that produced them; they do not diagnose, infer unsupported causes or rank students. See [`docs/terminal-agent-cli.md`](docs/terminal-agent-cli.md).
+
+## Privacy and diagnostics
+
+The maintained privacy map in [`docs/privacy-data-inventory.md`](docs/privacy-data-inventory.md) classifies current product data using D0–D3 engineering controls (not statutory legal labels) and maps SQLite, app-state, backups, exports, PDFs and diagnostic copies.
+
+New diagnostics no longer persist raw `Exception.ToString()`. They write only a closed D0 technical schema (time/id/category/exception type chain/message-free fingerprint/app version/mode) to the corresponding Production/Demo `diagnostics/events.jsonl`. Existing legacy `crash.log` files are left untouched and should be treated as potentially sensitive.
 
 ## Repository workflow
 
@@ -109,7 +143,13 @@ From the repository root on Windows:
 dotnet run --project .\src\SistemaDocente.App.Wpf\SistemaDocente.App.Wpf.csproj -- --demo-reset
 ```
 
-`--demo-reset` recreates the isolated fictitious Demo dataset. Production and Demo SQLite/application-state paths are separate. The Demo dataset includes structured grades, representative NEM project/activity metadata and enough attendance/evaluation history to validate import/export, PDF reporting and recovery workflows without real student data.
+Then the CLI can read the same isolated fictitious dataset:
+
+```powershell
+dotnet run --project .\src\SistemaDocente.Cli\SistemaDocente.Cli.csproj -- groups list --demo --json
+```
+
+Production and Demo SQLite/application-state/diagnostic paths remain separate.
 
 ## Automated validation
 
@@ -124,14 +164,14 @@ openspec validate --all
 git diff --check
 ```
 
-The installer workflow additionally publishes the self-contained WPF application, verifies/acquires the pinned Inno Setup compiler, builds an ephemeral older-version fixture plus the current development installer, performs a real version-to-version install/update/uninstall lifecycle check, proves that a sentinel in the historical user-data directory survives update and uninstall, and uploads both the normal installer artifact and a paired manual-upgrade validation artifact.
+`SistemaDocente.App.Wpf.Tests` references the CLI project, so the current solution quality gate restores/builds/tests the terminal host as part of the existing graph. The installer workflow additionally publishes WPF and a single-file self-contained CLI, builds an older-version upgrade fixture plus the current installer, verifies `aularaiz.exe status --json` before/after update, and proves ordinary uninstall preserves user data.
 
-The Release workflow starts only from a version tag, requires the tag to match `Directory.Build.props`, repeats the tagged-source quality gates, reuses the verified installer path, writes SHA-256 integrity metadata and publishes the installer/checksum pair through GitHub Releases. It uses GitHub-generated change notes and prepends an unsigned-development warning until Authenticode signing is implemented.
+The Release workflow starts only from a version tag, requires the tag to match `Directory.Build.props`, repeats the tagged-source quality gates, reuses the verified installer path, writes SHA-256 integrity metadata and publishes the installer/checksum pair through GitHub Releases.
 
 ## Roadmap
 
-The maintained roadmap is [`checklist_modulos_sistema_docente_nem.md`](checklist_modulos_sistema_docente_nem.md). PDF output and Windows installation/update packaging are merged. GitHub Release delivery is the active distribution-hardening change; privacy/local-security work remains pending as a separate module before broader production use.
+The maintained roadmap is [`checklist_modulos_sistema_docente_nem.md`](checklist_modulos_sistema_docente_nem.md). The privacy data-map/safe-logging baseline is merged. The current feature line adds local terminal/agent automation and evidence-based recommendations; backup encryption, local application lock and lifecycle/retention remain separate future privacy changes.
 
 ## Data policy
 
-Do not commit real student names, identifiers, health information, family information or other personal data. Tests and Demo mode use fictitious records only. Export files and PDF reports containing pedagogical observations or follow-up data must be stored/shared according to applicable personal-data handling requirements. `.sdocbackup` version 1 files can contain the complete local dataset and are not encrypted, so they must also be treated as sensitive files and stored only in appropriately protected locations.
+Do not commit real student names, identifiers, health information, family information or other personal data. Tests and Demo mode use fictitious records only. Export files, PDFs and `.sdocbackup` files can contain D3 educational/personal information and must be handled accordingly. A CLI response that omits names can still contain sensitive student-level educational evidence tied to stable internal ids; pseudonymization is minimization, not anonymization.

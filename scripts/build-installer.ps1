@@ -13,7 +13,9 @@ Set-StrictMode -Version Latest
 $repoRoot = (Resolve-Path (Join-Path $PSScriptRoot "..")).Path
 $propsPath = Join-Path $repoRoot "Directory.Build.props"
 $projectPath = Join-Path $repoRoot "src\SistemaDocente.App.Wpf\SistemaDocente.App.Wpf.csproj"
+$cliProjectPath = Join-Path $repoRoot "src\SistemaDocente.Cli\SistemaDocente.Cli.csproj"
 $publishDir = Join-Path $repoRoot "artifacts\publish\win-x64"
+$cliPublishDir = Join-Path $repoRoot "artifacts\publish\cli-win-x64"
 $installerDir = Join-Path $repoRoot "artifacts\installer"
 $installerScript = Join-Path $repoRoot "installer\AulaRaiz.iss"
 
@@ -40,8 +42,10 @@ if ($version -notmatch '^\d+\.\d+\.\d+$') {
 $assemblyVersion = "$version.0"
 
 Remove-Item -LiteralPath $publishDir -Recurse -Force -ErrorAction SilentlyContinue
+Remove-Item -LiteralPath $cliPublishDir -Recurse -Force -ErrorAction SilentlyContinue
 Remove-Item -LiteralPath $installerDir -Recurse -Force -ErrorAction SilentlyContinue
 New-Item -ItemType Directory -Path $publishDir -Force | Out-Null
+New-Item -ItemType Directory -Path $cliPublishDir -Force | Out-Null
 New-Item -ItemType Directory -Path $installerDir -Force | Out-Null
 
 & dotnet publish $projectPath `
@@ -55,11 +59,35 @@ New-Item -ItemType Directory -Path $installerDir -Force | Out-Null
     -p:FileVersion=$assemblyVersion `
     -p:InformationalVersion=$version
 if ($LASTEXITCODE -ne 0) {
-    throw "dotnet publish falló con código $LASTEXITCODE."
+    throw "dotnet publish de WPF falló con código $LASTEXITCODE."
 }
+
+& dotnet publish $cliProjectPath `
+    --configuration $Configuration `
+    --runtime win-x64 `
+    --self-contained true `
+    -p:PublishSingleFile=true `
+    -p:IncludeNativeLibrariesForSelfExtract=true `
+    -p:DebugType=None `
+    -p:DebugSymbols=false `
+    -p:PublishDir="$cliPublishDir\" `
+    -p:VersionPrefix=$version `
+    -p:AssemblyVersion=$assemblyVersion `
+    -p:FileVersion=$assemblyVersion `
+    -p:InformationalVersion=$version
+if ($LASTEXITCODE -ne 0) {
+    throw "dotnet publish de AulaRaíz CLI falló con código $LASTEXITCODE."
+}
+
+$cliExe = Join-Path $cliPublishDir "aularaiz.exe"
+if (-not (Test-Path -LiteralPath $cliExe -PathType Leaf)) {
+    throw "La publicación CLI no contiene 'aularaiz.exe'."
+}
+Copy-Item -LiteralPath $cliExe -Destination (Join-Path $publishDir "aularaiz.exe") -Force
 
 $requiredPublishFiles = @(
     "SistemaDocente.App.Wpf.exe",
+    "aularaiz.exe",
     "coreclr.dll",
     "hostfxr.dll",
     "PresentationFramework.dll",

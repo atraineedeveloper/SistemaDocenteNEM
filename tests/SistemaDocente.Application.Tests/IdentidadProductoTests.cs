@@ -14,7 +14,7 @@ public sealed class IdentidadProductoTests
     [Fact]
     public void VersionVisibleProvieneDeMetadatosCompartidosDelProducto()
     {
-        Assert.Equal("0.1.0", IdentidadProducto.Version);
-        Assert.Equal("v0.1.0", IdentidadProducto.VersionVisible);
+        Assert.Equal("0.2.0", IdentidadProducto.Version);
+        Assert.Equal("v0.2.0", IdentidadProducto.VersionVisible);
     }
 }
