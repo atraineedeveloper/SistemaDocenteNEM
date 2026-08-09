@@ -126,10 +126,16 @@ internal sealed record OpcionesActualizador(
             throw new ArgumentException("SHA-256 faltante.");
         if (!valores.TryGetValue("--app", out var aplicacion) || !Path.IsPathFullyQualified(aplicacion))
             throw new ArgumentException("Aplicación inválida.");
-        if (!valores.TryGetValue("--target-version", out var version)
-            || !System.Version.TryParse(version, out var versionParseada)
-            || versionParseada.Revision >= 0)
+        if (!valores.TryGetValue("--target-version", out var version))
+            throw new ArgumentException("Versión faltante.");
+
+        var partesVersion = version.Split('.');
+        if (partesVersion.Length != 3
+            || partesVersion.Any(p => !int.TryParse(p, out var numero) || numero < 0)
+            || !System.Version.TryParse(version, out var versionParseada))
+        {
             throw new ArgumentException("Versión inválida.");
+        }
 
         return new OpcionesActualizador(
             pid,
