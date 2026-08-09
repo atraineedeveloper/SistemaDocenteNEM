@@ -1,0 +1,15 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net10.0-windows</TargetFramework>
+    <EnableWindowsTargeting>true</EnableWindowsTargeting>
+    <UseWPF>true</UseWPF>
+    <AssemblyName>AulaRaiz.Updater</AssemblyName>
+    <RootNamespace>SistemaDocente.Updater</RootNamespace>
+    <AssemblyTitle>Actualizador de AulaRaíz</AssemblyTitle>
+    <Product>AulaRaíz</Product>
+    <Description>Coordinador local de instalación y reinicio de actualizaciones de AulaRaíz</Description>
+  </PropertyGroup>
+
+</Project>
