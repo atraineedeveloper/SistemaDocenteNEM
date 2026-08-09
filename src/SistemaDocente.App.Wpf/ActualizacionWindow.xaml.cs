@@ -109,14 +109,24 @@ public partial class ActualizacionWindow : Window
 
         try
         {
-            var updater = Path.Combine(AppContext.BaseDirectory, "AulaRaiz.Updater.exe");
+            var updaterInstalado = Path.Combine(AppContext.BaseDirectory, "AulaRaiz.Updater.exe");
             var app = Environment.ProcessPath;
-            if (!File.Exists(updater) || string.IsNullOrWhiteSpace(app) || !File.Exists(app))
+            var directorioActualizacion = Path.GetDirectoryName(verificada.RutaInstalador);
+            if (!File.Exists(updaterInstalado)
+                || string.IsNullOrWhiteSpace(app)
+                || !File.Exists(app)
+                || string.IsNullOrWhiteSpace(directorioActualizacion))
+            {
                 throw new FileNotFoundException();
+            }
+
+            Directory.CreateDirectory(directorioActualizacion);
+            var updaterTemporal = Path.Combine(directorioActualizacion, "AulaRaiz.Updater.run.exe");
+            File.Copy(updaterInstalado, updaterTemporal, overwrite: true);
 
             var inicio = new ProcessStartInfo
             {
-                FileName = updater,
+                FileName = updaterTemporal,
                 UseShellExecute = false,
             };
             inicio.ArgumentList.Add("--wait-pid");
