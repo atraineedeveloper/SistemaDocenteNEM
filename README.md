@@ -24,8 +24,9 @@ The application includes working modules for:
 - Light, Dark and High Contrast themes;
 - self-contained Windows installation/update packaging with version-to-version lifecycle validation;
 - automated GitHub Releases for accepted version tags;
+- consent-based in-app update discovery/download/verified restart in the `0.2.5` line;
 - a maintained privacy data inventory and message-free local diagnostic stream;
-- a local terminal/agent interface in the 0.2 line, with dry-run-by-default mutations and transparent pedagogical recommendations;
+- a local terminal/agent interface with dry-run-by-default mutations and transparent pedagogical recommendations;
 - automated Windows CI for formatting, Release build, tests, OpenSpec and whitespace validation.
 
 The NEM foundation includes structured primary grades, automatic phases, multigrade support, school organization, student grade, offline Mexico entity/municipality catalogs and structured project planning. Projects can carry a NEM methodology and target grades; activities can carry one formative field and an explicit grade scope while preserving their historical student roster.
@@ -74,9 +75,9 @@ Those identifiers are compatibility contracts, not user-facing branding. Any lat
 - Inno Setup 7 for the Windows installer
 - Git / GitHub Actions / GitHub Releases
 
-The product is layered into Core, Application, Data, Presentation, Reporting, Interchange, WPF and CLI hosts. Domain/application rules remain independent from SQLite and presentation hosts. `SistemaDocente.Cli` composes the same Application/Data contracts as WPF; its command handlers do not issue domain SQL directly.
+The product is layered into Core, Application, Data, Presentation, Reporting, Interchange, WPF and CLI hosts, plus the small standalone updater helper. Domain/application rules remain independent from SQLite and presentation hosts. `SistemaDocente.Cli` composes the same Application/Data contracts as WPF; its command handlers do not issue domain SQL directly. `AulaRaiz.Updater.exe` never opens SQLite.
 
-## Windows delivery
+## Windows delivery and in-app updates
 
 AulaRaíz is published as a self-contained .NET 10 `win-x64` application and packaged with Inno Setup 7. The default installation is per-user under:
 
@@ -86,9 +87,11 @@ AulaRaíz is published as a self-contained .NET 10 `win-x64` application and pac
 
 The installer owns program files and shortcuts only. Existing classroom data continues to live in the historical Production/Demo folders and is intentionally preserved during update and ordinary uninstall. SQLite migration remains application-owned; the installer does not execute database SQL.
 
-`v0.1.0` is the first published pre-release. The active 0.2 development line adds the installed `aularaiz.exe` terminal/agent interface. The same semantic version metadata flows into the WPF application, CLI and installer.
+GitHub Releases are the durable versioned download surface. A matching `vMAJOR.MINOR.PATCH` tag triggers quality gates, builds the installer, generates `SHA256SUMS.txt` and publishes both assets. Versions with major version `0` are prereleases.
 
-GitHub Releases are the durable versioned download surface for accepted application versions. A matching `vMAJOR.MINOR.PATCH` tag triggers a fresh quality gate, builds the validated installer, generates `SHA256SUMS.txt` and publishes both files to a GitHub Release. Versions with major version `0` are published as pre-releases. GitHub Actions artifacts remain temporary CI/manual-test outputs; GitHub Packages are not used merely to distribute the desktop installer. See [`docs/releases.md`](docs/releases.md).
+The `0.2.5` line adds a teacher-controlled update experience. After the app is usable, AulaRaíz can check published Preview releases without blocking local work. A manual **Actualizar** action is also available in the header. When a newer version is found, the teacher can postpone it or download it inside AulaRaíz. The installer is not considered ready until its SHA-256 matches the published checksum.
+
+After verification, **Cerrar y actualizar** invokes the normal pending-change protections, copies `AulaRaiz.Updater.exe` outside the install directory, closes WPF, re-verifies SHA-256, runs Inno Setup silently and reopens AulaRaíz in the same Production/Demo mode. Update checks never read or transmit classroom data. See [`docs/installation-update.md`](docs/installation-update.md).
 
 ## Terminal and agent interface
 
@@ -118,6 +121,8 @@ Recommendations include the evidence and coverage/caveat that produced them; the
 The maintained privacy map in [`docs/privacy-data-inventory.md`](docs/privacy-data-inventory.md) classifies current product data using D0–D3 engineering controls (not statutory legal labels) and maps SQLite, app-state, backups, exports, PDFs and diagnostic copies.
 
 New diagnostics no longer persist raw `Exception.ToString()`. They write only a closed D0 technical schema (time/id/category/exception type chain/message-free fingerprint/app version/mode) to the corresponding Production/Demo `diagnostics/events.jsonl`. Existing legacy `crash.log` files are left untouched and should be treated as potentially sensitive.
+
+The update client is a separate optional network surface: it requests only public GitHub Release metadata/assets and sends no student/group/school data. Update failures use the same D0-only safe diagnostics contract.
 
 ## Repository workflow
 
@@ -164,13 +169,13 @@ openspec validate --all
 git diff --check
 ```
 
-`SistemaDocente.App.Wpf.Tests` references the CLI project, so the current solution quality gate restores/builds/tests the terminal host as part of the existing graph. The installer workflow additionally publishes WPF and a single-file self-contained CLI, builds an older-version upgrade fixture plus the current installer, verifies `aularaiz.exe status --json` before/after update, and proves ordinary uninstall preserves user data.
+`SistemaDocente.App.Wpf.Tests` references the CLI and updater projects, so the solution quality gate restores/builds/tests both auxiliary hosts through the existing project graph. Installer CI publishes WPF plus both single-file helpers, upgrades from the verified published baseline, checks the installed versions, and proves ordinary uninstall removes program files while preserving user data.
 
 The Release workflow starts only from a version tag, requires the tag to match `Directory.Build.props`, repeats the tagged-source quality gates, reuses the verified installer path, writes SHA-256 integrity metadata and publishes the installer/checksum pair through GitHub Releases.
 
 ## Roadmap
 
-The maintained roadmap is [`checklist_modulos_sistema_docente_nem.md`](checklist_modulos_sistema_docente_nem.md). The privacy data-map/safe-logging baseline is merged. The current feature line adds local terminal/agent automation and evidence-based recommendations; backup encryption, local application lock and lifecycle/retention remain separate future privacy changes.
+The maintained roadmap is [`checklist_modulos_sistema_docente_nem.md`](checklist_modulos_sistema_docente_nem.md). The privacy data-map/safe-logging baseline, installer/Release pipeline and local terminal/agent interface are already in `main`. The `0.2.5` feature line adds consent-based in-app update coordination. Backup encryption, local application lock and lifecycle/retention remain separate future privacy changes.
 
 ## Data policy
 
