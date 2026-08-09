@@ -114,11 +114,11 @@ jobs:
 
           "BASELINE_INSTALLER=$baseline" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
 
-      - name: Build current self-contained app, CLI and installer
+      - name: Build current self-contained app, CLI, updater and installer
         shell: pwsh
         run: .\scripts\build-installer.ps1 -IsccPath "$env:INNO_ISCC"
 
-      - name: Smoke-test published upgrade, CLI and uninstall
+      - name: Smoke-test published upgrade, CLI, updater and uninstall
         shell: pwsh
         run: |
           [xml]$props = Get-Content -LiteralPath ".\Directory.Build.props" -Raw
@@ -128,6 +128,7 @@ jobs:
           $installDir = Join-Path $env:LOCALAPPDATA "Programs\AulaRaiz"
           $appExe = Join-Path $installDir "SistemaDocente.App.Wpf.exe"
           $cliExe = Join-Path $installDir "aularaiz.exe"
+          $updaterExe = Join-Path $installDir "AulaRaiz.Updater.exe"
           $sentinelDir = Join-Path $env:LOCALAPPDATA "SistemaDocenteNEM"
           $sentinel = Join-Path $sentinelDir "installer-ci-sentinel.txt"
           $uninstallKey = "HKCU:\Software\Microsoft\Windows\CurrentVersion\Uninstall\{7A2B71C7-3BC4-4D54-A7A2-97A0D56D4E5B}_is1"
@@ -185,10 +186,23 @@ jobs:
             }
           }
 
+          function Assert-UpdaterInstalledVersion([string]$ExpectedVersion) {
+            if (-not (Test-Path -LiteralPath $updaterExe -PathType Leaf)) {
+              throw "Installed AulaRaíz updater executable was not found."
+            }
+            $updaterVersion = [System.Diagnostics.FileVersionInfo]::GetVersionInfo($updaterExe)
+            if (-not $updaterVersion.ProductVersion.StartsWith($ExpectedVersion, [StringComparison]::Ordinal)) {
+              throw "Installed updater ProductVersion '$($updaterVersion.ProductVersion)' does not match '$ExpectedVersion'."
+            }
+          }
+
           Invoke-Setup $baselineInstaller.Path
           Assert-WpfInstalledVersion $env:UPGRADE_BASELINE_VERSION
           if (Test-Path -LiteralPath $cliExe) {
             throw "Published v$env:UPGRADE_BASELINE_VERSION unexpectedly contains the future AulaRaíz CLI."
+          }
+          if (Test-Path -LiteralPath $updaterExe) {
+            throw "Published v$env:UPGRADE_BASELINE_VERSION unexpectedly contains the future AulaRaíz updater."
           }
 
           New-Item -ItemType Directory -Path $sentinelDir -Force | Out-Null
@@ -197,6 +211,7 @@ jobs:
           Invoke-Setup $installer.Path
           Assert-WpfInstalledVersion $version
           Assert-CliStatus $version
+          Assert-UpdaterInstalledVersion $version
 
           $aulaRaizEntries = @(
             Get-ChildItem "HKCU:\Software\Microsoft\Windows\CurrentVersion\Uninstall" |
@@ -228,6 +243,9 @@ jobs:
           }
           if (Test-Path -LiteralPath $cliExe) {
             throw "AulaRaíz CLI remains after uninstall."
+          }
+          if (Test-Path -LiteralPath $updaterExe) {
+            throw "AulaRaíz updater remains after uninstall."
           }
           if (-not (Test-Path -LiteralPath $sentinel -PathType Leaf)) {
             throw "Uninstall deleted the legacy user-data sentinel."
