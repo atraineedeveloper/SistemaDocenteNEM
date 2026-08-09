@@ -13,7 +13,9 @@
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
 
-        <controls:MainNavigationHeader Grid.Row="0" RecuperacionSolicitada="OnRecuperacionSolicitada"/>
+        <controls:MainNavigationHeader Grid.Row="0"
+                                       RecuperacionSolicitada="OnRecuperacionSolicitada"
+                                       ActualizacionSolicitada="OnActualizacionSolicitada"/>
 
         <Grid Grid.Row="1">
             <views:InicioGruposView
