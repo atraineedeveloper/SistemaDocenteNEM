@@ -11,7 +11,11 @@ public sealed class CoordinadorActualizacionesWpf
     private bool _comprobando;
     private ActualizacionWindow? _dialogoAbierto;
 
-    public CoordinadorActualizacionesWpf(MainWindow ventana, IServicioActualizacionesAplicacion servicio, bool modoDemo, IRegistroDiagnosticoSeguro? diagnostico)
+    public CoordinadorActualizacionesWpf(
+        MainWindow ventana,
+        IServicioActualizacionesAplicacion servicio,
+        bool modoDemo,
+        IRegistroDiagnosticoSeguro? diagnostico)
     {
         _ventana = ventana;
         _servicio = servicio;
@@ -33,11 +37,17 @@ public sealed class CoordinadorActualizacionesWpf
         _comprobando = true;
         try
         {
-            var actualizacion = await _servicio.BuscarAsync(IdentidadProducto.Version, CanalActualizacion.Preview);
+            var actualizacion = await _servicio.BuscarAsync(
+                IdentidadProducto.Version,
+                CanalActualizacion.Preview);
             if (actualizacion is null)
             {
                 if (mostrarSinNovedades)
-                    _ventana.MostrarToastInfo($"Ya tienes la versión más reciente ({IdentidadProducto.VersionVisible}).", "AulaRaíz está actualizado");
+                {
+                    _ventana.MostrarToastInfo(
+                        $"Ya tienes la versión más reciente ({IdentidadProducto.VersionVisible}).",
+                        "AulaRaíz está actualizado");
+                }
                 return;
             }
 
@@ -47,15 +57,26 @@ public sealed class CoordinadorActualizacionesWpf
                 return;
             }
 
-            _dialogoAbierto = new ActualizacionWindow(_servicio, actualizacion, _ventana, _modoDemo) { Owner = _ventana };
+            _dialogoAbierto = new ActualizacionWindow(
+                _servicio,
+                actualizacion,
+                _ventana,
+                _modoDemo)
+            {
+                Owner = _ventana,
+            };
             _dialogoAbierto.Closed += (_, _) => _dialogoAbierto = null;
             _dialogoAbierto.Show();
         }
-        catch (ErrorActualizacionException exception)
+        catch (Exception exception)
         {
             _diagnostico?.Registrar(exception, CategoriaEventoDiagnostico.FalloActualizacion);
             if (mostrarSinNovedades)
-                _ventana.MostrarToastAdvertencia("No fue posible consultar actualizaciones. AulaRaíz puede seguir utilizándose sin conexión.", "Actualización no disponible");
+            {
+                _ventana.MostrarToastAdvertencia(
+                    "No fue posible consultar actualizaciones. AulaRaíz puede seguir utilizándose sin conexión.",
+                    "Actualización no disponible");
+            }
         }
         finally
         {
