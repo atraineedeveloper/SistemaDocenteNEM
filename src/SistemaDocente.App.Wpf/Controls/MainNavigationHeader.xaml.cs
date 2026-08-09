@@ -24,6 +24,7 @@ public partial class MainNavigationHeader : UserControl
     }
 
     public event EventHandler? RecuperacionSolicitada;
+    public event EventHandler? ActualizacionSolicitada;
 
     private MainWindowViewModel? ViewModel => DataContext as MainWindowViewModel;
 
@@ -133,6 +134,9 @@ public partial class MainNavigationHeader : UserControl
 
     private void RespaldoRestauracion_Click(object sender, RoutedEventArgs e) =>
         RecuperacionSolicitada?.Invoke(this, EventArgs.Empty);
+
+    private void BuscarActualizaciones_Click(object sender, RoutedEventArgs e) =>
+        ActualizacionSolicitada?.Invoke(this, EventArgs.Empty);
 
     private void TemaClaro_Click(object sender, RoutedEventArgs e) =>
         ThemeService.ApplyTheme(ThemeService.Light);
