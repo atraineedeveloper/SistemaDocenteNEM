@@ -3,6 +3,7 @@ using System.Windows;
 using System.Windows.Media;
 using System.Windows.Threading;
 
+using SistemaDocente.Application;
 using SistemaDocente.Presentation;
 
 namespace SistemaDocente.App.Wpf;
@@ -14,6 +15,8 @@ namespace SistemaDocente.App.Wpf;
 public partial class MainWindow : Window
 {
     private DispatcherTimer? _toastTimer;
+    private CoordinadorActualizacionesWpf? _actualizaciones;
+    private bool _omitirConfirmacionCierre;
 
     public MainWindow(
         MainWindowViewModel viewModel,
@@ -43,9 +46,27 @@ public partial class MainWindow : Window
     public ExportacionGrupoViewModel ExportacionGrupo { get; }
     public RecuperacionLocalViewModel RecuperacionLocal { get; }
 
+    public void ConfigurarActualizaciones(
+        IServicioActualizacionesAplicacion servicio,
+        bool modoDemo,
+        IRegistroDiagnosticoSeguro? diagnostico) =>
+        _actualizaciones = new CoordinadorActualizacionesWpf(this, servicio, modoDemo, diagnostico);
+
+    public Task ComprobarActualizacionesAlInicioAsync() =>
+        _actualizaciones?.ComprobarAlInicioAsync() ?? Task.CompletedTask;
+
+    public bool PrepararCierreParaActualizacion()
+    {
+        if (!ViewModel.SolicitarCerrar()) return false;
+        _omitirConfirmacionCierre = true;
+        return true;
+    }
+
+    public void CancelarCierrePreparadoParaActualizacion() => _omitirConfirmacionCierre = false;
+
     private void OnClosing(object? sender, CancelEventArgs e)
     {
-        if (!ViewModel.SolicitarCerrar())
+        if (!_omitirConfirmacionCierre && !ViewModel.SolicitarCerrar())
         {
             e.Cancel = true;
             return;
@@ -63,6 +84,11 @@ public partial class MainWindow : Window
             Owner = this,
         };
         ventana.ShowDialog();
+    }
+
+    private async void OnActualizacionSolicitada(object? sender, EventArgs e)
+    {
+        if (_actualizaciones is not null) await _actualizaciones.ComprobarManualAsync();
     }
 
     /// <summary>Muestra un toast flotante con auto-dismiss.</summary>

@@ -136,8 +136,11 @@
                 <MenuItem Header="↺  Respaldo" Foreground="{DynamicResource TextSecondaryBrush}" FontWeight="SemiBold"
                           Padding="8,8" TabIndex="8" Click="RespaldoRestauracion_Click"
                           AutomationProperties.Name="Abrir respaldo y restauración"/>
+                <MenuItem Header="⬆  Actualizar" Foreground="{DynamicResource TextSecondaryBrush}" FontWeight="SemiBold"
+                          Padding="8,8" TabIndex="9" Click="BuscarActualizaciones_Click"
+                          AutomationProperties.Name="Buscar actualizaciones de AulaRaíz"/>
                 <MenuItem Header="☼  Tema" Foreground="{DynamicResource TextSecondaryBrush}" FontWeight="SemiBold"
-                          Padding="8,8" TabIndex="9" AutomationProperties.Name="Seleccionar tema">
+                          Padding="8,8" TabIndex="10" AutomationProperties.Name="Seleccionar tema">
                     <MenuItem Header="Claro" Click="TemaClaro_Click" AutomationProperties.Name="Tema claro"/>
                     <MenuItem Header="Oscuro" Click="TemaOscuro_Click" AutomationProperties.Name="Tema oscuro"/>
                     <MenuItem Header="Alto contraste" Click="TemaAltoContraste_Click" AutomationProperties.Name="Tema alto contraste"/>

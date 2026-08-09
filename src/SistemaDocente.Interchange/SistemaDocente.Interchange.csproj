@@ -13,4 +13,8 @@
     <ProjectReference Include="..\SistemaDocente.Application\SistemaDocente.Application.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <InternalsVisibleTo Include="SistemaDocente.Application.Tests" />
+  </ItemGroup>
+
 </Project>

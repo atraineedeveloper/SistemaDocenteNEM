@@ -1,0 +1,72 @@
+<Window x:Class="SistemaDocente.App.Wpf.ActualizacionWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xml:lang="es-MX"
+        Title="Actualización de AulaRaíz"
+        Width="620" Height="470" MinWidth="560" MinHeight="420"
+        WindowStartupLocation="CenterOwner" ResizeMode="CanResizeWithGrip"
+        ShowInTaskbar="False">
+    <Grid Background="{DynamicResource WindowBackgroundBrush}" Margin="0">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <Border Grid.Row="0" Background="{DynamicResource CardBackgroundBrush}"
+                BorderBrush="{DynamicResource BorderLightBrush}" BorderThickness="0,0,0,1"
+                Padding="24,20">
+            <StackPanel>
+                <TextBlock Text="Nueva versión disponible" FontSize="21" FontWeight="Bold"
+                           Foreground="{DynamicResource TextPrimaryBrush}"/>
+                <TextBlock x:Name="VersionText" Margin="0,5,0,0" FontSize="13"
+                           Foreground="{DynamicResource TextSecondaryBrush}"/>
+            </StackPanel>
+        </Border>
+
+        <Grid Grid.Row="1" Margin="24,18">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
+
+            <TextBlock Text="Novedades" FontWeight="SemiBold" FontSize="14"
+                       Foreground="{DynamicResource TextPrimaryBrush}"/>
+            <Border Grid.Row="1" Margin="0,8,0,14" Padding="12"
+                    Background="{DynamicResource CardBackgroundBrush}"
+                    BorderBrush="{DynamicResource BorderLightBrush}" BorderThickness="1" CornerRadius="8">
+                <ScrollViewer VerticalScrollBarVisibility="Auto">
+                    <TextBlock x:Name="NotasText" TextWrapping="Wrap"
+                               Foreground="{DynamicResource TextSecondaryBrush}" FontSize="12.5"/>
+                </ScrollViewer>
+            </Border>
+
+            <StackPanel Grid.Row="2">
+                <TextBlock x:Name="EstadoText" Text="La actualización se descargará únicamente si decides continuar."
+                           Foreground="{DynamicResource TextSecondaryBrush}" TextWrapping="Wrap"/>
+                <ProgressBar x:Name="DownloadProgress" Height="8" Margin="0,9,0,0"
+                             Minimum="0" Maximum="100" Visibility="Collapsed"
+                             Foreground="{DynamicResource PrimaryBrush}"/>
+            </StackPanel>
+
+            <Border Grid.Row="3" Margin="0,14,0,0" Padding="12"
+                    Background="{DynamicResource InfoBackgroundBrush}"
+                    BorderBrush="{DynamicResource InfoBorderBrush}" BorderThickness="1" CornerRadius="8">
+                <TextBlock Text="AulaRaíz verificará SHA-256 antes de instalar. Tus datos locales no forman parte de la consulta ni de la descarga."
+                           Foreground="{DynamicResource InfoBrush}" TextWrapping="Wrap" FontSize="11.5"/>
+            </Border>
+        </Grid>
+
+        <Border Grid.Row="2" Padding="24,15" Background="{DynamicResource CardBackgroundBrush}"
+                BorderBrush="{DynamicResource BorderLightBrush}" BorderThickness="0,1,0,0">
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                <Button x:Name="LaterButton" Content="Más tarde" MinWidth="105" Margin="0,0,10,0"
+                        Padding="14,8" Click="LaterButton_Click"/>
+                <Button x:Name="PrimaryButton" Content="Descargar e instalar" MinWidth="165"
+                        Padding="14,8" Click="PrimaryButton_Click"/>
+            </StackPanel>
+        </Border>
+    </Grid>
+</Window>
