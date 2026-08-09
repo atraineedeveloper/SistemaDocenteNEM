@@ -11,6 +11,7 @@ public partial class ActualizacionWindow : Window
     private readonly IServicioActualizacionesAplicacion _servicio;
     private readonly ActualizacionDisponible _actualizacion;
     private readonly MainWindow _ventanaPrincipal;
+    private readonly IRegistroDiagnosticoSeguro? _diagnostico;
     private readonly bool _modoDemo;
     private ActualizacionVerificada? _verificada;
     private bool _descargando;
@@ -19,7 +20,8 @@ public partial class ActualizacionWindow : Window
         IServicioActualizacionesAplicacion servicio,
         ActualizacionDisponible actualizacion,
         MainWindow ventanaPrincipal,
-        bool modoDemo)
+        bool modoDemo,
+        IRegistroDiagnosticoSeguro? diagnostico)
     {
         ArgumentNullException.ThrowIfNull(servicio);
         ArgumentNullException.ThrowIfNull(actualizacion);
@@ -29,6 +31,7 @@ public partial class ActualizacionWindow : Window
         _actualizacion = actualizacion;
         _ventanaPrincipal = ventanaPrincipal;
         _modoDemo = modoDemo;
+        _diagnostico = diagnostico;
 
         InitializeComponent();
         VersionText.Text = $"Tienes {IdentidadProducto.VersionVisible} · Disponible v{actualizacion.Version}";
@@ -85,8 +88,9 @@ public partial class ActualizacionWindow : Window
             PrimaryButton.IsEnabled = true;
             LaterButton.IsEnabled = true;
         }
-        catch (ErrorActualizacionException)
+        catch (Exception exception)
         {
+            _diagnostico?.Registrar(exception, CategoriaEventoDiagnostico.FalloActualizacion);
             DownloadProgress.Visibility = Visibility.Collapsed;
             EstadoText.Text = "No fue posible descargar o verificar la actualización. Puedes continuar usando AulaRaíz e intentarlo más tarde.";
             PrimaryButton.Content = "Reintentar descarga";
@@ -144,8 +148,9 @@ public partial class ActualizacionWindow : Window
             Process.Start(inicio);
             System.Windows.Application.Current.Shutdown();
         }
-        catch
+        catch (Exception exception)
         {
+            _diagnostico?.Registrar(exception, CategoriaEventoDiagnostico.FalloActualizacion);
             _ventanaPrincipal.CancelarCierrePreparadoParaActualizacion();
             EstadoText.Text = "No fue posible iniciar el actualizador. AulaRaíz seguirá abierto y tus datos no fueron modificados.";
         }
