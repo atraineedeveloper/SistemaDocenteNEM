@@ -13,6 +13,7 @@ namespace SistemaDocente.App.Wpf;
 public partial class App : System.Windows.Application
 {
     private static RegistroDiagnosticoSeguroArchivo? _registroDiagnostico;
+    private static ServicioActualizacionesGitHub? _servicioActualizaciones;
 
     public App()
     {
@@ -41,6 +42,7 @@ public partial class App : System.Windows.Application
         var reiniciarDemo = e.Args.Any(x => string.Equals(x, "--demo-reset", StringComparison.OrdinalIgnoreCase));
         var modoDemo = reiniciarDemo
             || e.Args.Any(x => string.Equals(x, "--demo", StringComparison.OrdinalIgnoreCase));
+        var versionActualizada = ObtenerVersionActualizada(e.Args);
         var localApplicationData = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
         _registroDiagnostico = RegistroDiagnosticoSeguroArchivo.DesdeLocalApplicationData(
             localApplicationData,
@@ -167,9 +169,27 @@ public partial class App : System.Windows.Application
                 viewModelImportacion,
                 viewModelExportacion,
                 viewModelRecuperacion);
+
+            _servicioActualizaciones = new ServicioActualizacionesGitHub(
+                localApplicationData,
+                IdentidadProducto.Version);
+            ventana.ConfigurarActualizaciones(
+                _servicioActualizaciones,
+                modoDemo,
+                _registroDiagnostico);
+
             MainWindow = ventana;
             ventana.Show();
             viewModelGrupo.Inicializar();
+
+            if (string.Equals(versionActualizada, IdentidadProducto.Version, StringComparison.Ordinal))
+            {
+                ventana.MostrarToastExito(
+                    $"AulaRaíz se actualizó correctamente a {IdentidadProducto.VersionVisible}.",
+                    "✅ Actualización completada");
+            }
+
+            _ = ventana.ComprobarActualizacionesAlInicioAsync();
         }
         catch (Exception exception) when (
             exception is IOException or UnauthorizedAccessException or ErrorPersistenciaAplicacionException)
@@ -182,5 +202,25 @@ public partial class App : System.Windows.Application
                 IdentidadProducto.Nombre, MessageBoxButton.OK, MessageBoxImage.Error);
             Shutdown(1);
         }
+    }
+
+    protected override void OnExit(ExitEventArgs e)
+    {
+        _servicioActualizaciones?.Dispose();
+        _servicioActualizaciones = null;
+        base.OnExit(e);
+    }
+
+    private static string? ObtenerVersionActualizada(string[] args)
+    {
+        for (var i = 0; i < args.Length - 1; i++)
+        {
+            if (!string.Equals(args[i], "--updated-to", StringComparison.OrdinalIgnoreCase)) continue;
+            var partes = args[i + 1].Split('.');
+            if (partes.Length != 3 || partes.Any(p => !int.TryParse(p, out _))) return null;
+            return Version.TryParse(args[i + 1], out var version) ? version.ToString(3) : null;
+        }
+
+        return null;
     }
 }
