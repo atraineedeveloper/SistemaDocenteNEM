@@ -61,7 +61,8 @@ public sealed class CoordinadorActualizacionesWpf
                 _servicio,
                 actualizacion,
                 _ventana,
-                _modoDemo)
+                _modoDemo,
+                _diagnostico)
             {
                 Owner = _ventana,
             };
