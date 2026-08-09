@@ -10,5 +10,6 @@
   <ItemGroup>
     <ProjectReference Include="..\..\src\SistemaDocente.App.Wpf\SistemaDocente.App.Wpf.csproj" />
     <ProjectReference Include="..\..\src\SistemaDocente.Cli\SistemaDocente.Cli.csproj" />
+    <ProjectReference Include="..\..\src\SistemaDocente.Updater\SistemaDocente.Updater.csproj" />
   </ItemGroup>
 </Project>
