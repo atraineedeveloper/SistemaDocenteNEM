@@ -62,7 +62,19 @@ src/SistemaDocente.Presentation/Data/estados-municipios.SOURCE.md.
 Other distributed components
 ----------------------------
 
-The self-contained .NET distribution and NuGet dependencies retain the license
-and third-party notice files supplied by their respective publishers. The
-maintained SignPath readiness review records the direct production dependency
-inventory and primary license records.
+The self-contained .NET distribution and NuGet dependencies retain their
+publishers' applicable terms. The maintained packaged-component inventory
+records the direct production dependencies, primary license records and the
+special licensing of .NET runtime files on Windows:
+
+https://github.com/atraineedeveloper/SistemaDocenteNEM/blob/main/docs/packaged-component-license-inventory.md
+
+Microsoft's license information for .NET on Windows:
+https://github.com/dotnet/core/blob/main/license-information-windows.md
+
+SignPath Foundation permits System Libraries in signed open-source packages.
+AulaRaíz treats the specially licensed Microsoft runtime files as System
+Libraries and does not submit them as project-owned binaries for individual
+signing:
+
+https://signpath.org/terms.html
