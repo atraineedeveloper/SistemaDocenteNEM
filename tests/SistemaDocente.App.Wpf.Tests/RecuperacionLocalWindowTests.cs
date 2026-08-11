@@ -54,7 +54,7 @@ public sealed class RecuperacionLocalWindowTests
     }
 
     [Fact]
-    public void ShellExponeRecuperacionComoAccionGlobalSeparadaDelGrupo()
+    public void ShellExponeRecuperacionComoUtilidadGlobalSeparadaDeNavegacionDocente()
     {
         var raiz = Path.GetFullPath(Path.Combine(
             AppContext.BaseDirectory, "..", "..", "..", "..", ".."));
@@ -81,12 +81,10 @@ public sealed class RecuperacionLocalWindowTests
             "SistemaDocente.App.Wpf",
             "MainWindow.xaml.cs"));
 
-        Assert.Contains("Header=\"↺  Respaldo\"", header, StringComparison.Ordinal);
-        Assert.Equal(
-            2,
-            header.Split(
-                "Visibility=\"{Binding MostrarNavegacion",
-                StringSplitOptions.None).Length - 1);
+        Assert.Contains("Header=\"⋯  Más\"", header, StringComparison.Ordinal);
+        Assert.Contains("Header=\"Respaldo y restauración…\"", header, StringComparison.Ordinal);
+        Assert.Contains("Content=\"Resumen\"", header, StringComparison.Ordinal);
+        Assert.DoesNotContain("Content=\"Respaldo", header, StringComparison.Ordinal);
         Assert.Contains("RespaldoRestauracion_Click", header, StringComparison.Ordinal);
         Assert.Contains("RecuperacionSolicitada", headerCode, StringComparison.Ordinal);
         Assert.Contains("RecuperacionSolicitada=\"OnRecuperacionSolicitada\"", mainWindow, StringComparison.Ordinal);
