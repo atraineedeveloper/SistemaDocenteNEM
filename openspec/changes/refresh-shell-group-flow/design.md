@@ -21,37 +21,68 @@ Switching an existing group continues through `MainWindowViewModel.CambiarGrupo`
 
 ## Dedicated create-group route
 
-`MainWindowViewModel` owns a new `MostrarCreacionGrupo` route state. Entering the route:
+`MainWindowViewModel` owns `MostrarCreacionGrupo` plus wizard-step state. Entering the route:
 
 - first asks the current module whether it can be left;
-- clears only the new-group draft input;
-- does **not** call `GestionGrupoViewModel.AbrirNuevoGrupoCommand`;
+- clears only the new-group wizard draft;
+- does **not** call the historical welcome route;
 - does **not** mutate the confirmed/current group;
 - does **not** alter the underlying module-selection flags.
 
-Because the underlying module state is preserved, **Volver** and **Cancelar** can simply close the create route and return the teacher to the exact prior context.
+Because the underlying module state is preserved, cancellation can return the teacher to the exact prior context.
 
-If creation succeeds, `GestionGrupoViewModel.CrearGrupoCommand` loads the newly created group and raises `GrupoIdActual`. While the create route is active, `MainWindowViewModel` observes that change, closes the route and navigates to the existing group module, presented as **Resumen**.
+## Five-step setup wizard
 
-When entered from `Mis grupos` with no active group, Cancel returns to `Mis grupos` rather than the historical welcome state.
+The wizard is intentionally progressive and skippable after its first step:
 
-## Legacy welcome/recovery state
+1. **Grupo** — display name; this is the only required value.
+2. **Grados** — optional 1.º–6.º selections. Zero selections are valid during initial setup.
+3. **Escuela** — optional school name, CCT, school cycle and shift.
+4. **Ubicación** — optional state, municipality and locality. Municipality choices depend on state when a state is selected.
+5. **Confirmar** — summarize the entered values and explain that unspecified fields can be completed later.
 
-The historical `MostrarBienvenida` state remains available only as a compatibility/recovery fallback inside `GestionGrupoViewModel` for absent/invalid stored references. The normal shell create route no longer exposes that view, so `Olvidar referencia` is not presented as a normal group-creation action.
+Steps 2–4 expose `Omitir por ahora`. Back moves to the previous step; on step 1 Back behaves like Cancel and returns to the prior shell context. Cancel is always available and discards the entire draft.
 
-A later cleanup may remove or redesign the legacy recovery surface once startup/reference recovery has its own explicit shell state.
+The full group-configuration surface may retain stronger completeness validation for teachers who explicitly choose to configure a group. Initial creation uses a dedicated optional-save path so an empty grade/geographic setup does not become an accidental creation requirement.
+
+## Reusing existing context persistence
+
+The wizard does not add columns or a parallel metadata object. After the display-name group is created, supplied optional setup values are persisted as the existing `ContextoGrupo` associated with the new `GrupoId`.
+
+`ConfiguracionGrupoViewModel` owns draft/reset and optional initial-save behavior so it can reuse:
+
+- the existing Mexico state/municipality catalog;
+- grade normalization and NEM projections;
+- existing field-length/domain validation;
+- `GestionContextoGrupoCasosUso` and the current SQLite context storage.
+
+If all optional values are omitted, saving an otherwise empty `ContextoGrupo` remains valid and the teacher can complete it later.
+
+## Successful creation
+
+The shell uses an explicit wizard creation method rather than depending on the legacy welcome command's `CanExecute` state. A successful create:
+
+1. creates/selects the new group through the existing group business operation;
+2. persists the wizard context for that new `GrupoId`;
+3. closes the wizard;
+4. navigates to the new group's **Resumen**.
+
+The historical `MostrarBienvenida` state remains only as a compatibility/recovery fallback for absent/invalid stored references. Normal create-group navigation never exposes `Olvidar referencia`.
+
+## Student optional birth date UX
+
+`GestionGrupoViewModel.FechaNacimientoEdicion` and the underlying student data path already use nullable dates. The student editor therefore labels **Fecha de nacimiento** as optional and does not add a new validation rule. This is a presentation correction, not a data-contract change.
 
 ## Presentation composition
 
-A new WPF `CrearGrupoView` is rendered by `MainWindow.xaml` when `MostrarCreacionGrupo` is true. It uses existing theme tokens, `PrimaryButton`, standard controls and semantic automation labels.
+`CrearGrupoView` remains a shell-level WPF view but renders one wizard step at a time, a visible `Paso X de 5` indicator, Back/Cancel navigation and a final confirmation action. It uses existing theme tokens, `PrimaryButton`, standard controls and semantic automation labels.
 
-While creation is active, primary shell navigation is hidden to avoid silently abandoning the draft through another route; the form itself provides Back/Cancel.
-
-The shell header height increases to accommodate the two-row hierarchy. Toast placement must move below the new header.
+While creation is active, primary shell navigation is hidden to avoid silently abandoning the draft through another route.
 
 ## Accessibility
 
-- Back, Cancel and Create are keyboard-focusable controls.
-- The group name input receives a clear label and automation name.
+- Back, Cancel, Skip, Next and Create are keyboard-focusable controls.
+- Required versus optional fields are explicit in text, not color alone.
+- The wizard exposes a textual step indicator and descriptive headings.
 - Primary navigation state remains represented by text plus the existing active indicator, not color alone.
 - The change reuses semantic Light/Dark/High Contrast brushes rather than fixed colors.
