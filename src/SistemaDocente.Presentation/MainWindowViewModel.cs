@@ -37,6 +37,7 @@ public sealed class MainWindowViewModel : ViewModelBase
         IrAInicioCommand = new RelayCommand(MostrarInicioGrupos, () => !EstaOcupado && !MostrarCreacionGrupo);
         CrearGrupoDesdeInicioCommand = new RelayCommand(CrearGrupoDesdeInicio, () => !EstaOcupado && !MostrarCreacionGrupo);
         CancelarCreacionGrupoCommand = new RelayCommand(CancelarCreacionGrupo, () => MostrarCreacionGrupo && !EstaOcupado);
+        ConfirmarCreacionGrupoCommand = new RelayCommand(ConfirmarCreacionGrupo, () => MostrarCreacionGrupo && !EstaOcupado);
         IrAGrupoCommand = new RelayCommand(
             IrAGrupo,
             () => !MostrarCreacionGrupo
@@ -83,6 +84,7 @@ public sealed class MainWindowViewModel : ViewModelBase
                 IrAInicioCommand.NotifyCanExecuteChanged();
                 CrearGrupoDesdeInicioCommand.NotifyCanExecuteChanged();
                 CancelarCreacionGrupoCommand.NotifyCanExecuteChanged();
+                ConfirmarCreacionGrupoCommand.NotifyCanExecuteChanged();
             }
         };
 
@@ -95,6 +97,7 @@ public sealed class MainWindowViewModel : ViewModelBase
                 IrAInicioCommand.NotifyCanExecuteChanged();
                 CrearGrupoDesdeInicioCommand.NotifyCanExecuteChanged();
                 CancelarCreacionGrupoCommand.NotifyCanExecuteChanged();
+                ConfirmarCreacionGrupoCommand.NotifyCanExecuteChanged();
             }
         };
 
@@ -106,6 +109,7 @@ public sealed class MainWindowViewModel : ViewModelBase
                 IrAInicioCommand.NotifyCanExecuteChanged();
                 CrearGrupoDesdeInicioCommand.NotifyCanExecuteChanged();
                 CancelarCreacionGrupoCommand.NotifyCanExecuteChanged();
+                ConfirmarCreacionGrupoCommand.NotifyCanExecuteChanged();
             }
         };
 
@@ -132,6 +136,7 @@ public sealed class MainWindowViewModel : ViewModelBase
                     IrAInicioCommand.NotifyCanExecuteChanged();
                     CrearGrupoDesdeInicioCommand.NotifyCanExecuteChanged();
                     CancelarCreacionGrupoCommand.NotifyCanExecuteChanged();
+                    ConfirmarCreacionGrupoCommand.NotifyCanExecuteChanged();
                 }
             };
         }
@@ -146,6 +151,7 @@ public sealed class MainWindowViewModel : ViewModelBase
                     IrAInicioCommand.NotifyCanExecuteChanged();
                     CrearGrupoDesdeInicioCommand.NotifyCanExecuteChanged();
                     CancelarCreacionGrupoCommand.NotifyCanExecuteChanged();
+                    ConfirmarCreacionGrupoCommand.NotifyCanExecuteChanged();
                 }
             };
         }
@@ -179,6 +185,7 @@ public sealed class MainWindowViewModel : ViewModelBase
     public RelayCommand IrAInicioCommand { get; }
     public RelayCommand CrearGrupoDesdeInicioCommand { get; }
     public RelayCommand CancelarCreacionGrupoCommand { get; }
+    public RelayCommand ConfirmarCreacionGrupoCommand { get; }
     public RelayCommand IrAGrupoCommand { get; }
     public RelayCommand IrAAsistenciaCommand { get; }
     public RelayCommand IrAProyectosCommand { get; }
@@ -215,6 +222,7 @@ public sealed class MainWindowViewModel : ViewModelBase
             {
                 NotificarNavegacion();
                 CancelarCreacionGrupoCommand.NotifyCanExecuteChanged();
+                ConfirmarCreacionGrupoCommand.NotifyCanExecuteChanged();
             }
         }
     }
@@ -344,6 +352,13 @@ public sealed class MainWindowViewModel : ViewModelBase
         MostrarCreacionGrupo = false;
     }
 
+    private void ConfirmarCreacionGrupo()
+    {
+        if (!MostrarCreacionGrupo) return;
+
+        Grupo.CrearGrupoCommand.Execute(null);
+    }
+
     private void IrAGrupo()
     {
         var puedeSalir = !MostrarCreacionGrupo && PuedeSalirDelModuloActual();
@@ -439,6 +454,7 @@ public sealed class MainWindowViewModel : ViewModelBase
         IrAInicioCommand.NotifyCanExecuteChanged();
         CrearGrupoDesdeInicioCommand.NotifyCanExecuteChanged();
         CancelarCreacionGrupoCommand.NotifyCanExecuteChanged();
+        ConfirmarCreacionGrupoCommand.NotifyCanExecuteChanged();
         IrAGrupoCommand.NotifyCanExecuteChanged();
         IrAAsistenciaCommand.NotifyCanExecuteChanged();
         IrAProyectosCommand.NotifyCanExecuteChanged();
