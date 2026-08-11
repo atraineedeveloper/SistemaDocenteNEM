@@ -17,6 +17,7 @@ public sealed class MainWindowViewModelTests
         Assert.True(contexto.Shell.MostrarCreacionGrupo);
         Assert.Equal(grupoAnterior, contexto.Grupo.GrupoIdActual);
         Assert.False(contexto.Shell.MostrarNavegacion);
+        Assert.Equal(1, contexto.Shell.PasoCreacionGrupo);
 
         contexto.Shell.CancelarCreacionGrupoCommand.Execute(null);
 
@@ -39,16 +40,56 @@ public sealed class MainWindowViewModelTests
         Assert.True(contexto.Shell.MostrarInicio);
         Assert.False(contexto.Shell.MostrarCreacionGrupo);
         Assert.Equal(string.Empty, contexto.Grupo.NombreNuevoGrupo);
+        Assert.Equal(1, contexto.Shell.PasoCreacionGrupo);
     }
 
     [Fact]
-    public void CrearGrupoValidoCierraFlujoYAbreResumenNuevo()
+    public void PrimerPasoNoAvanzaSinNombre()
+    {
+        var contexto = new ContextoPrueba();
+        contexto.IrAResumen();
+        contexto.Shell.CrearGrupoDesdeInicioCommand.Execute(null);
+
+        contexto.Shell.SiguienteCreacionGrupoCommand.Execute(null);
+
+        Assert.Equal(1, contexto.Shell.PasoCreacionGrupo);
+        Assert.True(contexto.Shell.MostrarPasoGrupo);
+        Assert.Contains("nombre", contexto.Shell.MensajeCreacionGrupo, StringComparison.OrdinalIgnoreCase);
+    }
+
+    [Fact]
+    public void VolverConservaBorradorYLosPasosOpcionalesPuedenOmitirse()
+    {
+        var contexto = new ContextoPrueba();
+        contexto.IrAResumen();
+        contexto.Shell.CrearGrupoDesdeInicioCommand.Execute(null);
+        contexto.Grupo.NombreNuevoGrupo = "Quinto B";
+
+        contexto.Shell.SiguienteCreacionGrupoCommand.Execute(null);
+        Assert.Equal(2, contexto.Shell.PasoCreacionGrupo);
+        contexto.Shell.VolverCreacionGrupoCommand.Execute(null);
+
+        Assert.Equal(1, contexto.Shell.PasoCreacionGrupo);
+        Assert.Equal("Quinto B", contexto.Grupo.NombreNuevoGrupo);
+
+        contexto.Shell.SiguienteCreacionGrupoCommand.Execute(null);
+        contexto.Shell.OmitirPasoCreacionGrupoCommand.Execute(null);
+        contexto.Shell.OmitirPasoCreacionGrupoCommand.Execute(null);
+        contexto.Shell.OmitirPasoCreacionGrupoCommand.Execute(null);
+
+        Assert.Equal(5, contexto.Shell.PasoCreacionGrupo);
+        Assert.True(contexto.Shell.MostrarPasoConfirmar);
+    }
+
+    [Fact]
+    public void CrearGrupoSoloConNombreCierraWizardYAbreResumenNuevo()
     {
         var contexto = new ContextoPrueba();
         contexto.IrAResumen();
         var grupoAnterior = contexto.Grupo.GrupoIdActual;
         contexto.Shell.CrearGrupoDesdeInicioCommand.Execute(null);
         contexto.Grupo.NombreNuevoGrupo = "Nuevo grupo";
+        contexto.AvanzarHastaConfirmacionOmitiendoOpcionales();
 
         contexto.Shell.ConfirmarCreacionGrupoCommand.Execute(null);
 
@@ -96,6 +137,15 @@ public sealed class MainWindowViewModelTests
             Assert.NotNull(Grupo.GrupoIdActual);
             Assert.True(Shell.CambiarGrupo(Grupo.GrupoIdActual!.Value));
             Assert.True(Shell.MostrarGrupo);
+        }
+
+        internal void AvanzarHastaConfirmacionOmitiendoOpcionales()
+        {
+            Shell.SiguienteCreacionGrupoCommand.Execute(null);
+            Shell.OmitirPasoCreacionGrupoCommand.Execute(null);
+            Shell.OmitirPasoCreacionGrupoCommand.Execute(null);
+            Shell.OmitirPasoCreacionGrupoCommand.Execute(null);
+            Assert.True(Shell.MostrarPasoConfirmar);
         }
     }
 
