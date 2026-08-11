@@ -62,7 +62,7 @@ The installer announces the program being installed, supports ordinary uninstall
 
 The maintainer must complete all of the following before submitting the SignPath application or enabling signing:
 
-- [ ] confirm multi-factor authentication is enabled for the maintainer's GitHub account;
+- [x] confirm multi-factor authentication is enabled for the maintainer's GitHub account;
 - [ ] confirm multi-factor authentication will be enabled for the SignPath account;
 - [x] verify the provenance and redistribution license of every packaged `.ttf` font, or remove it from the package;
 - [x] document the source and redistribution terms of `estados-municipios.json`;
