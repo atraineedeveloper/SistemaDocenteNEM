@@ -36,7 +36,7 @@ src/SistemaDocente.Presentation/Data/estados-municipios.json is an AulaRaíz
 transformation of the official INEGI Catálogo Único de Claves de Áreas
 Geoestadísticas Estatales, Municipales y Localidades.
 
-Source: INEGI, Catálogo Único de Claves de Áreas Geoestadísticas Estatales,
+Fuente: INEGI, Catálogo Único de Claves de Áreas Geoestadísticas Estatales,
 Municipales y Localidades, classification updated through 17 June 2025.
 
 Official catalog:
