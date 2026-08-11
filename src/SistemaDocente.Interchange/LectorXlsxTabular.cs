@@ -26,6 +26,8 @@ public sealed class LectorXlsxTabular : ILectorImportacionTabular
             using var documento = SpreadsheetDocument.Open(rutaArchivo, false);
             var libro = documento.WorkbookPart
                 ?? throw new ImportacionTabularException("El archivo XLSX no contiene un libro válido.");
+            var contenidoLibro = libro.Workbook
+                ?? throw new ImportacionTabularException("El archivo XLSX no contiene una estructura de libro válida.");
 
             var cadenasCompartidas = libro.SharedStringTablePart?.SharedStringTable?
                 .Elements<SharedStringItem>()
@@ -44,10 +46,10 @@ public sealed class LectorXlsxTabular : ILectorImportacionTabular
                     formato => formato.FormatCode?.Value ?? string.Empty)
                 ?? new Dictionary<uint, string>();
 
-            var usaSistema1904 = libro.Workbook.WorkbookProperties?.Date1904?.Value ?? false;
+            var usaSistema1904 = contenidoLibro.WorkbookProperties?.Date1904?.Value ?? false;
             var hojas = new List<HojaTabular>();
 
-            foreach (var hoja in libro.Workbook.Sheets?.Elements<Sheet>() ?? [])
+            foreach (var hoja in contenidoLibro.Sheets?.Elements<Sheet>() ?? [])
             {
                 if (hoja.Id?.Value is not string relacionId ||
                     libro.GetPartById(relacionId) is not WorksheetPart parteHoja)
@@ -95,7 +97,13 @@ public sealed class LectorXlsxTabular : ILectorImportacionTabular
         IReadOnlyDictionary<uint, string> formatosPersonalizados,
         bool usaSistema1904)
     {
-        var filas = parteHoja.Worksheet.GetFirstChild<SheetData>()?
+        var contenidoHoja = parteHoja.Worksheet;
+        if (contenidoHoja is null)
+        {
+            return null;
+        }
+
+        var filas = contenidoHoja.GetFirstChild<SheetData>()?
             .Elements<Row>()
             .Select(fila => LeerFila(
                 fila,

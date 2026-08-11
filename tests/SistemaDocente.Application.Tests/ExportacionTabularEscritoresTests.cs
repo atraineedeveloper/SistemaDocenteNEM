@@ -41,25 +41,29 @@ public sealed class ExportacionTabularEscritoresTests
         Assert.True(File.Exists(ruta));
         using var spreadsheet = SpreadsheetDocument.Open(ruta, false);
         var workbookPart = Assert.IsType<WorkbookPart>(spreadsheet.WorkbookPart);
-        var sheets = workbookPart.Workbook.Sheets!.Elements<Sheet>().ToArray();
+        var workbook = Assert.IsType<Workbook>(workbookPart.Workbook);
+        var sheets = Assert.IsType<Sheets>(workbook.Sheets).Elements<Sheet>().ToArray();
         Assert.Equal(2, sheets.Length);
-        Assert.Equal("Alumnos", sheets[0].Name!.Value);
-        Assert.Equal("Contexto_grupo", sheets[1].Name!.Value);
+        Assert.Equal("Alumnos", sheets[0].Name?.Value);
+        Assert.Equal("Contexto_grupo", sheets[1].Name?.Value);
 
-        var formulas = workbookPart.WorksheetParts
-            .SelectMany(part => part.Worksheet.Descendants<CellFormula>())
+        var worksheets = workbookPart.WorksheetParts
+            .Select(part => Assert.IsType<Worksheet>(part.Worksheet))
+            .ToArray();
+        var formulas = worksheets
+            .SelectMany(worksheet => worksheet.Descendants<CellFormula>())
             .ToArray();
         Assert.Empty(formulas);
 
-        var textos = workbookPart.WorksheetParts
-            .SelectMany(part => part.Worksheet.Descendants<InlineString>())
+        var textos = worksheets
+            .SelectMany(worksheet => worksheet.Descendants<InlineString>())
             .Select(inline => inline.InnerText)
             .ToArray();
         Assert.Contains("María López", textos);
         Assert.Contains("=2+2", textos);
 
-        var celdasFecha = workbookPart.WorksheetParts
-            .SelectMany(part => part.Worksheet.Descendants<Cell>())
+        var celdasFecha = worksheets
+            .SelectMany(worksheet => worksheet.Descendants<Cell>())
             .Where(cell => cell.StyleIndex?.Value == 2U)
             .ToArray();
         Assert.Single(celdasFecha);

@@ -66,14 +66,17 @@ public sealed class ExportacionGrupoDemoIntegrationTests
         using (var spreadsheet = SpreadsheetDocument.Open(rutaXlsx, false))
         {
             var workbookPart = Assert.IsType<WorkbookPart>(spreadsheet.WorkbookPart);
-            var nombres = workbookPart.Workbook.Sheets!
+            var workbook = Assert.IsType<Workbook>(workbookPart.Workbook);
+            var sheets = Assert.IsType<Sheets>(workbook.Sheets);
+            var nombres = sheets
                 .Elements<Sheet>()
-                .Select(sheet => sheet.Name!.Value!)
+                .Select(sheet => Assert.IsType<string>(sheet.Name?.Value))
                 .ToArray();
             Assert.Equal(
                 ["Contexto", "Alumnos", "Asistencia", "Proyectos", "Actividades", "Evaluacion"],
                 nombres);
-            Assert.Empty(workbookPart.WorksheetParts.SelectMany(part => part.Worksheet.Descendants<CellFormula>()));
+            Assert.Empty(workbookPart.WorksheetParts.SelectMany(
+                part => Assert.IsType<Worksheet>(part.Worksheet).Descendants<CellFormula>()));
         }
 
         var solicitudCsv = new SolicitudExportacionGrupo(
