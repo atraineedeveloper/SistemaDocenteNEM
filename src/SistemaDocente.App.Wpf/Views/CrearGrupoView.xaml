@@ -74,7 +74,7 @@
                                     Margin="0,0,10,0"
                                     AutomationProperties.Name="Cancelar creación de grupo"/>
                             <Button Content="Crear grupo"
-                                    Command="{Binding Grupo.CrearGrupoCommand}"
+                                    Command="{Binding ConfirmarCreacionGrupoCommand}"
                                     Style="{StaticResource PrimaryButton}"
                                     Margin="0"
                                     AutomationProperties.Name="Crear grupo"/>
