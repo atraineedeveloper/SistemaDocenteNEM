@@ -60,7 +60,7 @@ If all optional values are omitted, saving an otherwise empty `ContextoGrupo` re
 
 ## Successful creation
 
-The shell uses an explicit wizard creation method rather than depending on the legacy welcome command's `CanExecute` state. A successful create:
+The shell owns the final-step command and invokes the existing group-creation operation only after the wizard reaches confirmation; the wizard button is not bound directly to the historical welcome surface. A successful create:
 
 1. creates/selects the new group through the existing group business operation;
 2. persists the wizard context for that new `GrupoId`;
