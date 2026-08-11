@@ -237,8 +237,10 @@ public sealed class ConfiguracionGrupoViewModel : ViewModelBase
         NombreEscuela = string.Empty;
         Cct = string.Empty;
         _municipio = string.Empty;
-        EntidadFederativa = string.Empty;
+        _entidadFederativa = string.Empty;
+        OnPropertyChanged(nameof(EntidadFederativa));
         Municipio = string.Empty;
+        MunicipiosDisponibles = Array.Empty<string>();
         Localidad = string.Empty;
         Grupo = string.Empty;
         Turno = string.Empty;
@@ -260,7 +262,6 @@ public sealed class ConfiguracionGrupoViewModel : ViewModelBase
     {
         try
         {
-            ValidarUbicacionOpcional();
             var grados = ObtenerGradosSeleccionados();
             var contexto = CrearContexto(
                 grupoId,
@@ -382,7 +383,6 @@ public sealed class ConfiguracionGrupoViewModel : ViewModelBase
         if (TercerGrado) grados.Add(GradoPrimaria.Tercero);
         if (CuartoGrado) grados.Add(GradoPrimaria.Cuarto);
         if (QuintoGrado) grados.Add(GradoPrimaria.Quinto);
-        if (QuintoGrado) { }
         if (SextoGrado) grados.Add(GradoPrimaria.Sexto);
         return grados;
     }
