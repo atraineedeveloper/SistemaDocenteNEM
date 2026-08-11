@@ -49,7 +49,7 @@ public sealed class ConfiguracionGrupoWizardTests
 
         Assert.True(guardado);
         Assert.NotNull(contextos.Ultimo);
-        Assert.Equal([GradoPrimaria.Quinto], contextos.Ultimo!.GradosAtendidos);
+        Assert.Equal(new[] { GradoPrimaria.Quinto }, contextos.Ultimo!.GradosAtendidos);
         Assert.Equal("Primaria de prueba", contextos.Ultimo.NombreEscuela);
         Assert.Equal("27DPR0000X", contextos.Ultimo.Cct);
         Assert.Equal("2026-2027", contextos.Ultimo.CicloEscolar);
