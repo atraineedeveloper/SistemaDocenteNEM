@@ -41,8 +41,8 @@ public sealed class ConfiguracionGrupoWizardTests
         viewModel.Cct = "27DPR0000X";
         viewModel.CicloEscolar = "2026-2027";
         viewModel.Turno = "Matutino";
-        viewModel.EntidadFederativa = viewModel.EntidadesFederativas.First();
-        viewModel.Municipio = viewModel.MunicipiosDisponibles.First();
+        viewModel.EntidadFederativa = viewModel.EntidadesFederativas[0];
+        viewModel.Municipio = viewModel.MunicipiosDisponibles[0];
         viewModel.Localidad = "Localidad de prueba";
 
         var guardado = viewModel.GuardarOpcionalParaNuevoGrupo(grupo.Id);
@@ -67,8 +67,8 @@ public sealed class ConfiguracionGrupoWizardTests
         var viewModel = CrearViewModel(grupos, contextos);
         viewModel.NombreEscuela = "Temporal";
         viewModel.SextoGrado = true;
-        viewModel.EntidadFederativa = viewModel.EntidadesFederativas.First();
-        viewModel.Municipio = viewModel.MunicipiosDisponibles.First();
+        viewModel.EntidadFederativa = viewModel.EntidadesFederativas[0];
+        viewModel.Municipio = viewModel.MunicipiosDisponibles[0];
 
         viewModel.PrepararNuevoGrupo();
 
