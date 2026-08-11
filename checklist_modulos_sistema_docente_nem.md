@@ -167,7 +167,6 @@ The report calculation/model foundation already exists. PDF output for the estab
 - [ ] Period/formative-field reports once those modules exist.
 
 ## 8. Digital evidence attachments
-
 - [ ] Attach photos/documents/student products.
 - [ ] Link files to projects, activities and students.
 - [ ] Store metadata in SQLite while keeping large files outside the database.
@@ -227,7 +226,7 @@ The report calculation/model foundation already exists. PDF output for the estab
 
 ## 12. Backup and restore
 
-**Status:** manual recovery version 1 merged in `main` via PR #18 after automated and manual Demo validation. Automatic scheduling, encryption, cloud integration and future evidence-file recovery remain separate work.
+**Status:** manual recovery version 1 merged in `main` via PR #18. Optional password-protected backup v2 is implemented and functionally accepted in PR #39; automatic scheduling, cloud integration and future evidence-file recovery remain separate work.
 
 - [x] Create a manual `.sdocbackup` for the complete current Production or Demo storage profile.
 - [x] Snapshot SQLite through its online backup API rather than copying a live DB/WAL directly.
@@ -243,8 +242,11 @@ The report calculation/model foundation already exists. PDF output for the estab
 - [x] Shut down the application after successful restore so stale in-memory state cannot overwrite restored data.
 - [x] Keep managed safety backups under the active Production/Demo application profile.
 - [x] Warn that version 1 backups contain sensitive personal/pedagogical data and are not encrypted.
+- [x] Add optional password protection as backup format v2 while preserving unprotected v1 as the default.
+- [x] Protect the complete logical v1 payload with PBKDF2-HMAC-SHA256 plus chunked AES-256-GCM, bounded reader parameters and authenticated framing.
+- [x] Keep password material out of persisted ViewModel/app-state/diagnostic surfaces and warn that forgotten passwords cannot be recovered.
+- [x] Preserve v1 restore semantics, mandatory safety backup and rollback after authenticated v2 decryption.
 - [ ] Add an optional automatic backup policy in a later change.
-- [ ] Add backup encryption/key-management strategy in a later privacy/security change.
 - [ ] Include future external evidence files once the evidence module exists.
 - [ ] Define an automatic retention/deletion policy for safety backups.
 
@@ -260,14 +262,14 @@ The report calculation/model foundation already exists. PDF output for the estab
 
 ## 14. Privacy and local security
 
-The maintained privacy inventory and message-free diagnostic baseline are implemented in `main`. Future work should extend those controls without weakening the current offline-first and data-minimization boundaries.
+The maintained privacy inventory, message-free diagnostic baseline and optional password-protected backup v2 are implemented. Future work should extend those controls without weakening the current offline-first and data-minimization boundaries.
 
 - [x] Personal-data inventory and D0–D3 engineering classification.
 - [x] Message-free safe diagnostics for current application and update failures.
 - [x] Production/Demo diagnostic and storage separation.
 - [~] Sensitive-information warnings in relevant workflows, including export, PDF, recovery and CLI boundaries.
 - [ ] Optional local application lock.
-- [ ] Backup protection/encryption strategy.
+- [x] Optional backup protection/encryption strategy with password-protected v2 packages and backward-compatible v1 restore.
 - [ ] Controlled deletion/anonymization strategy.
 - [ ] Retention policy for classroom data, diagnostics, update downloads and managed safety backups.
 - [~] Continuous review of sensitive observations, evidence and automation workflows.
@@ -317,9 +319,10 @@ The maintained privacy inventory and message-free diagnostic baseline are implem
 10. [x] Measure the initial automated-test coverage baseline in CI before adopting risk-based thresholds.
 11. [x] Threat-model and harden the updater/release trust boundary.
 12. [x] Adopt the OSI-approved `GPL-3.0-only` license and document its scope.
-13. [ ] Add production Authenticode signing before broad distribution.
-14. [ ] Return to richer NEM planning fields, evaluation criteria/rubrics and reporting periods.
-15. [ ] Add teacher journal, family workflow, evidence attachments and calendar as prioritized.
+13. [x] Add optional password-protected backup v2 with backward-compatible v1 recovery (PR #39).
+14. [ ] Add production Authenticode signing before broad distribution.
+15. [ ] Return to richer NEM planning fields, evaluation criteria/rubrics and reporting periods.
+16. [ ] Add teacher journal, family workflow, evidence attachments and calendar as prioritized.
 
 # Definition of done for a significant module/change
 
