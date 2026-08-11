@@ -13,6 +13,7 @@ public sealed partial class ServicioActualizacionesGitHub : IServicioActualizaci
     private const string Repositorio = "atraineedeveloper/SistemaDocenteNEM";
     private const string NombreChecksums = "SHA256SUMS.txt";
     private const int MaximoBytesChecksums = 64 * 1024;
+    private const long MaximoBytesInstalador = 512L * 1024 * 1024;
     private readonly HttpClient _httpClient;
     private readonly bool _poseeHttpClient;
     private readonly string _directorioActualizaciones;
@@ -82,10 +83,18 @@ public sealed partial class ServicioActualizacionesGitHub : IServicioActualizaci
                 {
                     var nombre = ObtenerString(asset, "name");
                     var urlTexto = ObtenerString(asset, "browser_download_url");
-                    if (!Uri.TryCreate(urlTexto, UriKind.Absolute, out var url) || !EsUrlGitHubValida(url)) continue;
+                    if (!Uri.TryCreate(urlTexto, UriKind.Absolute, out var url)) continue;
 
-                    if (string.Equals(nombre, nombreInstalador, StringComparison.Ordinal)) urlInstalador = url;
-                    else if (string.Equals(nombre, NombreChecksums, StringComparison.Ordinal)) urlChecksums = url;
+                    if (string.Equals(nombre, nombreInstalador, StringComparison.Ordinal)
+                        && EsUrlAssetReleaseValida(url, etiqueta, nombreInstalador))
+                    {
+                        urlInstalador = url;
+                    }
+                    else if (string.Equals(nombre, NombreChecksums, StringComparison.Ordinal)
+                        && EsUrlAssetReleaseValida(url, etiqueta, NombreChecksums))
+                    {
+                        urlChecksums = url;
+                    }
                 }
 
                 if (urlInstalador is null || urlChecksums is null) continue;
@@ -130,8 +139,11 @@ public sealed partial class ServicioActualizacionesGitHub : IServicioActualizaci
             ?? throw new ErrorActualizacionException("target_version_invalid");
         var versionTexto = version.ToString(3);
         var nombreInstalador = $"AulaRaiz-Setup-{versionTexto}-win-x64.exe";
-        if (!EsUrlGitHubValida(actualizacion.UrlInstalador) || !EsUrlGitHubValida(actualizacion.UrlChecksums))
+        if (!EsUrlAssetReleaseValida(actualizacion.UrlInstalador, actualizacion.Etiqueta, nombreInstalador)
+            || !EsUrlAssetReleaseValida(actualizacion.UrlChecksums, actualizacion.Etiqueta, NombreChecksums))
+        {
             throw new ErrorActualizacionException("asset_url_invalid");
+        }
 
         var directorioVersion = Path.Combine(_directorioActualizaciones, versionTexto);
         Directory.CreateDirectory(directorioVersion);
@@ -251,6 +263,8 @@ public sealed partial class ServicioActualizacionesGitHub : IServicioActualizaci
             using var respuesta = await _httpClient.GetAsync(url, HttpCompletionOption.ResponseHeadersRead, cancellationToken).ConfigureAwait(false);
             respuesta.EnsureSuccessStatusCode();
             var total = respuesta.Content.Headers.ContentLength;
+            if (total is > MaximoBytesInstalador)
+                throw new ErrorActualizacionException("installer_too_large");
             await using var origen = await respuesta.Content.ReadAsStreamAsync(cancellationToken).ConfigureAwait(false);
             await using var destino = new FileStream(
                 rutaTemporal,
@@ -268,6 +282,8 @@ public sealed partial class ServicioActualizacionesGitHub : IServicioActualizaci
                 {
                     var leidos = await origen.ReadAsync(buffer.AsMemory(0, buffer.Length), cancellationToken).ConfigureAwait(false);
                     if (leidos == 0) break;
+                    if (recibidos + leidos > MaximoBytesInstalador)
+                        throw new ErrorActualizacionException("installer_too_large");
                     await destino.WriteAsync(buffer.AsMemory(0, leidos), cancellationToken).ConfigureAwait(false);
                     recibidos += leidos;
                     progreso?.Report(new ProgresoDescargaActualizacion(recibidos, total));
@@ -312,10 +328,19 @@ public sealed partial class ServicioActualizacionesGitHub : IServicioActualizaci
             ? valor.GetString() ?? string.Empty
             : string.Empty;
 
-    private static bool EsUrlGitHubValida(Uri url) =>
-        string.Equals(url.Scheme, Uri.UriSchemeHttps, StringComparison.OrdinalIgnoreCase)
-        && (string.Equals(url.Host, "github.com", StringComparison.OrdinalIgnoreCase)
-            || url.Host.EndsWith(".githubusercontent.com", StringComparison.OrdinalIgnoreCase));
+    private static bool EsUrlAssetReleaseValida(Uri url, string etiqueta, string nombreArchivo)
+    {
+        if (!string.Equals(url.Scheme, Uri.UriSchemeHttps, StringComparison.OrdinalIgnoreCase)
+            || !string.Equals(url.Host, "github.com", StringComparison.OrdinalIgnoreCase)
+            || !string.IsNullOrEmpty(url.Query)
+            || !string.IsNullOrEmpty(url.Fragment))
+        {
+            return false;
+        }
+
+        var rutaEsperada = $"/{Repositorio}/releases/download/{Uri.EscapeDataString(etiqueta)}/{Uri.EscapeDataString(nombreArchivo)}";
+        return string.Equals(url.AbsolutePath, rutaEsperada, StringComparison.Ordinal);
+    }
 
     private static void TryDelete(string ruta)
     {
