@@ -177,6 +177,14 @@ The Release workflow starts only from a version tag, requires the tag to match `
 
 The maintained roadmap is [`checklist_modulos_sistema_docente_nem.md`](checklist_modulos_sistema_docente_nem.md). The privacy data-map/safe-logging baseline, installer/Release pipeline and local terminal/agent interface are already in `main`. The `0.2.5` feature line adds consent-based in-app update coordination. Backup encryption, local application lock and lifecycle/retention remain separate future privacy changes.
 
+## License
+
+Except where a file states otherwise, AulaRaíz source code and original project materials are licensed under the [GNU General Public License version 3.0 only](LICENSE) (`GPL-3.0-only`).
+
+You may use, study, modify and redistribute the covered work under that license. A redistributed modified version must preserve the applicable GPL notices and make its corresponding source available under GPL v3. Third-party packages, frameworks, fonts, catalogs and other incorporated materials retain their own copyright and license terms.
+
+This software is provided without warranty as described by the GPL. The software license applies to the program and repository materials; it does not grant rights over teacher, student, family or school data created or managed with AulaRaíz.
+
 ## Data policy
 
 Do not commit real student names, identifiers, health information, family information or other personal data. Tests and Demo mode use fictitious records only. Export files, PDFs and `.sdocbackup` files can contain D3 educational/personal information and must be handled accordingly. A CLI response that omits names can still contain sensitive student-level educational evidence tied to stable internal ids; pseudonymization is minimization, not anonymization.

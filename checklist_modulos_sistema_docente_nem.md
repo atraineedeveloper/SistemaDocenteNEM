@@ -13,6 +13,7 @@ This checklist reflects the current product state rather than the original proto
   - OpenSpec-driven changes.
   - Windows GitHub Actions CI: format, Release build, tests, OpenSpec and whitespace.
   - AulaRaíz visible product identity with legacy technical identifiers preserved for compatibility.
+  - Public source distribution under `GPL-3.0-only`, with third-party licenses and classroom-data ownership kept separate.
 
 - [x] **Group and students**
   - Multiple groups.
@@ -315,9 +316,10 @@ The maintained privacy inventory and message-free diagnostic baseline are implem
 9. [x] Establish repository security policy, dependency maintenance and project-specific OpenSpec rules.
 10. [x] Measure the initial automated-test coverage baseline in CI before adopting risk-based thresholds.
 11. [x] Threat-model and harden the updater/release trust boundary.
-12. [ ] Add production Authenticode signing before broad distribution.
-13. [ ] Return to richer NEM planning fields, evaluation criteria/rubrics and reporting periods.
-14. [ ] Add teacher journal, family workflow, evidence attachments and calendar as prioritized.
+12. [x] Adopt the OSI-approved `GPL-3.0-only` license and document its scope.
+13. [ ] Add production Authenticode signing before broad distribution.
+14. [ ] Return to richer NEM planning fields, evaluation criteria/rubrics and reporting periods.
+15. [ ] Add teacher journal, family workflow, evidence attachments and calendar as prioritized.
 
 # Definition of done for a significant module/change
 
