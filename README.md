@@ -124,6 +124,14 @@ New diagnostics no longer persist raw `Exception.ToString()`. They write only a 
 
 The update client is a separate optional network surface: it requests only public GitHub Release metadata/assets and sends no student/group/school data. Update failures use the same D0-only safe diagnostics contract.
 
+## Code signing policy
+
+AulaRaíz is preparing an application to SignPath Foundation's free service for open-source projects. Releases are currently unsigned; the trusted-build submission step will be enabled only after acceptance and configuration with real SignPath identifiers.
+
+**Free code signing provided by SignPath.io, certificate by SignPath Foundation**
+
+See the [code signing policy](docs/code-signing-policy.md) for scope, roles, privacy, manual approval and incident handling. The [SignPath readiness review](docs/signpath-readiness.md) records verified dependencies and the provenance checks that must be closed before applying.
+
 ## Repository workflow
 
 Feature work follows this sequence:
