@@ -23,7 +23,7 @@ env:
 
 jobs:
   validate:
-    name: Windows · format · build · test · OpenSpec
+    name: Windows · audit · format · build · test · coverage · OpenSpec
     runs-on: windows-latest
     timeout-minutes: 30
 
@@ -40,9 +40,9 @@ jobs:
         shell: pwsh
         run: dotnet --version
 
-      - name: Restore
+      - name: Restore and audit NuGet dependencies
         shell: pwsh
-        run: dotnet restore SistemaDocente.sln
+        run: dotnet restore SistemaDocente.sln -p:AuditPipeline=true
 
       - name: Verify formatting
         shell: pwsh
@@ -52,9 +52,23 @@ jobs:
         shell: pwsh
         run: dotnet build SistemaDocente.sln --configuration Release --no-restore
 
-      - name: Test
+      - name: Test and collect coverage
         shell: pwsh
-        run: dotnet test SistemaDocente.sln --configuration Release --no-build
+        run: >
+          dotnet test SistemaDocente.sln
+          --configuration Release
+          --no-build
+          --collect:"XPlat Code Coverage"
+          --settings .\eng\coverage.runsettings
+          --results-directory .\artifacts\coverage
+
+      - name: Upload Cobertura coverage
+        uses: actions/upload-artifact@v7
+        with:
+          name: aularaiz-coverage-cobertura
+          path: artifacts/coverage/**/coverage.cobertura.xml
+          if-no-files-found: error
+          retention-days: 14
 
       - name: Setup Node.js 24
         uses: actions/setup-node@v6
