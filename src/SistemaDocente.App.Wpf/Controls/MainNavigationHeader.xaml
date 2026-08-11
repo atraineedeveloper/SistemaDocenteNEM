@@ -5,14 +5,14 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:application="clr-namespace:SistemaDocente.Application;assembly=SistemaDocente.Application"
              mc:Ignorable="d"
-             d:DesignHeight="76" d:DesignWidth="1280"
+             d:DesignHeight="118" d:DesignWidth="1280"
              Background="{DynamicResource CardBackgroundBrush}"
              xml:lang="es-MX">
     <UserControl.Resources>
         <Style x:Key="ModernHeaderNavButton" TargetType="Button">
-            <Setter Property="Padding" Value="11,22,11,18"/>
-            <Setter Property="Margin" Value="1,0"/>
-            <Setter Property="MinWidth" Value="84"/>
+            <Setter Property="Padding" Value="18,11"/>
+            <Setter Property="Margin" Value="2,0"/>
+            <Setter Property="MinWidth" Value="108"/>
             <Setter Property="Cursor" Value="Hand"/>
             <Setter Property="Background" Value="Transparent"/>
             <Setter Property="Foreground" Value="{DynamicResource TextSecondaryBrush}"/>
@@ -26,12 +26,12 @@
                             <Border x:Name="Surface"
                                     Background="{TemplateBinding Background}"
                                     CornerRadius="8"
-                                    Margin="2,9,2,9"
+                                    Margin="2,2,2,4"
                                     Padding="{TemplateBinding Padding}">
                                 <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
                             </Border>
                             <Border x:Name="Indicator"
-                                    Height="3" Margin="10,0"
+                                    Height="3" Margin="14,0"
                                     VerticalAlignment="Bottom"
                                     Background="{DynamicResource PrimaryBrush}"
                                     CornerRadius="2,2,0,0"
@@ -58,94 +58,119 @@
         </Style>
     </UserControl.Resources>
 
-    <Border BorderBrush="{DynamicResource BorderLightBrush}" BorderThickness="0,0,0,1">
-        <Grid Margin="20,0">
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="Auto"/>
-                <ColumnDefinition Width="*"/>
-                <ColumnDefinition Width="Auto"/>
-                <ColumnDefinition Width="Auto"/>
-                <ColumnDefinition Width="Auto"/>
-            </Grid.ColumnDefinitions>
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
 
-            <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center" Margin="0,9">
-                <Border Width="46" Height="46" Background="{DynamicResource PrimaryBrush}"
-                        BorderBrush="{DynamicResource HeaderIconBackgroundBrush}" BorderThickness="1"
-                        CornerRadius="10" Margin="0,0,11,0"
-                        AutomationProperties.Name="AulaRaíz">
-                    <TextBlock Text="AR" Foreground="{DynamicResource HeaderIconBackgroundBrush}" FontSize="15" FontWeight="Bold"
-                               HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                </Border>
-                <StackPanel VerticalAlignment="Center">
-                    <StackPanel Orientation="Horizontal">
-                        <TextBlock Text="{x:Static application:IdentidadProducto.Nombre}"
-                                   Foreground="{DynamicResource TextPrimaryBrush}" FontSize="17" FontWeight="Bold"/>
-                        <Border Margin="8,0,0,0" Padding="7,2" CornerRadius="5"
-                                Background="{DynamicResource WarningBackgroundBrush}"
-                                BorderBrush="{DynamicResource WarningBorderBrush}" BorderThickness="1"
-                                Visibility="{Binding ModoDemostracion, Converter={StaticResource BoolToVisibility}}">
-                            <TextBlock Text="DEMO" Foreground="{DynamicResource WarningBrush}" FontSize="10" FontWeight="Bold"/>
-                        </Border>
-                        <TextBlock Text="{x:Static application:IdentidadProducto.VersionVisible}"
-                                   Foreground="{DynamicResource TextMutedBrush}" FontSize="10"
-                                   Margin="8,0,0,0" VerticalAlignment="Center"
-                                   AutomationProperties.Name="Versión instalada de AulaRaíz"/>
+        <!-- Contexto global: identidad, grupo activo y utilidades de la aplicación. -->
+        <Border Grid.Row="0" BorderBrush="{DynamicResource BorderLightBrush}" BorderThickness="0,0,0,1">
+            <Grid Margin="20,0" MinHeight="66">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+
+                <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center" Margin="0,8">
+                    <Border Width="42" Height="42" Background="{DynamicResource PrimaryBrush}"
+                            BorderBrush="{DynamicResource HeaderIconBackgroundBrush}" BorderThickness="1"
+                            CornerRadius="10" Margin="0,0,11,0"
+                            AutomationProperties.Name="AulaRaíz">
+                        <TextBlock Text="AR" Foreground="{DynamicResource HeaderIconBackgroundBrush}" FontSize="14" FontWeight="Bold"
+                                   HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                    </Border>
+                    <StackPanel VerticalAlignment="Center">
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="{x:Static application:IdentidadProducto.Nombre}"
+                                       Foreground="{DynamicResource TextPrimaryBrush}" FontSize="17" FontWeight="Bold"/>
+                            <Border Margin="8,0,0,0" Padding="7,2" CornerRadius="5"
+                                    Background="{DynamicResource WarningBackgroundBrush}"
+                                    BorderBrush="{DynamicResource WarningBorderBrush}" BorderThickness="1"
+                                    Visibility="{Binding ModoDemostracion, Converter={StaticResource BoolToVisibility}}">
+                                <TextBlock Text="DEMO" Foreground="{DynamicResource WarningBrush}" FontSize="10" FontWeight="Bold"/>
+                            </Border>
+                        </StackPanel>
+                        <TextBlock Text="{x:Static application:IdentidadProducto.Subtitulo}"
+                                   Foreground="{DynamicResource TextMutedBrush}" Style="{StaticResource Caption}"
+                                   Margin="0,2,0,0" TextTrimming="CharacterEllipsis" MaxWidth="310"/>
                     </StackPanel>
-                    <TextBlock Text="{x:Static application:IdentidadProducto.Subtitulo}"
-                               Foreground="{DynamicResource TextMutedBrush}" Style="{StaticResource Caption}"
-                               Margin="0,2,0,0" TextTrimming="CharacterEllipsis" MaxWidth="300"/>
                 </StackPanel>
-            </StackPanel>
 
-            <Menu Grid.Column="2" VerticalAlignment="Center" Margin="14,0,8,0" Background="Transparent"
-                  Visibility="{Binding MostrarNavegacion, Converter={StaticResource BoolToVisibility}}">
-                <MenuItem x:Name="GrupoContextMenu"
-                          Padding="8,5"
-                          AutomationProperties.Name="Cambiar contexto de grupo">
-                    <MenuItem.Header>
-                        <Border Background="{DynamicResource SectionBackgroundBrush}"
-                                BorderBrush="{DynamicResource BorderLightBrush}"
-                                BorderThickness="1"
-                                CornerRadius="9"
-                                Padding="10,6">
-                            <StackPanel Orientation="Horizontal">
-                                <Border Width="32" Height="32" CornerRadius="8" Background="{DynamicResource HoverBackgroundBrush}" Margin="0,0,9,0">
-                                    <TextBlock Text="👥" FontSize="15" HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                                </Border>
-                                <StackPanel MinWidth="120" MaxWidth="180" VerticalAlignment="Center">
-                                    <TextBlock Text="{Binding Grupo.NombreGrupo}" Foreground="{DynamicResource TextPrimaryBrush}" FontWeight="SemiBold" TextTrimming="CharacterEllipsis"/>
-                                    <TextBlock Text="Cambiar grupo" Foreground="{DynamicResource TextMutedBrush}" FontSize="10"/>
+                <TextBlock Grid.Column="1"
+                           Text="Crear nuevo grupo"
+                           HorizontalAlignment="Center" VerticalAlignment="Center"
+                           Foreground="{DynamicResource TextSecondaryBrush}"
+                           FontWeight="SemiBold" FontSize="13"
+                           Visibility="{Binding MostrarCreacionGrupo, Converter={StaticResource BoolToVisibility}}"/>
+
+                <Menu Grid.Column="2" VerticalAlignment="Center" Margin="14,0,10,0" Background="Transparent"
+                      Visibility="{Binding MostrarNavegacion, Converter={StaticResource BoolToVisibility}}">
+                    <MenuItem x:Name="GrupoContextMenu"
+                              Padding="6,4"
+                              AutomationProperties.Name="Cambiar contexto de grupo">
+                        <MenuItem.Header>
+                            <Border Background="{DynamicResource SectionBackgroundBrush}"
+                                    BorderBrush="{DynamicResource BorderLightBrush}"
+                                    BorderThickness="1"
+                                    CornerRadius="9"
+                                    Padding="10,5">
+                                <StackPanel Orientation="Horizontal">
+                                    <Border Width="30" Height="30" CornerRadius="7" Background="{DynamicResource HoverBackgroundBrush}" Margin="0,0,8,0">
+                                        <TextBlock Text="👥" FontSize="14" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                    </Border>
+                                    <StackPanel MinWidth="115" MaxWidth="190" VerticalAlignment="Center">
+                                        <TextBlock Text="{Binding Grupo.NombreGrupo}" Foreground="{DynamicResource TextPrimaryBrush}" FontWeight="SemiBold" TextTrimming="CharacterEllipsis"/>
+                                        <TextBlock Text="Cambiar grupo" Foreground="{DynamicResource TextMutedBrush}" FontSize="10"/>
+                                    </StackPanel>
+                                    <TextBlock Text="⌄" Foreground="{DynamicResource TextMutedBrush}" FontSize="14" Margin="7,0,0,0" VerticalAlignment="Center"/>
                                 </StackPanel>
-                                <TextBlock Text="⌄" Foreground="{DynamicResource TextMutedBrush}" FontSize="14" Margin="7,0,0,0" VerticalAlignment="Center"/>
-                            </StackPanel>
-                        </Border>
-                    </MenuItem.Header>
-                </MenuItem>
-            </Menu>
+                            </Border>
+                        </MenuItem.Header>
+                    </MenuItem>
+                </Menu>
 
-            <StackPanel Grid.Column="3" Orientation="Horizontal" VerticalAlignment="Stretch"
-                        Visibility="{Binding MostrarNavegacion, Converter={StaticResource BoolToVisibility}}">
-                <Button x:Name="NavBtnGrupo" Style="{StaticResource ModernHeaderNavButton}" Content="👥  Grupo" Command="{Binding IrAGrupoCommand}" TabIndex="3" AutomationProperties.Name="Navegar a Grupo"/>
-                <Button x:Name="NavBtnAsistencia" Style="{StaticResource ModernHeaderNavButton}" Content="✓  Asistencia" Command="{Binding IrAAsistenciaCommand}" TabIndex="4" AutomationProperties.Name="Navegar a Asistencia"/>
-                <Button x:Name="NavBtnProyectos" Style="{StaticResource ModernHeaderNavButton}" Content="▱  Proyectos" Command="{Binding IrAProyectosCommand}" TabIndex="5" AutomationProperties.Name="Navegar a Proyectos"/>
-                <Button x:Name="NavBtnEvaluacion" Style="{StaticResource ModernHeaderNavButton}" Content="☆  Evaluación" Command="{Binding IrAEvaluacionCommand}" TabIndex="6" AutomationProperties.Name="Navegar a Evaluación"/>
-                <Button x:Name="NavBtnReportes" Style="{StaticResource ModernHeaderNavButton}" Content="▤  Reportes" Command="{Binding IrAReportesCommand}" TabIndex="7" AutomationProperties.Name="Navegar a Reportes"/>
+                <Menu Grid.Column="3" VerticalAlignment="Center" Background="Transparent">
+                    <MenuItem Header="☼  Apariencia"
+                              Foreground="{DynamicResource TextSecondaryBrush}" FontWeight="SemiBold"
+                              Padding="8,7" TabIndex="8" AutomationProperties.Name="Seleccionar apariencia">
+                        <MenuItem Header="Claro" Click="TemaClaro_Click" AutomationProperties.Name="Tema claro"/>
+                        <MenuItem Header="Oscuro" Click="TemaOscuro_Click" AutomationProperties.Name="Tema oscuro"/>
+                        <MenuItem Header="Alto contraste" Click="TemaAltoContraste_Click" AutomationProperties.Name="Tema alto contraste"/>
+                    </MenuItem>
+                    <MenuItem Header="⋯  Más"
+                              Foreground="{DynamicResource TextSecondaryBrush}" FontWeight="SemiBold"
+                              Padding="8,7" TabIndex="9" AutomationProperties.Name="Más herramientas de AulaRaíz">
+                        <MenuItem Header="Respaldo y restauración…"
+                                  Click="RespaldoRestauracion_Click"
+                                  AutomationProperties.Name="Abrir respaldo y restauración"/>
+                        <MenuItem Header="Buscar actualizaciones"
+                                  Click="BuscarActualizaciones_Click"
+                                  AutomationProperties.Name="Buscar actualizaciones de AulaRaíz"/>
+                        <Separator/>
+                        <MenuItem Header="{x:Static application:IdentidadProducto.VersionVisible}"
+                                  IsEnabled="False"
+                                  AutomationProperties.Name="Versión instalada de AulaRaíz"/>
+                    </MenuItem>
+                </Menu>
+            </Grid>
+        </Border>
+
+        <!-- Navegación docente: sólo tareas del grupo activo. -->
+        <Border Grid.Row="1"
+                Background="{DynamicResource CardBackgroundBrush}"
+                BorderBrush="{DynamicResource BorderLightBrush}"
+                BorderThickness="0,0,0,1"
+                Visibility="{Binding MostrarNavegacion, Converter={StaticResource BoolToVisibility}}">
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" MinHeight="50">
+                <Button x:Name="NavBtnGrupo" Style="{StaticResource ModernHeaderNavButton}" Content="Resumen" Command="{Binding IrAGrupoCommand}" TabIndex="3" AutomationProperties.Name="Navegar a Resumen del grupo"/>
+                <Button x:Name="NavBtnAsistencia" Style="{StaticResource ModernHeaderNavButton}" Content="Asistencia" Command="{Binding IrAAsistenciaCommand}" TabIndex="4" AutomationProperties.Name="Navegar a Asistencia"/>
+                <Button x:Name="NavBtnProyectos" Style="{StaticResource ModernHeaderNavButton}" Content="Proyectos" Command="{Binding IrAProyectosCommand}" TabIndex="5" AutomationProperties.Name="Navegar a Proyectos"/>
+                <Button x:Name="NavBtnEvaluacion" Style="{StaticResource ModernHeaderNavButton}" Content="Evaluación" Command="{Binding IrAEvaluacionCommand}" TabIndex="6" AutomationProperties.Name="Navegar a Evaluación"/>
+                <Button x:Name="NavBtnReportes" Style="{StaticResource ModernHeaderNavButton}" Content="Reportes" Command="{Binding IrAReportesCommand}" TabIndex="7" AutomationProperties.Name="Navegar a Reportes"/>
             </StackPanel>
-
-            <Menu Grid.Column="4" VerticalAlignment="Center" Margin="4,0,0,0" Background="Transparent">
-                <MenuItem Header="↺  Respaldo" Foreground="{DynamicResource TextSecondaryBrush}" FontWeight="SemiBold"
-                          Padding="8,8" TabIndex="8" Click="RespaldoRestauracion_Click"
-                          AutomationProperties.Name="Abrir respaldo y restauración"/>
-                <MenuItem Header="⬆  Actualizar" Foreground="{DynamicResource TextSecondaryBrush}" FontWeight="SemiBold"
-                          Padding="8,8" TabIndex="9" Click="BuscarActualizaciones_Click"
-                          AutomationProperties.Name="Buscar actualizaciones de AulaRaíz"/>
-                <MenuItem Header="☼  Tema" Foreground="{DynamicResource TextSecondaryBrush}" FontWeight="SemiBold"
-                          Padding="8,8" TabIndex="10" AutomationProperties.Name="Seleccionar tema">
-                    <MenuItem Header="Claro" Click="TemaClaro_Click" AutomationProperties.Name="Tema claro"/>
-                    <MenuItem Header="Oscuro" Click="TemaOscuro_Click" AutomationProperties.Name="Tema oscuro"/>
-                    <MenuItem Header="Alto contraste" Click="TemaAltoContraste_Click" AutomationProperties.Name="Tema alto contraste"/>
-                </MenuItem>
-            </Menu>
-        </Grid>
-    </Border>
+        </Border>
+    </Grid>
 </UserControl>
