@@ -1,0 +1,68 @@
+AulaRaíz third-party notices
+================================
+
+AulaRaíz source code and original project materials are licensed under
+GPL-3.0-only as described by the root LICENSE file. The components and data
+listed below retain their own terms.
+
+Montserrat 9.000
+----------------
+
+Files embedded in the WPF application:
+
+- src/SistemaDocente.App.Wpf/Fonts/Montserrat-Regular.ttf
+  SHA-256: 3e8abe50c44c82e2242e97d1ec8c0d385c4890cdc50447bcdb8605c81a38cfb2
+- src/SistemaDocente.App.Wpf/Fonts/Montserrat-SemiBold.ttf
+  SHA-256: b4e1563393d73fdff491a869441245aef31add2ec03d9c97a6dae4de07c52fd0
+- src/SistemaDocente.App.Wpf/Fonts/Montserrat-Bold.ttf
+  SHA-256: bc6e854971cea46b463be6f9eef4d9cd52f51cfc1fc0dd90c9d3e6483dc0ec61
+
+Upstream: https://github.com/JulietaUla/Montserrat
+Copyright 2024 The Montserrat.Git Project Authors
+License: SIL Open Font License, Version 1.1
+
+The files above are byte-for-byte identical to their current upstream
+counterparts at the recorded paths when reviewed on 2026-08-11. Their embedded
+name tables identify Montserrat 9.000 and the SIL Open Font License 1.1.
+
+The complete license is distributed as Montserrat-OFL.txt and is also kept at
+third-party/montserrat/OFL.txt in the source repository.
+
+INEGI geographic catalog
+-------------------------
+
+The offline entity and municipality/demarcation name list in
+src/SistemaDocente.Presentation/Data/estados-municipios.json is an AulaRaíz
+transformation of the official INEGI Catálogo Único de Claves de Áreas
+Geoestadísticas Estatales, Municipales y Localidades.
+
+Source: INEGI, Catálogo Único de Claves de Áreas Geoestadísticas Estatales,
+Municipales y Localidades, classification updated through 17 June 2025.
+
+Official catalog:
+https://www.inegi.org.mx/app/ageeml/
+
+Official municipal-area service:
+https://www.inegi.org.mx/servicios/catalogounico.html
+
+INEGI terms of free use:
+https://www.inegi.org.mx/inegi/terminos.html
+
+AulaRaíz retains only the entity and municipality/demarcation names, groups
+them by entity and sorts them for offline selection. It omits geographic keys,
+population values, geometry and other source attributes. This extraction and
+reordering were performed by AulaRaíz, not by INEGI. AulaRaíz is not endorsed,
+integrated, sponsored or supported by INEGI.
+
+The reviewed snapshot contains 32 entities and 2,478 municipalities or Mexico
+City territorial demarcations. Detailed transformation and update instructions
+are recorded in
+src/SistemaDocente.Presentation/Data/estados-municipios.SOURCE.md.
+
+Other distributed components
+----------------------------
+
+The self-contained .NET distribution and NuGet dependencies retain the license
+and third-party notice files supplied by their respective publishers. The
+maintained SignPath readiness review records the direct production dependency
+inventory and primary license records.
