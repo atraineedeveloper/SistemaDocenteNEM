@@ -73,4 +73,24 @@ public sealed class InstalacionWindowsTests
         Assert.Contains("$updaterProjectPath", buildScript, StringComparison.Ordinal);
         Assert.Contains("PublishSingleFile=true", buildScript, StringComparison.Ordinal);
     }
+
+
+    [Fact]
+    public void InstallerPackagesLicensesAndThirdPartyProvenance()
+    {
+        var installer = Read("installer/AulaRaiz.iss");
+        var notices = Read("THIRD-PARTY-NOTICES.txt");
+        var montserratLicense = Read("third-party/montserrat/OFL.txt");
+        var catalogSource = Read("src/SistemaDocente.Presentation/Data/estados-municipios.SOURCE.md");
+
+        Assert.Contains("DestName: \"LICENSE.txt\"", installer, StringComparison.Ordinal);
+        Assert.Contains("THIRD-PARTY-NOTICES.txt", installer, StringComparison.Ordinal);
+        Assert.Contains("DestName: \"Montserrat-OFL.txt\"", installer, StringComparison.Ordinal);
+        Assert.Contains("Montserrat 9.000", notices, StringComparison.Ordinal);
+        Assert.Contains("SIL Open Font License, Version 1.1", montserratLicense, StringComparison.Ordinal);
+        Assert.Contains("Fuente: INEGI", notices, StringComparison.Ordinal);
+        Assert.Contains("2,478 municipalities", notices, StringComparison.Ordinal);
+        Assert.Contains("https://www.inegi.org.mx/servicios/catalogounico.html", catalogSource, StringComparison.Ordinal);
+        Assert.Contains("2025-06-17", catalogSource, StringComparison.Ordinal);
+    }
 }
