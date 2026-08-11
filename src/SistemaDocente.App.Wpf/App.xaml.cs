@@ -106,13 +106,14 @@ public partial class App : System.Windows.Application
                 persistenciaContexto,
                 new ExportadorTabularArchivo());
             var consultaExportacionGrupo = new ConsultaExportacionGrupoCasosUso(persistenciaProyectos);
-            var servicioRecuperacion = new ServicioRecuperacionLocalSqlite(
+            var servicioRecuperacionV1 = new ServicioRecuperacionLocalSqlite(
                 rutas.BaseSqlite,
                 rutas.EstadoAplicacion,
                 rutas.DirectorioRespaldosSeguridad,
                 modoDemo
                     ? ModoAlmacenamientoLocal.Demostracion
                     : ModoAlmacenamientoLocal.Produccion);
+            var servicioRecuperacion = new ServicioRecuperacionLocalProtegida(servicioRecuperacionV1);
             var gestionRespaldo = new GestionRespaldoCasosUso(servicioRecuperacion);
 
             var mensajes = new WpfNotificationService();
