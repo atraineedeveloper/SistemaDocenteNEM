@@ -259,27 +259,33 @@ The report calculation/model foundation already exists. PDF output for the estab
 
 ## 14. Privacy and local security
 
-- [ ] Personal-data inventory and classification.
-- [~] Sensitive-information warnings in relevant workflows, including sensitive export/PDF/recovery boundaries.
+The maintained privacy inventory and message-free diagnostic baseline are implemented in `main`. Future work should extend those controls without weakening the current offline-first and data-minimization boundaries.
+
+- [x] Personal-data inventory and D0–D3 engineering classification.
+- [x] Message-free safe diagnostics for current application and update failures.
+- [x] Production/Demo diagnostic and storage separation.
+- [~] Sensitive-information warnings in relevant workflows, including export, PDF, recovery and CLI boundaries.
 - [ ] Optional local application lock.
 - [ ] Backup protection/encryption strategy.
-- [ ] Safe error logging without leaking student data.
 - [ ] Controlled deletion/anonymization strategy.
-- [ ] Retention policy.
-- [ ] Review of sensitive observations/evidence workflows.
+- [ ] Retention policy for classroom data, diagnostics, update downloads and managed safety backups.
+- [~] Continuous review of sensitive observations, evidence and automation workflows.
 
 ## 15. Installation and update
 
-**Current feature branch:** `feature/windows-installer-update` / PR #23. Version 1 uses a per-user Inno Setup package and an explicit run-a-newer-installer update model; automatic update discovery/download remains separate future work.
+**Status:** the installer, GitHub Release pipeline, installed CLI and consent-based in-app updater are implemented in `main`. The current product version is `0.2.5`.
 
-- [~] Windows installer/package.
-- [~] Self-contained .NET 10 `win-x64` runtime/dependency strategy.
-- [~] Start Menu shortcut, optional desktop shortcut and stable installer identity.
-- [~] Safe update boundary: installer replaces program files while SQLite migration remains application-owned.
-- [~] Installed semantic-version display (`0.1.0` for the first installable line).
-- [~] Ordinary uninstall without accidental user-data deletion.
-- [~] Automated install/reinstall/uninstall lifecycle test with user-data preservation sentinel.
-- [ ] Manual clean/non-development-machine installation and update validation.
+- [x] Per-user Windows installer/package.
+- [x] Self-contained .NET 10 `win-x64` runtime/dependency strategy.
+- [x] Start Menu shortcut, optional desktop shortcut and stable installer identity.
+- [x] Safe update boundary: installer/updater replace program files while SQLite migration remains application-owned.
+- [x] Shared installed semantic-version display for WPF, CLI, updater and installer.
+- [x] Ordinary uninstall without accidental classroom-data deletion.
+- [x] Automated published-baseline upgrade and uninstall lifecycle validation with a user-data preservation sentinel.
+- [x] Tag-driven GitHub Releases with version validation and SHA-256 release metadata.
+- [x] Consent-based update discovery, download, checksum verification, pending-change protection and restart.
+- [ ] Document and review a dedicated updater/release threat model.
+- [ ] Manual clean/non-development-machine installation and update validation for each distribution milestone.
 - [ ] Production Authenticode signing workflow/certificate strategy before broad distribution.
 
 ## 16. Accessibility and UI quality — continuous work
@@ -304,10 +310,14 @@ The report calculation/model foundation already exists. PDF output for the estab
 4. [x] Merge group data XLSX/CSV export after manual file-opening validation (PR #17).
 5. [x] Merge safe local backup/restore after manual recovery validation (PR #18).
 6. [x] Merge PDF output for the existing individual/group reports after manual rendering validation (PR #21).
-7. [~] Complete Windows installation/update packaging and clean-machine validation (PR #23).
-8. [ ] Harden privacy and local security (module 14; deliberately deferred while module 15 is completed).
-9. [ ] Return to richer NEM planning fields, evaluation criteria/rubrics and reporting periods.
-10. [ ] Add teacher journal, family workflow, evidence attachments and calendar as prioritized.
+7. [x] Merge Windows installation, GitHub Release delivery, local CLI and consent-based in-app updates.
+8. [x] Establish the privacy inventory and message-free safe-diagnostics baseline.
+9. [ ] Establish repository security policy, dependency maintenance and project-specific OpenSpec rules.
+10. [ ] Measure automated-test coverage before adopting risk-based thresholds.
+11. [ ] Threat-model and harden the updater/release trust boundary.
+12. [ ] Add production Authenticode signing before broad distribution.
+13. [ ] Return to richer NEM planning fields, evaluation criteria/rubrics and reporting periods.
+14. [ ] Add teacher journal, family workflow, evidence attachments and calendar as prioritized.
 
 # Definition of done for a significant module/change
 

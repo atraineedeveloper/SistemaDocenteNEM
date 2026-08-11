@@ -1,20 +1,54 @@
 schema: spec-driven
 
-# Project context (optional)
-# This is shown to AI when creating artifacts.
-# Add your tech stack, conventions, style guides, domain knowledge, etc.
-# Example:
-#   context: |
-#     Tech stack: TypeScript, React, Node.js
-#     We use conventional commits
-#     Domain: e-commerce platform
+context: |
+  Product: AulaRaíz, an offline-first Windows desktop application for the everyday
+  work of a Mexican public-primary-school teacher and the Nueva Escuela Mexicana.
 
-# Per-artifact rules (optional)
-# Add custom rules for specific artifacts.
-# Example:
-#   rules:
-#     proposal:
-#       - Keep proposals under 500 words
-#       - Always include a "Non-goals" section
-#     tasks:
-#       - Break tasks into chunks of max 2 hours
+  Technology: C# / .NET 10, WPF, SQLite, xUnit, Open XML SDK, PDFsharp/MigraDoc,
+  Inno Setup, GitHub Actions and GitHub Releases.
+
+  Architecture:
+  - Core contains domain rules and must not depend on SQLite or presentation hosts.
+  - Application contains use cases and contracts, not WPF or SQL details.
+  - Data implements persistence behind Application contracts.
+  - Presentation remains independent from WPF and Data.
+  - Interchange owns XLSX, CSV, PDF and backup-format syntax.
+  - WPF and CLI compose existing Application/Data contracts; CLI handlers do not issue domain SQL.
+  - AulaRaiz.Updater never opens or modifies classroom SQLite data.
+
+  Product and privacy constraints:
+  - Preserve offline classroom work when optional network features fail.
+  - Never invent educational data, diagnoses, causes, labels or unsupported pedagogical meaning.
+  - Do not rank students competitively.
+  - Treat student-level and free-form pedagogical information as sensitive, even when names are omitted.
+  - Keep Production and Demo storage, diagnostics and update state isolated.
+  - Do not commit real student, teacher, family or school personal data.
+  - Minimize automation, diagnostic and CLI output by default; personal data requires explicit opt-in.
+  - Preserve historical rosters and evidence rather than silently rewriting history.
+  - Preserve SistemaDocente* namespaces, storage folders and backup identifiers unless a change
+    includes an explicit migration and backward-compatibility plan.
+
+  Language and workflow:
+  - Teacher-facing UI and established domain terms are written in Spanish.
+  - New technical documentation, OpenSpec artifacts, branch names, PR text and commits are written in English.
+  - Significant behavior changes use a dedicated branch, automated regression coverage,
+    applicable manual validation and a Draft PR before squash merge.
+
+rules:
+  proposal:
+    - State the teacher or operational problem, scope, non-goals and privacy impact.
+    - Identify compatibility implications for SQLite, backups, exports, CLI and installed versions.
+    - Do not present speculative educational or legal claims as established requirements.
+  design:
+    - Map new behavior to the existing architectural layer and dependency direction.
+    - Document trust boundaries, failure behavior and data classification for network, update, backup or D3 changes.
+    - Prefer additive, idempotent migrations and explicitly design rollback or safety backup for destructive changes.
+    - Include keyboard, theme, scaling and pending-change behavior for meaningful WPF workflows.
+  specs:
+    - Use testable normative requirements and include failure, privacy and historical-data scenarios.
+    - Require explicit teacher control for sensitive export, restore, update and personal-data operations.
+    - Preserve Demo/Production isolation and offline behavior where applicable.
+  tasks:
+    - Separate domain, application, persistence, presentation, host, tests and documentation tasks when applicable.
+    - Include dotnet format, Release build, full tests, openspec validate and git diff --check.
+    - Include risk-based manual UX or operational validation that cannot be proven reliably in automation.
