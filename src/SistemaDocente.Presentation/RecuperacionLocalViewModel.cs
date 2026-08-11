@@ -27,7 +27,7 @@ public sealed class RecuperacionLocalViewModel : ViewModelBase
         : "Producción";
 
     public string AdvertenciaSeguridad =>
-        $"El respaldo de {ModoActual} contiene datos personales y pedagógicos. El respaldo estándar v1 no está cifrado; puedes activar protección con contraseña para crear un v2 cifrado.";
+        $"El respaldo de {ModoActual} contiene datos personales y pedagógicos. La copia estándar v1 no está cifrada; puedes activar protección con contraseña para crear un v2 cifrado.";
 
     public string Confirmacion
     {
