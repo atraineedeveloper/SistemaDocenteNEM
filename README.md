@@ -19,7 +19,7 @@ The application includes working modules for:
 - group/school context;
 - safe student import from XLSX/CSV with preview, correction and atomic commit;
 - teacher-controlled group export to multi-sheet XLSX or focused CSV;
-- safe local backup/restore with versioned recovery packages, pre-restore inspection and mandatory safety backup;
+- safe local backup/restore with versioned recovery packages, pre-restore inspection, mandatory safety backup and optional password-protected v2 packages;
 - Demo mode with isolated fictitious data;
 - Light, Dark and High Contrast themes;
 - self-contained Windows installation/update packaging with version-to-version lifecycle validation;
@@ -183,7 +183,7 @@ The Release workflow starts only from a version tag, requires the tag to match `
 
 ## Roadmap
 
-The maintained roadmap is [`checklist_modulos_sistema_docente_nem.md`](checklist_modulos_sistema_docente_nem.md). The privacy data-map/safe-logging baseline, installer/Release pipeline and local terminal/agent interface are already in `main`. The `0.2.5` feature line adds consent-based in-app update coordination. Backup encryption, local application lock and lifecycle/retention remain separate future privacy changes.
+The maintained roadmap is [`checklist_modulos_sistema_docente_nem.md`](checklist_modulos_sistema_docente_nem.md). The privacy data-map/safe-logging baseline, installer/Release pipeline, local terminal/agent interface and optional password-protected backup v2 are implemented. The `0.2.5` feature line also includes consent-based in-app update coordination. Automatic backups, local application lock and lifecycle/retention remain separate future privacy changes.
 
 ## License
 
