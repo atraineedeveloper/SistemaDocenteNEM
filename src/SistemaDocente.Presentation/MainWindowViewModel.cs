@@ -6,6 +6,7 @@ namespace SistemaDocente.Presentation;
 public sealed class MainWindowViewModel : ViewModelBase
 {
     private bool _mostrarInicio = true;
+    private bool _mostrarCreacionGrupo;
     private bool _mostrarAsistencia;
     private bool _mostrarProyectos;
     private bool _mostrarEvaluacion;
@@ -33,23 +34,26 @@ public sealed class MainWindowViewModel : ViewModelBase
         Reportes = reportes;
         ModoDemostracion = modoDemostracion;
 
-        IrAInicioCommand = new RelayCommand(MostrarInicioGrupos, () => !EstaOcupado);
-        CrearGrupoDesdeInicioCommand = new RelayCommand(CrearGrupoDesdeInicio, () => !EstaOcupado);
+        IrAInicioCommand = new RelayCommand(MostrarInicioGrupos, () => !EstaOcupado && !MostrarCreacionGrupo);
+        CrearGrupoDesdeInicioCommand = new RelayCommand(CrearGrupoDesdeInicio, () => !EstaOcupado && !MostrarCreacionGrupo);
+        CancelarCreacionGrupoCommand = new RelayCommand(CancelarCreacionGrupo, () => MostrarCreacionGrupo && !EstaOcupado);
         IrAGrupoCommand = new RelayCommand(
             IrAGrupo,
-            () => (MostrarInicio || MostrarAsistencia || MostrarProyectos || MostrarEvaluacion || MostrarReportes) && !Asistencia.EstaOcupado);
+            () => !MostrarCreacionGrupo
+                && (MostrarInicio || MostrarAsistencia || MostrarProyectos || MostrarEvaluacion || MostrarReportes)
+                && !Asistencia.EstaOcupado);
         IrAAsistenciaCommand = new RelayCommand(
             IrAAsistencia,
-            () => !MostrarInicio && !MostrarAsistencia && Grupo.GrupoIdActual is not null);
+            () => !MostrarCreacionGrupo && !MostrarInicio && !MostrarAsistencia && Grupo.GrupoIdActual is not null);
         IrAProyectosCommand = new RelayCommand(
             IrAProyectos,
-            () => !MostrarInicio && !MostrarProyectos && Grupo.GrupoIdActual is not null && Proyectos is not null);
+            () => !MostrarCreacionGrupo && !MostrarInicio && !MostrarProyectos && Grupo.GrupoIdActual is not null && Proyectos is not null);
         IrAEvaluacionCommand = new RelayCommand(
             IrAEvaluacion,
-            () => !MostrarInicio && !MostrarEvaluacion && Grupo.GrupoIdActual is not null && Evaluacion is not null);
+            () => !MostrarCreacionGrupo && !MostrarInicio && !MostrarEvaluacion && Grupo.GrupoIdActual is not null && Evaluacion is not null);
         IrAReportesCommand = new RelayCommand(
             IrAReportes,
-            () => !MostrarInicio && !MostrarReportes && Grupo.GrupoIdActual is not null && Reportes is not null);
+            () => !MostrarCreacionGrupo && !MostrarInicio && !MostrarReportes && Grupo.GrupoIdActual is not null && Reportes is not null);
         MostrarVistaMensualCommand = ModuloAsistencia.MostrarVistaMensualCommand;
         MostrarVistaDiariaCommand = ModuloAsistencia.MostrarVistaDiariaCommand;
 
@@ -57,6 +61,13 @@ public sealed class MainWindowViewModel : ViewModelBase
         {
             if (args.PropertyName == nameof(GestionGrupoViewModel.GrupoIdActual))
             {
+                if (MostrarCreacionGrupo && Grupo.GrupoIdActual is not null)
+                {
+                    MostrarCreacionGrupo = false;
+                    MostrarSoloGrupo();
+                    MostrarInicio = false;
+                }
+
                 IrAAsistenciaCommand.NotifyCanExecuteChanged();
                 IrAProyectosCommand.NotifyCanExecuteChanged();
                 IrAEvaluacionCommand.NotifyCanExecuteChanged();
@@ -71,6 +82,7 @@ public sealed class MainWindowViewModel : ViewModelBase
                 OnPropertyChanged(nameof(EstaOcupado));
                 IrAInicioCommand.NotifyCanExecuteChanged();
                 CrearGrupoDesdeInicioCommand.NotifyCanExecuteChanged();
+                CancelarCreacionGrupoCommand.NotifyCanExecuteChanged();
             }
         };
 
@@ -82,6 +94,7 @@ public sealed class MainWindowViewModel : ViewModelBase
                 IrAGrupoCommand.NotifyCanExecuteChanged();
                 IrAInicioCommand.NotifyCanExecuteChanged();
                 CrearGrupoDesdeInicioCommand.NotifyCanExecuteChanged();
+                CancelarCreacionGrupoCommand.NotifyCanExecuteChanged();
             }
         };
 
@@ -92,6 +105,7 @@ public sealed class MainWindowViewModel : ViewModelBase
                 OnPropertyChanged(nameof(EstaOcupado));
                 IrAInicioCommand.NotifyCanExecuteChanged();
                 CrearGrupoDesdeInicioCommand.NotifyCanExecuteChanged();
+                CancelarCreacionGrupoCommand.NotifyCanExecuteChanged();
             }
         };
 
@@ -117,6 +131,7 @@ public sealed class MainWindowViewModel : ViewModelBase
                     OnPropertyChanged(nameof(EstaOcupado));
                     IrAInicioCommand.NotifyCanExecuteChanged();
                     CrearGrupoDesdeInicioCommand.NotifyCanExecuteChanged();
+                    CancelarCreacionGrupoCommand.NotifyCanExecuteChanged();
                 }
             };
         }
@@ -130,6 +145,7 @@ public sealed class MainWindowViewModel : ViewModelBase
                     OnPropertyChanged(nameof(EstaOcupado));
                     IrAInicioCommand.NotifyCanExecuteChanged();
                     CrearGrupoDesdeInicioCommand.NotifyCanExecuteChanged();
+                    CancelarCreacionGrupoCommand.NotifyCanExecuteChanged();
                 }
             };
         }
@@ -162,6 +178,7 @@ public sealed class MainWindowViewModel : ViewModelBase
 
     public RelayCommand IrAInicioCommand { get; }
     public RelayCommand CrearGrupoDesdeInicioCommand { get; }
+    public RelayCommand CancelarCreacionGrupoCommand { get; }
     public RelayCommand IrAGrupoCommand { get; }
     public RelayCommand IrAAsistenciaCommand { get; }
     public RelayCommand IrAProyectosCommand { get; }
@@ -172,8 +189,8 @@ public sealed class MainWindowViewModel : ViewModelBase
 
     public bool MostrarVistaDiaria => ModuloAsistencia.MostrarDiaria;
     public bool MostrarVistaMensual => ModuloAsistencia.MostrarMensual;
-    public bool MostrarAsistenciaDiaria => MostrarAsistencia && !MostrarInicio && !MostrarProyectos && !MostrarEvaluacion && !MostrarReportes && MostrarVistaDiaria;
-    public bool MostrarAsistenciaMensual => MostrarAsistencia && !MostrarInicio && !MostrarProyectos && !MostrarEvaluacion && !MostrarReportes && MostrarVistaMensual;
+    public bool MostrarAsistenciaDiaria => MostrarAsistencia && !MostrarCreacionGrupo && !MostrarInicio && !MostrarProyectos && !MostrarEvaluacion && !MostrarReportes && MostrarVistaDiaria;
+    public bool MostrarAsistenciaMensual => MostrarAsistencia && !MostrarCreacionGrupo && !MostrarInicio && !MostrarProyectos && !MostrarEvaluacion && !MostrarReportes && MostrarVistaMensual;
 
     public bool MostrarInicio
     {
@@ -185,6 +202,19 @@ public sealed class MainWindowViewModel : ViewModelBase
                 OnPropertyChanged(nameof(MostrarGrupo));
                 OnPropertyChanged(nameof(MostrarNavegacion));
                 NotificarNavegacion();
+            }
+        }
+    }
+
+    public bool MostrarCreacionGrupo
+    {
+        get => _mostrarCreacionGrupo;
+        private set
+        {
+            if (SetProperty(ref _mostrarCreacionGrupo, value))
+            {
+                NotificarNavegacion();
+                CancelarCreacionGrupoCommand.NotifyCanExecuteChanged();
             }
         }
     }
@@ -237,15 +267,22 @@ public sealed class MainWindowViewModel : ViewModelBase
         }
     }
 
-    public bool MostrarGrupo => !MostrarInicio && !MostrarAsistencia && !MostrarProyectos && !MostrarEvaluacion && !MostrarReportes;
+    public bool MostrarGrupo => !MostrarCreacionGrupo
+        && !MostrarInicio
+        && !MostrarAsistencia
+        && !MostrarProyectos
+        && !MostrarEvaluacion
+        && !MostrarReportes
+        && Grupo.GrupoIdActual is not null;
 
-    public bool MostrarNavegacion => !MostrarInicio && Grupo.GrupoIdActual is not null;
+    public bool MostrarNavegacion => !MostrarCreacionGrupo && !MostrarInicio && Grupo.GrupoIdActual is not null;
 
     public string TituloVentana
     {
         get
         {
             var titulo = ModoDemostracion ? $"{IdentidadProducto.Nombre} · DEMO" : IdentidadProducto.Nombre;
+            if (MostrarCreacionGrupo) return titulo + " - Crear nuevo grupo";
             if (MostrarInicio) return titulo + " - Mis grupos";
             if (!string.IsNullOrWhiteSpace(Grupo.NombreGrupo)) titulo += " - " + Grupo.NombreGrupo;
             if (MostrarAsistenciaDiaria) titulo += " - Asistencia diaria";
@@ -253,14 +290,14 @@ public sealed class MainWindowViewModel : ViewModelBase
             else if (MostrarProyectos) titulo += " - Proyectos";
             else if (MostrarEvaluacion) titulo += " - Evaluación";
             else if (MostrarReportes) titulo += " - Reportes";
-            else if (MostrarGrupo) titulo += " - Grupo";
+            else if (MostrarGrupo) titulo += " - Resumen";
             return titulo;
         }
     }
 
     public bool CambiarGrupo(GrupoId grupoId)
     {
-        if (!PuedeSalirDelModuloActual()) return false;
+        if (MostrarCreacionGrupo || !PuedeSalirDelModuloActual()) return false;
 
         Grupo.CargarGrupoPorId(grupoId);
         MostrarSoloGrupo();
@@ -270,7 +307,7 @@ public sealed class MainWindowViewModel : ViewModelBase
 
     public void MostrarInicioGrupos()
     {
-        if (!PuedeSalirDelModuloActual()) return;
+        if (MostrarCreacionGrupo || !PuedeSalirDelModuloActual()) return;
 
         MostrarAsistencia = false;
         MostrarProyectos = false;
@@ -281,6 +318,7 @@ public sealed class MainWindowViewModel : ViewModelBase
 
     public bool SolicitarCerrar()
     {
+        if (MostrarCreacionGrupo) return true;
         if (MostrarProyectos && Proyectos?.SolicitarSalir() == false) return false;
         if (MostrarEvaluacion && Evaluacion?.SolicitarSalir() == false) return false;
         if (MostrarAsistencia)
@@ -294,14 +332,21 @@ public sealed class MainWindowViewModel : ViewModelBase
     {
         if (!PuedeSalirDelModuloActual()) return;
 
-        Grupo.AbrirNuevoGrupoCommand.Execute(null);
-        MostrarSoloGrupo();
-        MostrarInicio = false;
+        Grupo.NombreNuevoGrupo = string.Empty;
+        MostrarCreacionGrupo = true;
+    }
+
+    private void CancelarCreacionGrupo()
+    {
+        if (!MostrarCreacionGrupo) return;
+
+        Grupo.NombreNuevoGrupo = string.Empty;
+        MostrarCreacionGrupo = false;
     }
 
     private void IrAGrupo()
     {
-        var puedeSalir = PuedeSalirDelModuloActual();
+        var puedeSalir = !MostrarCreacionGrupo && PuedeSalirDelModuloActual();
         if (puedeSalir)
         {
             MostrarSoloGrupo();
@@ -311,7 +356,7 @@ public sealed class MainWindowViewModel : ViewModelBase
 
     private void IrAAsistencia()
     {
-        if (Grupo.GrupoIdActual is not { } grupoId) return;
+        if (MostrarCreacionGrupo || Grupo.GrupoIdActual is not { } grupoId) return;
         if (!PuedeSalirDelModuloActual()) return;
 
         AsistenciaMensual.Inicializar(grupoId);
@@ -326,7 +371,7 @@ public sealed class MainWindowViewModel : ViewModelBase
 
     private void IrAProyectos()
     {
-        if (Grupo.GrupoIdActual is not { } grupoId || Proyectos is null) return;
+        if (MostrarCreacionGrupo || Grupo.GrupoIdActual is not { } grupoId || Proyectos is null) return;
         if (!PuedeSalirDelModuloActual()) return;
 
         Proyectos.Inicializar(grupoId);
@@ -339,7 +384,7 @@ public sealed class MainWindowViewModel : ViewModelBase
 
     private void IrAEvaluacion()
     {
-        if (Grupo.GrupoIdActual is not { } grupoId || Evaluacion is null) return;
+        if (MostrarCreacionGrupo || Grupo.GrupoIdActual is not { } grupoId || Evaluacion is null) return;
         if (!PuedeSalirDelModuloActual()) return;
 
         Evaluacion.Inicializar(grupoId);
@@ -352,7 +397,7 @@ public sealed class MainWindowViewModel : ViewModelBase
 
     private void IrAReportes()
     {
-        if (Grupo.GrupoIdActual is not { } grupoId || Reportes is null) return;
+        if (MostrarCreacionGrupo || Grupo.GrupoIdActual is not { } grupoId || Reportes is null) return;
         if (!PuedeSalirDelModuloActual()) return;
 
         Reportes.Inicializar(grupoId);
@@ -391,6 +436,9 @@ public sealed class MainWindowViewModel : ViewModelBase
         OnPropertyChanged(nameof(TituloVentana));
         OnPropertyChanged(nameof(MostrarAsistenciaDiaria));
         OnPropertyChanged(nameof(MostrarAsistenciaMensual));
+        IrAInicioCommand.NotifyCanExecuteChanged();
+        CrearGrupoDesdeInicioCommand.NotifyCanExecuteChanged();
+        CancelarCreacionGrupoCommand.NotifyCanExecuteChanged();
         IrAGrupoCommand.NotifyCanExecuteChanged();
         IrAAsistenciaCommand.NotifyCanExecuteChanged();
         IrAProyectosCommand.NotifyCanExecuteChanged();
