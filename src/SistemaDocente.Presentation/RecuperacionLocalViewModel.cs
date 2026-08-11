@@ -12,6 +12,8 @@ public sealed class RecuperacionLocalViewModel : ViewModelBase
     private InspeccionRespaldoLocal? _inspeccion;
     private ResultadoRespaldoLocal? _ultimoRespaldo;
     private ResultadoRestauracionLocal? _ultimaRestauracion;
+    private string? _rutaProtegidaPendiente;
+    private bool _inspeccionProtegida;
     private string _confirmacion = string.Empty;
     private string _mensaje = string.Empty;
 
@@ -25,7 +27,7 @@ public sealed class RecuperacionLocalViewModel : ViewModelBase
         : "Producción";
 
     public string AdvertenciaSeguridad =>
-        $"El respaldo de {ModoActual} contiene datos personales y pedagógicos. La versión 1 no está cifrada; guárdala sólo en una ubicación segura.";
+        $"El respaldo de {ModoActual} contiene datos personales y pedagógicos. El respaldo estándar v1 no está cifrado; puedes activar protección con contraseña para crear un v2 cifrado.";
 
     public string Confirmacion
     {
@@ -38,6 +40,16 @@ public sealed class RecuperacionLocalViewModel : ViewModelBase
     }
 
     public bool TieneInspeccion => _inspeccion is not null;
+    public bool RequiereContrasenaInspeccion =>
+        _inspeccion is null && !string.IsNullOrWhiteSpace(_rutaProtegidaPendiente);
+    public bool InspeccionProtegida => _inspeccionProtegida;
+    public string RutaProtegidaPendiente => _rutaProtegidaPendiente ?? string.Empty;
+    public string TipoProteccionInspeccion => _inspeccion is null
+        ? string.Empty
+        : _inspeccionProtegida
+            ? "Protegido con contraseña (v2)"
+            : "Sin contraseña (v1)";
+
     public bool PuedeRestaurar =>
         _inspeccion?.EsCompatible == true
         && string.Equals(
@@ -93,17 +105,74 @@ public sealed class RecuperacionLocalViewModel : ViewModelBase
     {
         var resultado = _casosUso.CrearRespaldo(rutaDestino, ahoraUtc, versionAplicacion);
         _ultimoRespaldo = resultado;
-        Mensaje = "Respaldo creado correctamente.";
+        Mensaje = "Respaldo estándar v1 creado correctamente.";
         NotificarRespaldo();
         return resultado;
+    }
+
+    public ResultadoRespaldoLocal CrearRespaldoProtegido(
+        string rutaDestino,
+        DateTimeOffset ahoraUtc,
+        string versionAplicacion,
+        char[] contrasena)
+    {
+        var resultado = _casosUso.CrearRespaldoProtegido(
+            rutaDestino,
+            ahoraUtc,
+            versionAplicacion,
+            contrasena);
+        _ultimoRespaldo = resultado;
+        Mensaje = "Respaldo protegido v2 creado correctamente.";
+        NotificarRespaldo();
+        return resultado;
+    }
+
+    public TipoProteccionRespaldoLocal SeleccionarRespaldo(string rutaRespaldo)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(rutaRespaldo);
+        LimpiarInspeccion();
+
+        var proteccion = _casosUso.DetectarProteccion(rutaRespaldo);
+        if (proteccion == TipoProteccionRespaldoLocal.Contrasena)
+        {
+            _rutaProtegidaPendiente = rutaRespaldo;
+            Mensaje = "El respaldo está protegido. Escribe su contraseña para inspeccionarlo.";
+            NotificarInspeccion();
+            return proteccion;
+        }
+
+        Inspeccionar(rutaRespaldo);
+        return proteccion;
     }
 
     public InspeccionRespaldoLocal Inspeccionar(string rutaRespaldo)
     {
         _inspeccion = _casosUso.Inspeccionar(rutaRespaldo);
+        _rutaProtegidaPendiente = null;
+        _inspeccionProtegida = false;
         _ultimaRestauracion = null;
         Confirmacion = string.Empty;
-        Mensaje = "El respaldo es compatible y está listo para revisión.";
+        Mensaje = "El respaldo v1 es compatible y está listo para revisión.";
+        NotificarInspeccion();
+        OnPropertyChanged(nameof(RestauracionCompletada));
+        OnPropertyChanged(nameof(RutaRespaldoSeguridad));
+        return _inspeccion;
+    }
+
+    public InspeccionRespaldoLocal InspeccionarProtegido(char[] contrasena)
+    {
+        if (string.IsNullOrWhiteSpace(_rutaProtegidaPendiente))
+        {
+            throw new InvalidOperationException("Selecciona un respaldo protegido antes de escribir la contraseña.");
+        }
+
+        var ruta = _rutaProtegidaPendiente;
+        _inspeccion = _casosUso.InspeccionarProtegido(ruta, contrasena);
+        _rutaProtegidaPendiente = null;
+        _inspeccionProtegida = true;
+        _ultimaRestauracion = null;
+        Confirmacion = string.Empty;
+        Mensaje = "El respaldo protegido es compatible y está listo para revisión.";
         NotificarInspeccion();
         OnPropertyChanged(nameof(RestauracionCompletada));
         OnPropertyChanged(nameof(RutaRespaldoSeguridad));
@@ -114,16 +183,42 @@ public sealed class RecuperacionLocalViewModel : ViewModelBase
         DateTimeOffset ahoraUtc,
         string versionAplicacion)
     {
+        return Restaurar(ahoraUtc, versionAplicacion, contrasena: null);
+    }
+
+    public ResultadoRestauracionLocal Restaurar(
+        DateTimeOffset ahoraUtc,
+        string versionAplicacion,
+        char[]? contrasena)
+    {
         if (_inspeccion is null)
         {
             throw new InvalidOperationException("Selecciona e inspecciona un respaldo antes de restaurar.");
         }
 
-        var resultado = _casosUso.Restaurar(
-            _inspeccion.RutaArchivo,
-            Confirmacion,
-            ahoraUtc,
-            versionAplicacion);
+        ResultadoRestauracionLocal resultado;
+        if (_inspeccionProtegida)
+        {
+            if (contrasena is null)
+            {
+                throw new InvalidOperationException("Escribe la contraseña del respaldo protegido para restaurarlo.");
+            }
+            resultado = _casosUso.RestaurarProtegido(
+                _inspeccion.RutaArchivo,
+                Confirmacion,
+                ahoraUtc,
+                versionAplicacion,
+                contrasena);
+        }
+        else
+        {
+            resultado = _casosUso.Restaurar(
+                _inspeccion.RutaArchivo,
+                Confirmacion,
+                ahoraUtc,
+                versionAplicacion);
+        }
+
         _ultimaRestauracion = resultado;
         Mensaje = "Restauración completada. La aplicación debe cerrarse antes de continuar.";
         OnPropertyChanged(nameof(RestauracionCompletada));
@@ -134,6 +229,8 @@ public sealed class RecuperacionLocalViewModel : ViewModelBase
     public void LimpiarInspeccion()
     {
         _inspeccion = null;
+        _rutaProtegidaPendiente = null;
+        _inspeccionProtegida = false;
         _ultimaRestauracion = null;
         Confirmacion = string.Empty;
         Mensaje = string.Empty;
@@ -152,6 +249,10 @@ public sealed class RecuperacionLocalViewModel : ViewModelBase
     private void NotificarInspeccion()
     {
         OnPropertyChanged(nameof(TieneInspeccion));
+        OnPropertyChanged(nameof(RequiereContrasenaInspeccion));
+        OnPropertyChanged(nameof(InspeccionProtegida));
+        OnPropertyChanged(nameof(RutaProtegidaPendiente));
+        OnPropertyChanged(nameof(TipoProteccionInspeccion));
         OnPropertyChanged(nameof(PuedeRestaurar));
         OnPropertyChanged(nameof(RutaInspeccion));
         OnPropertyChanged(nameof(FechaRespaldo));

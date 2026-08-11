@@ -3,7 +3,7 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xml:lang="es-MX"
         Title="Respaldo y restauración"
-        Height="760" Width="960" MinHeight="660" MinWidth="840"
+        Height="820" Width="960" MinHeight="700" MinWidth="840"
         WindowStartupLocation="CenterOwner" ShowInTaskbar="False"
         ResizeMode="CanResizeWithGrip"
         Background="{DynamicResource WindowBackgroundBrush}">
@@ -49,7 +49,7 @@
                         BorderBrush="{DynamicResource WarningBorderBrush}" BorderThickness="1"
                         Margin="0,0,0,18">
                     <StackPanel>
-                        <TextBlock Text="Archivo sensible sin cifrado" FontWeight="SemiBold"
+                        <TextBlock Text="Respaldos y privacidad" FontWeight="SemiBold"
                                    Foreground="{DynamicResource WarningBrush}"/>
                         <TextBlock Text="{Binding AdvertenciaSeguridad, Mode=OneWay}" TextWrapping="Wrap"
                                    Foreground="{DynamicResource TextPrimaryBrush}" Margin="0,4,0,0"/>
@@ -66,6 +66,31 @@
                             <TextBlock Text="Crear respaldo manual" Style="{StaticResource PopupSectionTitle}"/>
                             <TextBlock Text="Guarda una copia completa de la base local y del estado válido de la aplicación en un archivo .sdocbackup."
                                        Style="{StaticResource PopupSubtitle}"/>
+
+                            <CheckBox x:Name="ProtectBackupCheckBox"
+                                      Content="Proteger con contraseña (v2)"
+                                      Margin="0,14,0,0"
+                                      FontWeight="SemiBold"
+                                      AutomationProperties.Name="Proteger respaldo con contraseña"/>
+
+                            <Border Margin="0,10,0,0" Padding="12" CornerRadius="8"
+                                    Background="{DynamicResource SectionBackgroundBrush}"
+                                    Visibility="{Binding IsChecked, ElementName=ProtectBackupCheckBox, Converter={StaticResource RecoveryBoolToVisibility}}">
+                                <StackPanel>
+                                    <TextBlock Text="Protección opcional" FontWeight="SemiBold"/>
+                                    <TextBlock Margin="0,4,0,10" TextWrapping="Wrap"
+                                               Text="AulaRaíz cifrará el respaldo. Usa al menos 12 caracteres. Si olvidas la contraseña, AulaRaíz no puede recuperarla ni abrir el respaldo."/>
+                                    <TextBlock Text="Contraseña" FontWeight="SemiBold"/>
+                                    <PasswordBox x:Name="CreatePasswordBox"
+                                                 Margin="0,5,0,10" MaxWidth="360" HorizontalAlignment="Left"
+                                                 AutomationProperties.Name="Contraseña para proteger el respaldo"/>
+                                    <TextBlock Text="Confirmar contraseña" FontWeight="SemiBold"/>
+                                    <PasswordBox x:Name="ConfirmCreatePasswordBox"
+                                                 Margin="0,5,0,0" MaxWidth="360" HorizontalAlignment="Left"
+                                                 AutomationProperties.Name="Confirmar contraseña del respaldo"/>
+                                </StackPanel>
+                            </Border>
+
                             <TextBlock Text="{Binding UltimoRespaldoRuta, Mode=OneWay}" Margin="0,12,0,2"
                                        TextWrapping="Wrap" FontWeight="SemiBold"/>
                             <TextBlock Text="{Binding UltimoRespaldoResumen, Mode=OneWay}"
@@ -99,6 +124,26 @@
 
                         <Border Margin="0,18,0,0" Padding="16" CornerRadius="8"
                                 Background="{DynamicResource SectionBackgroundBrush}"
+                                Visibility="{Binding RequiereContrasenaInspeccion, Converter={StaticResource RecoveryBoolToVisibility}}">
+                            <StackPanel>
+                                <TextBlock Text="Respaldo protegido con contraseña" FontWeight="SemiBold"/>
+                                <TextBlock Text="{Binding RutaProtegidaPendiente, Mode=OneWay}" Margin="0,5,0,8"
+                                           TextWrapping="Wrap" Foreground="{DynamicResource TextSecondaryBrush}"/>
+                                <TextBlock Text="La información interna no se mostrará hasta que el paquete se descifre y autentique correctamente."
+                                           TextWrapping="Wrap" Margin="0,0,0,10"/>
+                                <TextBlock Text="Contraseña del respaldo" FontWeight="SemiBold"/>
+                                <PasswordBox x:Name="RestorePasswordBox"
+                                             Margin="0,5,0,10" MaxWidth="360" HorizontalAlignment="Left"
+                                             AutomationProperties.Name="Contraseña del respaldo protegido"/>
+                                <Button Content="Desbloquear e inspeccionar"
+                                        Click="OnDesbloquearRespaldoClic"
+                                        HorizontalAlignment="Left"
+                                        AutomationProperties.Name="Desbloquear e inspeccionar respaldo protegido"/>
+                            </StackPanel>
+                        </Border>
+
+                        <Border Margin="0,18,0,0" Padding="16" CornerRadius="8"
+                                Background="{DynamicResource SectionBackgroundBrush}"
                                 Visibility="{Binding TieneInspeccion, Converter={StaticResource RecoveryBoolToVisibility}}">
                             <StackPanel>
                                 <TextBlock Text="Respaldo validado" FontWeight="SemiBold" Margin="0,0,0,10"/>
@@ -115,21 +160,24 @@
                                         <RowDefinition Height="Auto"/>
                                         <RowDefinition Height="Auto"/>
                                         <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="Auto"/>
                                     </Grid.RowDefinitions>
                                     <TextBlock Text="Archivo" FontWeight="SemiBold"/>
                                     <TextBlock Grid.Column="1" Text="{Binding RutaInspeccion, Mode=OneWay}" TextWrapping="Wrap"/>
-                                    <TextBlock Grid.Row="1" Text="Creado" FontWeight="SemiBold" Margin="0,7,0,0"/>
-                                    <TextBlock Grid.Row="1" Grid.Column="1" Text="{Binding FechaRespaldo, Mode=OneWay}" Margin="0,7,0,0"/>
-                                    <TextBlock Grid.Row="2" Text="Modo" FontWeight="SemiBold" Margin="0,7,0,0"/>
-                                    <TextBlock Grid.Row="2" Grid.Column="1" Text="{Binding ModoRespaldo, Mode=OneWay}" Margin="0,7,0,0"/>
-                                    <TextBlock Grid.Row="3" Text="Aplicación" FontWeight="SemiBold" Margin="0,7,0,0"/>
-                                    <TextBlock Grid.Row="3" Grid.Column="1" Text="{Binding VersionAplicacionRespaldo, Mode=OneWay}" Margin="0,7,0,0"/>
-                                    <TextBlock Grid.Row="4" Text="Base de datos" FontWeight="SemiBold" Margin="0,7,0,0"/>
-                                    <TextBlock Grid.Row="4" Grid.Column="1" Text="{Binding VersionBaseDatos, StringFormat=Versión {0}, Mode=OneWay}" Margin="0,7,0,0"/>
-                                    <TextBlock Grid.Row="5" Text="Tamaño" FontWeight="SemiBold" Margin="0,7,0,0"/>
-                                    <TextBlock Grid.Row="5" Grid.Column="1" Text="{Binding TamanoRespaldo, Mode=OneWay}" Margin="0,7,0,0"/>
-                                    <TextBlock Grid.Row="6" Text="Componentes" FontWeight="SemiBold" Margin="0,7,0,0"/>
-                                    <TextBlock Grid.Row="6" Grid.Column="1" Text="{Binding ComponentesRespaldo, Mode=OneWay}"
+                                    <TextBlock Grid.Row="1" Text="Protección" FontWeight="SemiBold" Margin="0,7,0,0"/>
+                                    <TextBlock Grid.Row="1" Grid.Column="1" Text="{Binding TipoProteccionInspeccion, Mode=OneWay}" Margin="0,7,0,0"/>
+                                    <TextBlock Grid.Row="2" Text="Creado" FontWeight="SemiBold" Margin="0,7,0,0"/>
+                                    <TextBlock Grid.Row="2" Grid.Column="1" Text="{Binding FechaRespaldo, Mode=OneWay}" Margin="0,7,0,0"/>
+                                    <TextBlock Grid.Row="3" Text="Modo" FontWeight="SemiBold" Margin="0,7,0,0"/>
+                                    <TextBlock Grid.Row="3" Grid.Column="1" Text="{Binding ModoRespaldo, Mode=OneWay}" Margin="0,7,0,0"/>
+                                    <TextBlock Grid.Row="4" Text="Aplicación" FontWeight="SemiBold" Margin="0,7,0,0"/>
+                                    <TextBlock Grid.Row="4" Grid.Column="1" Text="{Binding VersionAplicacionRespaldo, Mode=OneWay}" Margin="0,7,0,0"/>
+                                    <TextBlock Grid.Row="5" Text="Base de datos" FontWeight="SemiBold" Margin="0,7,0,0"/>
+                                    <TextBlock Grid.Row="5" Grid.Column="1" Text="{Binding VersionBaseDatos, StringFormat=Versión {0}, Mode=OneWay}" Margin="0,7,0,0"/>
+                                    <TextBlock Grid.Row="6" Text="Tamaño" FontWeight="SemiBold" Margin="0,7,0,0"/>
+                                    <TextBlock Grid.Row="6" Grid.Column="1" Text="{Binding TamanoRespaldo, Mode=OneWay}" Margin="0,7,0,0"/>
+                                    <TextBlock Grid.Row="7" Text="Componentes" FontWeight="SemiBold" Margin="0,7,0,0"/>
+                                    <TextBlock Grid.Row="7" Grid.Column="1" Text="{Binding ComponentesRespaldo, Mode=OneWay}"
                                                TextWrapping="Wrap" Margin="0,7,0,0"/>
                                 </Grid>
                                 <TextBlock Text="{Binding AdvertenciasInspeccion, Mode=OneWay}" Margin="0,10,0,0"
