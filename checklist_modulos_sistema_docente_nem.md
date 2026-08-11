@@ -284,7 +284,7 @@ The maintained privacy inventory and message-free diagnostic baseline are implem
 - [x] Automated published-baseline upgrade and uninstall lifecycle validation with a user-data preservation sentinel.
 - [x] Tag-driven GitHub Releases with version validation and SHA-256 release metadata.
 - [x] Consent-based update discovery, download, checksum verification, pending-change protection and restart.
-- [ ] Document and review a dedicated updater/release threat model.
+- [x] Document and review the updater/release threat model, bind assets to the exact repository/tag, bound installer downloads and require release tags from accepted `main` history.
 - [ ] Manual clean/non-development-machine installation and update validation for each distribution milestone.
 - [ ] Production Authenticode signing workflow/certificate strategy before broad distribution.
 
@@ -314,7 +314,7 @@ The maintained privacy inventory and message-free diagnostic baseline are implem
 8. [x] Establish the privacy inventory and message-free safe-diagnostics baseline.
 9. [x] Establish repository security policy, dependency maintenance and project-specific OpenSpec rules.
 10. [x] Measure the initial automated-test coverage baseline in CI before adopting risk-based thresholds.
-11. [ ] Threat-model and harden the updater/release trust boundary.
+11. [x] Threat-model and harden the updater/release trust boundary.
 12. [ ] Add production Authenticode signing before broad distribution.
 13. [ ] Return to richer NEM planning fields, evaluation criteria/rubrics and reporting periods.
 14. [ ] Add teacher journal, family workflow, evidence attachments and calendar as prioritized.
