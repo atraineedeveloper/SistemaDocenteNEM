@@ -17,7 +17,7 @@ This document records the repository evidence and remaining work for an applicat
 | Uninstall and disclosed system changes | Inno Setup owns program files and shortcuts, includes uninstall and intentionally preserves classroom data. | Ready |
 | Privacy/network disclosure | The privacy inventory documents local data and the optional GitHub release update surface. The required network statement is in the code-signing policy. | Ready |
 | Team roles and signing approval | Committer, reviewer and signing approver are identified in the code-signing policy; every future signing request is required to receive manual approval. | Documented; MFA confirmation pending |
-| No proprietary packaged components | NuGet dependencies checked below are open source. Packaged fonts and the offline geographic catalog still require provenance confirmation. | Blocked |
+| No proprietary packaged components | Direct NuGet dependencies are open source. Montserrat binaries match the official 9.000 upstream files under OFL-1.1, and the INEGI-derived geographic catalog now has source, transformation and attribution records. License/notices are packaged with the installer. | Ready for final installed-file inventory |
 | Verifiable project reputation | The project is public and has an existing release, but SignPath evaluates reputation and may reject a new or insufficiently established project. | External decision |
 
 ## Direct application dependencies
@@ -35,30 +35,33 @@ The self-contained Windows package also contains the applicable .NET runtime fil
 
 Test-only packages are not distributed as application binaries, but remain subject to their own open-source license terms.
 
-## Blocking provenance checks
+## Verified source-material provenance
 
-### Packaged fonts
+### Montserrat fonts
 
-The WPF project contains a `Fonts\*.ttf` resource glob. Before declaring the release free of proprietary components:
+The three embedded files are Montserrat 9.000 Regular, SemiBold and Bold. Their
+byte lengths, SHA-256 hashes and Git blob ids match the corresponding files in
+the official [JulietaUla/Montserrat](https://github.com/JulietaUla/Montserrat)
+repository. Their internal name tables also identify Montserrat 9.000 and SIL
+Open Font License 1.1.
 
-1. list every matching file;
-2. record its upstream project, exact version and license;
-3. retain the required copyright/license notice;
-4. remove any font whose redistribution or embedding rights cannot be demonstrated.
+The upstream OFL text is retained at `third-party/montserrat/OFL.txt`.
+`THIRD-PARTY-NOTICES.txt`, the root project license and a copy named
+`Montserrat-OFL.txt` are installed beside the application.
 
-An empty glob should be removed to avoid ambiguity.
+### INEGI geographic catalog
 
-### Geographic catalog
+`src/SistemaDocente.Presentation/Data/estados-municipios.json` is documented
+as an AulaRaíz transformation of the official INEGI Catálogo Único de Claves
+de Áreas Geoestadísticas Estatales, Municipales y Localidades. The sidecar
+`estados-municipios.SOURCE.md` records the official catalog/service links,
+INEGI terms, required attribution, transformation, 2025-06-17 reference date,
+reviewed counts and update procedure.
 
-`src/SistemaDocente.Presentation/Data/estados-municipios.json` is embedded in the product. Record:
-
-- the original source or the repository process that generated it;
-- the retrieval/generation date;
-- the applicable license or public-domain basis;
-- any transformations made by the project;
-- the update procedure.
-
-If those terms cannot be demonstrated, replace the catalog with data from an attributable compatible source before applying.
+The reviewed JSON contains 32 entities and 2,478 municipalities or Mexico City
+territorial demarcations, matching INEGI's 2025 national count. The installed
+`THIRD-PARTY-NOTICES.txt` credits INEGI, identifies AulaRaíz's transformation
+and disclaims endorsement.
 
 ## Integration after acceptance
 

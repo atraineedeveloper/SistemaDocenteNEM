@@ -64,8 +64,8 @@ The maintainer must complete all of the following before submitting the SignPath
 
 - [ ] confirm multi-factor authentication is enabled for the maintainer's GitHub account;
 - [ ] confirm multi-factor authentication will be enabled for the SignPath account;
-- [ ] verify the provenance and redistribution license of every packaged `.ttf` font, or remove it from the package;
-- [ ] document the source and redistribution terms of `estados-municipios.json`;
+- [x] verify the provenance and redistribution license of every packaged `.ttf` font, or remove it from the package;
+- [x] document the source and redistribution terms of `estados-municipios.json`;
 - [ ] confirm all packaged runtime and installer components are covered by compatible open-source licenses;
 - [ ] obtain SignPath Foundation acceptance;
 - [ ] install the SignPath GitHub App with access limited to this repository;
