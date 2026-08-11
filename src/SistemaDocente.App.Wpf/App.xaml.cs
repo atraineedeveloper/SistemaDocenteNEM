@@ -163,7 +163,8 @@ public partial class App : System.Windows.Application
                 viewModelEvaluacion,
                 viewModelExpediente,
                 modoDemo,
-                viewModelReportes);
+                viewModelReportes,
+                viewModelConfiguracion);
             var ventana = new MainWindow(
                 viewModel,
                 viewModelConfiguracion,
