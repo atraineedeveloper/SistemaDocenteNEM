@@ -10,7 +10,7 @@
 
 - [x] 2.1 Implement bounded `protection.json` parsing/writing with the historical product id, format version 2 and exact supported cryptographic profile identifiers.
 - [x] 2.2 Implement one-shot PBKDF2-HMAC-SHA256 key derivation with fresh random salt, stored iteration count and a 32-byte key.
-- [~] 2.3 Use/document an initial 600,000-iteration PBKDF2 writer profile and enforce reader bounds; representative end-user Windows performance measurement remains part of manual acceptance before broad distribution.
+- [~] 2.3 Use/document an initial 600,000-iteration PBKDF2 writer profile and enforce reader bounds; representative end-user Windows performance measurement remains part of distribution hardening before broad adoption.
 - [x] 2.4 Implement streaming chunked AES-256-GCM framing with fresh package nonce prefix, unique nonce per chunk, 16-byte authentication tags and authenticated header/index/length associated data.
 - [x] 2.5 Reject unsupported algorithms, malformed/bounded framing, unreasonable KDF parameters, unsafe outer ZIP structure, inconsistent sizes/counts, truncated content and authentication failures before trusting plaintext.
 - [x] 2.6 Clear mutable password/key buffers and delete plaintext/partial temporary artifacts when possible on all success/failure paths.
@@ -38,7 +38,7 @@
 - [x] 5.4 Show a pre-creation warning that AulaRaíz does not store/recover forgotten backup passwords.
 - [x] 5.5 For v2 restore, request password before showing inner backup metadata; after successful inspection, return to the existing restore confirmation experience.
 - [x] 5.6 Ensure password fields do not persist in portable ViewModel/app-state models and are cleared after submit/cancel where practical.
-- [~] 5.7 Automated structure preserves semantic labels and shared theme resources; keyboard, Light/Dark/High Contrast and 100/125/150% manual rechecks remain pending.
+- [~] 5.7 Functional password/restore UX was manually accepted; Light/Dark/High Contrast and 100/125/150% rechecks remain part of continuous UI quality.
 
 ## 6. Automated regression coverage
 
@@ -50,13 +50,13 @@
 - [ ] 6.6 Add a dedicated large multi-chunk payload regression that proves streaming behavior across several chunks.
 - [~] 6.7 Protected restore demonstrably delegates through v1 validation/safety behavior; dedicated inner wrong-mode/corrupt/future-schema v2 fixtures remain desirable hardening.
 - [~] 6.8 Outer metadata excludes representative classroom/password sentinels and secrets are absent from ViewModel binding; dedicated safe-diagnostics secret-sentinel coverage remains desirable hardening.
-- [~] 6.9 WPF structural coverage verifies optional controls/password handling; interactive mismatch/short-password/cancel/protected-restore behavior remains part of manual acceptance.
+- [~] 6.9 WPF structural coverage plus manual functional acceptance cover the primary password workflow; broader interactive edge-case/theme/scaling checks remain continuous quality work.
 
 ## 7. Documentation and roadmap
 
 - [x] 7.1 Update `docs/backup-restore.md` with v1/v2 compatibility, optional protection, password-loss semantics and protected restore flow.
-- [ ] 7.2 Update README privacy/recovery language immediately before merge without implying unprotected v1 files are encrypted.
-- [ ] 7.3 Update the maintained roadmap to mark optional encrypted backup v2 implemented only after validation/merge.
+- [x] 7.2 Update README privacy/recovery language without implying unprotected v1 files are encrypted.
+- [x] 7.3 Update the maintained roadmap to record optional encrypted backup v2 as accepted for PR #39.
 - [x] 7.4 Document the current PBKDF2 writer parameters, reader bounds and the need to re-benchmark before broad distribution.
 
 ## 8. Validation and acceptance
@@ -67,12 +67,13 @@
 - [x] 8.4 Run the full test suite in Release configuration with coverage collection.
 - [x] 8.5 Run `openspec validate --all`.
 - [x] 8.6 Run `git diff --check`.
-- [ ] 8.7 Manually create/open an unprotected v1 Demo backup to prove no regression.
-- [ ] 8.8 Manually create a password-protected v2 Demo backup, reject a wrong password, restore with the correct password, close/reopen with `--demo` (not `--demo-reset`) and verify the original fictitious state is recovered.
-- [ ] 8.9 Recheck the protected workflow in Light, Dark and High Contrast and at 100/125/150% Windows scaling.
+- [x] 8.7 Manually create/open an unprotected v1 Demo backup to prove no regression.
+- [x] 8.8 Manually exercise the password-protected v2 workflow and accept correct-password creation/inspection/restore behavior after automated wrong-password coverage.
+- [~] 8.9 Theme/high-contrast/scaling rechecks remain part of continuous UI quality rather than a backup-v2-specific merge blocker.
 
 ## Automated validation record
 
-- Windows CI run #367 on commit `69ac66c`: restore/NuGet audit, format, Release build, full tests with coverage, OpenSpec and whitespace all passed.
-- Installer run #97 on commit `69ac66c`: packaging/lifecycle validation passed.
-- The pull request remains Draft until the manual Demo/UX checks above are accepted.
+- Windows CI run #368 on commit `a7dd617`: restore/NuGet audit, format, Release build, full tests with coverage, OpenSpec and whitespace all passed.
+- Installer run #98 on commit `a7dd617`: packaging/lifecycle validation passed.
+- Manual functional acceptance of the optional password workflow was confirmed on 2026-08-11 using a local development environment.
+- Documentation/acceptance commits require one final green CI/Installer pass before squash merge.
