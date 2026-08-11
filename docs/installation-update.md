@@ -67,6 +67,8 @@ The download does not immediately close the application. AulaRaíz first downloa
 
 The installer is streamed to a temporary sibling file and is not published as ready until its locally calculated SHA-256 exactly matches the checksum file entry.
 
+Both asset URLs must identify the exact `atraineedeveloper/SistemaDocenteNEM` repository, selected tag and expected filename. URLs from another GitHub repository, URLs with query/fragment ambiguity and installers larger than 512 MiB are rejected before they can become verified update state.
+
 After verification, AulaRaíz presents a second explicit action: **Cerrar y actualizar**. Existing pending-change protections are consulted first. If the teacher cancels a module's close/save decision, the application remains open and the update is not launched.
 
 ## Why a separate updater exists
@@ -144,7 +146,7 @@ artifacts\installer\AulaRaiz-Setup-0.2.5-win-x64.exe
 
 ## CI supply-chain and lifecycle checks
 
-Installer CI acquires the pinned Inno Setup compiler from its official GitHub Release and verifies the release asset before use.
+Installer CI acquires the declared Inno Setup compiler version from its official GitHub Release and verifies the release asset before use. The tagged Release workflow also requires the tagged commit to be reachable from `origin/main`, avoids persisting checkout credentials and applies the same direct/transitive NuGet audit gate as normal CI.
 
 The lifecycle test downloads the real published `v0.1.0` AulaRaíz installer and its checksum, verifies that baseline, then proves an update to the current source-built installer. After the current installation it requires:
 
@@ -161,6 +163,8 @@ Ordinary uninstall must remove all three program executables while the data sent
 Current development/prerelease installers are still unsigned unless a trusted signing process is applied. SHA-256 verification prevents AulaRaíz from executing a downloaded installer whose bytes do not match the published checksum, but Authenticode remains the next distribution-hardening layer before broad institutional deployment.
 
 A future production signing workflow should sign the installer (and preferably the updater/application executables) using protected signing infrastructure. Private signing keys must never be committed to the repository.
+
+The maintained threat analysis, enforced controls, residual risks and incident procedure are documented in [`updater-release-threat-model.md`](updater-release-threat-model.md). SHA-256 and exact Release-path binding reduce substitution and corruption risk but do not independently authenticate the publisher.
 
 ## Manual acceptance for the in-app updater
 
