@@ -309,7 +309,7 @@ public sealed class ConfiguracionGrupoViewModel : ViewModelBase
 
     private ContextoGrupo CrearContexto(
         GrupoId grupoId,
-        IReadOnlyList<GradoPrimaria> grados,
+        List<GradoPrimaria> grados,
         bool exigirConfiguracionCompleta)
     {
         if (exigirConfiguracionCompleta)
