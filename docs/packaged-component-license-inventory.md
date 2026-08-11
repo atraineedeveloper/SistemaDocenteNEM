@@ -19,7 +19,7 @@ distributed to end users.
 | Package | Pinned version | Primary license record | Result |
 | --- | --- | --- | --- |
 | Microsoft.Data.Sqlite | 10.0.10 | [MIT, dotnet/efcore](https://github.com/dotnet/efcore/blob/main/LICENSE.txt) | Compatible |
-| SQLitePCLRaw.bundle_e_sqlite3 | 2.1.12 | [Apache-2.0, ericsink/SQLitePCL.raw](https://github.com/ericsink/SQLitePCL.raw/blob/v2.1.12/LICENSE) | Compatible |
+| SQLitePCLRaw.bundle_e_sqlite3 | 2.1.12 | [Apache-2.0, NuGet package metadata](https://www.nuget.org/packages/SQLitePCLRaw.bundle_e_sqlite3/2.1.12) | Compatible |
 | DocumentFormat.OpenXml | 3.3.0 | [MIT, dotnet/Open-XML-SDK](https://github.com/dotnet/Open-XML-SDK/blob/v3.3.0/LICENSE) | Compatible |
 | PDFsharp-MigraDoc | 6.2.4 | [MIT, empira/PDFsharp](https://github.com/empira/PDFsharp/blob/v6.2.4/LICENSE) | Compatible |
 
