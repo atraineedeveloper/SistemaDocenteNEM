@@ -15,7 +15,7 @@ Only release artifacts built from this repository's reviewed source and publishe
 - the AulaRaíz Inno Setup installer;
 - project-owned executable files included in that installer, when required by the accepted SignPath policy.
 
-Third-party binaries are never submitted as if they were authored by AulaRaíz. An unsigned upstream open-source component may only be included inside the signed package when its license and provenance have been verified.
+Third-party binaries are never submitted as if they were authored by AulaRaíz. An unsigned upstream open-source component may only be included inside the signed package when its license and provenance have been verified. System Libraries may be included under SignPath Foundation's express exception and must remain identified under their applicable terms. See the maintained [packaged component license inventory](packaged-component-license-inventory.md).
 
 ## Source and build integrity
 
@@ -66,7 +66,7 @@ The maintainer must complete all of the following before submitting the SignPath
 - [ ] confirm multi-factor authentication will be enabled for the SignPath account;
 - [x] verify the provenance and redistribution license of every packaged `.ttf` font, or remove it from the package;
 - [x] document the source and redistribution terms of `estados-municipios.json`;
-- [ ] confirm all packaged runtime and installer components are covered by compatible open-source licenses;
+- [x] confirm packaged runtime and installer components are covered by compatible licenses or SignPath's System Libraries exception;
 - [ ] obtain SignPath Foundation acceptance;
 - [ ] install the SignPath GitHub App with access limited to this repository;
 - [ ] configure the real SignPath identifiers and `SIGNPATH_API_TOKEN`;
