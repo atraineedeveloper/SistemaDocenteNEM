@@ -50,7 +50,7 @@ public sealed class MainWindowViewModelTests
         contexto.Shell.CrearGrupoDesdeInicioCommand.Execute(null);
         contexto.Grupo.NombreNuevoGrupo = "Nuevo grupo";
 
-        contexto.Grupo.CrearGrupoCommand.Execute(null);
+        contexto.Shell.ConfirmarCreacionGrupoCommand.Execute(null);
 
         Assert.NotEqual(grupoAnterior, contexto.Grupo.GrupoIdActual);
         Assert.False(contexto.Shell.MostrarCreacionGrupo);
@@ -63,6 +63,7 @@ public sealed class MainWindowViewModelTests
     {
         internal ContextoPrueba()
         {
+            Estado.Guardar(GestionGrupo.GrupoActual.GrupoId);
             Grupo = new GestionGrupoViewModel(GestionGrupo, Estado, Mensajes, Confirmacion);
             Grupo.Inicializar();
 
