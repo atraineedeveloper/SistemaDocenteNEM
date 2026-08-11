@@ -48,6 +48,8 @@ Starting normal group creation SHALL NOT clear or replace the currently confirme
 
 ### Requirement: Successful group creation SHALL enter the new group summary
 
+A successful group creation SHALL close the transient creation route, keep the newly created group selected and navigate the shell to that group's `Resumen`.
+
 #### Scenario: Teacher creates a valid group
 - **WHEN** the teacher submits a valid group name from the dedicated create form
 - **THEN** the existing group-creation business operation SHALL create and select the group
@@ -56,12 +58,16 @@ Starting normal group creation SHALL NOT clear or replace the currently confirme
 
 ### Requirement: Normal group creation SHALL NOT expose stale-reference recovery actions
 
+The dedicated normal create-group route SHALL provide only normal creation/navigation actions and SHALL NOT expose stale-reference recovery as part of that workflow.
+
 #### Scenario: Normal creation form is displayed
 - **WHEN** the shell-level create-group route is active
 - **THEN** the form SHALL provide Back, Cancel and Create actions
 - **AND** SHALL NOT present `Olvidar referencia` as a normal creation action.
 
 ### Requirement: Refreshed shell controls SHALL preserve accessibility semantics
+
+The refreshed shell and create-group controls SHALL remain keyboard-focusable, semantically labeled and compatible with the application's semantic theme resources.
 
 #### Scenario: Teacher uses keyboard or semantic themes
 - **WHEN** the refreshed shell/create form is used with keyboard navigation or Light, Dark or High Contrast resources
