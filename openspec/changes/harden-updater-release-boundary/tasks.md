@@ -14,6 +14,6 @@
 - [x] 7. Add wrong-repository and oversized-installer regression tests.
 - [x] 8. Document the threat model, residual risks and incident response.
 - [x] 9. Update installation guidance and the maintained roadmap.
-- [ ] 10. Run format, Release build, full tests, OpenSpec and whitespace validation in CI.
-- [ ] 11. Run installer lifecycle CI.
+- [x] 10. Run format, Release build, full tests, OpenSpec and whitespace validation in CI.
+- [x] 11. Run installer lifecycle CI.
 - [ ] 12. Complete controlled manual Demo acceptance before a distribution milestone.
