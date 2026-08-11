@@ -313,7 +313,7 @@ The maintained privacy inventory and message-free diagnostic baseline are implem
 7. [x] Merge Windows installation, GitHub Release delivery, local CLI and consent-based in-app updates.
 8. [x] Establish the privacy inventory and message-free safe-diagnostics baseline.
 9. [x] Establish repository security policy, dependency maintenance and project-specific OpenSpec rules.
-10. [~] Collect automated-test coverage in CI and review the baseline before adopting risk-based thresholds.
+10. [x] Measure the initial automated-test coverage baseline in CI before adopting risk-based thresholds.
 11. [ ] Threat-model and harden the updater/release trust boundary.
 12. [ ] Add production Authenticode signing before broad distribution.
 13. [ ] Return to richer NEM planning fields, evaluation criteria/rubrics and reporting periods.
