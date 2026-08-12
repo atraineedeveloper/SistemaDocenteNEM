@@ -38,7 +38,7 @@
 - [x] 5.3 Data tests prove backup failure prevents deletion, populated deletion creates a safety backup first and empty deletion skips the backup.
 - [x] 5.4 Application/WPF structure tests cover active/archived separation and lifecycle composition.
 - [x] 5.5 WPF tests verify archive/restore/delete affordances and typed exact-name confirmation semantics.
-- [ ] 5.6 Run formatting, Release build, automated tests, coverage, OpenSpec validation and whitespace checks on the exact PR head.
+- [x] 5.6 Run formatting, Release build, automated tests, coverage, OpenSpec validation and whitespace checks on the exact PR head.
 
 ## 6. Manual acceptance
 
