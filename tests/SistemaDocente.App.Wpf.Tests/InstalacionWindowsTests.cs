@@ -42,7 +42,7 @@ public sealed class InstalacionWindowsTests
 
         Assert.Contains("IdentidadProducto.VersionVisible", header, StringComparison.Ordinal);
         Assert.Contains("Versión instalada de AulaRaíz", header, StringComparison.Ordinal);
-        Assert.Contains("<VersionPrefix>0.2.5</VersionPrefix>", props, StringComparison.Ordinal);
+        Assert.Contains("<VersionPrefix>0.2.6</VersionPrefix>", props, StringComparison.Ordinal);
         Assert.Contains("Buscar actualizaciones de AulaRaíz", header, StringComparison.Ordinal);
     }
 
@@ -73,7 +73,6 @@ public sealed class InstalacionWindowsTests
         Assert.Contains("$updaterProjectPath", buildScript, StringComparison.Ordinal);
         Assert.Contains("PublishSingleFile=true", buildScript, StringComparison.Ordinal);
     }
-
 
     [Fact]
     public void InstallerPackagesLicensesAndThirdPartyProvenance()
