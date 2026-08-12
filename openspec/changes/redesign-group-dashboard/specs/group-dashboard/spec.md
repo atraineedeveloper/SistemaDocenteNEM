@@ -59,12 +59,16 @@ The contextual action set SHALL include Ver expediente, Editar estudiante and ex
 
 ### Requirement: Double-click SHALL provide a desktop shortcut to expediente
 
+Double-clicking a student row SHALL select that row and SHALL open the existing expediente flow for that student.
+
 #### Scenario: Teacher double-clicks a student
 - **WHEN** a student row is double-clicked
 - **THEN** that student SHALL become selected
 - **AND** AulaRaíz SHALL open that student's expediente using the existing expediente flow.
 
 ### Requirement: The redesigned dashboard SHALL preserve semantic themes and discoverability
+
+The redesigned dashboard SHALL use the application's semantic theme resources, SHALL keep frequent actions keyboard-focusable and labeled, and SHALL provide a visible alternative to right-click for row actions.
 
 #### Scenario: Teacher uses themes, keyboard or mouse
 - **WHEN** the dashboard is used in Light, Dark or High Contrast or with keyboard navigation
