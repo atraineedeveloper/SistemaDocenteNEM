@@ -54,7 +54,7 @@ jobs:
             --clobber
 
           $asset = Join-Path $downloadDir "innosetup-$($env:INNO_VERSION)-x64.exe"
-          gh release verify-asset $asset --repo jrsoftware/issrc
+          gh release verify-asset $env:INNO_TAG $asset --repo jrsoftware/issrc
 
           $process = Start-Process -FilePath $asset -ArgumentList @(
             "/VERYSILENT",
