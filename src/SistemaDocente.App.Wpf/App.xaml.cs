@@ -53,23 +53,46 @@ public partial class App : System.Windows.Application
             var rutas = RutasAplicacion.DesdeLocalApplicationData(localApplicationData, modoDemo);
             if (reiniciarDemo) rutas.ReiniciarDemostracion();
 
-            var persistencia = new PersistenciaGrupoSqlite(rutas.BaseSqlite);
+            var persistenciaSqlite = new PersistenciaGrupoSqlite(rutas.BaseSqlite);
             var persistenciaAsistencia = new PersistenciaAsistenciaSqlite(rutas.BaseSqlite);
             var persistenciaProyectos = new PersistenciaProyectosSqlite(rutas.BaseSqlite);
             var persistenciaExpediente = new PersistenciaExpedienteSqlite(rutas.BaseSqlite);
             var persistenciaContexto = new PersistenciaContextoGrupoSqlite(rutas.BaseSqlite);
+            var persistenciaCicloVida = new PersistenciaGrupoCicloVidaSqlite(persistenciaSqlite);
             var estado = new AlmacenamientoEstadoJson(rutas.EstadoAplicacion);
 
             if (modoDemo)
             {
                 var grupoDemo = DemoDataSeeder.AsegurarDatos(
-                    persistencia,
+                    persistenciaSqlite,
                     persistenciaAsistencia,
                     persistenciaProyectos,
                     persistenciaExpediente);
                 DemoContextSeeder.AsegurarContexto(persistenciaContexto, grupoDemo);
-                estado.Guardar(grupoDemo);
+
+                var grupoDemoConCicloVida = persistenciaCicloVida.Cargar(grupoDemo);
+                if (grupoDemoConCicloVida is { EstaArchivado: false })
+                {
+                    estado.Guardar(grupoDemo);
+                }
+                else
+                {
+                    estado.Olvidar();
+                }
             }
+
+            var servicioRecuperacionV1 = new ServicioRecuperacionLocalSqlite(
+                rutas.BaseSqlite,
+                rutas.EstadoAplicacion,
+                rutas.DirectorioRespaldosSeguridad,
+                modoDemo
+                    ? ModoAlmacenamientoLocal.Demostracion
+                    : ModoAlmacenamientoLocal.Produccion);
+            var servicioRecuperacion = new ServicioRecuperacionLocalProtegida(servicioRecuperacionV1);
+            IAlmacenamientoGrupos persistencia = new AlmacenamientoGruposConRespaldoEliminacion(
+                persistenciaCicloVida,
+                servicioRecuperacion,
+                rutas.DirectorioRespaldosSeguridad);
 
             var gestionGrupoCasosUso = new GestionGrupoCasosUso(persistencia);
             var gestion = new GestionGrupoPresentacion(gestionGrupoCasosUso);
@@ -106,17 +129,11 @@ public partial class App : System.Windows.Application
                 persistenciaContexto,
                 new ExportadorTabularArchivo());
             var consultaExportacionGrupo = new ConsultaExportacionGrupoCasosUso(persistenciaProyectos);
-            var servicioRecuperacionV1 = new ServicioRecuperacionLocalSqlite(
-                rutas.BaseSqlite,
-                rutas.EstadoAplicacion,
-                rutas.DirectorioRespaldosSeguridad,
-                modoDemo
-                    ? ModoAlmacenamientoLocal.Demostracion
-                    : ModoAlmacenamientoLocal.Produccion);
-            var servicioRecuperacion = new ServicioRecuperacionLocalProtegida(servicioRecuperacionV1);
             var gestionRespaldo = new GestionRespaldoCasosUso(servicioRecuperacion);
 
             var mensajes = new WpfNotificationService();
+            CicloVidaGruposWpf.Configurar(gestionGrupoCasosUso, estado);
+
             var viewModelGrupo = new GestionGrupoViewModel(
                 gestion, estado, mensajes, new ServicioConfirmacionWpf());
             var viewModelAsistencia = new GestionAsistenciaViewModel(

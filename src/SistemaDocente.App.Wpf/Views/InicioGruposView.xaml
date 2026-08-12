@@ -3,57 +3,23 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:controls="clr-namespace:SistemaDocente.App.Wpf.Controls"
              Background="{DynamicResource WindowBackgroundBrush}"
+             Loaded="OnVistaCargada"
              xml:lang="es-MX">
     <UserControl.Resources>
-        <Style x:Key="GroupWorkspaceCardButton" TargetType="Button">
+        <Style x:Key="GroupWorkspaceCard" TargetType="Border">
             <Setter Property="Background" Value="{DynamicResource CardBackgroundBrush}"/>
             <Setter Property="BorderBrush" Value="{DynamicResource BorderLightBrush}"/>
             <Setter Property="BorderThickness" Value="1"/>
-            <Setter Property="Padding" Value="0"/>
+            <Setter Property="CornerRadius" Value="12"/>
+            <Setter Property="Padding" Value="20"/>
             <Setter Property="Margin" Value="0,0,16,16"/>
-            <Setter Property="Width" Value="300"/>
-            <Setter Property="MinHeight" Value="176"/>
-            <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
-            <Setter Property="VerticalContentAlignment" Value="Stretch"/>
-            <Setter Property="Cursor" Value="Hand"/>
-            <Setter Property="Template">
-                <Setter.Value>
-                    <ControlTemplate TargetType="Button">
-                        <Border x:Name="Surface"
-                                Background="{TemplateBinding Background}"
-                                BorderBrush="{TemplateBinding BorderBrush}"
-                                BorderThickness="{TemplateBinding BorderThickness}"
-                                CornerRadius="12"
-                                Padding="20">
-                            <ContentPresenter/>
-                        </Border>
-                        <ControlTemplate.Triggers>
-                            <Trigger Property="IsMouseOver" Value="True">
-                                <Setter TargetName="Surface" Property="Background" Value="{DynamicResource HoverBackgroundBrush}"/>
-                                <Setter TargetName="Surface" Property="BorderBrush" Value="{DynamicResource PrimaryBrush}"/>
-                            </Trigger>
-                            <Trigger Property="IsKeyboardFocused" Value="True">
-                                <Setter TargetName="Surface" Property="BorderBrush" Value="{DynamicResource PrimaryBrush}"/>
-                                <Setter TargetName="Surface" Property="BorderThickness" Value="2"/>
-                            </Trigger>
-                            <Trigger Property="IsPressed" Value="True">
-                                <Setter TargetName="Surface" Property="Background" Value="{DynamicResource PressedBackgroundBrush}"/>
-                            </Trigger>
-                        </ControlTemplate.Triggers>
-                    </ControlTemplate>
-                </Setter.Value>
-            </Setter>
+            <Setter Property="Width" Value="330"/>
+            <Setter Property="MinHeight" Value="206"/>
         </Style>
     </UserControl.Resources>
 
     <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
-        <Grid MaxWidth="1180" Margin="36,34" HorizontalAlignment="Center">
-            <Grid.RowDefinitions>
-                <RowDefinition Height="Auto"/>
-                <RowDefinition Height="Auto"/>
-                <RowDefinition Height="*"/>
-            </Grid.RowDefinitions>
-
+        <StackPanel MaxWidth="1180" Margin="36,34" HorizontalAlignment="Center">
             <Grid Margin="0,0,0,28">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*"/>
@@ -62,8 +28,8 @@
                 <StackPanel>
                     <TextBlock Text="ESPACIO DE TRABAJO" Foreground="{DynamicResource PrimaryBrush}" FontSize="12" FontWeight="SemiBold"/>
                     <TextBlock Text="Mis grupos" Style="{StaticResource Heading1}" FontSize="32" Margin="0,4,0,6"/>
-                    <TextBlock Text="Selecciona el grupo con el que vas a trabajar. Asistencia, proyectos, evaluación y reportes usarán ese contexto."
-                               Foreground="{DynamicResource TextMutedBrush}" FontSize="14" TextWrapping="Wrap" MaxWidth="760"/>
+                    <TextBlock Text="Abre los grupos actuales, archiva los ciclos que ya terminaste o elimina con protección los que se crearon por error."
+                               Foreground="{DynamicResource TextMutedBrush}" FontSize="14" TextWrapping="Wrap" MaxWidth="780"/>
                 </StackPanel>
                 <Button Grid.Column="1"
                         Style="{StaticResource PrimaryButton}"
@@ -74,7 +40,7 @@
                         AutomationProperties.Name="Crear un grupo nuevo"/>
             </Grid>
 
-            <Border Grid.Row="1" Style="{StaticResource ContentCard}" Margin="0,0,0,24" Padding="16">
+            <Border Style="{StaticResource ContentCard}" Margin="0,0,0,24" Padding="16">
                 <Grid>
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="Auto"/>
@@ -84,14 +50,16 @@
                         <TextBlock Text="ⓘ" Foreground="{DynamicResource InfoBrush}" FontSize="20" HorizontalAlignment="Center" VerticalAlignment="Center"/>
                     </Border>
                     <StackPanel Grid.Column="1" VerticalAlignment="Center">
-                        <TextBlock Text="Un grupo = un contexto de trabajo" Foreground="{DynamicResource TextPrimaryBrush}" FontWeight="SemiBold"/>
-                        <TextBlock Text="Cambiar de grupo desde el encabezado no mezcla datos y respeta los cambios pendientes de cada módulo."
+                        <TextBlock Text="Archivar conserva; eliminar borra" Foreground="{DynamicResource TextPrimaryBrush}" FontWeight="SemiBold"/>
+                        <TextBlock Text="Un grupo archivado conserva toda su información y puede restaurarse. La eliminación permanente exige una confirmación adicional cuando hay datos."
                                    Foreground="{DynamicResource TextMutedBrush}" TextWrapping="Wrap" Margin="0,3,0,0"/>
                     </StackPanel>
                 </Grid>
             </Border>
 
-            <Grid Grid.Row="2">
+            <TextBlock Text="Grupos activos" Style="{StaticResource Heading2}" Margin="0,0,0,12"/>
+
+            <Grid>
                 <ItemsControl ItemsSource="{Binding Grupo.GruposDisponibles}">
                     <ItemsControl.ItemsPanel>
                         <ItemsPanelTemplate>
@@ -100,14 +68,12 @@
                     </ItemsControl.ItemsPanel>
                     <ItemsControl.ItemTemplate>
                         <DataTemplate>
-                            <Button Style="{StaticResource GroupWorkspaceCardButton}"
-                                    Tag="{Binding}"
-                                    Click="OnAbrirGrupoClic"
-                                    AutomationProperties.Name="{Binding NombreVisible, StringFormat=Abrir grupo {0}}">
+                            <Border Style="{StaticResource GroupWorkspaceCard}">
                                 <Grid>
                                     <Grid.RowDefinitions>
                                         <RowDefinition Height="Auto"/>
                                         <RowDefinition Height="*"/>
+                                        <RowDefinition Height="Auto"/>
                                         <RowDefinition Height="Auto"/>
                                     </Grid.RowDefinitions>
                                     <Grid>
@@ -124,27 +90,121 @@
                                         </StackPanel>
                                     </Grid>
 
-                                    <TextBlock Grid.Row="1" Margin="0,18,0,18"
-                                               Text="Abre la lista del grupo y continúa con asistencia, proyectos, evaluación o reportes."
+                                    <TextBlock Grid.Row="1" Margin="0,16,0,14"
+                                               Text="Asistencia, proyectos, evaluación y reportes usarán este grupo como contexto de trabajo."
                                                Foreground="{DynamicResource TextSecondaryBrush}" TextWrapping="Wrap"/>
 
-                                    <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Right">
-                                        <TextBlock Text="Abrir grupo" Foreground="{DynamicResource PrimaryBrush}" FontWeight="SemiBold" VerticalAlignment="Center"/>
-                                        <TextBlock Text="  →" Foreground="{DynamicResource PrimaryBrush}" FontSize="18" VerticalAlignment="Center"/>
-                                    </StackPanel>
+                                    <Button Grid.Row="2"
+                                            Style="{StaticResource PrimaryButton}"
+                                            Content="Abrir grupo"
+                                            HorizontalAlignment="Stretch"
+                                            Tag="{Binding}"
+                                            Click="OnAbrirGrupoClic"
+                                            AutomationProperties.Name="{Binding NombreVisible, StringFormat=Abrir grupo {0}}"/>
+
+                                    <Grid Grid.Row="3" Margin="0,8,0,0">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*"/>
+                                            <ColumnDefinition Width="*"/>
+                                        </Grid.ColumnDefinitions>
+                                        <Button Grid.Column="0"
+                                                Content="Archivar"
+                                                Margin="0,0,4,0"
+                                                Tag="{Binding}"
+                                                Click="OnArchivarGrupoClic"
+                                                AutomationProperties.Name="{Binding NombreVisible, StringFormat=Archivar grupo {0}}"/>
+                                        <Button Grid.Column="1"
+                                                Content="Eliminar…"
+                                                Margin="4,0,0,0"
+                                                Foreground="{DynamicResource ErrorBrush}"
+                                                Tag="{Binding}"
+                                                Click="OnEliminarGrupoClic"
+                                                AutomationProperties.Name="{Binding NombreVisible, StringFormat=Eliminar grupo {0}}"/>
+                                    </Grid>
                                 </Grid>
-                            </Button>
+                            </Border>
                         </DataTemplate>
                     </ItemsControl.ItemTemplate>
                 </ItemsControl>
 
                 <controls:EmptyState Icon="👥"
-                                     Title="Aún no hay grupos"
-                                     Message="Crea tu primer grupo para comenzar a trabajar con estudiantes, asistencia y evaluación."
+                                     Title="No hay grupos activos"
+                                     Message="Crea un grupo nuevo o restaura uno archivado para volver a trabajar con él."
                                      ActionText="Crear grupo"
                                      ActionCommand="{Binding CrearGrupoDesdeInicioCommand}"
                                      Visibility="{Binding Grupo.GruposDisponibles.Count, Converter={StaticResource CountToVisibility}}"/>
             </Grid>
-        </Grid>
+
+            <Border x:Name="ArchivadosPanel"
+                    Margin="0,20,0,0"
+                    Padding="18"
+                    CornerRadius="12"
+                    Background="{DynamicResource SectionBackgroundBrush}"
+                    BorderBrush="{DynamicResource BorderLightBrush}"
+                    BorderThickness="1"
+                    Visibility="Collapsed">
+                <Expander x:Name="ArchivadosExpander" IsExpanded="False">
+                    <Expander.Header>
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="Archivados" FontSize="18" FontWeight="SemiBold" Foreground="{DynamicResource TextPrimaryBrush}"/>
+                            <TextBlock x:Name="ArchivadosCantidadTextBlock" Margin="8,2,0,0" Foreground="{DynamicResource TextMutedBrush}"/>
+                        </StackPanel>
+                    </Expander.Header>
+                    <StackPanel Margin="0,16,0,0">
+                        <TextBlock Text="Estos grupos conservan toda su información, pero no aparecen en los módulos de trabajo hasta que los restaures."
+                                   Foreground="{DynamicResource TextMutedBrush}" TextWrapping="Wrap" Margin="0,0,0,14"/>
+                        <ItemsControl x:Name="ArchivadosItemsControl">
+                            <ItemsControl.ItemsPanel>
+                                <ItemsPanelTemplate>
+                                    <WrapPanel/>
+                                </ItemsPanelTemplate>
+                            </ItemsControl.ItemsPanel>
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <Border Style="{StaticResource GroupWorkspaceCard}" MinHeight="176">
+                                        <Grid>
+                                            <Grid.RowDefinitions>
+                                                <RowDefinition Height="Auto"/>
+                                                <RowDefinition Height="*"/>
+                                                <RowDefinition Height="Auto"/>
+                                            </Grid.RowDefinitions>
+                                            <StackPanel>
+                                                <TextBlock Text="ARCHIVADO" FontSize="11" FontWeight="SemiBold" Foreground="{DynamicResource TextMutedBrush}"/>
+                                                <TextBlock Text="{Binding NombreVisible}" FontSize="19" FontWeight="SemiBold" Foreground="{DynamicResource TextPrimaryBrush}" Margin="0,4,0,0" TextTrimming="CharacterEllipsis"/>
+                                                <TextBlock Text="{Binding Estudiantes.Count, StringFormat={}{0} estudiantes registrados}" Foreground="{DynamicResource TextMutedBrush}" FontSize="12" Margin="0,3,0,0"/>
+                                            </StackPanel>
+
+                                            <TextBlock Grid.Row="1" Margin="0,14,0,14"
+                                                       Text="Restaura este grupo para volver a abrirlo y editarlo."
+                                                       Foreground="{DynamicResource TextSecondaryBrush}" TextWrapping="Wrap"/>
+
+                                            <Grid Grid.Row="2">
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="*"/>
+                                                    <ColumnDefinition Width="*"/>
+                                                </Grid.ColumnDefinitions>
+                                                <Button Grid.Column="0"
+                                                        Content="Restaurar"
+                                                        Margin="0,0,4,0"
+                                                        Tag="{Binding}"
+                                                        Click="OnRestaurarGrupoClic"
+                                                        AutomationProperties.Name="{Binding NombreVisible, StringFormat=Restaurar grupo {0}}"/>
+                                                <Button Grid.Column="1"
+                                                        Content="Eliminar…"
+                                                        Margin="4,0,0,0"
+                                                        Foreground="{DynamicResource ErrorBrush}"
+                                                        Tag="{Binding}"
+                                                        Click="OnEliminarGrupoClic"
+                                                        AutomationProperties.Name="{Binding NombreVisible, StringFormat=Eliminar grupo archivado {0}}"/>
+                                            </Grid>
+                                        </Grid>
+                                    </Border>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </StackPanel>
+                </Expander>
+            </Border>
+        </StackPanel>
     </ScrollViewer>
 </UserControl>

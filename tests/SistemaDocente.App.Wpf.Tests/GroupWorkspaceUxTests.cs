@@ -20,7 +20,8 @@ public sealed class GroupWorkspaceUxTests
         Assert.Contains("MostrarInicio", main, StringComparison.Ordinal);
         Assert.Contains("public bool CambiarGrupo", shell, StringComparison.Ordinal);
         Assert.Contains("Mis grupos", workspace, StringComparison.Ordinal);
-        Assert.Contains("GroupWorkspaceCardButton", workspace, StringComparison.Ordinal);
+        Assert.Contains("GroupWorkspaceCard", workspace, StringComparison.Ordinal);
+        Assert.Contains("Content=\"Abrir grupo\"", workspace, StringComparison.Ordinal);
     }
 
     [Fact]

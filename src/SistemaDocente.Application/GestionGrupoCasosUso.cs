@@ -19,12 +19,56 @@ public sealed class GestionGrupoCasosUso
         return Proyectar(grupo);
     }
 
-    public GrupoDetalle CargarGrupo(GrupoId grupoId) => Proyectar(CargarRequerido(grupoId));
+    public GrupoDetalle CargarGrupo(GrupoId grupoId)
+    {
+        var grupo = CargarRequerido(grupoId);
+        AsegurarActivo(grupo);
+        return Proyectar(grupo);
+    }
 
     public IReadOnlyList<GrupoDetalle> ListarGrupos() =>
-        _almacenamiento.ListarTodos().Select(Proyectar).ToList();
+        _almacenamiento.ListarTodos()
+            .Where(grupo => !grupo.EstaArchivado)
+            .Select(Proyectar)
+            .ToList();
+
+    public IReadOnlyList<GrupoDetalle> ListarGruposActivos() => ListarGrupos();
+
+    public IReadOnlyList<GrupoDetalle> ListarGruposArchivados() =>
+        _almacenamiento.ListarTodos()
+            .Where(grupo => grupo.EstaArchivado)
+            .Select(Proyectar)
+            .ToList();
 
     public bool Existe(GrupoId grupoId) => _almacenamiento.Existe(grupoId);
+
+    public GrupoDetalle ArchivarGrupo(GrupoId grupoId)
+    {
+        var grupo = CargarRequerido(grupoId);
+        grupo.Archivar();
+        _almacenamiento.Guardar(grupo);
+        return Proyectar(grupo);
+    }
+
+    public GrupoDetalle RestaurarGrupo(GrupoId grupoId)
+    {
+        var grupo = CargarRequerido(grupoId);
+        grupo.Restaurar();
+        _almacenamiento.Guardar(grupo);
+        return Proyectar(grupo);
+    }
+
+    public ResumenEliminacionGrupo ObtenerResumenEliminacion(GrupoId grupoId)
+    {
+        _ = CargarRequerido(grupoId);
+        return _almacenamiento.ObtenerResumenEliminacion(grupoId);
+    }
+
+    public void EliminarGrupo(GrupoId grupoId)
+    {
+        _ = CargarRequerido(grupoId);
+        _almacenamiento.Eliminar(grupoId);
+    }
 
     public GrupoDetalle CambiarNombreGrupo(GrupoId grupoId, string nombreVisible)
     {
@@ -148,20 +192,40 @@ public sealed class GestionGrupoCasosUso
     }
 
     public IReadOnlyList<EstudianteDetalle> ObtenerTodosLosEstudiantes(GrupoId grupoId) =>
-        ProyectarEstudiantes(CargarRequerido(grupoId).Estudiantes);
+        ProyectarEstudiantes(CargarRequeridoActivo(grupoId).Estudiantes);
 
     public IReadOnlyList<EstudianteDetalle> ObtenerEstudiantesActivos(GrupoId grupoId) =>
-        ProyectarEstudiantes(CargarRequerido(grupoId).Estudiantes.Where(x => x.EstaActivo));
+        ProyectarEstudiantes(CargarRequeridoActivo(grupoId).Estudiantes.Where(x => x.EstaActivo));
+
+    private Grupo CargarRequeridoActivo(GrupoId grupoId)
+    {
+        var grupo = CargarRequerido(grupoId);
+        AsegurarActivo(grupo);
+        return grupo;
+    }
 
     private Grupo CargarRequerido(GrupoId grupoId) =>
         _almacenamiento.Cargar(grupoId)
         ?? throw new GrupoNoEncontradoException($"No existe el grupo {grupoId}.");
 
+    private static void AsegurarActivo(Grupo grupo)
+    {
+        if (grupo.EstaArchivado)
+        {
+            throw new GrupoArchivadoException(
+                $"El grupo {grupo.NombreVisible} está archivado. Restáuralo antes de abrirlo.");
+        }
+    }
+
     private static Estudiante ObtenerEstudiante(Grupo grupo, EstudianteId estudianteId) =>
         grupo.Estudiantes.Single(estudiante => estudiante.Id == estudianteId);
 
     private static GrupoDetalle Proyectar(Grupo grupo) =>
-        new(grupo.Id, grupo.NombreVisible, ProyectarEstudiantes(grupo.Estudiantes));
+        new(
+            grupo.Id,
+            grupo.NombreVisible,
+            ProyectarEstudiantes(grupo.Estudiantes),
+            grupo.EstaArchivado);
 
     private static EstudianteDetalle Proyectar(Estudiante estudiante) =>
         new(
