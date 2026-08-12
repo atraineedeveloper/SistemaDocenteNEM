@@ -31,12 +31,17 @@
 
 ## 5. Validation
 
-- [ ] 5.1 `dotnet restore SistemaDocente.sln -p:AuditPipeline=true`.
-- [ ] 5.2 `dotnet format SistemaDocente.sln --verify-no-changes --no-restore`.
-- [ ] 5.3 Release build with zero warnings/errors.
-- [ ] 5.4 Full test suite with coverage.
-- [ ] 5.5 `openspec validate --all`.
-- [ ] 5.6 `git diff --check`.
-- [ ] 5.7 Installer lifecycle validation.
+- [x] 5.1 `dotnet restore SistemaDocente.sln -p:AuditPipeline=true`.
+- [x] 5.2 `dotnet format SistemaDocente.sln --verify-no-changes --no-restore`.
+- [x] 5.3 Release build with zero warnings/errors.
+- [x] 5.4 Full test suite with coverage.
+- [x] 5.5 `openspec validate --all`.
+- [x] 5.6 `git diff --check`.
+- [x] 5.7 Installer lifecycle validation.
 - [ ] 5.8 Manual Demo review: populated and empty groups, search/filter/order, `⋮`, right-click, double-click, add/import/export, activate/deactivate.
 - [ ] 5.9 Manual Light/Dark/High Contrast and common Windows scaling smoke check.
+
+## Automated validation record
+
+- Dashboard implementation/spec HEAD `8a5b75b`: Windows CI #407 passed NuGet audit/restore, formatting, Release build, the full test suite with coverage, OpenSpec and whitespace; Installer #137 passed self-contained app/CLI/updater/installer build plus install/upgrade/uninstall lifecycle smoke tests and artifact publication.
+- PR #41 remains Draft until manual UX acceptance in 5.8–5.9 is completed.
