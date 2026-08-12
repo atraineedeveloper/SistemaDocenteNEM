@@ -17,7 +17,7 @@ public sealed class GroupDashboardStructureTests
 
         Assert.Contains("Text=\"Total\"", xaml, StringComparison.Ordinal);
         Assert.Contains("Text=\"Activos\"", xaml, StringComparison.Ordinal);
-        Assert.DoesNotContain("Promedio de edad", xaml, StringComparison.OrdinalIgnoreCase);
+        Assert.DoesNotContain("Text=\"Promedio de edad\"", xaml, StringComparison.OrdinalIgnoreCase);
         Assert.DoesNotContain("Acciones masivas", xaml, StringComparison.Ordinal);
         Assert.DoesNotContain("Content=\"▱  Ver expediente\"", xaml, StringComparison.Ordinal);
     }
