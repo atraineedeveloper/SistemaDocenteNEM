@@ -6,16 +6,46 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              mc:Ignorable="d"
-             d:DesignHeight="700" d:DesignWidth="1200"
+             d:DesignHeight="760" d:DesignWidth="1280"
              Background="{DynamicResource WindowBackgroundBrush}"
              PreviewKeyDown="OnPreviewKeyDown"
              xml:lang="es-MX">
     <UserControl.Resources>
         <converters:CollectionMetricConverter x:Key="CollectionMetric"/>
+
+        <Style x:Key="DashboardMetricCard" TargetType="Border">
+            <Setter Property="Background" Value="{DynamicResource CardBackgroundBrush}"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource BorderLightBrush}"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="CornerRadius" Value="12"/>
+            <Setter Property="Padding" Value="18,15"/>
+            <Setter Property="MinWidth" Value="245"/>
+        </Style>
+
+        <Style x:Key="StudentToolbarCombo" TargetType="ComboBox">
+            <Setter Property="MinHeight" Value="38"/>
+            <Setter Property="Padding" Value="10,5"/>
+            <Setter Property="VerticalContentAlignment" Value="Center"/>
+        </Style>
+
+        <Style x:Key="StudentOverflowButton" TargetType="Button">
+            <Setter Property="Content" Value="⋮"/>
+            <Setter Property="MinWidth" Value="34"/>
+            <Setter Property="Width" Value="34"/>
+            <Setter Property="Height" Value="32"/>
+            <Setter Property="Padding" Value="0"/>
+            <Setter Property="Margin" Value="0"/>
+            <Setter Property="FontSize" Value="18"/>
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="BorderBrush" Value="Transparent"/>
+            <Setter Property="Foreground" Value="{DynamicResource TextSecondaryBrush}"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="AutomationProperties.Name" Value="Más acciones del estudiante"/>
+        </Style>
     </UserControl.Resources>
 
-    <Grid Margin="24">
-        <!-- Bienvenida -->
+    <Grid Margin="32,24,32,28">
+        <!-- Bienvenida/recovery heredada. La creación normal vive en el wizard del shell. -->
         <Grid x:Name="GrupoBienvenidaPanel" Visibility="{Binding MostrarBienvenida, Converter={StaticResource BoolToVisibility}}">
             <Grid.RowDefinitions>
                 <RowDefinition Height="*"/>
@@ -46,195 +76,268 @@
             </Border>
         </Grid>
 
-        <!-- Gestión normal -->
+        <!-- Resumen del grupo -->
         <Grid Visibility="{Binding MostrarGestion, Converter={StaticResource BoolToVisibility}}">
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto"/>
                 <RowDefinition Height="Auto"/>
                 <RowDefinition Height="*"/>
                 <RowDefinition Height="Auto"/>
-                <RowDefinition Height="Auto"/>
             </Grid.RowDefinitions>
 
-            <!-- Encabezado de módulo -->
+            <!-- Encabezado -->
             <Grid Margin="0,0,0,20">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*"/>
                     <ColumnDefinition Width="Auto"/>
                 </Grid.ColumnDefinitions>
-                <StackPanel>
-                    <TextBlock Text="LISTA DE ESTUDIANTES" Foreground="{DynamicResource PrimaryBrush}" FontSize="12" FontWeight="SemiBold"/>
-                    <TextBlock Text="{Binding NombreGrupo}" Style="{StaticResource Heading1}" FontSize="28" Margin="0,3,0,3"/>
-                    <TextBlock Foreground="{DynamicResource TextMutedBrush}">
+                <StackPanel VerticalAlignment="Center">
+                    <TextBlock Text="LISTA DE ESTUDIANTES"
+                               Foreground="{DynamicResource PrimaryBrush}"
+                               FontSize="11" FontWeight="SemiBold"
+                               CharacterSpacing="35"/>
+                    <TextBlock Text="{Binding NombreGrupo}"
+                               Foreground="{DynamicResource TextPrimaryBrush}"
+                               FontSize="30" FontWeight="Bold"
+                               Margin="0,5,0,4"/>
+                    <TextBlock Foreground="{DynamicResource TextMutedBrush}" FontSize="12">
                         <Run Text="{Binding Estudiantes, Mode=OneWay, Converter={StaticResource CollectionMetric}}"/>
                         <Run Text=" estudiantes · "/>
                         <Run Text="{Binding Estudiantes, Mode=OneWay, Converter={StaticResource CollectionMetric}, ConverterParameter=Activos}"/>
                         <Run Text=" activos"/>
                     </TextBlock>
                 </StackPanel>
-                <StackPanel Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Top">
+                <StackPanel Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center">
                     <Button TabIndex="19" Content="⚙  Configurar grupo" Click="OnConfigurarGrupoClic"
-                            Margin="0,0,8,0" AutomationProperties.Name="Abrir configuración del grupo"/>
-                    <Button TabIndex="20" Content="✎  Cambiar nombre" Command="{Binding AbrirCambioNombreCommand}"/>
+                            MinHeight="40" Padding="14,8" Margin="0,0,10,0"
+                            AutomationProperties.Name="Abrir configuración del grupo"/>
+                    <Button TabIndex="20" Content="✎  Cambiar nombre" Command="{Binding AbrirCambioNombreCommand}"
+                            MinHeight="40" Padding="14,8" AutomationProperties.Name="Cambiar nombre del grupo"/>
                 </StackPanel>
             </Grid>
 
-            <!-- Búsqueda y métricas -->
-            <Grid Grid.Row="1" Margin="0,0,0,14">
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="420"/>
-                    <ColumnDefinition Width="*"/>
-                    <ColumnDefinition Width="190"/>
-                    <ColumnDefinition Width="12"/>
-                    <ColumnDefinition Width="190"/>
-                </Grid.ColumnDefinitions>
-
-                <Border Grid.Column="0" Style="{StaticResource ContentCard}" Margin="0">
+            <!-- Métricas: sin promedio de edad -->
+            <StackPanel Grid.Row="1" Orientation="Horizontal" Margin="0,0,0,16">
+                <Border Style="{StaticResource DashboardMetricCard}" Margin="0,0,14,0">
                     <Grid>
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="Auto"/>
                             <ColumnDefinition Width="*"/>
                         </Grid.ColumnDefinitions>
-                        <TextBlock Text="⌕" FontSize="20" Foreground="{DynamicResource TextMutedBrush}" VerticalAlignment="Center" Margin="0,0,8,0"/>
-                        <TextBox Grid.Column="1" BorderThickness="0" Background="Transparent" Margin="0" Padding="4,6"
-                                 TabIndex="25" ToolTip="Buscar por nombre, número de lista o grado"
-                                 AutomationProperties.Name="Buscar estudiante por nombre, número de lista o grado"
-                                 Text="{Binding FiltroBusqueda, UpdateSourceTrigger=PropertyChanged}"/>
-                    </Grid>
-                </Border>
-
-                <Border Grid.Column="2" Style="{StaticResource ContentCard}" Margin="0">
-                    <Grid>
-                        <Grid.ColumnDefinitions><ColumnDefinition Width="Auto"/><ColumnDefinition Width="*"/></Grid.ColumnDefinitions>
-                        <Border Width="42" Height="42" Background="{DynamicResource HoverBackgroundBrush}" CornerRadius="9" Margin="0,0,11,0">
-                            <TextBlock Text="👥" FontSize="19" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        <Border Width="50" Height="50" Background="{DynamicResource HoverBackgroundBrush}" CornerRadius="11" Margin="0,0,14,0">
+                            <TextBlock Text="👥" FontSize="21" HorizontalAlignment="Center" VerticalAlignment="Center"/>
                         </Border>
                         <StackPanel Grid.Column="1" VerticalAlignment="Center">
-                            <TextBlock Text="Total" Style="{StaticResource Caption}"/>
-                            <TextBlock Text="{Binding Estudiantes, Converter={StaticResource CollectionMetric}}" Style="{StaticResource Heading2}" Foreground="{DynamicResource PrimaryBrush}"/>
+                            <TextBlock Text="Total" Foreground="{DynamicResource TextSecondaryBrush}" FontSize="12"/>
+                            <TextBlock Text="{Binding Estudiantes, Converter={StaticResource CollectionMetric}}"
+                                       Foreground="{DynamicResource PrimaryBrush}" FontSize="23" FontWeight="Bold"/>
+                            <TextBlock Text="estudiantes" Foreground="{DynamicResource TextMutedBrush}" FontSize="10"/>
                         </StackPanel>
                     </Grid>
                 </Border>
 
-                <Border Grid.Column="4" Style="{StaticResource ContentCard}" Margin="0">
+                <Border Style="{StaticResource DashboardMetricCard}">
                     <Grid>
-                        <Grid.ColumnDefinitions><ColumnDefinition Width="Auto"/><ColumnDefinition Width="*"/></Grid.ColumnDefinitions>
-                        <Border Width="42" Height="42" Background="{DynamicResource SuccessBackgroundBrush}" CornerRadius="9" Margin="0,0,11,0">
-                            <TextBlock Text="✓" FontSize="21" Foreground="{DynamicResource SuccessBrush}" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <Border Width="50" Height="50" Background="{DynamicResource SuccessBackgroundBrush}" CornerRadius="11" Margin="0,0,14,0">
+                            <TextBlock Text="✓" FontSize="23" Foreground="{DynamicResource SuccessBrush}" HorizontalAlignment="Center" VerticalAlignment="Center"/>
                         </Border>
                         <StackPanel Grid.Column="1" VerticalAlignment="Center">
-                            <TextBlock Text="Activos" Style="{StaticResource Caption}"/>
-                            <TextBlock Text="{Binding Estudiantes, Converter={StaticResource CollectionMetric}, ConverterParameter=Activos}" Style="{StaticResource Heading2}" Foreground="{DynamicResource SuccessBrush}"/>
+                            <TextBlock Text="Activos" Foreground="{DynamicResource TextSecondaryBrush}" FontSize="12"/>
+                            <TextBlock Text="{Binding Estudiantes, Converter={StaticResource CollectionMetric}, ConverterParameter=Activos}"
+                                       Foreground="{DynamicResource SuccessBrush}" FontSize="23" FontWeight="Bold"/>
+                            <TextBlock Text="estudiantes activos" Foreground="{DynamicResource TextMutedBrush}" FontSize="10"/>
                         </StackPanel>
                     </Grid>
                 </Border>
-            </Grid>
+            </StackPanel>
 
-            <!-- Tabla -->
-            <Border Grid.Row="2" Background="{DynamicResource CardBackgroundBrush}" BorderBrush="{DynamicResource BorderLightBrush}" BorderThickness="1" CornerRadius="10">
+            <!-- Tarjeta principal de estudiantes -->
+            <Border Grid.Row="2"
+                    Background="{DynamicResource CardBackgroundBrush}"
+                    BorderBrush="{DynamicResource BorderLightBrush}"
+                    BorderThickness="1"
+                    CornerRadius="12"
+                    MinHeight="340">
                 <Grid>
-                    <DataGrid ItemsSource="{Binding EstudiantesFiltrados}" SelectedItem="{Binding EstudianteSeleccionado}"
-                              AutoGenerateColumns="False" IsReadOnly="True" CanUserSortColumns="True"
-                              SelectionMode="Single" SelectionUnit="FullRow" TabIndex="30"
-                              HeadersVisibility="Column" GridLinesVisibility="Horizontal" RowHeaderWidth="0"
-                              FontSize="14" RowHeight="48" MinHeight="260" BorderThickness="0"
-                              EnableRowVirtualization="True" EnableColumnVirtualization="True"
-                              VirtualizingStackPanel.IsVirtualizing="True" ScrollViewer.CanContentScroll="True"
-                              AutomationProperties.Name="Lista de estudiantes">
-                        <DataGrid.RowStyle>
-                            <Style TargetType="DataGridRow">
-                                <Setter Property="VerticalContentAlignment" Value="Center"/>
-                                <Style.Triggers>
-                                    <DataTrigger Binding="{Binding EstaActivo}" Value="False">
-                                        <Setter Property="Foreground" Value="{DynamicResource TextMutedBrush}"/>
-                                        <Setter Property="Opacity" Value="0.72"/>
-                                    </DataTrigger>
-                                </Style.Triggers>
-                            </Style>
-                        </DataGrid.RowStyle>
-                        <DataGrid.ContextMenu>
-                            <ContextMenu>
-                                <MenuItem Header="Ver expediente" Click="OnVerExpedienteEstudianteClic"/>
-                                <MenuItem Header="Editar estudiante" Command="{Binding AbrirEditarEstudianteCommand}"/>
-                                <Separator/>
-                                <MenuItem Header="Desactivar" Command="{Binding DesactivarEstudianteCommand}"/>
-                                <MenuItem Header="Reactivar" Command="{Binding ReactivarEstudianteCommand}"/>
-                            </ContextMenu>
-                        </DataGrid.ContextMenu>
-                        <DataGrid.Columns>
-                            <DataGridTextColumn Header="Núm." Binding="{Binding NumeroLista}" Width="70"/>
-                            <DataGridTemplateColumn Header="Nombre del estudiante" Width="*">
-                                <DataGridTemplateColumn.CellTemplate>
-                                    <DataTemplate>
-                                        <StackPanel Orientation="Horizontal" VerticalAlignment="Center" Margin="8,0">
-                                            <Border Width="34" Height="34" CornerRadius="17" Background="{DynamicResource HoverBackgroundBrush}" Margin="0,0,10,0">
-                                                <TextBlock Text="{Binding Iniciales}" Foreground="{DynamicResource PrimaryBrush}" FontWeight="Bold" HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                                            </Border>
-                                            <TextBlock Text="{Binding Nombre}" VerticalAlignment="Center" Foreground="{DynamicResource TextPrimaryBrush}"/>
-                                        </StackPanel>
-                                    </DataTemplate>
-                                </DataGridTemplateColumn.CellTemplate>
-                            </DataGridTemplateColumn>
-                            <DataGridTextColumn Header="Grado" Binding="{Binding GradoTexto}" Width="86"/>
-                            <DataGridTemplateColumn Header="Género" Width="150">
-                                <DataGridTemplateColumn.CellTemplate>
-                                    <DataTemplate>
-                                        <Border Background="{DynamicResource SectionBackgroundBrush}" CornerRadius="8" Padding="8,4" HorizontalAlignment="Center">
-                                            <TextBlock Text="{Binding GeneroTexto}" Foreground="{DynamicResource TextSecondaryBrush}" FontSize="12"/>
-                                        </Border>
-                                    </DataTemplate>
-                                </DataGridTemplateColumn.CellTemplate>
-                            </DataGridTemplateColumn>
-                            <DataGridTextColumn Header="Edad" Binding="{Binding EdadTexto}" Width="80"/>
-                            <DataGridTemplateColumn Header="Estado" Width="120">
-                                <DataGridTemplateColumn.CellTemplate>
-                                    <DataTemplate>
-                                        <Border x:Name="EstadoPill" Background="{DynamicResource SuccessBackgroundBrush}" CornerRadius="9" Padding="9,4" HorizontalAlignment="Center">
-                                            <TextBlock x:Name="EstadoTexto" Text="{Binding Estado}" Foreground="{DynamicResource SuccessBrush}" FontWeight="SemiBold" FontSize="12"/>
-                                        </Border>
-                                        <DataTemplate.Triggers>
-                                            <DataTrigger Binding="{Binding EstaActivo}" Value="False">
-                                                <Setter TargetName="EstadoPill" Property="Background" Value="{DynamicResource DisabledBackgroundBrush}"/>
-                                                <Setter TargetName="EstadoTexto" Property="Foreground" Value="{DynamicResource TextMutedBrush}"/>
-                                            </DataTrigger>
-                                        </DataTemplate.Triggers>
-                                    </DataTemplate>
-                                </DataGridTemplateColumn.CellTemplate>
-                            </DataGridTemplateColumn>
-                        </DataGrid.Columns>
-                    </DataGrid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
 
-                    <controls:EmptyState Icon="👥" Title="Aún no hay estudiantes"
-                                         Message="Agrega el primer estudiante al grupo para comenzar."
-                                         ActionText="Agregar estudiante"
-                                         ActionCommand="{Binding AbrirAgregarEstudianteCommand}"
-                                         Visibility="{Binding Estudiantes.Count, Converter={StaticResource CountToVisibility}}"/>
+                    <!-- Toolbar -->
+                    <Grid Grid.Row="0" Margin="16,12" MinHeight="42">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="330"/>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="142"/>
+                            <ColumnDefinition Width="10"/>
+                            <ColumnDefinition Width="190"/>
+                            <ColumnDefinition Width="10"/>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="8"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+
+                        <Border Grid.Column="0"
+                                Background="{DynamicResource WindowBackgroundBrush}"
+                                BorderBrush="{DynamicResource BorderLightBrush}"
+                                BorderThickness="1" CornerRadius="9" Padding="10,0">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+                                <TextBlock Text="⌕" FontSize="19" Foreground="{DynamicResource TextMutedBrush}"
+                                           VerticalAlignment="Center" Margin="0,0,7,0"/>
+                                <TextBox Grid.Column="1" BorderThickness="0" Background="Transparent"
+                                         Margin="0" Padding="2,7" MinHeight="36" TabIndex="25"
+                                         ToolTip="Buscar por nombre, número de lista o grado"
+                                         AutomationProperties.Name="Buscar estudiante"
+                                         Text="{Binding FiltroBusqueda, UpdateSourceTrigger=PropertyChanged}"/>
+                            </Grid>
+                        </Border>
+
+                        <ComboBox x:Name="StudentStatusFilterCombo" Grid.Column="2"
+                                  Style="{StaticResource StudentToolbarCombo}"
+                                  SelectedIndex="0" SelectionChanged="OnFiltroEstadoCambiado"
+                                  AutomationProperties.Name="Filtrar estudiantes por estado">
+                            <ComboBoxItem Content="Todos"/>
+                            <ComboBoxItem Content="Activos"/>
+                            <ComboBoxItem Content="Inactivos"/>
+                        </ComboBox>
+
+                        <ComboBox x:Name="StudentSortCombo" Grid.Column="4"
+                                  Style="{StaticResource StudentToolbarCombo}"
+                                  SelectedIndex="0" SelectionChanged="OnOrdenEstudiantesCambiado"
+                                  AutomationProperties.Name="Ordenar estudiantes">
+                            <ComboBoxItem Content="Nombre A–Z"/>
+                            <ComboBoxItem Content="Nombre Z–A"/>
+                            <ComboBoxItem Content="Número de lista"/>
+                        </ComboBox>
+
+                        <Button Grid.Column="6" TabIndex="26"
+                                Style="{StaticResource PrimaryButton}"
+                                Content="＋  Agregar estudiante"
+                                Command="{Binding AbrirAgregarEstudianteCommand}"
+                                MinHeight="40" Padding="14,8"
+                                AutomationProperties.Name="Agregar estudiante"/>
+
+                        <Menu Grid.Column="8" Background="Transparent" VerticalAlignment="Center">
+                            <MenuItem Header="⋯" Padding="12,8" FontSize="18"
+                                      AutomationProperties.Name="Acciones de datos del grupo">
+                                <MenuItem Header="Importar alumnos…" Click="OnImportarAlumnosClic"
+                                          AutomationProperties.Name="Importar alumnos desde Excel o CSV"/>
+                                <MenuItem Header="Exportar datos…" Click="OnExportarDatosClic"
+                                          AutomationProperties.Name="Exportar datos del grupo a Excel o CSV"/>
+                            </MenuItem>
+                        </Menu>
+                    </Grid>
+
+                    <Border Grid.Row="1" BorderBrush="{DynamicResource BorderLightBrush}" BorderThickness="0,1,0,0">
+                        <Grid>
+                            <DataGrid x:Name="StudentGrid"
+                                      ItemsSource="{Binding Estudiantes}"
+                                      SelectedItem="{Binding EstudianteSeleccionado}"
+                                      AutoGenerateColumns="False" IsReadOnly="True" CanUserSortColumns="False"
+                                      SelectionMode="Single" SelectionUnit="FullRow" TabIndex="30"
+                                      HeadersVisibility="Column" GridLinesVisibility="Horizontal" RowHeaderWidth="0"
+                                      FontSize="13" RowHeight="46" MinHeight="260" BorderThickness="0"
+                                      EnableRowVirtualization="True" EnableColumnVirtualization="True"
+                                      VirtualizingStackPanel.IsVirtualizing="True" ScrollViewer.CanContentScroll="True"
+                                      PreviewMouseRightButtonUp="OnStudentGridPreviewMouseRightButtonUp"
+                                      MouseDoubleClick="OnStudentGridMouseDoubleClick"
+                                      AutomationProperties.Name="Lista de estudiantes">
+                                <DataGrid.RowStyle>
+                                    <Style TargetType="DataGridRow">
+                                        <Setter Property="VerticalContentAlignment" Value="Center"/>
+                                        <Setter Property="Cursor" Value="Arrow"/>
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding EstaActivo}" Value="False">
+                                                <Setter Property="Foreground" Value="{DynamicResource TextMutedBrush}"/>
+                                                <Setter Property="Opacity" Value="0.72"/>
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </DataGrid.RowStyle>
+                                <DataGrid.Columns>
+                                    <DataGridTextColumn Header="Núm." Binding="{Binding NumeroLista}" Width="70"/>
+                                    <DataGridTemplateColumn Header="Nombre del estudiante" Width="*">
+                                        <DataGridTemplateColumn.CellTemplate>
+                                            <DataTemplate>
+                                                <StackPanel Orientation="Horizontal" VerticalAlignment="Center" Margin="6,0">
+                                                    <Border Width="32" Height="32" CornerRadius="16"
+                                                            Background="{DynamicResource HoverBackgroundBrush}" Margin="0,0,10,0">
+                                                        <TextBlock Text="{Binding Iniciales}" Foreground="{DynamicResource PrimaryBrush}"
+                                                                   FontWeight="Bold" FontSize="11"
+                                                                   HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                                    </Border>
+                                                    <TextBlock Text="{Binding Nombre}" VerticalAlignment="Center"
+                                                               Foreground="{DynamicResource TextPrimaryBrush}" FontWeight="Medium"/>
+                                                </StackPanel>
+                                            </DataTemplate>
+                                        </DataGridTemplateColumn.CellTemplate>
+                                    </DataGridTemplateColumn>
+                                    <DataGridTextColumn Header="Grado" Binding="{Binding GradoTexto}" Width="86"/>
+                                    <DataGridTemplateColumn Header="Género" Width="130">
+                                        <DataGridTemplateColumn.CellTemplate>
+                                            <DataTemplate>
+                                                <Border Background="{DynamicResource SectionBackgroundBrush}" CornerRadius="8"
+                                                        Padding="8,3" HorizontalAlignment="Center">
+                                                    <TextBlock Text="{Binding GeneroTexto}" Foreground="{DynamicResource TextSecondaryBrush}" FontSize="11"/>
+                                                </Border>
+                                            </DataTemplate>
+                                        </DataGridTemplateColumn.CellTemplate>
+                                    </DataGridTemplateColumn>
+                                    <DataGridTextColumn Header="Edad" Binding="{Binding EdadTexto}" Width="76"/>
+                                    <DataGridTemplateColumn Header="Estado" Width="112">
+                                        <DataGridTemplateColumn.CellTemplate>
+                                            <DataTemplate>
+                                                <Border x:Name="EstadoPill" Background="{DynamicResource SuccessBackgroundBrush}"
+                                                        CornerRadius="9" Padding="9,3" HorizontalAlignment="Center">
+                                                    <StackPanel Orientation="Horizontal">
+                                                        <TextBlock x:Name="EstadoPunto" Text="●" Foreground="{DynamicResource SuccessBrush}" FontSize="8" Margin="0,0,5,0" VerticalAlignment="Center"/>
+                                                        <TextBlock x:Name="EstadoTexto" Text="{Binding Estado}" Foreground="{DynamicResource SuccessBrush}" FontWeight="SemiBold" FontSize="11"/>
+                                                    </StackPanel>
+                                                </Border>
+                                                <DataTemplate.Triggers>
+                                                    <DataTrigger Binding="{Binding EstaActivo}" Value="False">
+                                                        <Setter TargetName="EstadoPill" Property="Background" Value="{DynamicResource DisabledBackgroundBrush}"/>
+                                                        <Setter TargetName="EstadoPunto" Property="Foreground" Value="{DynamicResource TextMutedBrush}"/>
+                                                        <Setter TargetName="EstadoTexto" Property="Foreground" Value="{DynamicResource TextMutedBrush}"/>
+                                                    </DataTrigger>
+                                                </DataTemplate.Triggers>
+                                            </DataTemplate>
+                                        </DataGridTemplateColumn.CellTemplate>
+                                    </DataGridTemplateColumn>
+                                    <DataGridTemplateColumn Header="" Width="48" CanUserResize="False">
+                                        <DataGridTemplateColumn.CellTemplate>
+                                            <DataTemplate>
+                                                <Button Style="{StaticResource StudentOverflowButton}"
+                                                        Click="OnStudentMoreClick"
+                                                        ToolTip="Más acciones"/>
+                                            </DataTemplate>
+                                        </DataGridTemplateColumn.CellTemplate>
+                                    </DataGridTemplateColumn>
+                                </DataGrid.Columns>
+                            </DataGrid>
+
+                            <controls:EmptyState Icon="👥" Title="Aún no hay estudiantes"
+                                                 Message="Agrega el primer estudiante al grupo para comenzar."
+                                                 ActionText="Agregar estudiante"
+                                                 ActionCommand="{Binding AbrirAgregarEstudianteCommand}"
+                                                 Visibility="{Binding Estudiantes.Count, Converter={StaticResource CountToVisibility}}"/>
+                        </Grid>
+                    </Border>
                 </Grid>
             </Border>
 
-            <!-- Barra de acciones -->
-            <Border Grid.Row="3" Style="{StaticResource ContentCard}" Margin="0,14,0,0" Padding="12">
-                <DockPanel>
-                    <StackPanel DockPanel.Dock="Left" Orientation="Horizontal">
-                        <Button TabIndex="40" Content="▱  Ver expediente" Click="OnVerExpedienteEstudianteClic"/>
-                        <Button Style="{StaticResource PrimaryButton}" TabIndex="41" Content="＋  Agregar estudiante" Command="{Binding AbrirAgregarEstudianteCommand}"/>
-                        <Button TabIndex="42" Content="⇩  Importar alumnos…" Click="OnImportarAlumnosClic"
-                                AutomationProperties.Name="Importar alumnos desde Excel o CSV"/>
-                        <Button TabIndex="43" Content="⇧  Exportar datos…" Click="OnExportarDatosClic"
-                                AutomationProperties.Name="Exportar datos del grupo a Excel o CSV"/>
-                        <Button TabIndex="44" Content="✎  Editar estudiante" Command="{Binding AbrirEditarEstudianteCommand}"/>
-                    </StackPanel>
-                    <Menu DockPanel.Dock="Right" Background="Transparent" VerticalAlignment="Center">
-                        <MenuItem Padding="12,8" Cursor="Hand" Header="•••  Acciones masivas ▾" FontWeight="SemiBold">
-                            <MenuItem Header="Desactivar seleccionado" Command="{Binding DesactivarEstudianteCommand}"/>
-                            <MenuItem Header="Reactivar seleccionado" Command="{Binding ReactivarEstudianteCommand}"/>
-                        </MenuItem>
-                    </Menu>
-                </DockPanel>
-            </Border>
-
-            <!-- Editor de nombre del grupo -->
-            <Border x:Name="GrupoEditorPanel" Grid.Row="4" Style="{StaticResource ContentCard}"
+            <!-- Editor de nombre del grupo: sólo aparece cuando se solicita. -->
+            <Border x:Name="GrupoEditorPanel" Grid.Row="3" Style="{StaticResource ContentCard}"
+                    Margin="0,14,0,0"
                     Visibility="{Binding MostrarEditorGrupo, Converter={StaticResource BoolToVisibility}}">
                 <StackPanel>
                     <TextBlock Text="Cambiar nombre del grupo" Style="{StaticResource Heading2}" Margin="0,0,0,12"/>
