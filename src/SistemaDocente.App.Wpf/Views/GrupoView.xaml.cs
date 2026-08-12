@@ -1,6 +1,8 @@
 using System.ComponentModel;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Controls.Primitives;
+using System.Windows.Data;
 using System.Windows.Input;
 using System.Windows.Media;
 
@@ -9,12 +11,13 @@ using SistemaDocente.Presentation;
 namespace SistemaDocente.App.Wpf.Views;
 
 /// <summary>
-/// Presentación del módulo Grupo: bienvenida/creación, lista de estudiantes,
-/// búsqueda, editor de nombre y apertura de ventanas dedicadas.
+/// Presentación del módulo Resumen/Grupo: lista de estudiantes, búsqueda,
+/// filtros/orden, acciones contextuales y apertura de ventanas dedicadas.
 /// </summary>
 public partial class GrupoView : UserControl
 {
     private GestionGrupoViewModel? _viewModelSuscrito;
+    private ICollectionView? _vistaEstudiantes;
 
     public GrupoView()
     {
@@ -79,12 +82,23 @@ public partial class GrupoView : UserControl
         CambiarSuscripcion(ViewModel);
         AsignarFocoInicial();
         AbrirEditorEstudianteVentana();
+        ActualizarVistaEstudiantes();
     }
 
-    private void OnUnloaded(object sender, RoutedEventArgs e) => CambiarSuscripcion(null);
+    private void OnUnloaded(object sender, RoutedEventArgs e)
+    {
+        CambiarSuscripcion(null);
+        _vistaEstudiantes = null;
+    }
 
-    private void OnDataContextChanged(object sender, DependencyPropertyChangedEventArgs e) =>
+    private void OnDataContextChanged(object sender, DependencyPropertyChangedEventArgs e)
+    {
         CambiarSuscripcion(e.NewValue as GestionGrupoViewModel);
+        if (IsLoaded)
+        {
+            Dispatcher.BeginInvoke(ActualizarVistaEstudiantes);
+        }
+    }
 
     private void CambiarSuscripcion(GestionGrupoViewModel? nuevo)
     {
@@ -113,6 +127,12 @@ public partial class GrupoView : UserControl
             {
                 Dispatcher.BeginInvoke(AbrirEditorEstudianteVentana);
             }
+        }
+
+        if (args.PropertyName is nameof(GestionGrupoViewModel.Estudiantes)
+            or nameof(GestionGrupoViewModel.FiltroBusqueda))
+        {
+            Dispatcher.BeginInvoke(ActualizarVistaEstudiantes);
         }
     }
 
@@ -174,6 +194,156 @@ public partial class GrupoView : UserControl
             Owner = Window.GetWindow(this),
         };
         ventana.ShowDialog();
+    }
+
+    private void OnFiltroEstadoCambiado(object sender, SelectionChangedEventArgs e)
+    {
+        if (IsLoaded)
+        {
+            ActualizarVistaEstudiantes();
+        }
+    }
+
+    private void OnOrdenEstudiantesCambiado(object sender, SelectionChangedEventArgs e)
+    {
+        if (IsLoaded)
+        {
+            ActualizarVistaEstudiantes();
+        }
+    }
+
+    private void ActualizarVistaEstudiantes()
+    {
+        if (StudentGrid.ItemsSource is null) return;
+
+        _vistaEstudiantes = CollectionViewSource.GetDefaultView(StudentGrid.ItemsSource);
+        using (_vistaEstudiantes.DeferRefresh())
+        {
+            _vistaEstudiantes.Filter = FiltrarEstudiante;
+            _vistaEstudiantes.SortDescriptions.Clear();
+
+            var orden = StudentSortCombo.SelectedIndex switch
+            {
+                1 => new SortDescription(nameof(EstudianteVisual.Nombre), ListSortDirection.Descending),
+                2 => new SortDescription(nameof(EstudianteVisual.NumeroLista), ListSortDirection.Ascending),
+                _ => new SortDescription(nameof(EstudianteVisual.Nombre), ListSortDirection.Ascending),
+            };
+            _vistaEstudiantes.SortDescriptions.Add(orden);
+        }
+    }
+
+    private bool FiltrarEstudiante(object item)
+    {
+        if (item is not EstudianteVisual estudiante) return false;
+
+        var busqueda = ViewModel?.FiltroBusqueda?.Trim() ?? string.Empty;
+        var coincideBusqueda = string.IsNullOrWhiteSpace(busqueda)
+            || estudiante.Nombre.Contains(busqueda, StringComparison.CurrentCultureIgnoreCase)
+            || estudiante.NumeroLista.ToString(System.Globalization.CultureInfo.CurrentCulture)
+                .Contains(busqueda, StringComparison.Ordinal)
+            || estudiante.GradoTexto.Contains(busqueda, StringComparison.CurrentCultureIgnoreCase);
+
+        if (!coincideBusqueda) return false;
+
+        return StudentStatusFilterCombo.SelectedIndex switch
+        {
+            1 => estudiante.EstaActivo,
+            2 => !estudiante.EstaActivo,
+            _ => true,
+        };
+    }
+
+    private void OnStudentGridPreviewMouseRightButtonUp(object sender, MouseButtonEventArgs e)
+    {
+        var fila = ObtenerFilaEstudiante(StudentGrid, e.OriginalSource as DependencyObject);
+        if (fila?.Item is not EstudianteVisual estudiante) return;
+
+        SeleccionarEstudiante(estudiante);
+        AbrirMenuContextualEstudiante(fila, PlacementMode.MousePoint);
+        e.Handled = true;
+    }
+
+    private void OnStudentMoreClick(object sender, RoutedEventArgs e)
+    {
+        if (sender is not Button { DataContext: EstudianteVisual estudiante } boton) return;
+
+        SeleccionarEstudiante(estudiante);
+        AbrirMenuContextualEstudiante(boton, PlacementMode.Bottom);
+        e.Handled = true;
+    }
+
+    private void OnStudentGridMouseDoubleClick(object sender, MouseButtonEventArgs e)
+    {
+        if (e.ChangedButton != MouseButton.Left) return;
+
+        var fila = ObtenerFilaEstudiante(StudentGrid, e.OriginalSource as DependencyObject);
+        if (fila?.Item is not EstudianteVisual estudiante) return;
+
+        SeleccionarEstudiante(estudiante);
+        AbrirExpedienteEstudiante();
+        e.Handled = true;
+    }
+
+    private void SeleccionarEstudiante(EstudianteVisual estudiante)
+    {
+        StudentGrid.SelectedItem = estudiante;
+        if (ViewModel is { } grupo)
+        {
+            grupo.EstudianteSeleccionado = estudiante;
+        }
+    }
+
+    private void AbrirMenuContextualEstudiante(FrameworkElement destino, PlacementMode ubicacion)
+    {
+        if (ViewModel is not { EstudianteSeleccionado: { } estudiante } grupo) return;
+
+        var menu = new ContextMenu
+        {
+            PlacementTarget = destino,
+            Placement = ubicacion,
+        };
+
+        var verExpediente = new MenuItem { Header = "Ver expediente" };
+        verExpediente.Click += (_, _) => AbrirExpedienteEstudiante();
+        menu.Items.Add(verExpediente);
+
+        menu.Items.Add(new MenuItem
+        {
+            Header = "Editar estudiante",
+            Command = grupo.AbrirEditarEstudianteCommand,
+        });
+
+        menu.Items.Add(new Separator());
+
+        if (estudiante.EstaActivo)
+        {
+            menu.Items.Add(new MenuItem
+            {
+                Header = "Desactivar estudiante",
+                Command = grupo.DesactivarEstudianteCommand,
+            });
+        }
+        else
+        {
+            menu.Items.Add(new MenuItem
+            {
+                Header = "Reactivar estudiante",
+                Command = grupo.ReactivarEstudianteCommand,
+            });
+        }
+
+        menu.IsOpen = true;
+    }
+
+    private static DataGridRow? ObtenerFilaEstudiante(DataGrid grid, DependencyObject? origen)
+    {
+        var actual = origen;
+        while (actual is not null && actual is not DataGridRow)
+        {
+            actual = VisualTreeHelper.GetParent(actual);
+        }
+
+        return actual as DataGridRow;
     }
 
     private void AbrirExpedienteEstudiante()
