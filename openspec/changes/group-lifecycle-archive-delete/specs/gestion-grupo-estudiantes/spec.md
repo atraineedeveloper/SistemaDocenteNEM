@@ -1,7 +1,7 @@
 ## ADDED Requirements
 
 ### Requirement: Group lifecycle SHALL be reversible through archive and restore
-The system SHALL represent every group as active or archived. New and migrated legacy groups SHALL be active by default. Archiving and restoring SHALL preserve group identity and all associated classroom data.
+The system SHALL represent every group as active or archived. New and existing groups without a lifecycle row SHALL be active by default. Archiving and restoring SHALL preserve group identity and all associated classroom data.
 
 Archive and restore SHALL be idempotent.
 
@@ -74,12 +74,15 @@ Any SQL/integrity failure SHALL roll back the complete deletion.
 - **WHEN** any required dependent deletion fails before commit
 - **THEN** the transaction is rolled back and the original group graph remains available.
 
-### Requirement: Existing databases SHALL migrate archive state without changing active behavior
-The SQLite schema SHALL migrate supported v6 databases to a version that stores group archive state. Every existing group SHALL migrate as active unless explicitly archived later.
+### Requirement: Existing databases SHALL gain lifecycle state through a versioned additive extension
+The system SHALL persist group archive state in an independently versioned SQLite lifecycle extension while keeping the validated base `PRAGMA user_version` unchanged.
+
+When the lifecycle extension is initialized for a supported existing database, every group without a lifecycle row SHALL receive active state without changing its identity or classroom data.
 
 #### Scenario: Open an existing v6 database
-- **WHEN** the current application initializes a valid v6 database
-- **THEN** the schema gains persisted archive state
+- **WHEN** the current application initializes a valid base-v6 database that has no group-lifecycle extension yet
+- **THEN** the lifecycle extension is initialized independently
+- **AND** the base `PRAGMA user_version` remains 6
 - **AND** every preexisting group remains available as active with the same identity and data.
 
 ### Requirement: Selected-group state SHALL not retain an unavailable archived or deleted workspace

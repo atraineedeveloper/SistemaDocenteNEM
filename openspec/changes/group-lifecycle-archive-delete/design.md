@@ -10,23 +10,31 @@ Archived groups are historical, read-only workspaces. Normal group/student mutat
 
 ## Application queries
 
-The group use case exposes all groups as well as convenience active/archived queries. The normal shell and group picker consume only active groups. `Mis grupos` additionally exposes a secondary archived collection.
+The normal group query returns active groups only so existing shell/presentation consumers do not accidentally expose archived workspaces. A separate archived query feeds the `Archivados` management surface.
 
 Loading an archived group as the active working context is rejected. A teacher restores it first, after which the existing modules can use it normally.
 
 ## SQLite schema compatibility
 
-The base SQLite schema advances from v6 to v7 by adding:
+The validated base SQLite `PRAGMA user_version` remains **v6**. Group lifecycle follows the repository's existing additive-extension pattern and versions the capability independently as `group-lifecycle` version 1.
+
+The extension owns:
 
 ```sql
-archivado INTEGER NOT NULL DEFAULT 0 CHECK (archivado IN (0,1))
+CREATE TABLE ciclo_vida_grupo (
+    grupo_id TEXT NOT NULL PRIMARY KEY,
+    archivado INTEGER NOT NULL DEFAULT 0 CHECK (archivado IN (0,1)),
+    FOREIGN KEY (grupo_id) REFERENCES grupos(id) ON DELETE CASCADE
+);
 ```
 
-to `grupos`. Migration from v6 uses `ALTER TABLE`; prior migration chains finish v6 first and then apply v7. Fresh databases create the v7 shape directly. Existing rows therefore remain active.
+Initialization runs the validated base schema first, creates the lifecycle extension if needed and inserts a default active row for every existing group with `INSERT OR IGNORE`. New/updated groups upsert their lifecycle state. This avoids rewriting the already validated base v6 table while preserving existing identities and data.
 
 ## Deletion preflight
 
-Persistence exposes a small immutable deletion summary containing counts for students, attendance days, projects, activities and deliveries. `TieneDatos` is true when any count is non-zero. The summary is used only to choose the confirmation strength and explain impact; it is not an authorization token.
+Persistence exposes a small immutable deletion summary containing counts for students, attendance days, projects, activities, deliveries and meaningful group/NEM configuration. `TieneDatos` is true when any of those categories contains information. Boilerplate empty context rows created by compatibility bridges are not treated as meaningful classroom data.
+
+The summary is used only to choose the confirmation strength and explain impact; it is not an authorization token.
 
 ## Safety backup boundary
 
@@ -48,7 +56,7 @@ The base restrictive order is:
 4. attendance registrations;
 5. attendance days;
 6. students (pedagogical notes, tutor agreements and student-grade extension rows cascade);
-7. group (group context, configured grades and compatible extension rows cascade).
+7. group (group context, configured grades, lifecycle state and compatible extension rows cascade).
 
 NEM project/activity extension rows cascade from projects/activities. The implementation does not disable foreign keys. Any unexpected dependency or SQL failure rolls the complete operation back.
 
