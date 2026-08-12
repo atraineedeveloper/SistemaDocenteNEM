@@ -11,4 +11,10 @@ public interface IAlmacenamientoGrupos
     void Guardar(Grupo grupo);
 
     IReadOnlyList<Grupo> ListarTodos();
+
+    ResumenEliminacionGrupo ObtenerResumenEliminacion(GrupoId grupoId) =>
+        new(0, 0, 0, 0, 0, 0);
+
+    void Eliminar(GrupoId grupoId) =>
+        throw new NotSupportedException("Este almacenamiento no admite eliminación permanente de grupos.");
 }

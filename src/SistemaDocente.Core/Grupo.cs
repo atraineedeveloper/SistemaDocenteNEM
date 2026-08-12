@@ -10,21 +10,28 @@ public sealed class Grupo
     private readonly ReadOnlyCollection<Estudiante> _vistaEstudiantes;
 
     private Grupo(string nombreVisible)
-        : this(GrupoId.Crear(), nombreVisible, [])
+        : this(GrupoId.Crear(), nombreVisible, [], false)
     {
     }
 
-    private Grupo(GrupoId id, string nombreVisible, List<Estudiante> estudiantes)
+    private Grupo(
+        GrupoId id,
+        string nombreVisible,
+        List<Estudiante> estudiantes,
+        bool estaArchivado)
     {
         Id = id;
         NombreVisible = nombreVisible;
         _estudiantes = estudiantes;
         _vistaEstudiantes = _estudiantes.AsReadOnly();
+        EstaArchivado = estaArchivado;
     }
 
     public GrupoId Id { get; }
 
     public string NombreVisible { get; private set; }
+
+    public bool EstaArchivado { get; private set; }
 
     public IReadOnlyList<Estudiante> Estudiantes => _vistaEstudiantes;
 
@@ -48,7 +55,8 @@ public sealed class Grupo
     public static Grupo Rehidratar(
         GrupoId id,
         string nombreVisible,
-        IReadOnlyCollection<DatosEstudianteRehidratado> estudiantes)
+        IReadOnlyCollection<DatosEstudianteRehidratado> estudiantes,
+        bool estaArchivado = false)
     {
         if (id == default)
         {
@@ -103,11 +111,22 @@ public sealed class Grupo
                     preservarNombreVisible: true));
         }
 
-        return new Grupo(id, nombreValidado, estudiantesValidados);
+        return new Grupo(id, nombreValidado, estudiantesValidados, estaArchivado);
+    }
+
+    public void Archivar()
+    {
+        EstaArchivado = true;
+    }
+
+    public void Restaurar()
+    {
+        EstaArchivado = false;
     }
 
     public void Renombrar(string nombreVisible)
     {
+        AsegurarActivo();
         var nombreNormalizado = NormalizadorNombreVisible.NormalizarYValidar(
             nombreVisible,
             LongitudMaximaNombre,
@@ -129,6 +148,7 @@ public sealed class Grupo
         GradoPrimaria grado = GradoPrimaria.NoEspecificado,
         bool preservarNombreVisible = false)
     {
+        AsegurarActivo();
         var nombreNormalizado = ValidarNombreEstudiante(nombreVisible);
         ValidarNumeroLista(numeroLista);
         ValidarNumeroDisponible(numeroLista);
@@ -165,6 +185,7 @@ public sealed class Grupo
         string observaciones,
         GradoPrimaria? grado = null)
     {
+        AsegurarActivo();
         var estudiante = ObtenerEstudiante(estudianteId);
         var nombreNormalizado = ValidarNombreEstudiante(nombreVisible);
 
@@ -174,11 +195,13 @@ public sealed class Grupo
 
     public void CambiarGradoEstudiante(EstudianteId estudianteId, GradoPrimaria grado)
     {
+        AsegurarActivo();
         ObtenerEstudiante(estudianteId).CambiarGrado(grado);
     }
 
     public void RenombrarEstudiante(EstudianteId estudianteId, string nombreVisible)
     {
+        AsegurarActivo();
         var estudiante = ObtenerEstudiante(estudianteId);
         var nombreNormalizado = ValidarNombreEstudiante(nombreVisible);
 
@@ -187,6 +210,7 @@ public sealed class Grupo
 
     public void CambiarNumeroLista(EstudianteId estudianteId, int numeroLista)
     {
+        AsegurarActivo();
         var estudiante = ObtenerEstudiante(estudianteId);
         ValidarNumeroLista(numeroLista);
 
@@ -200,6 +224,7 @@ public sealed class Grupo
 
     public void DesactivarEstudiante(EstudianteId estudianteId)
     {
+        AsegurarActivo();
         var estudiante = ObtenerEstudiante(estudianteId);
 
         if (!estudiante.EstaActivo)
@@ -212,6 +237,7 @@ public sealed class Grupo
 
     public void ReactivarEstudiante(EstudianteId estudianteId)
     {
+        AsegurarActivo();
         var estudiante = ObtenerEstudiante(estudianteId);
 
         if (estudiante.EstaActivo)
@@ -221,6 +247,15 @@ public sealed class Grupo
 
         ValidarNumeroDisponible(estudiante.NumeroLista, estudiante.Id);
         estudiante.Reactivar();
+    }
+
+    private void AsegurarActivo()
+    {
+        if (EstaArchivado)
+        {
+            throw new DomainConflictException(
+                "El grupo está archivado. Restáuralo antes de modificarlo.");
+        }
     }
 
     private static string ValidarNombreEstudiante(string nombreVisible) =>
