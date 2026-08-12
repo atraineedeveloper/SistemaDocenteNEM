@@ -8,8 +8,8 @@ using SistemaDocente.Presentation;
 namespace SistemaDocente.App.Wpf.Controls;
 
 /// <summary>
-/// Encabezado global del shell: branding, contexto de grupo, navegación principal
-/// y selector de tema. No contiene lógica de módulos.
+/// Encabezado global del shell: identidad, contexto de grupo, navegación docente
+/// y utilidades secundarias. No contiene lógica de módulos.
 /// </summary>
 public partial class MainNavigationHeader : UserControl
 {
@@ -127,7 +127,7 @@ public partial class MainNavigationHeader : UserControl
         });
         GrupoContextMenu.Items.Add(new MenuItem
         {
-            Header = "Crear grupo…",
+            Header = "Crear nuevo grupo…",
             Command = vm.CrearGrupoDesdeInicioCommand,
         });
     }

@@ -46,11 +46,16 @@
                 DataContext="{Binding DataContext.Reportes, ElementName=RootWindow}"
                 Configuracion="{Binding ConfiguracionGrupo, ElementName=RootWindow}"
                 Visibility="{Binding DataContext.MostrarReportes, ElementName=RootWindow, Converter={StaticResource BoolToVisibility}}"/>
+
+            <views:CrearGrupoView
+                Panel.ZIndex="20"
+                DataContext="{Binding DataContext, ElementName=RootWindow}"
+                Visibility="{Binding DataContext.MostrarCreacionGrupo, ElementName=RootWindow, Converter={StaticResource BoolToVisibility}}"/>
         </Grid>
 
         <Border x:Name="ToastBanner" Grid.Row="0" Grid.RowSpan="2"
                 VerticalAlignment="Top" HorizontalAlignment="Right"
-                Margin="0,84,20,0" Padding="16,12"
+                Margin="0,128,20,0" Padding="16,12"
                 CornerRadius="8" MinWidth="260" MaxWidth="360"
                 Visibility="Collapsed" Panel.ZIndex="9999"
                 BorderThickness="1"

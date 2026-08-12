@@ -230,12 +230,90 @@ public sealed class ConfiguracionGrupoViewModel : ViewModelBase
         GuardarCommand.NotifyCanExecuteChanged();
     }
 
+    public void PrepararNuevoGrupo()
+    {
+        _grupoId = null;
+        CicloEscolar = string.Empty;
+        NombreEscuela = string.Empty;
+        Cct = string.Empty;
+        _municipio = string.Empty;
+        _entidadFederativa = string.Empty;
+        OnPropertyChanged(nameof(EntidadFederativa));
+        Municipio = string.Empty;
+        MunicipiosDisponibles = Array.Empty<string>();
+        Localidad = string.Empty;
+        Grupo = string.Empty;
+        Turno = string.Empty;
+        OrganizacionEscolar = OrganizacionEscolar.NoEspecificada;
+        AplicarGrados([]);
+        DocenteResponsable = string.Empty;
+        ResponsableDesde = null;
+        ResponsableHasta = null;
+        HoraEntrada = string.Empty;
+        HoraSalida = string.Empty;
+        Mensaje = string.Empty;
+        GuardadoCorrectamente = false;
+        OnPropertyChanged(nameof(ResponsableDesdeFecha));
+        OnPropertyChanged(nameof(ResponsableHastaFecha));
+        GuardarCommand.NotifyCanExecuteChanged();
+    }
+
+    public bool GuardarOpcionalParaNuevoGrupo(GrupoId grupoId)
+    {
+        try
+        {
+            var grados = ObtenerGradosSeleccionados();
+            var contexto = CrearContexto(
+                grupoId,
+                grados,
+                exigirConfiguracionCompleta: false);
+            _casosUso.Guardar(contexto);
+            _grupoId = grupoId;
+            Mensaje = "Configuración inicial guardada.";
+            GuardadoCorrectamente = true;
+            OnPropertyChanged(nameof(GuardadoCorrectamente));
+            GuardarCommand.NotifyCanExecuteChanged();
+            return true;
+        }
+        catch (Exception ex) when (ex is DomainValidationException or DomainConflictException or ErrorPersistenciaAplicacionException)
+        {
+            Mensaje = ex is DomainValidationException ? ex.Message : "No fue posible guardar la configuración inicial del grupo.";
+            GuardadoCorrectamente = false;
+            OnPropertyChanged(nameof(GuardadoCorrectamente));
+            return false;
+        }
+    }
+
     public void Guardar()
     {
         if (_grupoId is not { } grupoId) return;
         try
         {
             var grados = ObtenerGradosSeleccionados();
+            var contexto = CrearContexto(
+                grupoId,
+                grados,
+                exigirConfiguracionCompleta: true);
+            _casosUso.Guardar(contexto);
+            Mensaje = "Configuración guardada.";
+            GuardadoCorrectamente = true;
+            OnPropertyChanged(nameof(GuardadoCorrectamente));
+        }
+        catch (Exception ex) when (ex is DomainValidationException or DomainConflictException or ErrorPersistenciaAplicacionException)
+        {
+            Mensaje = ex is DomainValidationException ? ex.Message : "No fue posible guardar la configuración del grupo.";
+            GuardadoCorrectamente = false;
+            OnPropertyChanged(nameof(GuardadoCorrectamente));
+        }
+    }
+
+    private ContextoGrupo CrearContexto(
+        GrupoId grupoId,
+        List<GradoPrimaria> grados,
+        bool exigirConfiguracionCompleta)
+    {
+        if (exigirConfiguracionCompleta)
+        {
             if (grados.Count == 0)
             {
                 throw new DomainValidationException("Selecciona al menos un grado de primaria.");
@@ -250,36 +328,45 @@ public sealed class ConfiguracionGrupoViewModel : ViewModelBase
             {
                 throw new DomainValidationException("Selecciona un municipio de la entidad elegida.");
             }
-
-            var contexto = ContextoGrupo.Crear(
-                grupoId,
-                CicloEscolar,
-                NombreEscuela,
-                Cct,
-                EntidadFederativa,
-                Municipio,
-                Localidad,
-                CatalogoNemPrimaria.FormatearGrados(grados),
-                Grupo,
-                Turno,
-                EtapaDesarrolloCognoscitivo.NoEspecificada,
-                DocenteResponsable,
-                ResponsableDesde,
-                ResponsableHasta,
-                ParseHora(HoraEntrada, "La hora de entrada"),
-                ParseHora(HoraSalida, "La hora de salida"),
-                OrganizacionEscolar,
-                grados);
-            _casosUso.Guardar(contexto);
-            Mensaje = "Configuración guardada.";
-            GuardadoCorrectamente = true;
-            OnPropertyChanged(nameof(GuardadoCorrectamente));
         }
-        catch (Exception ex) when (ex is DomainValidationException or DomainConflictException or ErrorPersistenciaAplicacionException)
+        else
         {
-            Mensaje = ex is DomainValidationException ? ex.Message : "No fue posible guardar la configuración del grupo.";
-            GuardadoCorrectamente = false;
-            OnPropertyChanged(nameof(GuardadoCorrectamente));
+            ValidarUbicacionOpcional();
+        }
+
+        return ContextoGrupo.Crear(
+            grupoId,
+            CicloEscolar,
+            NombreEscuela,
+            Cct,
+            EntidadFederativa,
+            Municipio,
+            Localidad,
+            grados.Count == 0 ? string.Empty : CatalogoNemPrimaria.FormatearGrados(grados),
+            Grupo,
+            Turno,
+            EtapaDesarrolloCognoscitivo.NoEspecificada,
+            DocenteResponsable,
+            ResponsableDesde,
+            ResponsableHasta,
+            ParseHora(HoraEntrada, "La hora de entrada"),
+            ParseHora(HoraSalida, "La hora de salida"),
+            OrganizacionEscolar,
+            grados);
+    }
+
+    private void ValidarUbicacionOpcional()
+    {
+        if (!string.IsNullOrWhiteSpace(EntidadFederativa)
+            && !CatalogoGeograficoMexico.ContieneEntidad(EntidadFederativa))
+        {
+            throw new DomainValidationException("Selecciona una entidad federativa del catálogo o déjala sin especificar.");
+        }
+
+        if (!string.IsNullOrWhiteSpace(Municipio)
+            && !CatalogoGeograficoMexico.ContieneMunicipio(EntidadFederativa, Municipio))
+        {
+            throw new DomainValidationException("Selecciona un municipio de la entidad elegida o déjalo sin especificar.");
         }
     }
 

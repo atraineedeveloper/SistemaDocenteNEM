@@ -126,11 +126,11 @@
                                 </ComboBox>
                             </controls:FormField>
 
-                            <controls:FormField Grid.Column="6" Header="Fecha de nacimiento *">
+                            <controls:FormField Grid.Column="6" Header="Fecha de nacimiento (opcional)">
                                 <DatePicker TabIndex="16"
                                             Style="{StaticResource PopupDatePicker}"
                                             SelectedDate="{Binding FechaNacimientoEdicion, Mode=TwoWay}"
-                                            AutomationProperties.Name="Fecha de nacimiento del estudiante"/>
+                                            AutomationProperties.Name="Fecha de nacimiento opcional del estudiante"/>
                             </controls:FormField>
                         </Grid>
                     </StackPanel>
