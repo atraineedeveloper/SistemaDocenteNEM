@@ -42,9 +42,9 @@
 
 ## 6. Manual acceptance
 
-- [ ] 6.1 In Demo, archive an active group with data and verify it disappears from active workspaces without data loss.
-- [ ] 6.2 Restore the group and verify students, attendance, projects/evaluation and context remain available.
-- [ ] 6.3 Delete an empty test group through simple confirmation.
-- [ ] 6.4 Attempt deletion of a populated group with a wrong typed name and verify deletion remains disabled.
-- [ ] 6.5 Delete a populated group with exact-name confirmation, verify a safety backup is created and the group disappears completely.
-- [ ] 6.6 Recheck Light, Dark and High Contrast plus keyboard focus for lifecycle controls/dialog.
+- [x] 6.1 In Demo, archive an active group with data and verify it disappears from active workspaces without data loss.
+- [x] 6.2 Restore the group and verify students, attendance, projects/evaluation and context remain available.
+- [x] 6.3 Delete an empty test group through simple confirmation.
+- [x] 6.4 Attempt deletion of a populated group with a wrong typed name and verify deletion remains disabled.
+- [x] 6.5 Delete a populated group with exact-name confirmation, verify a safety backup is created and the group disappears completely.
+- [x] 6.6 Recheck Light, Dark and High Contrast plus keyboard focus for lifecycle controls/dialog.
