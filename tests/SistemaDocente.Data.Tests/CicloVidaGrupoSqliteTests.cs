@@ -42,9 +42,9 @@ public sealed class CicloVidaGrupoSqliteTests
     public void ResumenDistingueGrupoVacioDeGrupoConDatos()
     {
         using var db = new BaseSqliteTemporal();
-        var vacio = Grupo.Crear("Grupo vacío");
-        db.Persistencia.Guardar(vacio);
         var almacenamiento = new PersistenciaGrupoCicloVidaSqlite(db.Persistencia);
+        var vacio = Grupo.Crear("Grupo vacío");
+        almacenamiento.Guardar(vacio);
 
         Assert.False(almacenamiento.ObtenerResumenEliminacion(vacio.Id).TieneDatos);
 
@@ -75,35 +75,7 @@ public sealed class CicloVidaGrupoSqliteTests
         var actividadId = Guid.NewGuid().ToString("D");
         var grupoId = objetivo.Id.Valor.ToString("D");
         var estudianteId = estudiante.Id.Valor.ToString("D");
-
-        using (var conexion = db.AbrirConexion())
-        using (var comando = conexion.CreateCommand())
-        {
-            comando.CommandText = """
-                INSERT INTO asistencias_diarias (grupo_id, fecha)
-                VALUES ($grupoId, '2026-08-12');
-                INSERT INTO registros_asistencia (grupo_id, fecha, estudiante_id, estado)
-                VALUES ($grupoId, '2026-08-12', $estudianteId, 0);
-                INSERT INTO proyectos_didacticos (
-                    proyecto_id, grupo_id, nombre, descripcion, fecha_inicio,
-                    fecha_termino, estado, observaciones, version)
-                VALUES ($proyectoId, $grupoId, 'Proyecto', '', '2026-08-12',
-                    '2026-08-13', 0, '', 1);
-                INSERT INTO actividades_proyecto (
-                    actividad_id, proyecto_id, grupo_id, titulo, descripcion,
-                    fecha_realizacion, observaciones_generales, estado, version)
-                VALUES ($actividadId, $proyectoId, $grupoId, 'Actividad', '',
-                    '2026-08-12', '', 0, 1);
-                INSERT INTO entregas_actividad (
-                    actividad_id, estudiante_id, grupo_id, estado_entrega, observacion)
-                VALUES ($actividadId, $estudianteId, $grupoId, 0, '');
-                """;
-            comando.Parameters.AddWithValue("$grupoId", grupoId);
-            comando.Parameters.AddWithValue("$estudianteId", estudianteId);
-            comando.Parameters.AddWithValue("$proyectoId", proyectoId);
-            comando.Parameters.AddWithValue("$actividadId", actividadId);
-            comando.ExecuteNonQuery();
-        }
+        InsertarGrafo(db, grupoId, estudianteId, proyectoId, actividadId);
 
         var resumen = almacenamiento.ObtenerResumenEliminacion(objetivo.Id);
         Assert.Equal(1, resumen.Estudiantes);
@@ -116,23 +88,32 @@ public sealed class CicloVidaGrupoSqliteTests
 
         Assert.False(almacenamiento.Existe(objetivo.Id));
         Assert.True(almacenamiento.Existe(otro.Id));
-        Assert.Equal(0, Contar(db, "estudiantes", grupoId));
-        Assert.Equal(0, Contar(db, "asistencias_diarias", grupoId));
-        Assert.Equal(0, Contar(db, "registros_asistencia", grupoId));
-        Assert.Equal(0, Contar(db, "proyectos_didacticos", grupoId));
-        Assert.Equal(0, Contar(db, "actividades_proyecto", grupoId));
-        Assert.Equal(0, Contar(db, "entregas_actividad", grupoId));
-        Assert.Equal(0, Contar(db, "ciclo_vida_grupo", grupoId));
-        Assert.Equal(1, Contar(db, "grupos", otro.Id.Valor.ToString("D"), columna: "id"));
+        foreach (var tabla in new[]
+        {
+            "estudiantes",
+            "asistencias_diarias",
+            "registros_asistencia",
+            "proyectos_didacticos",
+            "actividades_proyecto",
+            "entregas_actividad",
+            "ciclo_vida_grupo",
+        })
+        {
+            Assert.Equal(0, Contar(db, tabla, grupoId));
+        }
     }
 
     [Fact]
     public void DecoradorRespaldaAntesDeEliminarGrupoConDatos()
     {
+        var eventos = new List<string>();
         var grupo = Grupo.Crear("Quinto A");
-        var inner = new AlmacenamientoFalso(grupo, new ResumenEliminacionGrupo(1, 0, 0, 0, 0, 0));
-        var recuperacion = new RecuperacionFalsa();
-        var directorio = Path.Combine(Path.GetTempPath(), "AulaRaiz.Tests", Guid.NewGuid().ToString("N"));
+        var inner = new AlmacenamientoFalso(
+            grupo,
+            new ResumenEliminacionGrupo(1, 0, 0, 0, 0, 0),
+            eventos);
+        var recuperacion = new RecuperacionFalsa(eventos);
+        var directorio = CrearDirectorioTemporal();
 
         try
         {
@@ -143,23 +124,26 @@ public sealed class CicloVidaGrupoSqliteTests
 
             almacenamiento.Eliminar(grupo.Id);
 
-            Assert.Equal(1, recuperacion.Creaciones);
+            Assert.Equal(new[] { "backup", "delete" }, eventos);
             Assert.True(inner.Eliminado);
-            Assert.True(recuperacion.CreacionFinalizadaAntesDeEliminar);
         }
         finally
         {
-            if (Directory.Exists(directorio)) Directory.Delete(directorio, true);
+            LimpiarDirectorio(directorio);
         }
     }
 
     [Fact]
     public void FalloDeRespaldoImpideEliminarGrupoConDatos()
     {
+        var eventos = new List<string>();
         var grupo = Grupo.Crear("Quinto A");
-        var inner = new AlmacenamientoFalso(grupo, new ResumenEliminacionGrupo(1, 0, 0, 0, 0, 0));
-        var recuperacion = new RecuperacionFalsa { Fallar = true };
-        var directorio = Path.Combine(Path.GetTempPath(), "AulaRaiz.Tests", Guid.NewGuid().ToString("N"));
+        var inner = new AlmacenamientoFalso(
+            grupo,
+            new ResumenEliminacionGrupo(1, 0, 0, 0, 0, 0),
+            eventos);
+        var recuperacion = new RecuperacionFalsa(eventos, fallar: true);
+        var directorio = CrearDirectorioTemporal();
 
         try
         {
@@ -169,30 +153,77 @@ public sealed class CicloVidaGrupoSqliteTests
                 directorio);
 
             Assert.Throws<RecuperacionLocalException>(() => almacenamiento.Eliminar(grupo.Id));
+            Assert.Equal(new[] { "backup" }, eventos);
             Assert.False(inner.Eliminado);
         }
         finally
         {
-            if (Directory.Exists(directorio)) Directory.Delete(directorio, true);
+            LimpiarDirectorio(directorio);
         }
     }
 
     [Fact]
     public void GrupoVacioSeEliminaSinCrearRespaldoAutomatico()
     {
+        var eventos = new List<string>();
         var grupo = Grupo.Crear("Error de captura");
-        var inner = new AlmacenamientoFalso(grupo, new ResumenEliminacionGrupo(0, 0, 0, 0, 0, 0));
-        var recuperacion = new RecuperacionFalsa();
-        var directorio = Path.Combine(Path.GetTempPath(), "AulaRaiz.Tests", Guid.NewGuid().ToString("N"));
+        var inner = new AlmacenamientoFalso(
+            grupo,
+            new ResumenEliminacionGrupo(0, 0, 0, 0, 0, 0),
+            eventos);
+        var recuperacion = new RecuperacionFalsa(eventos);
+        var directorio = CrearDirectorioTemporal();
 
-        var almacenamiento = new AlmacenamientoGruposConRespaldoEliminacion(
-            inner,
-            recuperacion,
-            directorio);
-        almacenamiento.Eliminar(grupo.Id);
+        try
+        {
+            var almacenamiento = new AlmacenamientoGruposConRespaldoEliminacion(
+                inner,
+                recuperacion,
+                directorio);
+            almacenamiento.Eliminar(grupo.Id);
 
-        Assert.Equal(0, recuperacion.Creaciones);
-        Assert.True(inner.Eliminado);
+            Assert.Equal(new[] { "delete" }, eventos);
+            Assert.True(inner.Eliminado);
+        }
+        finally
+        {
+            LimpiarDirectorio(directorio);
+        }
+    }
+
+    private static void InsertarGrafo(
+        BaseSqliteTemporal db,
+        string grupoId,
+        string estudianteId,
+        string proyectoId,
+        string actividadId)
+    {
+        using var conexion = db.AbrirConexion();
+        using var comando = conexion.CreateCommand();
+        comando.CommandText = """
+            INSERT INTO asistencias_diarias (grupo_id, fecha)
+            VALUES ($grupoId, '2026-08-12');
+            INSERT INTO registros_asistencia (grupo_id, fecha, estudiante_id, estado)
+            VALUES ($grupoId, '2026-08-12', $estudianteId, 0);
+            INSERT INTO proyectos_didacticos (
+                proyecto_id, grupo_id, nombre, descripcion, fecha_inicio,
+                fecha_termino, estado, observaciones, version)
+            VALUES ($proyectoId, $grupoId, 'Proyecto', '', '2026-08-12',
+                '2026-08-13', 0, '', 1);
+            INSERT INTO actividades_proyecto (
+                actividad_id, proyecto_id, grupo_id, titulo, descripcion,
+                fecha_realizacion, observaciones_generales, estado, version)
+            VALUES ($actividadId, $proyectoId, $grupoId, 'Actividad', '',
+                '2026-08-12', '', 0, 1);
+            INSERT INTO entregas_actividad (
+                actividad_id, estudiante_id, grupo_id, estado_entrega, observacion)
+            VALUES ($actividadId, $estudianteId, $grupoId, 0, '');
+            """;
+        comando.Parameters.AddWithValue("$grupoId", grupoId);
+        comando.Parameters.AddWithValue("$estudianteId", estudianteId);
+        comando.Parameters.AddWithValue("$proyectoId", proyectoId);
+        comando.Parameters.AddWithValue("$actividadId", actividadId);
+        comando.ExecuteNonQuery();
     }
 
     private static int LeerEntero(BaseSqliteTemporal db, string sql)
@@ -203,28 +234,39 @@ public sealed class CicloVidaGrupoSqliteTests
         return Convert.ToInt32(comando.ExecuteScalar(), System.Globalization.CultureInfo.InvariantCulture);
     }
 
-    private static int Contar(
-        BaseSqliteTemporal db,
-        string tabla,
-        string grupoId,
-        string columna = "grupo_id")
+    private static int Contar(BaseSqliteTemporal db, string tabla, string grupoId)
     {
         using var conexion = db.AbrirConexion();
         using var comando = conexion.CreateCommand();
-        comando.CommandText = $"SELECT COUNT(*) FROM {tabla} WHERE {columna} = $grupoId;";
+        comando.CommandText = $"SELECT COUNT(*) FROM {tabla} WHERE grupo_id = $grupoId;";
         comando.Parameters.AddWithValue("$grupoId", grupoId);
         return Convert.ToInt32(comando.ExecuteScalar(), System.Globalization.CultureInfo.InvariantCulture);
+    }
+
+    private static string CrearDirectorioTemporal() => Path.Combine(
+        Path.GetTempPath(),
+        "AulaRaiz.Tests",
+        Guid.NewGuid().ToString("N"));
+
+    private static void LimpiarDirectorio(string directorio)
+    {
+        if (Directory.Exists(directorio)) Directory.Delete(directorio, true);
     }
 
     private sealed class AlmacenamientoFalso : IAlmacenamientoGrupos
     {
         private Grupo? _grupo;
         private readonly ResumenEliminacionGrupo _resumen;
+        private readonly List<string> _eventos;
 
-        internal AlmacenamientoFalso(Grupo grupo, ResumenEliminacionGrupo resumen)
+        internal AlmacenamientoFalso(
+            Grupo grupo,
+            ResumenEliminacionGrupo resumen,
+            List<string> eventos)
         {
             _grupo = grupo;
             _resumen = resumen;
+            _eventos = eventos;
         }
 
         internal bool Eliminado { get; private set; }
@@ -237,7 +279,7 @@ public sealed class CicloVidaGrupoSqliteTests
 
         public void Eliminar(GrupoId grupoId)
         {
-            RecuperacionFalsa.EliminarObservado = true;
+            _eventos.Add("delete");
             Eliminado = true;
             _grupo = null;
         }
@@ -245,10 +287,15 @@ public sealed class CicloVidaGrupoSqliteTests
 
     private sealed class RecuperacionFalsa : IServicioRecuperacionLocal
     {
-        internal static bool EliminarObservado { get; set; }
-        internal int Creaciones { get; private set; }
-        internal bool Fallar { get; init; }
-        internal bool CreacionFinalizadaAntesDeEliminar { get; private set; }
+        private readonly List<string> _eventos;
+        private readonly bool _fallar;
+
+        internal RecuperacionFalsa(List<string> eventos, bool fallar = false)
+        {
+            _eventos = eventos;
+            _fallar = fallar;
+        }
+
         public ModoAlmacenamientoLocal ModoActual => ModoAlmacenamientoLocal.Produccion;
 
         public ResultadoRespaldoLocal CrearRespaldo(
@@ -256,16 +303,14 @@ public sealed class CicloVidaGrupoSqliteTests
             DateTimeOffset ahoraUtc,
             string versionAplicacion)
         {
-            EliminarObservado = false;
-            Creaciones++;
-            if (Fallar)
+            _eventos.Add("backup");
+            if (_fallar)
             {
                 throw new RecuperacionLocalException(
                     CategoriaErrorRecuperacionLocal.RespaldoSeguridad,
                     "Fallo simulado.");
             }
 
-            CreacionFinalizadaAntesDeEliminar = !EliminarObservado;
             return new ResultadoRespaldoLocal(
                 rutaDestino,
                 ahoraUtc,

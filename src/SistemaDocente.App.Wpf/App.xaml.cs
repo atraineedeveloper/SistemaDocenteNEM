@@ -58,6 +58,7 @@ public partial class App : System.Windows.Application
             var persistenciaProyectos = new PersistenciaProyectosSqlite(rutas.BaseSqlite);
             var persistenciaExpediente = new PersistenciaExpedienteSqlite(rutas.BaseSqlite);
             var persistenciaContexto = new PersistenciaContextoGrupoSqlite(rutas.BaseSqlite);
+            var persistenciaCicloVida = new PersistenciaGrupoCicloVidaSqlite(persistenciaSqlite);
             var estado = new AlmacenamientoEstadoJson(rutas.EstadoAplicacion);
 
             if (modoDemo)
@@ -68,7 +69,16 @@ public partial class App : System.Windows.Application
                     persistenciaProyectos,
                     persistenciaExpediente);
                 DemoContextSeeder.AsegurarContexto(persistenciaContexto, grupoDemo);
-                estado.Guardar(grupoDemo);
+
+                var grupoDemoConCicloVida = persistenciaCicloVida.Cargar(grupoDemo);
+                if (grupoDemoConCicloVida is { EstaArchivado: false })
+                {
+                    estado.Guardar(grupoDemo);
+                }
+                else
+                {
+                    estado.Olvidar();
+                }
             }
 
             var servicioRecuperacionV1 = new ServicioRecuperacionLocalSqlite(
@@ -79,7 +89,6 @@ public partial class App : System.Windows.Application
                     ? ModoAlmacenamientoLocal.Demostracion
                     : ModoAlmacenamientoLocal.Produccion);
             var servicioRecuperacion = new ServicioRecuperacionLocalProtegida(servicioRecuperacionV1);
-            var persistenciaCicloVida = new PersistenciaGrupoCicloVidaSqlite(persistenciaSqlite);
             IAlmacenamientoGrupos persistencia = new AlmacenamientoGruposConRespaldoEliminacion(
                 persistenciaCicloVida,
                 servicioRecuperacion,
