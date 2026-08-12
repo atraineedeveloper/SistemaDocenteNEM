@@ -124,7 +124,10 @@ public sealed class CicloVidaGrupoSqliteTests
 
             almacenamiento.Eliminar(grupo.Id);
 
-            Assert.Equal(new[] { "backup", "delete" }, eventos);
+            Assert.Collection(
+                eventos,
+                evento => Assert.Equal("backup", evento),
+                evento => Assert.Equal("delete", evento));
             Assert.True(inner.Eliminado);
         }
         finally
@@ -153,7 +156,7 @@ public sealed class CicloVidaGrupoSqliteTests
                 directorio);
 
             Assert.Throws<RecuperacionLocalException>(() => almacenamiento.Eliminar(grupo.Id));
-            Assert.Equal(new[] { "backup" }, eventos);
+            Assert.Equal("backup", Assert.Single(eventos));
             Assert.False(inner.Eliminado);
         }
         finally
@@ -182,7 +185,7 @@ public sealed class CicloVidaGrupoSqliteTests
                 directorio);
             almacenamiento.Eliminar(grupo.Id);
 
-            Assert.Equal(new[] { "delete" }, eventos);
+            Assert.Equal("delete", Assert.Single(eventos));
             Assert.True(inner.Eliminado);
         }
         finally
