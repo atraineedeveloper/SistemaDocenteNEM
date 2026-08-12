@@ -163,7 +163,8 @@ public sealed class RefactorMainWindowVistasTests
         Assert.Contains("DataContext=\"{Binding DataContext.Grupo, ElementName=RootWindow}\"", mainWindow, StringComparison.Ordinal);
         Assert.Contains("xmlns:controls=\"clr-namespace:SistemaDocente.App.Wpf.Controls\"", grupoXaml, StringComparison.Ordinal);
         Assert.Contains(nameof(GestionGrupoViewModel), grupoCs, StringComparison.Ordinal);
-        Assert.Contains("OnVerExpedienteEstudianteClic", grupoXaml, StringComparison.Ordinal);
+        Assert.Contains("MouseDoubleClick=\"OnStudentGridMouseDoubleClick\"", grupoXaml, StringComparison.Ordinal);
+        Assert.Contains("AbrirExpedienteEstudiante", grupoCs, StringComparison.Ordinal);
     }
 
     [Fact]
