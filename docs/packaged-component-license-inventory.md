@@ -1,6 +1,6 @@
 # Packaged component license inventory
 
-Reviewed: 2026-08-11
+Reviewed: 2026-08-12
 
 This inventory covers the production components intentionally included by the
 AulaRaíz Windows release process. Test-only and build-only dependencies are not
@@ -10,7 +10,7 @@ distributed to end users.
 
 | Component | Version or snapshot | Terms | Distribution treatment |
 | --- | --- | --- | --- |
-| AulaRaíz project code and original materials | 0.2.5 | GPL-3.0-only | Root `LICENSE` is installed as `LICENSE.txt`. |
+| AulaRaíz project code and original materials | 0.2.6 | GPL-3.0-only | Root `LICENSE` is installed as `LICENSE.txt`. |
 | Montserrat | 9.000 | SIL Open Font License 1.1 | Exact provenance, hashes and full license are recorded in `THIRD-PARTY-NOTICES.txt` and `third-party/montserrat/OFL.txt`. |
 | INEGI geographic catalog transformation | classification through 2025-06-17 | INEGI terms of free use | Source, attribution and transformation are documented in `src/SistemaDocente.Presentation/Data/estados-municipios.SOURCE.md`. |
 
@@ -19,15 +19,22 @@ distributed to end users.
 | Package | Pinned version | Primary license record | Result |
 | --- | --- | --- | --- |
 | Microsoft.Data.Sqlite | 10.0.10 | [MIT, dotnet/efcore](https://github.com/dotnet/efcore/blob/main/LICENSE.txt) | Compatible |
-| SQLitePCLRaw.bundle_e_sqlite3 | 2.1.12 | [Apache-2.0, NuGet package metadata](https://www.nuget.org/packages/SQLitePCLRaw.bundle_e_sqlite3/2.1.12) | Compatible |
+| SQLitePCLRaw.bundle_e_sqlite3 | 3.0.5 | [Apache-2.0, upstream v3.0.5 package metadata](https://github.com/ericsink/SQLitePCL.raw/blob/v3.0.5/src/SQLitePCLRaw.bundle_e_sqlite3/pack.nuspec) | Compatible |
 | DocumentFormat.OpenXml | 3.3.0 | [MIT, dotnet/Open-XML-SDK](https://github.com/dotnet/Open-XML-SDK/blob/v3.3.0/LICENSE) | Compatible |
 | PDFsharp-MigraDoc | 6.2.4 | [MIT, empira/PDFsharp](https://github.com/empira/PDFsharp/blob/v6.2.4/LICENSE) | Compatible |
 
-The SQLite native engine distributed by the selected SQLitePCLRaw bundle is
-[public domain](https://www.sqlite.org/copyright.html). Transitive assemblies
-belonging to the package families above retain the same upstream license and
-notice obligations. Dependency versions are pinned in the project files and are
-audited during restore.
+At upstream tag `v3.0.5`, `SQLitePCLRaw.bundle_e_sqlite3` is an Apache-2.0
+meta-package that depends on `SQLitePCLRaw.config.e_sqlite3` 3.0.5 and the
+native `SQLite` package 3.53.4. The upstream generated build properties pin
+that native package version, so this transitive composition is part of the
+reviewed production dependency set even though AulaRaíz references the bundle
+directly.
+
+The SQLite native engine distributed by that package is
+[public domain](https://www.sqlite.org/copyright.html). Transitive managed
+assemblies belonging to the SQLitePCLRaw package family retain the upstream
+Apache-2.0 license and notice obligations. Dependency versions are pinned in
+the project files and are audited during restore.
 
 ## Self-contained .NET 10 Windows runtime
 

@@ -81,6 +81,9 @@ public sealed class InstalacionWindowsTests
         var notices = Read("THIRD-PARTY-NOTICES.txt");
         var montserratLicense = Read("third-party/montserrat/OFL.txt");
         var catalogSource = Read("src/SistemaDocente.Presentation/Data/estados-municipios.SOURCE.md");
+        var inventory = Read("docs/packaged-component-license-inventory.md");
+        var readiness = Read("docs/signpath-readiness.md");
+        var dataProject = Read("src/SistemaDocente.Data/SistemaDocente.Data.csproj");
 
         Assert.Contains("DestName: \"LICENSE.txt\"", installer, StringComparison.Ordinal);
         Assert.Contains("THIRD-PARTY-NOTICES.txt", installer, StringComparison.Ordinal);
@@ -91,5 +94,10 @@ public sealed class InstalacionWindowsTests
         Assert.Contains("2,478 municipalities", notices, StringComparison.Ordinal);
         Assert.Contains("https://www.inegi.org.mx/servicios/catalogounico.html", catalogSource, StringComparison.Ordinal);
         Assert.Contains("2025-06-17", catalogSource, StringComparison.Ordinal);
+        Assert.Contains("<PackageReference Include=\"SQLitePCLRaw.bundle_e_sqlite3\" Version=\"3.0.5\" />", dataProject, StringComparison.Ordinal);
+        Assert.Contains("| AulaRaíz project code and original materials | 0.2.6 |", inventory, StringComparison.Ordinal);
+        Assert.Contains("| SQLitePCLRaw.bundle_e_sqlite3 | 3.0.5 |", inventory, StringComparison.Ordinal);
+        Assert.Contains("native `SQLite` package 3.53.4", inventory, StringComparison.Ordinal);
+        Assert.Contains("| SQLitePCLRaw.bundle_e_sqlite3 | 3.0.5 |", readiness, StringComparison.Ordinal);
     }
 }

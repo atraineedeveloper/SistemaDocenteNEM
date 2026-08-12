@@ -1,6 +1,6 @@
 # SignPath Foundation readiness review
 
-Review date: 2026-08-11
+Review date: 2026-08-12
 
 This document records the repository evidence and remaining work for an application to the free SignPath Foundation code-signing service. It is a readiness record, not proof of acceptance.
 
@@ -27,9 +27,16 @@ The direct production package references found in the project files are compatib
 | Component | Version | License | Primary package record |
 | --- | ---: | --- | --- |
 | Microsoft.Data.Sqlite | 10.0.10 | MIT | [NuGet](https://www.nuget.org/packages/Microsoft.Data.Sqlite/10.0.10) |
-| SQLitePCLRaw.bundle_e_sqlite3 | 2.1.12 | Apache-2.0 | [NuGet](https://www.nuget.org/packages/SQLitePCLRaw.bundle_e_sqlite3/2.1.12) |
+| SQLitePCLRaw.bundle_e_sqlite3 | 3.0.5 | Apache-2.0 | [NuGet](https://www.nuget.org/packages/SQLitePCLRaw.bundle_e_sqlite3/3.0.5) |
 | DocumentFormat.OpenXml | 3.3.0 | MIT | [NuGet](https://www.nuget.org/packages/DocumentFormat.OpenXml/3.3.0) |
 | PDFsharp-MigraDoc | 6.2.4 | MIT | [NuGet](https://www.nuget.org/packages/PDFsharp-MigraDoc/6.2.4) |
+
+SQLitePCLRaw 3.0.5 keeps the `bundle_e_sqlite3` package under Apache-2.0. At the
+upstream `v3.0.5` tag, that bundle composes `SQLitePCLRaw.config.e_sqlite3`
+3.0.5 with the native `SQLite` package 3.53.4. The SQLitePCLRaw 3.0 migration
+notes explicitly describe `bundle_e_sqlite3` as a version-only upgrade path for
+existing users. The packaged-component inventory records the resulting native
+SQLite composition and provenance.
 
 The self-contained Windows package also contains the applicable .NET runtime files and third-party notices. The release workflow installs Inno Setup from its official GitHub release and verifies the downloaded archive. Before application submission, the final installed-file inventory must be checked against the corresponding .NET and Inno Setup license/notice files.
 
